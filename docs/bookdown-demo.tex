@@ -1543,8 +1543,9 @@ Classes 'tbl_df', 'tbl' and 'data.frame':   1036 obs. of  11 variables:
  $ alcdays   : int  1 4 4 3 2 28 4 2 4 25 ...
 \end{verbatim}
 
-\subsection{Omitting Missing Observations: Complete-Case
-Analyses}\label{omitting-missing-observations-complete-case-analyses}
+\section{\texorpdfstring{\texttt{smartcle2}: Omitting Missing
+Observations: Complete-Case
+Analyses}{smartcle2: Omitting Missing Observations: Complete-Case Analyses}}\label{smartcle2-omitting-missing-observations-complete-case-analyses}
 
 For the purpose of fitting our first few models, we will eliminate the
 missingness problem, and look only at the \emph{complete cases} in our
@@ -1553,16 +1554,12 @@ missingness problem, and look only at the \emph{complete cases} in our
 To inspect the missingness in our data, we might consider using the
 \texttt{skim} function from the \texttt{skimr} package. We'll exclude
 the respondent identifier code (\texttt{SEQNO}) from this summary as
-uninteresting. In this case, we'll use the \texttt{skim\_with} command
-to set some options that will make this book work a bit more
-effectively, by eliminating the spark graphs that we'll demonstrate in
-class.
+uninteresting.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\KeywordTok{skim_with}\NormalTok{(}\DataTypeTok{numeric =} \KeywordTok{list}\NormalTok{(}\DataTypeTok{hist =} \OtherTok{NULL}\NormalTok{), }\DataTypeTok{ts =} \KeywordTok{list}\NormalTok{(}\DataTypeTok{line_graph =} \OtherTok{NULL}\NormalTok{))}
-
-\NormalTok{smartcle1 }\OperatorTok{%>%}\StringTok{ }\KeywordTok{skim}\NormalTok{(}\OperatorTok{-}\NormalTok{SEQNO)}
+\NormalTok{smartcle1 }\OperatorTok{%>%}\StringTok{ }
+\StringTok{    }\KeywordTok{skim}\NormalTok{(}\OperatorTok{-}\NormalTok{SEQNO)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -1600,6 +1597,8 @@ Variable type: integer
 Variable type: numeric 
  variable missing complete    n  mean   sd    p0  p25 median   p75  p100
       bmi      84      952 1036 27.89 6.47 12.71 23.7  26.68 30.53 66.06
+     hist
+ <U+2581><U+2587><U+2587><U+2582><U+2581><U+2581><U+2581><U+2581>
 \end{verbatim}
 
 Now, we'll create a new tibble called \texttt{smartcle2} which contains
@@ -1642,23 +1641,344 @@ the 10 variables (excluding \texttt{poorhealth}) in the
 \texttt{smartcle1} data which described 1036 respondents and 11
 variables, but with lots of missing data.
 
-\section{\texorpdfstring{Model A: Predicting
-\texttt{physhealth}}{Model A: Predicting physhealth}}\label{model-a-predicting-physhealth}
+\section{A Small Study}\label{a-small-study}
 
 We'll begin by investigating the problem of predicting
 \texttt{physhealth}, at first with just two predictor variables:
 \texttt{exerany} and \texttt{bmi}, in our new \texttt{smartcle2} data
 set.
 
+\begin{itemize}
+\tightlist
+\item
+  The outcome of interest is \texttt{physhealth}.
+\item
+  Inputs to the regression model are:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \texttt{exerany} = 1 if the subject exercised in the past 30 days,
+    and 0 if they didn't
+  \item
+    \texttt{bmi} = body mass index (treated as qualitative and
+    continuous)
+  \end{itemize}
+\end{itemize}
+
+\subsection{Some exploratory data
+analysis}\label{some-exploratory-data-analysis}
+
+Counting things can be amazingly useful.
+
+\subsubsection{How many respondents had exercised in the past 30
+days?}\label{how-many-respondents-had-exercised-in-the-past-30-days}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{smartcle2 }\OperatorTok{%>%}\StringTok{ }\KeywordTok{count}\NormalTok{(exerany)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+# A tibble: 2 x 2
+  exerany     n
+    <int> <int>
+1       0   209
+2       1   687
+\end{verbatim}
+
+This counting approach works for quantitative variables with discrete
+sets of possible values, like \texttt{physhealth}, which must be an
+integer between 0 and 30.
+
+\subsubsection{\texorpdfstring{What's the distribution of
+\texttt{physhealth}?}{What's the distribution of physhealth?}}\label{whats-the-distribution-of-physhealth}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{smartcle2 }\OperatorTok{%>%}\StringTok{ }\KeywordTok{count}\NormalTok{(physhealth)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+# A tibble: 19 x 2
+   physhealth     n
+        <int> <int>
+ 1          0   591
+ 2          1    35
+ 3          2    55
+ 4          3    22
+ 5          4    12
+ 6          5    25
+ 7          6     4
+ 8          7    20
+ 9          8     1
+10          9     1
+11         10    18
+12         12     3
+13         14    10
+14         15    14
+15         18     1
+16         20     8
+17         21     1
+18         25     1
+19         30    74
+\end{verbatim}
+
+\subsubsection{How many of the respondents have a BMI below
+30?}\label{how-many-of-the-respondents-have-a-bmi-below-30}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{smartcle2 }\OperatorTok{%>%}\StringTok{ }\KeywordTok{count}\NormalTok{(bmi }\OperatorTok{<}\StringTok{ }\DecValTok{30}\NormalTok{) }
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+# A tibble: 2 x 2
+  `bmi < 30`     n
+  <lgl>      <int>
+1 F            253
+2 T            643
+\end{verbatim}
+
+\subsubsection{How many of the respondents who have a BMI \textless{} 30
+exercised?}\label{how-many-of-the-respondents-who-have-a-bmi-30-exercised}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{smartcle2 }\OperatorTok{%>%}\StringTok{ }\KeywordTok{count}\NormalTok{(bmi }\OperatorTok{<}\StringTok{ }\DecValTok{30}\NormalTok{, exerany)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+# A tibble: 4 x 3
+  `bmi < 30` exerany     n
+  <lgl>        <int> <int>
+1 F                0    88
+2 F                1   165
+3 T                0   121
+4 T                1   522
+\end{verbatim}
+
+\subsubsection{\texorpdfstring{Comparing \texttt{physhealth} summaries
+by obesity
+status}{Comparing physhealth summaries by obesity status}}\label{comparing-physhealth-summaries-by-obesity-status}
+
+Can we compare the \texttt{physhealth} means, medians and
+75\textsuperscript{th} percentiles for respondents whose BMI is below 30
+to the respondents whose BMI is not?
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{smartcle2 }\OperatorTok{%>%}
+\StringTok{    }\KeywordTok{group_by}\NormalTok{(bmi }\OperatorTok{<}\StringTok{ }\DecValTok{30}\NormalTok{) }\OperatorTok{%>%}
+\StringTok{    }\KeywordTok{summarize}\NormalTok{(}\KeywordTok{mean}\NormalTok{(physhealth), }\DataTypeTok{median =} \KeywordTok{median}\NormalTok{(physhealth), }
+              \DataTypeTok{q75 =} \KeywordTok{quantile}\NormalTok{(physhealth, }\FloatTok{0.75}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+# A tibble: 2 x 4
+  `bmi < 30` `mean(physhealth)` median   q75
+  <lgl>                   <dbl>  <int> <dbl>
+1 F                        5.95      0  7.00
+2 T                        3.22      0  2.00
+\end{verbatim}
+
+\subsubsection{\texorpdfstring{The \texttt{skim} function within a
+pipe}{The skim function within a pipe}}\label{the-skim-function-within-a-pipe}
+
+The \textbf{skim} function works within pipes and with the other
+\texttt{tidyverse} functions.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{smartcle2 }\OperatorTok{%>%}
+\StringTok{    }\KeywordTok{group_by}\NormalTok{(exerany) }\OperatorTok{%>%}
+\StringTok{    }\KeywordTok{skim}\NormalTok{(bmi, physhealth)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Skim summary statistics
+ n obs: 896 
+ n variables: 10 
+ group variables: exerany 
+
+Variable type: integer 
+ exerany   variable missing complete   n mean    sd p0 p25 median p75 p100
+       0 physhealth       0      209 209 7.95 11.68  0   0      0  15   30
+       1 physhealth       0      687 687 2.78  7.06  0   0      0   2   30
+     hist
+ <U+2587><U+2581><U+2581><U+2581><U+2581><U+2581><U+2581><U+2582>
+ <U+2587><U+2581><U+2581><U+2581><U+2581><U+2581><U+2581><U+2581>
+
+Variable type: numeric 
+ exerany variable missing complete   n  mean   sd    p0   p25 median   p75
+       0      bmi       0      209 209 29.57 7.46 18    24.11  28.49 33.13
+       1      bmi       0      687 687 27.35 5.84 12.71 23.7   26.52 29.81
+  p100     hist
+ 66.06 <U+2586><U+2587><U+2586><U+2582><U+2581><U+2581><U+2581><U+2581>
+ 60.95 <U+2581><U+2586><U+2587><U+2582><U+2581><U+2581><U+2581><U+2581>
+\end{verbatim}
+
+\subsubsection{\texorpdfstring{The usual \texttt{summary} for a data
+frame}{The usual summary for a data frame}}\label{the-usual-summary-for-a-data-frame}
+
+Of course, we can use the usual \texttt{summary} to get some basic
+information about the data, too.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{summary}\NormalTok{(smartcle2)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+     SEQNO             physhealth      menthealth           genhealth  
+ Min.   :2.016e+09   Min.   : 0.00   Min.   : 0.000   1_Excellent:155  
+ 1st Qu.:2.016e+09   1st Qu.: 0.00   1st Qu.: 0.000   2_VeryGood :306  
+ Median :2.016e+09   Median : 0.00   Median : 0.000   3_Good     :295  
+ Mean   :2.016e+09   Mean   : 3.99   Mean   : 2.693   4_Fair     :102  
+ 3rd Qu.:2.016e+09   3rd Qu.: 2.00   3rd Qu.: 2.000   5_Poor     : 38  
+ Max.   :2.016e+09   Max.   :30.00   Max.   :30.000                    
+      bmi            female         internet30        exerany      
+ Min.   :12.71   Min.   :0.0000   Min.   :0.0000   Min.   :0.0000  
+ 1st Qu.:23.70   1st Qu.:0.0000   1st Qu.:1.0000   1st Qu.:1.0000  
+ Median :26.80   Median :1.0000   Median :1.0000   Median :1.0000  
+ Mean   :27.87   Mean   :0.5848   Mean   :0.8147   Mean   :0.7667  
+ 3rd Qu.:30.53   3rd Qu.:1.0000   3rd Qu.:1.0000   3rd Qu.:1.0000  
+ Max.   :66.06   Max.   :1.0000   Max.   :1.0000   Max.   :1.0000  
+    sleephrs         alcdays      
+ Min.   : 1.000   Min.   : 0.000  
+ 1st Qu.: 6.000   1st Qu.: 0.000  
+ Median : 7.000   Median : 1.000  
+ Mean   : 7.022   Mean   : 4.834  
+ 3rd Qu.: 8.000   3rd Qu.: 5.000  
+ Max.   :20.000   Max.   :30.000  
+\end{verbatim}
+
+\subsubsection{\texorpdfstring{The \texttt{describe} function in
+\texttt{Hmisc}}{The describe function in Hmisc}}\label{the-describe-function-in-hmisc}
+
+Or we can use the \texttt{describe} function from the \texttt{Hmisc}
+package.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{Hmisc}\OperatorTok{::}\KeywordTok{describe}\NormalTok{(smartcle2)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+smartcle2 
+
+ 10  Variables      896  Observations
+---------------------------------------------------------------------------
+SEQNO 
+        n   missing  distinct      Info      Mean       Gmd       .05 
+      896         0       896         1 2.016e+09     345.7 2.016e+09 
+      .10       .25       .50       .75       .90       .95 
+2.016e+09 2.016e+09 2.016e+09 2.016e+09 2.016e+09 2.016e+09 
+
+lowest : 2016000001 2016000002 2016000003 2016000004 2016000005
+highest: 2016001031 2016001032 2016001033 2016001034 2016001036
+---------------------------------------------------------------------------
+physhealth 
+       n  missing distinct     Info     Mean      Gmd      .05      .10 
+     896        0       19    0.712     3.99    6.664        0        0 
+     .25      .50      .75      .90      .95 
+       0        0        2       15       30 
+                                                                      
+Value          0     1     2     3     4     5     6     7     8     9
+Frequency    591    35    55    22    12    25     4    20     1     1
+Proportion 0.660 0.039 0.061 0.025 0.013 0.028 0.004 0.022 0.001 0.001
+                                                                
+Value         10    12    14    15    18    20    21    25    30
+Frequency     18     3    10    14     1     8     1     1    74
+Proportion 0.020 0.003 0.011 0.016 0.001 0.009 0.001 0.001 0.083
+---------------------------------------------------------------------------
+menthealth 
+       n  missing distinct     Info     Mean      Gmd      .05      .10 
+     896        0       17    0.645    2.693    4.652        0        0 
+     .25      .50      .75      .90      .95 
+       0        0        2        8       20 
+                                                                      
+Value          0     1     2     3     4     5     6     7     8    10
+Frequency    634    25    56    27    15    30     4    13     4    18
+Proportion 0.708 0.028 0.062 0.030 0.017 0.033 0.004 0.015 0.004 0.020
+                                                    
+Value         14    15    18    20    23    29    30
+Frequency      2    20     1     9     1     1    36
+Proportion 0.002 0.022 0.001 0.010 0.001 0.001 0.040
+---------------------------------------------------------------------------
+genhealth 
+       n  missing distinct 
+     896        0        5 
+                                                                      
+Value      1_Excellent  2_VeryGood      3_Good      4_Fair      5_Poor
+Frequency          155         306         295         102          38
+Proportion       0.173       0.342       0.329       0.114       0.042
+---------------------------------------------------------------------------
+bmi 
+       n  missing distinct     Info     Mean      Gmd      .05      .10 
+     896        0      467        1    27.87    6.572    20.06    21.23 
+     .25      .50      .75      .90      .95 
+   23.70    26.80    30.53    35.36    39.30 
+
+lowest : 12.71 13.34 14.72 16.22 17.30, highest: 56.89 57.04 60.95 61.84 66.06
+---------------------------------------------------------------------------
+female 
+       n  missing distinct     Info      Sum     Mean      Gmd 
+     896        0        2    0.728      524   0.5848   0.4862 
+
+---------------------------------------------------------------------------
+internet30 
+       n  missing distinct     Info      Sum     Mean      Gmd 
+     896        0        2    0.453      730   0.8147   0.3022 
+
+---------------------------------------------------------------------------
+exerany 
+       n  missing distinct     Info      Sum     Mean      Gmd 
+     896        0        2    0.537      687   0.7667   0.3581 
+
+---------------------------------------------------------------------------
+sleephrs 
+       n  missing distinct     Info     Mean      Gmd      .05      .10 
+     896        0       14    0.934    7.022    1.477        5        5 
+     .25      .50      .75      .90      .95 
+       6        7        8        8        9 
+                                                                      
+Value          1     2     3     4     5     6     7     8     9    10
+Frequency      5     1     6    20    63   192   276   266    38    22
+Proportion 0.006 0.001 0.007 0.022 0.070 0.214 0.308 0.297 0.042 0.025
+                                  
+Value         11    12    16    20
+Frequency      2     2     2     1
+Proportion 0.002 0.002 0.002 0.001
+---------------------------------------------------------------------------
+alcdays 
+       n  missing distinct     Info     Mean      Gmd      .05      .10 
+     896        0       22    0.909    4.834    7.189        0        0 
+     .25      .50      .75      .90      .95 
+       0        1        5       17       30 
+
+lowest :  0  1  2  3  4, highest: 25 26 27 28 30
+---------------------------------------------------------------------------
+\end{verbatim}
+
 \subsection{Graphing The Data}\label{graphing-the-data}
 
-We'll start by building an exploratory figure to show the relationship
+We'll build an exploratory figure (or several) to show the relationship
 between \texttt{bmi} and \texttt{physhealth} within each of the two
 \texttt{exerany} groups.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\KeywordTok{ggplot}\NormalTok{(smartcle2, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ bmi, }\DataTypeTok{y =}\NormalTok{ physhealth, }\DataTypeTok{group =}\NormalTok{ exerany, }\DataTypeTok{color =} \KeywordTok{factor}\NormalTok{(exerany))) }\OperatorTok{+}
+\KeywordTok{ggplot}\NormalTok{(smartcle2, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ bmi, }\DataTypeTok{y =}\NormalTok{ physhealth, }
+                      \DataTypeTok{group =}\NormalTok{ exerany, }\DataTypeTok{color =} \KeywordTok{factor}\NormalTok{(exerany))) }\OperatorTok{+}
 \StringTok{    }\KeywordTok{geom_point}\NormalTok{() }\OperatorTok{+}
 \StringTok{    }\KeywordTok{geom_smooth}\NormalTok{(}\DataTypeTok{method =} \StringTok{"lm"}\NormalTok{, }\DataTypeTok{se =} \OtherTok{FALSE}\NormalTok{) }\OperatorTok{+}\StringTok{ }
 \StringTok{    }\KeywordTok{theme_bw}\NormalTok{()}
@@ -1672,7 +1992,8 @@ facets.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\KeywordTok{ggplot}\NormalTok{(smartcle2, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ bmi, }\DataTypeTok{y =}\NormalTok{ physhealth, }\DataTypeTok{group =}\NormalTok{ exerany, }\DataTypeTok{color =} \KeywordTok{factor}\NormalTok{(exerany))) }\OperatorTok{+}
+\KeywordTok{ggplot}\NormalTok{(smartcle2, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ bmi, }\DataTypeTok{y =}\NormalTok{ physhealth, }
+                      \DataTypeTok{group =}\NormalTok{ exerany, }\DataTypeTok{color =} \KeywordTok{factor}\NormalTok{(exerany))) }\OperatorTok{+}
 \StringTok{    }\KeywordTok{geom_point}\NormalTok{() }\OperatorTok{+}
 \StringTok{    }\KeywordTok{geom_smooth}\NormalTok{(}\DataTypeTok{method =} \StringTok{"lm"}\NormalTok{, }\DataTypeTok{se =} \OtherTok{FALSE}\NormalTok{) }\OperatorTok{+}\StringTok{ }
 \StringTok{    }\KeywordTok{theme_bw}\NormalTok{() }\OperatorTok{+}\StringTok{ }
@@ -1699,11 +2020,32 @@ Now, what can we learn from these plots?
   \texttt{physhealth}?
 \end{enumerate}
 
+\section{\texorpdfstring{Model A: Predicting
+\texttt{physhealth}}{Model A: Predicting physhealth}}\label{model-a-predicting-physhealth}
+
 \subsection{Building Model A}\label{building-model-a}
 
 First, we'll fit a simple model describing the main effects but not the
 interaction of \texttt{exerany} and \texttt{bmi}, without doing any of
 the exploratory ground work we should do in advance.
+
+\begin{itemize}
+\tightlist
+\item
+  The outcome of interest is \texttt{physhealth}.
+\item
+  Inputs to the regression model are:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \texttt{exerany} = 1 if the subject exercised in the past 30 days,
+    and 0 if they didn't
+  \item
+    \texttt{bmi} = body mass index (treated as qualitative and
+    continuous)
+  \end{itemize}
+\end{itemize}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1761,6 +2103,8 @@ Residual standard error: 8.319 on 892 degrees of freedom
 Multiple R-squared:  0.07608,   Adjusted R-squared:  0.07297 
 F-statistic: 24.48 on 3 and 892 DF,  p-value: 3.144e-15
 \end{verbatim}
+
+What conclusions can we draw here?
 
 \bibliography{text.bib}
 

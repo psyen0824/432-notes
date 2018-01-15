@@ -38,16 +38,15 @@ Variable | Description
 str(smartcle1)
 ```
 
-### Omitting Missing Observations: Complete-Case Analyses
+## `smartcle2`: Omitting Missing Observations: Complete-Case Analyses
 
 For the purpose of fitting our first few models, we will eliminate the missingness problem, and look only at the *complete cases* in our `smartcle1` data. 
 
-To inspect the missingness in our data, we might consider using the `skim` function from the `skimr` package. We'll exclude the respondent identifier code (`SEQNO`) from this summary as uninteresting. In this case, we'll use the `skim_with` command to set some options that will make this book work a bit more effectively, by eliminating the spark graphs that we'll demonstrate in class.
+To inspect the missingness in our data, we might consider using the `skim` function from the `skimr` package. We'll exclude the respondent identifier code (`SEQNO`) from this summary as uninteresting. 
 
 ```{r}
-skim_with(numeric = list(hist = NULL), ts = list(line_graph = NULL))
-
-smartcle1 %>% skim(-SEQNO)
+smartcle1 %>% 
+    skim(-SEQNO)
 ```
 
 Now, we'll create a new tibble called `smartcle2` which contains every variable except `poorhealth`, and which includes all respondents with complete data on the variables (other than `poorhealth`). We'll store those observations with complete data in the `smartcle2` tibble.
@@ -62,16 +61,89 @@ smartcle2
 
 Note that there are only `r nrow(smartcle2)` respondents with **complete** data on the `r ncol(smartcle2)` variables (excluding `poorhealth`) in the `smartcle2` tibble, as compared to our original `smartcle1` data which described `r nrow(smartcle1)` respondents and `r ncol(smartcle1)` variables, but with lots of missing data.
 
-## Model A: Predicting `physhealth`
+## A Small Study
 
 We'll begin by investigating the problem of predicting `physhealth`, at first with just two predictor variables: `exerany` and `bmi`, in our new `smartcle2` data set. 
 
+- The outcome of interest is `physhealth`.
+- Inputs to the regression model are:
+    - `exerany` = 1 if the subject exercised in the past 30 days, and 0 if they didn't
+    - `bmi` = body mass index (treated as qualitative and continuous)
+
+### Some exploratory data analysis
+
+Counting things can be amazingly useful. 
+
+#### How many respondents had exercised in the past 30 days?
+
+```{r eda_exerany_smartcle2}
+smartcle2 %>% count(exerany)
+```
+
+This counting approach works for quantitative variables with discrete sets of possible values, like `physhealth`, which must be an integer between 0 and 30.
+
+#### What's the distribution of `physhealth`?
+
+```{r eda_physhealth_smartcle2_head}
+smartcle2 %>% count(physhealth)
+```
+
+#### How many of the respondents have a BMI below 30?
+
+```{r eda_bmilt30_smartcle2}
+smartcle2 %>% count(bmi < 30) 
+```
+
+#### How many of the respondents who have a BMI < 30 exercised?
+
+```{r eda_bmilt30_exerany_smartcle2}
+smartcle2 %>% count(bmi < 30, exerany)
+```
+
+#### Comparing `physhealth` summaries by obesity status
+
+Can we compare the `physhealth` means, medians and 75^th^ percentiles for respondents whose BMI is below 30 to the respondents whose BMI is not?
+
+```{r}
+smartcle2 %>%
+    group_by(bmi < 30) %>%
+    summarize(mean(physhealth), median = median(physhealth), 
+              q75 = quantile(physhealth, 0.75))
+```
+
+#### The `skim` function within a pipe
+
+The **skim** function works within pipes and with the other `tidyverse` functions.
+
+```{r}
+smartcle2 %>%
+    group_by(exerany) %>%
+    skim(bmi, physhealth)
+```
+
+#### The usual `summary` for a data frame
+
+Of course, we can use the usual `summary` to get some basic information about the data, too.
+
+```{r}
+summary(smartcle2)
+```
+
+#### The `describe` function in `Hmisc`
+
+Or we can use the `describe` function from the `Hmisc` package.
+
+```{r}
+Hmisc::describe(smartcle2)
+```
+
 ### Graphing The Data
 
-We'll start by building an exploratory figure to show the relationship between `bmi` and `physhealth` within each of the two `exerany` groups.
+We'll build an exploratory figure (or several) to show the relationship between `bmi` and `physhealth` within each of the two `exerany` groups.
 
 ```{r gr_smartcle2_1_fig}
-ggplot(smartcle2, aes(x = bmi, y = physhealth, group = exerany, color = factor(exerany))) +
+ggplot(smartcle2, aes(x = bmi, y = physhealth, 
+                      group = exerany, color = factor(exerany))) +
     geom_point() +
     geom_smooth(method = "lm", se = FALSE) + 
     theme_bw()
@@ -80,7 +152,8 @@ ggplot(smartcle2, aes(x = bmi, y = physhealth, group = exerany, color = factor(e
 The figure *could* be improved by separating the two groups into facets.
 
 ```{r gr_smartcle2_2_fig}
-ggplot(smartcle2, aes(x = bmi, y = physhealth, group = exerany, color = factor(exerany))) +
+ggplot(smartcle2, aes(x = bmi, y = physhealth, 
+                      group = exerany, color = factor(exerany))) +
     geom_point() +
     geom_smooth(method = "lm", se = FALSE) + 
     theme_bw() + 
@@ -94,9 +167,16 @@ Now, what can we learn from these plots?
 2. Does there seem to be a meaningful difference in the slopes of the two fitted lines?
 3. In what BMI range can we make a reasonable prediction of `physhealth`?
 
+## Model A: Predicting `physhealth`
+
 ### Building Model A
 
 First, we'll fit a simple model describing the main effects but not the interaction of `exerany` and `bmi`, without doing any of the exploratory ground work we should do in advance. 
+
+- The outcome of interest is `physhealth`.
+- Inputs to the regression model are:
+    - `exerany` = 1 if the subject exercised in the past 30 days, and 0 if they didn't
+    - `bmi` = body mass index (treated as qualitative and continuous)
 
 ```{r modelA_smartcle2}
 modA <- lm(physhealth ~ exerany * bmi, data = smartcle2)
@@ -105,3 +185,4 @@ tidy(modA)
 summary(modA)
 ```
 
+What conclusions can we draw here?

@@ -135,12 +135,14 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li class="chapter" data-level="2.1" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#brfss-and-smart"><i class="fa fa-check"></i><b>2.1</b> BRFSS and SMART</a><ul>
 <li class="chapter" data-level="2.1.1" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#key-resources"><i class="fa fa-check"></i><b>2.1.1</b> Key resources</a></li>
 </ul></li>
-<li class="chapter" data-level="2.2" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#the-smartcle1-data-cookbook"><i class="fa fa-check"></i><b>2.2</b> The <code>smartcle1</code> data: Cookbook</a><ul>
-<li class="chapter" data-level="2.2.1" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#omitting-missing-observations-complete-case-analyses"><i class="fa fa-check"></i><b>2.2.1</b> Omitting Missing Observations: Complete-Case Analyses</a></li>
+<li class="chapter" data-level="2.2" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#the-smartcle1-data-cookbook"><i class="fa fa-check"></i><b>2.2</b> The <code>smartcle1</code> data: Cookbook</a></li>
+<li class="chapter" data-level="2.3" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#smartcle2-omitting-missing-observations-complete-case-analyses"><i class="fa fa-check"></i><b>2.3</b> <code>smartcle2</code>: Omitting Missing Observations: Complete-Case Analyses</a></li>
+<li class="chapter" data-level="2.4" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#a-small-study"><i class="fa fa-check"></i><b>2.4</b> A Small Study</a><ul>
+<li class="chapter" data-level="2.4.1" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#some-exploratory-data-analysis"><i class="fa fa-check"></i><b>2.4.1</b> Some exploratory data analysis</a></li>
+<li class="chapter" data-level="2.4.2" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#graphing-the-data"><i class="fa fa-check"></i><b>2.4.2</b> Graphing The Data</a></li>
 </ul></li>
-<li class="chapter" data-level="2.3" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#model-a-predicting-physhealth"><i class="fa fa-check"></i><b>2.3</b> Model A: Predicting <code>physhealth</code></a><ul>
-<li class="chapter" data-level="2.3.1" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#graphing-the-data"><i class="fa fa-check"></i><b>2.3.1</b> Graphing The Data</a></li>
-<li class="chapter" data-level="2.3.2" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#building-model-a"><i class="fa fa-check"></i><b>2.3.2</b> Building Model A</a></li>
+<li class="chapter" data-level="2.5" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#model-a-predicting-physhealth"><i class="fa fa-check"></i><b>2.5</b> Model A: Predicting <code>physhealth</code></a><ul>
+<li class="chapter" data-level="2.5.1" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#building-model-a"><i class="fa fa-check"></i><b>2.5.1</b> Building Model A</a></li>
 </ul></li>
 </ul></li>
 <li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>References</a></li>
@@ -256,13 +258,13 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
  $ exerany   : int  1 1 0 1 1 1 1 1 1 0 ...
  $ sleephrs  : int  6 6 8 9 7 5 9 7 7 7 ...
  $ alcdays   : int  1 4 4 3 2 28 4 2 4 25 ...</code></pre>
-<div id="omitting-missing-observations-complete-case-analyses" class="section level3">
-<h3><span class="header-section-number">2.2.1</span> Omitting Missing Observations: Complete-Case Analyses</h3>
+</div>
+<div id="smartcle2-omitting-missing-observations-complete-case-analyses" class="section level2">
+<h2><span class="header-section-number">2.3</span> <code>smartcle2</code>: Omitting Missing Observations: Complete-Case Analyses</h2>
 <p>For the purpose of fitting our first few models, we will eliminate the missingness problem, and look only at the <em>complete cases</em> in our <code>smartcle1</code> data.</p>
-<p>To inspect the missingness in our data, we might consider using the <code>skim</code> function from the <code>skimr</code> package. We’ll exclude the respondent identifier code (<code>SEQNO</code>) from this summary as uninteresting. In this case, we’ll use the <code>skim_with</code> command to set some options that will make this book work a bit more effectively, by eliminating the spark graphs that we’ll demonstrate in class.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">skim_with</span>(<span class="dt">numeric =</span> <span class="kw">list</span>(<span class="dt">hist =</span> <span class="ot">NULL</span>), <span class="dt">ts =</span> <span class="kw">list</span>(<span class="dt">line_graph =</span> <span class="ot">NULL</span>))
-
-smartcle1 <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">skim</span>(<span class="op">-</span>SEQNO)</code></pre></div>
+<p>To inspect the missingness in our data, we might consider using the <code>skim</code> function from the <code>skimr</code> package. We’ll exclude the respondent identifier code (<code>SEQNO</code>) from this summary as uninteresting.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">smartcle1 <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">    </span><span class="kw">skim</span>(<span class="op">-</span>SEQNO)</code></pre></div>
 <pre><code>Skim summary statistics
  n obs: 1036 
  n variables: 11 
@@ -295,7 +297,9 @@ Variable type: integer
 
 Variable type: numeric 
  variable missing complete    n  mean   sd    p0  p25 median   p75  p100
-      bmi      84      952 1036 27.89 6.47 12.71 23.7  26.68 30.53 66.06</code></pre>
+      bmi      84      952 1036 27.89 6.47 12.71 23.7  26.68 30.53 66.06
+     hist
+ &lt;U+2581&gt;&lt;U+2587&gt;&lt;U+2587&gt;&lt;U+2582&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2581&gt;</code></pre>
 <p>Now, we’ll create a new tibble called <code>smartcle2</code> which contains every variable except <code>poorhealth</code>, and which includes all respondents with complete data on the variables (other than <code>poorhealth</code>). We’ll store those observations with complete data in the <code>smartcle2</code> tibble.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">smartcle2 &lt;-<span class="st"> </span>smartcle1 <span class="op">%&gt;%</span><span class="st"> </span>
 <span class="st">    </span><span class="kw">select</span>(<span class="op">-</span>poorhealth) <span class="op">%&gt;%</span>
@@ -319,20 +323,254 @@ smartcle2</code></pre></div>
 #   &lt;int&gt;</code></pre>
 <p>Note that there are only 896 respondents with <strong>complete</strong> data on the 10 variables (excluding <code>poorhealth</code>) in the <code>smartcle2</code> tibble, as compared to our original <code>smartcle1</code> data which described 1036 respondents and 11 variables, but with lots of missing data.</p>
 </div>
-</div>
-<div id="model-a-predicting-physhealth" class="section level2">
-<h2><span class="header-section-number">2.3</span> Model A: Predicting <code>physhealth</code></h2>
+<div id="a-small-study" class="section level2">
+<h2><span class="header-section-number">2.4</span> A Small Study</h2>
 <p>We’ll begin by investigating the problem of predicting <code>physhealth</code>, at first with just two predictor variables: <code>exerany</code> and <code>bmi</code>, in our new <code>smartcle2</code> data set.</p>
+<ul>
+<li>The outcome of interest is <code>physhealth</code>.</li>
+<li>Inputs to the regression model are:
+<ul>
+<li><code>exerany</code> = 1 if the subject exercised in the past 30 days, and 0 if they didn’t</li>
+<li><code>bmi</code> = body mass index (treated as qualitative and continuous)</li>
+</ul></li>
+</ul>
+<div id="some-exploratory-data-analysis" class="section level3">
+<h3><span class="header-section-number">2.4.1</span> Some exploratory data analysis</h3>
+<p>Counting things can be amazingly useful.</p>
+<div id="how-many-respondents-had-exercised-in-the-past-30-days" class="section level4">
+<h4><span class="header-section-number">2.4.1.1</span> How many respondents had exercised in the past 30 days?</h4>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">smartcle2 <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">count</span>(exerany)</code></pre></div>
+<pre><code># A tibble: 2 x 2
+  exerany     n
+    &lt;int&gt; &lt;int&gt;
+1       0   209
+2       1   687</code></pre>
+<p>This counting approach works for quantitative variables with discrete sets of possible values, like <code>physhealth</code>, which must be an integer between 0 and 30.</p>
+</div>
+<div id="whats-the-distribution-of-physhealth" class="section level4">
+<h4><span class="header-section-number">2.4.1.2</span> What’s the distribution of <code>physhealth</code>?</h4>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">smartcle2 <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">count</span>(physhealth)</code></pre></div>
+<pre><code># A tibble: 19 x 2
+   physhealth     n
+        &lt;int&gt; &lt;int&gt;
+ 1          0   591
+ 2          1    35
+ 3          2    55
+ 4          3    22
+ 5          4    12
+ 6          5    25
+ 7          6     4
+ 8          7    20
+ 9          8     1
+10          9     1
+11         10    18
+12         12     3
+13         14    10
+14         15    14
+15         18     1
+16         20     8
+17         21     1
+18         25     1
+19         30    74</code></pre>
+</div>
+<div id="how-many-of-the-respondents-have-a-bmi-below-30" class="section level4">
+<h4><span class="header-section-number">2.4.1.3</span> How many of the respondents have a BMI below 30?</h4>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">smartcle2 <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">count</span>(bmi <span class="op">&lt;</span><span class="st"> </span><span class="dv">30</span>) </code></pre></div>
+<pre><code># A tibble: 2 x 2
+  `bmi &lt; 30`     n
+  &lt;lgl&gt;      &lt;int&gt;
+1 F            253
+2 T            643</code></pre>
+</div>
+<div id="how-many-of-the-respondents-who-have-a-bmi-30-exercised" class="section level4">
+<h4><span class="header-section-number">2.4.1.4</span> How many of the respondents who have a BMI &lt; 30 exercised?</h4>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">smartcle2 <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">count</span>(bmi <span class="op">&lt;</span><span class="st"> </span><span class="dv">30</span>, exerany)</code></pre></div>
+<pre><code># A tibble: 4 x 3
+  `bmi &lt; 30` exerany     n
+  &lt;lgl&gt;        &lt;int&gt; &lt;int&gt;
+1 F                0    88
+2 F                1   165
+3 T                0   121
+4 T                1   522</code></pre>
+</div>
+<div id="comparing-physhealth-summaries-by-obesity-status" class="section level4">
+<h4><span class="header-section-number">2.4.1.5</span> Comparing <code>physhealth</code> summaries by obesity status</h4>
+<p>Can we compare the <code>physhealth</code> means, medians and 75<sup>th</sup> percentiles for respondents whose BMI is below 30 to the respondents whose BMI is not?</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">smartcle2 <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">group_by</span>(bmi <span class="op">&lt;</span><span class="st"> </span><span class="dv">30</span>) <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">summarize</span>(<span class="kw">mean</span>(physhealth), <span class="dt">median =</span> <span class="kw">median</span>(physhealth), 
+              <span class="dt">q75 =</span> <span class="kw">quantile</span>(physhealth, <span class="fl">0.75</span>))</code></pre></div>
+<pre><code># A tibble: 2 x 4
+  `bmi &lt; 30` `mean(physhealth)` median   q75
+  &lt;lgl&gt;                   &lt;dbl&gt;  &lt;int&gt; &lt;dbl&gt;
+1 F                        5.95      0  7.00
+2 T                        3.22      0  2.00</code></pre>
+</div>
+<div id="the-skim-function-within-a-pipe" class="section level4">
+<h4><span class="header-section-number">2.4.1.6</span> The <code>skim</code> function within a pipe</h4>
+<p>The <strong>skim</strong> function works within pipes and with the other <code>tidyverse</code> functions.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">smartcle2 <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">group_by</span>(exerany) <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">skim</span>(bmi, physhealth)</code></pre></div>
+<pre><code>Skim summary statistics
+ n obs: 896 
+ n variables: 10 
+ group variables: exerany 
+
+Variable type: integer 
+ exerany   variable missing complete   n mean    sd p0 p25 median p75 p100
+       0 physhealth       0      209 209 7.95 11.68  0   0      0  15   30
+       1 physhealth       0      687 687 2.78  7.06  0   0      0   2   30
+     hist
+ &lt;U+2587&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2582&gt;
+ &lt;U+2587&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2581&gt;
+
+Variable type: numeric 
+ exerany variable missing complete   n  mean   sd    p0   p25 median   p75
+       0      bmi       0      209 209 29.57 7.46 18    24.11  28.49 33.13
+       1      bmi       0      687 687 27.35 5.84 12.71 23.7   26.52 29.81
+  p100     hist
+ 66.06 &lt;U+2586&gt;&lt;U+2587&gt;&lt;U+2586&gt;&lt;U+2582&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2581&gt;
+ 60.95 &lt;U+2581&gt;&lt;U+2586&gt;&lt;U+2587&gt;&lt;U+2582&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2581&gt;</code></pre>
+</div>
+<div id="the-usual-summary-for-a-data-frame" class="section level4">
+<h4><span class="header-section-number">2.4.1.7</span> The usual <code>summary</code> for a data frame</h4>
+<p>Of course, we can use the usual <code>summary</code> to get some basic information about the data, too.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(smartcle2)</code></pre></div>
+<pre><code>     SEQNO             physhealth      menthealth           genhealth  
+ Min.   :2.016e+09   Min.   : 0.00   Min.   : 0.000   1_Excellent:155  
+ 1st Qu.:2.016e+09   1st Qu.: 0.00   1st Qu.: 0.000   2_VeryGood :306  
+ Median :2.016e+09   Median : 0.00   Median : 0.000   3_Good     :295  
+ Mean   :2.016e+09   Mean   : 3.99   Mean   : 2.693   4_Fair     :102  
+ 3rd Qu.:2.016e+09   3rd Qu.: 2.00   3rd Qu.: 2.000   5_Poor     : 38  
+ Max.   :2.016e+09   Max.   :30.00   Max.   :30.000                    
+      bmi            female         internet30        exerany      
+ Min.   :12.71   Min.   :0.0000   Min.   :0.0000   Min.   :0.0000  
+ 1st Qu.:23.70   1st Qu.:0.0000   1st Qu.:1.0000   1st Qu.:1.0000  
+ Median :26.80   Median :1.0000   Median :1.0000   Median :1.0000  
+ Mean   :27.87   Mean   :0.5848   Mean   :0.8147   Mean   :0.7667  
+ 3rd Qu.:30.53   3rd Qu.:1.0000   3rd Qu.:1.0000   3rd Qu.:1.0000  
+ Max.   :66.06   Max.   :1.0000   Max.   :1.0000   Max.   :1.0000  
+    sleephrs         alcdays      
+ Min.   : 1.000   Min.   : 0.000  
+ 1st Qu.: 6.000   1st Qu.: 0.000  
+ Median : 7.000   Median : 1.000  
+ Mean   : 7.022   Mean   : 4.834  
+ 3rd Qu.: 8.000   3rd Qu.: 5.000  
+ Max.   :20.000   Max.   :30.000  </code></pre>
+</div>
+<div id="the-describe-function-in-hmisc" class="section level4">
+<h4><span class="header-section-number">2.4.1.8</span> The <code>describe</code> function in <code>Hmisc</code></h4>
+<p>Or we can use the <code>describe</code> function from the <code>Hmisc</code> package.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Hmisc<span class="op">::</span><span class="kw">describe</span>(smartcle2)</code></pre></div>
+<pre><code>smartcle2 
+
+ 10  Variables      896  Observations
+---------------------------------------------------------------------------
+SEQNO 
+        n   missing  distinct      Info      Mean       Gmd       .05 
+      896         0       896         1 2.016e+09     345.7 2.016e+09 
+      .10       .25       .50       .75       .90       .95 
+2.016e+09 2.016e+09 2.016e+09 2.016e+09 2.016e+09 2.016e+09 
+
+lowest : 2016000001 2016000002 2016000003 2016000004 2016000005
+highest: 2016001031 2016001032 2016001033 2016001034 2016001036
+---------------------------------------------------------------------------
+physhealth 
+       n  missing distinct     Info     Mean      Gmd      .05      .10 
+     896        0       19    0.712     3.99    6.664        0        0 
+     .25      .50      .75      .90      .95 
+       0        0        2       15       30 
+                                                                      
+Value          0     1     2     3     4     5     6     7     8     9
+Frequency    591    35    55    22    12    25     4    20     1     1
+Proportion 0.660 0.039 0.061 0.025 0.013 0.028 0.004 0.022 0.001 0.001
+                                                                
+Value         10    12    14    15    18    20    21    25    30
+Frequency     18     3    10    14     1     8     1     1    74
+Proportion 0.020 0.003 0.011 0.016 0.001 0.009 0.001 0.001 0.083
+---------------------------------------------------------------------------
+menthealth 
+       n  missing distinct     Info     Mean      Gmd      .05      .10 
+     896        0       17    0.645    2.693    4.652        0        0 
+     .25      .50      .75      .90      .95 
+       0        0        2        8       20 
+                                                                      
+Value          0     1     2     3     4     5     6     7     8    10
+Frequency    634    25    56    27    15    30     4    13     4    18
+Proportion 0.708 0.028 0.062 0.030 0.017 0.033 0.004 0.015 0.004 0.020
+                                                    
+Value         14    15    18    20    23    29    30
+Frequency      2    20     1     9     1     1    36
+Proportion 0.002 0.022 0.001 0.010 0.001 0.001 0.040
+---------------------------------------------------------------------------
+genhealth 
+       n  missing distinct 
+     896        0        5 
+                                                                      
+Value      1_Excellent  2_VeryGood      3_Good      4_Fair      5_Poor
+Frequency          155         306         295         102          38
+Proportion       0.173       0.342       0.329       0.114       0.042
+---------------------------------------------------------------------------
+bmi 
+       n  missing distinct     Info     Mean      Gmd      .05      .10 
+     896        0      467        1    27.87    6.572    20.06    21.23 
+     .25      .50      .75      .90      .95 
+   23.70    26.80    30.53    35.36    39.30 
+
+lowest : 12.71 13.34 14.72 16.22 17.30, highest: 56.89 57.04 60.95 61.84 66.06
+---------------------------------------------------------------------------
+female 
+       n  missing distinct     Info      Sum     Mean      Gmd 
+     896        0        2    0.728      524   0.5848   0.4862 
+
+---------------------------------------------------------------------------
+internet30 
+       n  missing distinct     Info      Sum     Mean      Gmd 
+     896        0        2    0.453      730   0.8147   0.3022 
+
+---------------------------------------------------------------------------
+exerany 
+       n  missing distinct     Info      Sum     Mean      Gmd 
+     896        0        2    0.537      687   0.7667   0.3581 
+
+---------------------------------------------------------------------------
+sleephrs 
+       n  missing distinct     Info     Mean      Gmd      .05      .10 
+     896        0       14    0.934    7.022    1.477        5        5 
+     .25      .50      .75      .90      .95 
+       6        7        8        8        9 
+                                                                      
+Value          1     2     3     4     5     6     7     8     9    10
+Frequency      5     1     6    20    63   192   276   266    38    22
+Proportion 0.006 0.001 0.007 0.022 0.070 0.214 0.308 0.297 0.042 0.025
+                                  
+Value         11    12    16    20
+Frequency      2     2     2     1
+Proportion 0.002 0.002 0.002 0.001
+---------------------------------------------------------------------------
+alcdays 
+       n  missing distinct     Info     Mean      Gmd      .05      .10 
+     896        0       22    0.909    4.834    7.189        0        0 
+     .25      .50      .75      .90      .95 
+       0        1        5       17       30 
+
+lowest :  0  1  2  3  4, highest: 25 26 27 28 30
+---------------------------------------------------------------------------</code></pre>
+</div>
+</div>
 <div id="graphing-the-data" class="section level3">
-<h3><span class="header-section-number">2.3.1</span> Graphing The Data</h3>
-<p>We’ll start by building an exploratory figure to show the relationship between <code>bmi</code> and <code>physhealth</code> within each of the two <code>exerany</code> groups.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">ggplot</span>(smartcle2, <span class="kw">aes</span>(<span class="dt">x =</span> bmi, <span class="dt">y =</span> physhealth, <span class="dt">group =</span> exerany, <span class="dt">color =</span> <span class="kw">factor</span>(exerany))) <span class="op">+</span>
+<h3><span class="header-section-number">2.4.2</span> Graphing The Data</h3>
+<p>We’ll build an exploratory figure (or several) to show the relationship between <code>bmi</code> and <code>physhealth</code> within each of the two <code>exerany</code> groups.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">ggplot</span>(smartcle2, <span class="kw">aes</span>(<span class="dt">x =</span> bmi, <span class="dt">y =</span> physhealth, 
+                      <span class="dt">group =</span> exerany, <span class="dt">color =</span> <span class="kw">factor</span>(exerany))) <span class="op">+</span>
 <span class="st">    </span><span class="kw">geom_point</span>() <span class="op">+</span>
 <span class="st">    </span><span class="kw">geom_smooth</span>(<span class="dt">method =</span> <span class="st">&quot;lm&quot;</span>, <span class="dt">se =</span> <span class="ot">FALSE</span>) <span class="op">+</span><span class="st"> </span>
 <span class="st">    </span><span class="kw">theme_bw</span>()</code></pre></div>
 <p><img src="bookdown-demo_files/figure-html/gr_smartcle2_1_fig-1.png" width="672" /></p>
 <p>The figure <em>could</em> be improved by separating the two groups into facets.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">ggplot</span>(smartcle2, <span class="kw">aes</span>(<span class="dt">x =</span> bmi, <span class="dt">y =</span> physhealth, <span class="dt">group =</span> exerany, <span class="dt">color =</span> <span class="kw">factor</span>(exerany))) <span class="op">+</span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">ggplot</span>(smartcle2, <span class="kw">aes</span>(<span class="dt">x =</span> bmi, <span class="dt">y =</span> physhealth, 
+                      <span class="dt">group =</span> exerany, <span class="dt">color =</span> <span class="kw">factor</span>(exerany))) <span class="op">+</span>
 <span class="st">    </span><span class="kw">geom_point</span>() <span class="op">+</span>
 <span class="st">    </span><span class="kw">geom_smooth</span>(<span class="dt">method =</span> <span class="st">&quot;lm&quot;</span>, <span class="dt">se =</span> <span class="ot">FALSE</span>) <span class="op">+</span><span class="st"> </span>
 <span class="st">    </span><span class="kw">theme_bw</span>() <span class="op">+</span><span class="st"> </span>
@@ -346,9 +584,20 @@ smartcle2</code></pre></div>
 <li>In what BMI range can we make a reasonable prediction of <code>physhealth</code>?</li>
 </ol>
 </div>
+</div>
+<div id="model-a-predicting-physhealth" class="section level2">
+<h2><span class="header-section-number">2.5</span> Model A: Predicting <code>physhealth</code></h2>
 <div id="building-model-a" class="section level3">
-<h3><span class="header-section-number">2.3.2</span> Building Model A</h3>
+<h3><span class="header-section-number">2.5.1</span> Building Model A</h3>
 <p>First, we’ll fit a simple model describing the main effects but not the interaction of <code>exerany</code> and <code>bmi</code>, without doing any of the exploratory ground work we should do in advance.</p>
+<ul>
+<li>The outcome of interest is <code>physhealth</code>.</li>
+<li>Inputs to the regression model are:
+<ul>
+<li><code>exerany</code> = 1 if the subject exercised in the past 30 days, and 0 if they didn’t</li>
+<li><code>bmi</code> = body mass index (treated as qualitative and continuous)</li>
+</ul></li>
+</ul>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">modA &lt;-<span class="st"> </span><span class="kw">lm</span>(physhealth <span class="op">~</span><span class="st"> </span>exerany <span class="op">*</span><span class="st"> </span>bmi, <span class="dt">data =</span> smartcle2)
 <span class="kw">glance</span>(modA)</code></pre></div>
 <pre><code>   r.squared adj.r.squared    sigma statistic     p.value df    logLik
@@ -382,6 +631,7 @@ Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&
 Residual standard error: 8.319 on 892 degrees of freedom
 Multiple R-squared:  0.07608,   Adjusted R-squared:  0.07297 
 F-statistic: 24.48 on 3 and 892 DF,  p-value: 3.144e-15</code></pre>
+<p>What conclusions can we draw here?</p>
 
 </div>
 </div>
