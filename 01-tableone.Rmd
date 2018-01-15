@@ -26,19 +26,26 @@ knitr::include_graphics("images/Roy-snip1.png")
 
 The article provides percentages, means and standard deviations across groups, but note that it does not provide p values for the comparison of baseline characteristics. This is a common feature of NEJM reports on randomized clinical trials, where we anticipate that the two groups will be well matched at baseline. Note that the patients in this study were *randomly* assigned to either the rhythm-control group or to the rate-control group, using blocked randomizations stratified by study center.
 
-## Simulating Data from a Clinical Trial
+## The MR CLEAN trial
 
-Consider the following simulated data, available on the Data and Code page of [our course website](https://github.com/THOMASELOVE/432-2018) in the `fakestroke.csv` file, which I built to let us mirror the Table 1 for a real randomized clinical trial, called MR CLEAN [@Berkheimer2015].
+Consider the following simulated data, available on the Data and Code page of [our course website](https://github.com/THOMASELOVE/432-2018) in the `fakestroke.csv` file, which I built to let us mirror the Table 1 for a real randomized clinical trial, called MR CLEAN [@Berkhemer2015].
 
 The MR CLEAN trial report describes 500 patients with acute ischemic stroke at 16 medical centers in the Netherlands, where 233 were randomly assigned to the intervention (intraarterial treatment plus usual care) and 267 to control (usual care alone.) 
 
-### The `fakestroke` data
+Here's the Table 1 from @Berkhemer2015.
 
-Here's a quick look at the simulated data in `fakestroke`.
-
-```{r fakestroke_printtibble}
-fakestroke
+```{r Berkhemer_table1_NEJM_fig, echo=FALSE, out.width='90%'}
+knitr::include_graphics("images/Berkhemer-snip4complete.png")
 ```
+
+The Table was accompanied by the following notes.
+
+```{r Berkhemer_table1_NEJM_notes_fig, echo=FALSE, out.width='90%'}
+knitr::include_graphics("images/Berkhemer-snip4notes.png")
+```
+
+
+## Simulated `fakestroke` data
 
 The `fakestroke.csv` file contains the following 18 variables for 500 patients.
 
@@ -56,27 +63,32 @@ Variable |	Description
 `mrankin` |	Pre-stroke modified Rankin scale score (0, 1, 2 or > 2) indicating functional disability - complete range is 0 (no symptoms) to 6 (death)
 `sbp`	| Systolic blood pressure, in mm Hg
 `iv.altep`	| Treatment with IV alteplase (Yes/No)
-`time.iv`	| Time from stroke onset to start of IV altepase (minutes) if iv.altep=Yes
+`time.iv`	| Time from stroke onset to start of IV alteplase (minutes) if iv.altep=Yes
 `aspects`	| Alberta Stroke Program Early Computed Tomography score, which measures extent of stroke from 0 - 10; higher scores indicate fewer early ischemic changes
 `ia.occlus`	| Intracranial arterial occlusion, based on vessel imaging - five categories^[The five categories are Intracranial ICA, ICA with involvement of the M1 middle cerebral artery segment, M1 middle cerebral artery segment, M2 middle cerebral artery segment, A1 or A2 anterior cerebral artery segment]
 `extra.ica`	| Extracranial ICA occlusion (1 = Yes, 0 = No)
 `time.rand`	| Time from stroke onset to study randomization, in minutes
 `time.punc`	| Time from stroke onset to groin puncture, in minutes (only if Intervention)
 
-### `fakestroke` Table 1: Attempt 1
+Here's a quick look at the simulated data in `fakestroke`.
+
+```{r fakestroke_printtibble}
+fakestroke
+```
+
+## Building Table 1 for `fakestroke`: Attempt 1
 
 Our goal, then, is to take the data in `fakestroke.csv` and use it to generate a Table 1 for the study that compares the 233 patients in the Intervention group to the 267 patients in the Control group, on all of the other variables (except study ID #) available. I'll use the `tableone` package of functions available in R to help me complete this task. We'll make a first attempt, using the `CreateTableOne` function in the `tableone` package. To use the function, we'll need to specify:
 
-- the `vars` or variables we want to place in the rows of our Table 1 (which will include just about everything in the `fakestroke` data except the `studyid` code and the `trt` variable for which we have other plans)
+- the `vars` or variables we want to place in the rows of our Table 1 (which will include just about everything in the `fakestroke` data except the `studyid` code and the `trt` variable for which we have other plans, and the `time.punc` which applies only to subjects in the Intervention group.)
     - A useful trick here is to use the `dput` function, specifically something like `dput(names(fakestroke))` can be used to generate a list of all of the variables included in the `fakestroke` tibble, and then this can be copied and pasted into the `vars` specification, saving some typing.
 - the `strata` which indicates the levels want to use in the columns of our Table 1 (for us, that's `trt`)
 
-```{r attempt1_fakestroke, warning = FALSE}
+```{r attempt1_fakestroke}
 fs.vars <- c("age", "sex", "nihss", "location", 
           "hx.isch", "afib", "dm", "mrankin", "sbp",
           "iv.altep", "time.iv", "aspects", 
-          "ia.occlus", "extra.ica", "time.rand", 
-          "time.punc")
+          "ia.occlus", "extra.ica", "time.rand")
 
 fs.trt <- c("trt")
 
@@ -86,12 +98,12 @@ att1 <- CreateTableOne(data = fakestroke,
 print(att1)
 ```
 
-Some of this is very useful, and other parts need to be fixed. 
+### Some of this is very useful, and other parts need to be fixed. 
 
 1. The 1/0 variables (`afib`, `dm`, `extra.ica`) might be better if they were treated as the factors they are, and reported as the Yes/No variables are reported, with counts and percentages rather than with means and standard deviations.
 2. In some cases, we may prefer to re-order the levels of the categorical (factor) variables, particularly the `mrankin` variable, but also the `ia.occlus` variable. It would also be more typical to put the Intervention group to the left and the Control group to the right, so we may need to adjust our `trt` variable's levels accordingly.
 3. For each of the quantitative variables (`age`, `nihss`, `sbp`, `time.iv`, `aspects`, `extra.ica`, `time.rand` and `time.punc`) we should make a decision whether a summary with mean and standard deviation is appropriate, or whether we should instead summarize with, say, the median and quartiles. A mean and standard deviation really only yields an appropriate summary when the data are least approximately Normally distributed. This will make the *p* values a bit more reasonable, too. The `test` column in the first attempt will soon have something useful to tell us.
-4. We've got some warnings (which I've silenced here), having to do with the fact that `time.punc` is only relevant to patients in the Intervention group. We might consider removing that variable from this table, as a result, and summarizing those data separately.
+4. If we'd left in the `time.punc` variable, we'd get some warnings, having to do with the fact that `time.punc` is only relevant to patients in the Intervention group. 
 
 ### `fakestroke` Cleaning Up Categorical Variables
 
@@ -108,7 +120,7 @@ We also want to re-order some of those categorical variables, so that the levels
 
 - place Intervention before Control in the `trt` variable,
 - reorder the `mrankin` scale as 0, 1, 2, > 2, and
-- rearrange the `ia.occlus` variable to the order^[We might also have considered reordering the `ia.occlus` factor by its frequency, using the `fct_infreq` function] presented in @Berkheimer2015.
+- rearrange the `ia.occlus` variable to the order^[We might also have considered reordering the `ia.occlus` factor by its frequency, using the `fct_infreq` function] presented in @Berkhemer2015.
 
 To accomplish this, we'll use the `fct_relevel` function from the `forcats` package (loaded with the rest of the core `tidyverse` packages) to reorder our levels manually.
 
@@ -122,9 +134,9 @@ fakestroke <- fakestroke %>%
            ) 
 ```
 
-### `fakestroke` Table 1: Attempt 2
+## `fakestroke` Table 1: Attempt 2
 
-```{r attempt2_fakestroke, warning = FALSE}
+```{r attempt2_fakestroke}
 att2 <- CreateTableOne(data = fakestroke, 
                        vars = fs.vars,
                        factorVars = fs.factorvars,
@@ -136,21 +148,20 @@ The categorical data presentation looks much improved.
 
 ### What summaries should we show?
 
-Now, we'll move on to the issue of making a decision about what type of summary to show for the quantitative variables. Since the `fakestroke` data are just simulated and only match the summary statistics of the original results, not the details, we'll adopt the decisions made by @Berkheimer2015, which was to use medians and interquartile ranges to summarize the distributions of all of the continuous variables **except** systolic blood pressure. 
+Now, we'll move on to the issue of making a decision about what type of summary to show for the quantitative variables. Since the `fakestroke` data are just simulated and only match the summary statistics of the original results, not the details, we'll adopt the decisions made by @Berkhemer2015, which were to use medians and interquartile ranges to summarize the distributions of all of the continuous variables **except** systolic blood pressure. 
 
 - Specifying certain quantitative variables as *non-normal* causes R to show them with medians and the 25th and 75th percentiles, rather than means and standard deviations, and also causes those variables to be tested using non-parametric tests, like the Wilcoxon signed rank test, rather than the t test. The `test` column indicates this with the word `nonnorm`.
 - Specifying *exact* tests for certain categorical variables (we'll try this for the `location` and `mrankin` variables) can be done, and these changes will be noted in the `test` column, as well.
 
 To accomplish this, we need to specify which variables should be treated as non-Normal in the `print` statement - notice that we don't need to redo the `CreateTableOne` for this change.
 
-```{r attempt2_withprintchanges, warning = FALSE}
+```{r attempt2_withprintchanges}
 print(att2, 
-      nonnormal = c("age", "nihss", "time.iv", "aspects", "time.rand",
-                    "time.punc"),
+      nonnormal = c("age", "nihss", "time.iv", "aspects", "time.rand"),
       exact = c("location", "mrankin"))
 ```
 
-### Obtaining a Detailed Summary
+## Obtaining a more detailed Summary
 
 If this was a real data set, we'd want to get a more detailed description of the data to make decisions about things like potentially collapsing categories of a variable, or whether or not a normal distribution was useful for a particular continuous variable, etc. You can do this with the `summary` command applied to a created Table 1, which shows, among other things, the effect of changing from normal to non-normal *p* values for continuous variables, and from approximate to "exact" *p* values for categorical factors.
 

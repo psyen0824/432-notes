@@ -282,49 +282,29 @@ be well matched at baseline. Note that the patients in this study were
 rate-control group, using blocked randomizations stratified by study
 center.
 
-\section{Simulating Data from a Clinical
-Trial}\label{simulating-data-from-a-clinical-trial}
+\section{The MR CLEAN trial}\label{the-mr-clean-trial}
 
 Consider the following simulated data, available on the Data and Code
 page of \href{https://github.com/THOMASELOVE/432-2018}{our course
 website} in the \texttt{fakestroke.csv} file, which I built to let us
 mirror the Table 1 for a real randomized clinical trial, called MR CLEAN
-\citep{Berkheimer2015}.
+\citep{Berkhemer2015}.
 
 The MR CLEAN trial report describes 500 patients with acute ischemic
 stroke at 16 medical centers in the Netherlands, where 233 were randomly
 assigned to the intervention (intraarterial treatment plus usual care)
 and 267 to control (usual care alone.)
 
-\subsection{\texorpdfstring{The \texttt{fakestroke}
-data}{The fakestroke data}}\label{the-fakestroke-data}
+Here's the Table 1 from \citet{Berkhemer2015}.
 
-Here's a quick look at the simulated data in \texttt{fakestroke}.
+\includegraphics[width=0.9\linewidth]{images/Berkhemer-snip4complete}
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{fakestroke}
-\end{Highlighting}
-\end{Shaded}
+The Table was accompanied by the following notes.
 
-\begin{verbatim}
-# A tibble: 500 x 18
-   studyid trt        age sex   nihss location hx.isch  afib    dm mrankin
-   <fct>   <fct>    <dbl> <fct> <int> <fct>    <fct>   <int> <int> <fct>  
- 1 z001    Control   53.0 Male     21 Right    No          0     0 2      
- 2 z002    Interve~  51.0 Male     23 Left     No          1     0 0      
- 3 z003    Control   68.0 Fema~    11 Right    No          0     0 0      
- 4 z004    Control   28.0 Male     22 Left     No          0     0 0      
- 5 z005    Control   91.0 Male     24 Right    No          0     0 0      
- 6 z006    Control   34.0 Fema~    18 Left     No          0     0 2      
- 7 z007    Interve~  75.0 Male     25 Right    No          0     0 0      
- 8 z008    Control   89.0 Fema~    18 Right    No          0     0 0      
- 9 z009    Control   75.0 Male     25 Left     No          1     0 2      
-10 z010    Interve~  26.0 Fema~    27 Right    No          0     0 0      
-# ... with 490 more rows, and 8 more variables: sbp <int>, iv.altep <fct>,
-#   time.iv <int>, aspects <int>, ia.occlus <fct>, extra.ica <int>,
-#   time.rand <int>, time.punc <int>
-\end{verbatim}
+\includegraphics[width=0.9\linewidth]{images/Berkhemer-snip4notes}
+
+\section{\texorpdfstring{Simulated \texttt{fakestroke}
+data}{Simulated fakestroke data}}\label{simulated-fakestroke-data}
 
 The \texttt{fakestroke.csv} file contains the following 18 variables for
 500 patients.
@@ -404,7 +384,7 @@ Treatment with IV alteplase (Yes/No)\strut
 \begin{minipage}[t]{0.16\columnwidth}\raggedleft\strut
 \texttt{time.iv}\strut
 \end{minipage} & \begin{minipage}[t]{0.55\columnwidth}\raggedright\strut
-Time from stroke onset to start of IV altepase (minutes) if
+Time from stroke onset to start of IV alteplase (minutes) if
 iv.altep=Yes\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.16\columnwidth}\raggedleft\strut
@@ -443,8 +423,36 @@ Intervention)\strut
 \bottomrule
 \end{longtable}
 
-\subsection{\texorpdfstring{\texttt{fakestroke} Table 1: Attempt
-1}{fakestroke Table 1: Attempt 1}}\label{fakestroke-table-1-attempt-1}
+Here's a quick look at the simulated data in \texttt{fakestroke}.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{fakestroke}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+# A tibble: 500 x 18
+   studyid trt        age sex   nihss location hx.isch  afib    dm mrankin
+   <fct>   <fct>    <dbl> <fct> <int> <fct>    <fct>   <int> <int> <fct>  
+ 1 z001    Control   53.0 Male     21 Right    No          0     0 2      
+ 2 z002    Interve~  51.0 Male     23 Left     No          1     0 0      
+ 3 z003    Control   68.0 Fema~    11 Right    No          0     0 0      
+ 4 z004    Control   28.0 Male     22 Left     No          0     0 0      
+ 5 z005    Control   91.0 Male     24 Right    No          0     0 0      
+ 6 z006    Control   34.0 Fema~    18 Left     No          0     0 2      
+ 7 z007    Interve~  75.0 Male     25 Right    No          0     0 0      
+ 8 z008    Control   89.0 Fema~    18 Right    No          0     0 0      
+ 9 z009    Control   75.0 Male     25 Left     No          1     0 2      
+10 z010    Interve~  26.0 Fema~    27 Right    No          0     0 0      
+# ... with 490 more rows, and 8 more variables: sbp <int>, iv.altep <fct>,
+#   time.iv <int>, aspects <int>, ia.occlus <fct>, extra.ica <int>,
+#   time.rand <int>, time.punc <int>
+\end{verbatim}
+
+\section{\texorpdfstring{Building Table 1 for \texttt{fakestroke}:
+Attempt
+1}{Building Table 1 for fakestroke: Attempt 1}}\label{building-table-1-for-fakestroke-attempt-1}
 
 Our goal, then, is to take the data in \texttt{fakestroke.csv} and use
 it to generate a Table 1 for the study that compares the 233 patients in
@@ -461,7 +469,9 @@ use the function, we'll need to specify:
   the \texttt{vars} or variables we want to place in the rows of our
   Table 1 (which will include just about everything in the
   \texttt{fakestroke} data except the \texttt{studyid} code and the
-  \texttt{trt} variable for which we have other plans)
+  \texttt{trt} variable for which we have other plans, and the
+  \texttt{time.punc} which applies only to subjects in the Intervention
+  group.)
 
   \begin{itemize}
   \tightlist
@@ -482,8 +492,7 @@ use the function, we'll need to specify:
 \NormalTok{fs.vars <-}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"age"}\NormalTok{, }\StringTok{"sex"}\NormalTok{, }\StringTok{"nihss"}\NormalTok{, }\StringTok{"location"}\NormalTok{, }
           \StringTok{"hx.isch"}\NormalTok{, }\StringTok{"afib"}\NormalTok{, }\StringTok{"dm"}\NormalTok{, }\StringTok{"mrankin"}\NormalTok{, }\StringTok{"sbp"}\NormalTok{,}
           \StringTok{"iv.altep"}\NormalTok{, }\StringTok{"time.iv"}\NormalTok{, }\StringTok{"aspects"}\NormalTok{, }
-          \StringTok{"ia.occlus"}\NormalTok{, }\StringTok{"extra.ica"}\NormalTok{, }\StringTok{"time.rand"}\NormalTok{, }
-          \StringTok{"time.punc"}\NormalTok{)}
+          \StringTok{"ia.occlus"}\NormalTok{, }\StringTok{"extra.ica"}\NormalTok{, }\StringTok{"time.rand"}\NormalTok{)}
 
 \NormalTok{fs.trt <-}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"trt"}\NormalTok{)}
 
@@ -522,10 +531,10 @@ use the function, we'll need to specify:
      M2                     21 ( 7.9)      18 ( 7.7)             
   extra.ica (mean (sd))   0.26 (0.44)    0.32 (0.47)   0.150     
   time.rand (mean (sd)) 213.88 (70.29) 202.51 (57.33)  0.051     
-  time.punc (mean (sd))    NaN (NA)    263.02 (54.23)  NA        
 \end{verbatim}
 
-Some of this is very useful, and other parts need to be fixed.
+\subsection{Some of this is very useful, and other parts need to be
+fixed.}\label{some-of-this-is-very-useful-and-other-parts-need-to-be-fixed.}
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
@@ -554,10 +563,9 @@ Some of this is very useful, and other parts need to be fixed.
   too. The \texttt{test} column in the first attempt will soon have
   something useful to tell us.
 \item
-  We've got some warnings (which I've silenced here), having to do with
-  the fact that \texttt{time.punc} is only relevant to patients in the
-  Intervention group. We might consider removing that variable from this
-  table, as a result, and summarizing those data separately.
+  If we'd left in the \texttt{time.punc} variable, we'd get some
+  warnings, having to do with the fact that \texttt{time.punc} is only
+  relevant to patients in the Intervention group.
 \end{enumerate}
 
 \subsection{\texorpdfstring{\texttt{fakestroke} Cleaning Up Categorical
@@ -591,7 +599,7 @@ the levels are more useful to us. Specifically, we want to:
   rearrange the \texttt{ia.occlus} variable to the order\footnote{We
     might also have considered reordering the \texttt{ia.occlus} factor
     by its frequency, using the \texttt{fct\_infreq} function} presented
-  in \citet{Berkheimer2015}.
+  in \citet{Berkhemer2015}.
 \end{itemize}
 
 To accomplish this, we'll use the \texttt{fct\_relevel} function from
@@ -610,7 +618,7 @@ the \texttt{forcats} package (loaded with the rest of the core
 \end{Highlighting}
 \end{Shaded}
 
-\subsection{\texorpdfstring{\texttt{fakestroke} Table 1: Attempt
+\section{\texorpdfstring{\texttt{fakestroke} Table 1: Attempt
 2}{fakestroke Table 1: Attempt 2}}\label{fakestroke-table-1-attempt-2}
 
 \begin{Shaded}
@@ -651,7 +659,6 @@ the \texttt{forcats} package (loaded with the rest of the core
      A1 or A2                1 ( 0.4)       2 ( 0.8)             
   extra.ica = 1 (%)         75 (32.2)      70 (26.3)   0.179     
   time.rand (mean (sd)) 202.51 (57.33) 213.88 (70.29)  0.051     
-  time.punc (mean (sd)) 263.02 (54.23)    NaN (NA)     NA        
 \end{verbatim}
 
 The categorical data presentation looks much improved.
@@ -663,7 +670,7 @@ Now, we'll move on to the issue of making a decision about what type of
 summary to show for the quantitative variables. Since the
 \texttt{fakestroke} data are just simulated and only match the summary
 statistics of the original results, not the details, we'll adopt the
-decisions made by \citet{Berkheimer2015}, which was to use medians and
+decisions made by \citet{Berkhemer2015}, which were to use medians and
 interquartile ranges to summarize the distributions of all of the
 continuous variables \textbf{except} systolic blood pressure.
 
@@ -690,8 +697,7 @@ need to redo the \texttt{CreateTableOne} for this change.
 \begin{Shaded}
 \begin{Highlighting}[]
 \KeywordTok{print}\NormalTok{(att2, }
-      \DataTypeTok{nonnormal =} \KeywordTok{c}\NormalTok{(}\StringTok{"age"}\NormalTok{, }\StringTok{"nihss"}\NormalTok{, }\StringTok{"time.iv"}\NormalTok{, }\StringTok{"aspects"}\NormalTok{, }\StringTok{"time.rand"}\NormalTok{,}
-                    \StringTok{"time.punc"}\NormalTok{),}
+      \DataTypeTok{nonnormal =} \KeywordTok{c}\NormalTok{(}\StringTok{"age"}\NormalTok{, }\StringTok{"nihss"}\NormalTok{, }\StringTok{"time.iv"}\NormalTok{, }\StringTok{"aspects"}\NormalTok{, }\StringTok{"time.rand"}\NormalTok{),}
       \DataTypeTok{exact =} \KeywordTok{c}\NormalTok{(}\StringTok{"location"}\NormalTok{, }\StringTok{"mrankin"}\NormalTok{))}
 \end{Highlighting}
 \end{Shaded}
@@ -724,7 +730,6 @@ need to redo the \texttt{CreateTableOne} for this change.
      A1 or A2                   1 ( 0.4)                2 ( 0.8)          
   extra.ica = 1 (%)            75 (32.2)               70 (26.3)          
   time.rand (median [IQR]) 204.00 [152.00, 249.50] 196.00 [149.00, 266.00]
-  time.punc (median [IQR]) 260.00 [212.00, 313.00]     NA [NA, NA]        
                           Stratified by trt
                            p      test   
   n                                      
@@ -752,11 +757,10 @@ need to redo the \texttt{CreateTableOne} for this change.
      A1 or A2                            
   extra.ica = 1 (%)         0.179        
   time.rand (median [IQR])  0.251 nonnorm
-  time.punc (median [IQR])  NA    nonnorm
 \end{verbatim}
 
-\subsection{Obtaining a Detailed
-Summary}\label{obtaining-a-detailed-summary}
+\section{Obtaining a more detailed
+Summary}\label{obtaining-a-more-detailed-summary}
 
 If this was a real data set, we'd want to get a more detailed
 description of the data to make decisions about things like potentially
@@ -788,17 +792,15 @@ sbp       233    0    0.0  146 26    146 129 164  78 214 -0.07 -0.22
 time.iv   233   30   12.9   98 45     85  67 110  42 218  1.03  0.08
 aspects   233    0    0.0    8  2      9   7  10   5  10 -0.56 -0.98
 time.rand 233    2    0.9  203 57    204 152 250 100 300  0.01 -1.16
-time.punc 233    0    0.0  263 54    260 212 313 180 360  0.11 -1.33
 -------------------------------------------------------- 
 trt: Control
-            n miss p.miss mean sd median p25 p75 min  max   skew  kurt
-age       267    0    0.0   65 16     66  56  76  24   94 -0.296 -0.28
-nihss     267    0    0.0   18  4     18  14  22  11   25  0.017 -1.24
-sbp       267    1    0.4  145 24    145 128 161  82  231  0.156  0.08
-time.iv   267   25    9.4   88 26     87  65 116  44  130  0.001 -1.32
-aspects   267    4    1.5    9  1      9   8  10   5   10 -1.071  0.36
-time.rand 267    0    0.0  214 70    196 149 266 120  360  0.508 -0.93
-time.punc 267  267  100.0  NaN NA     NA  NA  NA Inf -Inf    NaN   NaN
+            n miss p.miss mean sd median p25 p75 min max   skew  kurt
+age       267    0    0.0   65 16     66  56  76  24  94 -0.296 -0.28
+nihss     267    0    0.0   18  4     18  14  22  11  25  0.017 -1.24
+sbp       267    1    0.4  145 24    145 128 161  82 231  0.156  0.08
+time.iv   267   25    9.4   88 26     87  65 116  44 130  0.001 -1.32
+aspects   267    4    1.5    9  1      9   8  10   5  10 -1.071  0.36
+time.rand 267    0    0.0  214 70    196 149 266 120 360  0.508 -0.93
 
 p-values
               pNormal pNonNormal
@@ -808,7 +810,6 @@ sbp       0.647157646 0.51346132
 time.iv   0.003073372 0.59641104
 aspects   0.032662901 0.07464683
 time.rand 0.050803672 0.25134327
-time.punc          NA         NA
 
 Standardize mean differences
               1 vs 2
@@ -818,7 +819,6 @@ sbp       0.04100833
 time.iv   0.27691223
 aspects   0.19210662
 time.rand 0.17720957
-time.punc         NA
 
 =======================================================================================
 
