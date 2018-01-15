@@ -2,7 +2,7 @@
 
 Many scientific articles involve direct comparison of results from various exposures, perhaps treatments. In 431, we studied numerous methods, including various sorts of hypothesis tests, confidence intervals, and descriptive summaries, which can help us to understand and compare outcomes in such a setting. One common approach is to present what's often called Table 1. Table 1 provides a summary of the characteristics of a sample, or of groups of samples, which is most commonly used to help understand the nature of the data being compared.
 
-## Two examples from the New England Journal of Medicine
+## Two examples from the *New England Journal of Medicine*
 
 ### A simple Table 1
 
@@ -16,7 +16,7 @@ This (partial) table reports baseline characteristics on age group, sex and race
 
 In addition to the measures shown in this excerpt, the full Table also includes detailed information on the primary tumor for each patient, including its size, nodal status and histologic grade. Footnotes tell us that the percentages shown are subject to rounding, and may not total 100, and that the race information was self-reported.
 
-### Table 1 showing a group comparison
+### A group comparison
 
 A more typical Table 1 involves a group comparison, for example in this excerpt from @Roy2008. This Table 1 describes a multi-center randomized clinical trial comparing two different approaches to caring for patients with heart failure and atrial fibrillation^[The complete Table 1 appears on pages 2668-2669 of @Roy2008, but I have only reproduced the first page and the footnote in this excerpt.].
 
@@ -28,9 +28,7 @@ The article provides percentages, means and standard deviations across groups, b
 
 ## The MR CLEAN trial
 
-Consider the following simulated data, available on the Data and Code page of [our course website](https://github.com/THOMASELOVE/432-2018) in the `fakestroke.csv` file, which I built to let us mirror the Table 1 for a real randomized clinical trial, called MR CLEAN [@Berkhemer2015].
-
-The MR CLEAN trial report describes 500 patients with acute ischemic stroke at 16 medical centers in the Netherlands, where 233 were randomly assigned to the intervention (intraarterial treatment plus usual care) and 267 to control (usual care alone.) 
+@Berkhemer2015 reported on the MR CLEAN trial, involving 500 patients with acute ischemic stroke caused by a proximal intracranial arterial occlusion. The trial was conducted at 16 medical centers in the Netherlands, where 233 were randomly assigned to the intervention (intraarterial treatment plus usual care) and 267 to control (usual care alone.) The primary outcome was the modified Rankin scale score at 90 days; this categorical scale measures functional outcome, with scores ranging from 0 (no symptoms) to 6 (death). The fundamental conclusion of @Berkhemer2015 was that in patients with acute ischemic stroke caused by a proximal intracranial occlusion of the anterior circulation, intraarterial treatment administered within 6 hours after stroke onset was effective and safe. 
 
 Here's the Table 1 from @Berkhemer2015.
 
@@ -47,7 +45,7 @@ knitr::include_graphics("images/Berkhemer-snip4notes.png")
 
 ## Simulated `fakestroke` data
 
-The `fakestroke.csv` file contains the following 18 variables for 500 patients.
+Consider the simulated data, available on the Data and Code page of [our course website](https://github.com/THOMASELOVE/432-2018) in the `fakestroke.csv` file, which I built to let us mirror the Table 1 for MR CLEAN [@Berkhemer2015]. The `fakestroke.csv` file contains the following 18 variables for 500 patients.
 
 Variable |	Description
 ----------: | -----------------------------------------
@@ -173,4 +171,141 @@ summary(att2)
 
 Again, I have simulated the data to mirror the results in the published Table 1 for this study. In no way have I captured the full range of the real data, or any of the relationships in that data, so it's more important here to see what's available in the analysis, rather than to interpret it closely in the clinical context.
 
+## Exporting the Completed Table 1 from R to Excel or Word
+
+Once you've built the table and are generally satisfied with it, you'll probably want to be able to drop it into Excel or Word for final cleanup. 
+
+### Approach A: Save and open in Excel
+
+One option is to **save the Table 1** to a `.csv` file, which you can then open directly in Excel. This is the approach I generally use. Note the addition of some `quote`, `noSpaces` and `printToggle` selections here.
+
+```{r save_fs_table1_to_csv, eval = FALSE}
+fs.table1save <- print(att2, 
+      nonnormal = c("age", "nihss", "time.iv", "aspects", "time.rand"),
+      exact = c("location", "mrankin"),
+      quote = FALSE, noSpaces = TRUE, printToggle = FALSE)
+
+write.csv(fs.table1save, file = "fs-table1.csv")
+```
+
+When I then open the `fs-table1.csv` file in Excel, it looks like this:
+
+```{r fs_table1_csv_fig, echo=FALSE, out.width='90%'}
+knitr::include_graphics("images/fs-table1inExcel.png")
+```
+
+And from here, I can either drop it directly into Word, or present it as is, or start tweaking it to meet formatting needs.
+
+### Approach B: Produce the Table so you can cut and paste it
+
+```{r fs_table1_for_cut_paste, eval=FALSE}
+print(att2, 
+      nonnormal = c("age", "nihss", "time.iv", "aspects", "time.rand"),
+      exact = c("location", "mrankin"),
+      quote = TRUE, noSpaces = TRUE)
+```
+
+This will look like a mess by itself, but if you:
+
+1. copy and paste that mess into Excel
+2. select Text to Columns from the Data menu
+3. select Delimited, then Space and select Treat consecutive delimiters as one
+
+you should get something usable again.
+
+Or, in Word, 
+
+1. insert the text
+2. select the text with your mouse
+3. select Insert ... Table ... Convert Text to Table
+4. place a quotation mark in the "Other" area under Separate text at ...
+
+After dropping blank columns, the result looks pretty good.
+
+## A Controlled Biological Experiment - The Blood-Brain Barrier
+
+My source for the data and the following explanatory paragraph is page 307 from @RamseySchafer2002. The original data come from @Barnett1995.
+
+> The human brain (and that of rats, coincidentally) is protected from the bacteria and toxins that course through the bloodstream by something called the blood-brain barrier. After a method of disrupting the barrier was developed, researchers tested this new mechanism, as follows. A series of 34 rats were inoculated with human lung cancer cells to induce brain tumors. After 9-11 days they were infused with either the barrier disruption (BD) solution or, as a control, a normal saline (NS) solution. Fifteen minutes later, the rats received a standard dose of a particular therapeutic antibody (L6-F(ab')2. The key measure of the effectiveness of transmission across the brain-blood barrier is the ratio of the antibody concentration in the brain tumor to the antibody concentration in normal tissue outside the brain. The rats were then sacrificed, and the amounts of antibody in the brain tumor and in normal tissue from the liver were measured. The study's primary objective is to determine whether the antibody concentration in the tumor increased when the blood-barrier disruption infusion was given, and if so, by how much? 
+
+## The `bloodbrain.csv` file
+
+Consider the data, available on the Data and Code page of [our course website](https://github.com/THOMASELOVE/432-2018) in the `bloodbrain.csv` file, which includes the following variables:
+
+Variable | Description
+-------: | --------------------------------------------
+`case`	 | identification number for the rat (1 - 34)
+`brain`	 | an outcome: Brain tumor antibody count (per gram)
+`liver`	 | an outcome: Liver antibody count (per gram)
+`tlratio`	 | an outcome: tumor / liver concentration ratio
+`solution` | the treatment: BD (barrier disruption) or NS (normal saline)
+`sactime`	 | a design variable: Sacrifice time (hours; either 0.5, 3, 24 or 72)
+`postin`	 | covariate: Days post-inoculation of lung cancer cells (9, 10 or 11)
+`sex`	     | covariate: M or F
+`wt.init`  | covariate: Initial weight (grams)
+`wt.loss`	 | covariate: Weight loss (grams)
+`wt.tumor` | covariate: Tumor weight (10^-4^ grams)
+
+And here's what the data look like in R.
+
+```{r bloodbrain_tibble}
+bloodbrain
+```
+
+## A Table 1 for `bloodbrain`
+
+@Barnett1995 did not provide a Table 1 for these data, so let's build one to compare the two `solutions` (`BD` vs. `NS`) on the covariates and outcomes, plus the natural logarithm of the tumor/liver concentration ratio (`tlratio`). We'll opt to treat the sacrifice time (`sactime`) and the days post-inoculation of lung cancer cells (`postin`) as categorical rather than quantitative variables.
+
+```{r bloodbrain_munge}
+bloodbrain <- bloodbrain %>%
+    mutate(logTL = log(tlratio))
+
+dput(names(bloodbrain))
+```
+
+OK - there's the list of variables we'll need. I'll put the outcomes at the bottom of the table.
+
+```{r bloodbrain_table1_att1}
+bb.vars <- c("sactime", "postin", "sex", "wt.init", "wt.loss", 
+             "wt.tumor", "brain", "liver", "tlratio", "logTL")
+
+bb.factors <- c("sactime", "sex", "postin")
+
+bb.att1 <- CreateTableOne(data = bloodbrain,
+                          vars = bb.vars,
+                          factorVars = bb.factors,
+                          strata = c("solution"))
+summary(bb.att1)
+```
+
+### Generate final Table 1 for `bloodbrain`
+
+I'll choose to treat `tlratio` as non-Normal, but otherwise, use t tests.
+
+```{r attempt1_bloodbrain_table1}
+print(bb.att1, nonnormal = c("tlratio", "logTL"))
+```
+
+Or, we can get an Excel-readable version, using
+
+```{r build_excel_version_of_bb_table1}
+bb.t1 <- print(bb.att1, nonnormal = c("tlratio", "logTL"), quote = FALSE,
+               noSpaces = TRUE, printToggle = FALSE)
+
+write.csv(bb.t1, file = "bb-table1.csv")
+```
+
+which, when dropped into Excel, will look like this:
+
+```{r bb_table1_csv_fig, echo=FALSE, out.width='90%'}
+knitr::include_graphics("images/bb-table1inExcel.png")
+```
+
+One thing I would definitely clean up here, in practice, is to change the presentation of the *p* value for `sex` from 1 to > 0.99, or just omit it altogether. I'd also drop the `computer-ese` where possible, add units for the measures, round **a lot**, identify the outcomes carefully, and use notes to indicate deviations from the main approach. 
+
+### A More Finished Version (after Cleanup in Word)
+
+```{r bb_table1_word_fig, echo=FALSE, out.width='95%'}
+knitr::include_graphics("images/bb-table1inWord.png")
+```
 

@@ -164,8 +164,8 @@ that are likely to come up in PQHS/CRSP/MPHP 432.
 
 While these Notes share some of the features of a textbook, they are
 neither comprehensive nor completely original. The main purpose is to
-give 432 students a set of common materials on which to draw during the
-course. In class, we will sometimes:
+give students in 432 a set of common materials on which to draw during
+the course. In class, we will sometimes:
 
 \begin{itemize}
 \tightlist
@@ -181,11 +181,13 @@ course. In class, we will sometimes:
   refer to issues not mentioned in this document,
 \end{itemize}
 
-but what we don't do is follow these notes very precisely. We assume
-instead that you will read the materials and try to learn from them,
-just as you will attend classes and try to learn from them. We welcome
-feedback of all kinds on this document or anything else. Just email us
-at \texttt{431-help\ at\ case\ dot\ edu}, or submit a pull request.
+but what we don't (always) do is follow these notes very precisely. We
+assume instead that you will read the materials and try to learn from
+them, just as you will attend classes and try to learn from them. We
+welcome feedback of all kinds on this document or anything else. Just
+email us at \texttt{431-help\ at\ case\ dot\ edu}, or submit a pull
+request. Note that we still use \texttt{431-help} even though we're now
+in 432.
 
 What you will mostly find are brief explanations of a key idea or
 summary, accompanied (most of the time) by R code and a demonstration of
@@ -222,6 +224,7 @@ Here, we'll load in the data sets used in these notes.
 \begin{Shaded}
 \begin{Highlighting}[]
 \NormalTok{fakestroke <-}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(}\StringTok{"data/fakestroke.csv"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }\NormalTok{tbl_df}
+\NormalTok{bloodbrain <-}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(}\StringTok{"data/bloodbrain.csv"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }\NormalTok{tbl_df}
 \end{Highlighting}
 \end{Shaded}
 
@@ -236,8 +239,9 @@ present what's often called Table 1. Table 1 provides a summary of the
 characteristics of a sample, or of groups of samples, which is most
 commonly used to help understand the nature of the data being compared.
 
-\section{Two examples from the New England Journal of
-Medicine}\label{two-examples-from-the-new-england-journal-of-medicine}
+\section{\texorpdfstring{Two examples from the \emph{New England Journal
+of
+Medicine}}{Two examples from the New England Journal of Medicine}}\label{two-examples-from-the-new-england-journal-of-medicine}
 
 \subsection{A simple Table 1}\label{a-simple-table-1}
 
@@ -261,8 +265,7 @@ including its size, nodal status and histologic grade. Footnotes tell us
 that the percentages shown are subject to rounding, and may not total
 100, and that the race information was self-reported.
 
-\subsection{Table 1 showing a group
-comparison}\label{table-1-showing-a-group-comparison}
+\subsection{A group comparison}\label{a-group-comparison}
 
 A more typical Table 1 involves a group comparison, for example in this
 excerpt from \citet{Roy2008}. This Table 1 describes a multi-center
@@ -284,16 +287,18 @@ center.
 
 \section{The MR CLEAN trial}\label{the-mr-clean-trial}
 
-Consider the following simulated data, available on the Data and Code
-page of \href{https://github.com/THOMASELOVE/432-2018}{our course
-website} in the \texttt{fakestroke.csv} file, which I built to let us
-mirror the Table 1 for a real randomized clinical trial, called MR CLEAN
-\citep{Berkhemer2015}.
-
-The MR CLEAN trial report describes 500 patients with acute ischemic
-stroke at 16 medical centers in the Netherlands, where 233 were randomly
-assigned to the intervention (intraarterial treatment plus usual care)
-and 267 to control (usual care alone.)
+\citet{Berkhemer2015} reported on the MR CLEAN trial, involving 500
+patients with acute ischemic stroke caused by a proximal intracranial
+arterial occlusion. The trial was conducted at 16 medical centers in the
+Netherlands, where 233 were randomly assigned to the intervention
+(intraarterial treatment plus usual care) and 267 to control (usual care
+alone.) The primary outcome was the modified Rankin scale score at 90
+days; this categorical scale measures functional outcome, with scores
+ranging from 0 (no symptoms) to 6 (death). The fundamental conclusion of
+\citet{Berkhemer2015} was that in patients with acute ischemic stroke
+caused by a proximal intracranial occlusion of the anterior circulation,
+intraarterial treatment administered within 6 hours after stroke onset
+was effective and safe.
 
 Here's the Table 1 from \citet{Berkhemer2015}.
 
@@ -306,8 +311,11 @@ The Table was accompanied by the following notes.
 \section{\texorpdfstring{Simulated \texttt{fakestroke}
 data}{Simulated fakestroke data}}\label{simulated-fakestroke-data}
 
-The \texttt{fakestroke.csv} file contains the following 18 variables for
-500 patients.
+Consider the simulated data, available on the Data and Code page of
+\href{https://github.com/THOMASELOVE/432-2018}{our course website} in
+the \texttt{fakestroke.csv} file, which I built to let us mirror the
+Table 1 for MR CLEAN \citep{Berkhemer2015}. The \texttt{fakestroke.csv}
+file contains the following 18 variables for 500 patients.
 
 \begin{longtable}[]{@{}rl@{}}
 \toprule
@@ -924,6 +932,446 @@ Table 1 for this study. In no way have I captured the full range of the
 real data, or any of the relationships in that data, so it's more
 important here to see what's available in the analysis, rather than to
 interpret it closely in the clinical context.
+
+\section{Exporting the Completed Table 1 from R to Excel or
+Word}\label{exporting-the-completed-table-1-from-r-to-excel-or-word}
+
+Once you've built the table and are generally satisfied with it, you'll
+probably want to be able to drop it into Excel or Word for final
+cleanup.
+
+\subsection{Approach A: Save and open in
+Excel}\label{approach-a-save-and-open-in-excel}
+
+One option is to \textbf{save the Table 1} to a \texttt{.csv} file,
+which you can then open directly in Excel. This is the approach I
+generally use. Note the addition of some \texttt{quote},
+\texttt{noSpaces} and \texttt{printToggle} selections here.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{fs.table1save <-}\StringTok{ }\KeywordTok{print}\NormalTok{(att2, }
+      \DataTypeTok{nonnormal =} \KeywordTok{c}\NormalTok{(}\StringTok{"age"}\NormalTok{, }\StringTok{"nihss"}\NormalTok{, }\StringTok{"time.iv"}\NormalTok{, }\StringTok{"aspects"}\NormalTok{, }\StringTok{"time.rand"}\NormalTok{),}
+      \DataTypeTok{exact =} \KeywordTok{c}\NormalTok{(}\StringTok{"location"}\NormalTok{, }\StringTok{"mrankin"}\NormalTok{),}
+      \DataTypeTok{quote =} \OtherTok{FALSE}\NormalTok{, }\DataTypeTok{noSpaces =} \OtherTok{TRUE}\NormalTok{, }\DataTypeTok{printToggle =} \OtherTok{FALSE}\NormalTok{)}
+
+\KeywordTok{write.csv}\NormalTok{(fs.table1save, }\DataTypeTok{file =} \StringTok{"fs-table1.csv"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+When I then open the \texttt{fs-table1.csv} file in Excel, it looks like
+this:
+
+\includegraphics[width=0.9\linewidth]{images/fs-table1inExcel}
+
+And from here, I can either drop it directly into Word, or present it as
+is, or start tweaking it to meet formatting needs.
+
+\subsection{Approach B: Produce the Table so you can cut and paste
+it}\label{approach-b-produce-the-table-so-you-can-cut-and-paste-it}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{print}\NormalTok{(att2, }
+      \DataTypeTok{nonnormal =} \KeywordTok{c}\NormalTok{(}\StringTok{"age"}\NormalTok{, }\StringTok{"nihss"}\NormalTok{, }\StringTok{"time.iv"}\NormalTok{, }\StringTok{"aspects"}\NormalTok{, }\StringTok{"time.rand"}\NormalTok{),}
+      \DataTypeTok{exact =} \KeywordTok{c}\NormalTok{(}\StringTok{"location"}\NormalTok{, }\StringTok{"mrankin"}\NormalTok{),}
+      \DataTypeTok{quote =} \OtherTok{TRUE}\NormalTok{, }\DataTypeTok{noSpaces =} \OtherTok{TRUE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+This will look like a mess by itself, but if you:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  copy and paste that mess into Excel
+\item
+  select Text to Columns from the Data menu
+\item
+  select Delimited, then Space and select Treat consecutive delimiters
+  as one
+\end{enumerate}
+
+you should get something usable again.
+
+Or, in Word,
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  insert the text
+\item
+  select the text with your mouse
+\item
+  select Insert \ldots{} Table \ldots{} Convert Text to Table
+\item
+  place a quotation mark in the ``Other'' area under Separate text at
+  \ldots{}
+\end{enumerate}
+
+After dropping blank columns, the result looks pretty good.
+
+\section{A Controlled Biological Experiment - The Blood-Brain
+Barrier}\label{a-controlled-biological-experiment---the-blood-brain-barrier}
+
+My source for the data and the following explanatory paragraph is page
+307 from \citet{RamseySchafer2002}. The original data come from
+\citet{Barnett1995}.
+
+\begin{quote}
+The human brain (and that of rats, coincidentally) is protected from the
+bacteria and toxins that course through the bloodstream by something
+called the blood-brain barrier. After a method of disrupting the barrier
+was developed, researchers tested this new mechanism, as follows. A
+series of 34 rats were inoculated with human lung cancer cells to induce
+brain tumors. After 9-11 days they were infused with either the barrier
+disruption (BD) solution or, as a control, a normal saline (NS)
+solution. Fifteen minutes later, the rats received a standard dose of a
+particular therapeutic antibody (L6-F(ab')2. The key measure of the
+effectiveness of transmission across the brain-blood barrier is the
+ratio of the antibody concentration in the brain tumor to the antibody
+concentration in normal tissue outside the brain. The rats were then
+sacrificed, and the amounts of antibody in the brain tumor and in normal
+tissue from the liver were measured. The study's primary objective is to
+determine whether the antibody concentration in the tumor increased when
+the blood-barrier disruption infusion was given, and if so, by how much?
+\end{quote}
+
+\section{\texorpdfstring{The \texttt{bloodbrain.csv}
+file}{The bloodbrain.csv file}}\label{the-bloodbrain.csv-file}
+
+Consider the data, available on the Data and Code page of
+\href{https://github.com/THOMASELOVE/432-2018}{our course website} in
+the \texttt{bloodbrain.csv} file, which includes the following
+variables:
+
+\begin{longtable}[]{@{}rl@{}}
+\toprule
+\begin{minipage}[b]{0.12\columnwidth}\raggedleft\strut
+Variable\strut
+\end{minipage} & \begin{minipage}[b]{0.59\columnwidth}\raggedright\strut
+Description\strut
+\end{minipage}\tabularnewline
+\midrule
+\endhead
+\begin{minipage}[t]{0.12\columnwidth}\raggedleft\strut
+\texttt{case}\strut
+\end{minipage} & \begin{minipage}[t]{0.59\columnwidth}\raggedright\strut
+identification number for the rat (1 - 34)\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\raggedleft\strut
+\texttt{brain}\strut
+\end{minipage} & \begin{minipage}[t]{0.59\columnwidth}\raggedright\strut
+an outcome: Brain tumor antibody count (per gram)\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\raggedleft\strut
+\texttt{liver}\strut
+\end{minipage} & \begin{minipage}[t]{0.59\columnwidth}\raggedright\strut
+an outcome: Liver antibody count (per gram)\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\raggedleft\strut
+\texttt{tlratio}\strut
+\end{minipage} & \begin{minipage}[t]{0.59\columnwidth}\raggedright\strut
+an outcome: tumor / liver concentration ratio\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\raggedleft\strut
+\texttt{solution}\strut
+\end{minipage} & \begin{minipage}[t]{0.59\columnwidth}\raggedright\strut
+the treatment: BD (barrier disruption) or NS (normal saline)\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\raggedleft\strut
+\texttt{sactime}\strut
+\end{minipage} & \begin{minipage}[t]{0.59\columnwidth}\raggedright\strut
+a design variable: Sacrifice time (hours; either 0.5, 3, 24 or 72)\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\raggedleft\strut
+\texttt{postin}\strut
+\end{minipage} & \begin{minipage}[t]{0.59\columnwidth}\raggedright\strut
+covariate: Days post-inoculation of lung cancer cells (9, 10 or
+11)\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\raggedleft\strut
+\texttt{sex}\strut
+\end{minipage} & \begin{minipage}[t]{0.59\columnwidth}\raggedright\strut
+covariate: M or F\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\raggedleft\strut
+\texttt{wt.init}\strut
+\end{minipage} & \begin{minipage}[t]{0.59\columnwidth}\raggedright\strut
+covariate: Initial weight (grams)\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\raggedleft\strut
+\texttt{wt.loss}\strut
+\end{minipage} & \begin{minipage}[t]{0.59\columnwidth}\raggedright\strut
+covariate: Weight loss (grams)\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\raggedleft\strut
+\texttt{wt.tumor}\strut
+\end{minipage} & \begin{minipage}[t]{0.59\columnwidth}\raggedright\strut
+covariate: Tumor weight (10\textsuperscript{-4} grams)\strut
+\end{minipage}\tabularnewline
+\bottomrule
+\end{longtable}
+
+And here's what the data look like in R.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{bloodbrain}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+# A tibble: 34 x 11
+    case  brain   liver tlratio solution sactime postin sex   wt.init
+   <int>  <int>   <int>   <dbl> <fct>      <dbl>  <int> <fct>   <int>
+ 1     1  41081 1456164  0.0282 BD         0.500     10 F         239
+ 2     2  44286 1602171  0.0276 BD         0.500     10 F         225
+ 3     3 102926 1601936  0.0642 BD         0.500     10 F         224
+ 4     4  25927 1776411  0.0146 BD         0.500     10 F         184
+ 5     5  42643 1351184  0.0316 BD         0.500     10 F         250
+ 6     6  31342 1790863  0.0175 NS         0.500     10 F         196
+ 7     7  22815 1633386  0.0140 NS         0.500     10 F         200
+ 8     8  16629 1618757  0.0103 NS         0.500     10 F         273
+ 9     9  22315 1567602  0.0142 NS         0.500     10 F         216
+10    10  77961 1060057  0.0735 BD         3.00      10 F         267
+# ... with 24 more rows, and 2 more variables: wt.loss <dbl>, wt.tumor
+#   <int>
+\end{verbatim}
+
+\section{\texorpdfstring{A Table 1 for
+\texttt{bloodbrain}}{A Table 1 for bloodbrain}}\label{a-table-1-for-bloodbrain}
+
+\citet{Barnett1995} did not provide a Table 1 for these data, so let's
+build one to compare the two \texttt{solutions} (\texttt{BD} vs.
+\texttt{NS}) on the covariates and outcomes, plus the natural logarithm
+of the tumor/liver concentration ratio (\texttt{tlratio}). We'll opt to
+treat the sacrifice time (\texttt{sactime}) and the days
+post-inoculation of lung cancer cells (\texttt{postin}) as categorical
+rather than quantitative variables.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{bloodbrain <-}\StringTok{ }\NormalTok{bloodbrain }\OperatorTok{%>%}
+\StringTok{    }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{logTL =} \KeywordTok{log}\NormalTok{(tlratio))}
+
+\KeywordTok{dput}\NormalTok{(}\KeywordTok{names}\NormalTok{(bloodbrain))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+c("case", "brain", "liver", "tlratio", "solution", "sactime", 
+"postin", "sex", "wt.init", "wt.loss", "wt.tumor", "logTL")
+\end{verbatim}
+
+OK - there's the list of variables we'll need. I'll put the outcomes at
+the bottom of the table.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{bb.vars <-}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"sactime"}\NormalTok{, }\StringTok{"postin"}\NormalTok{, }\StringTok{"sex"}\NormalTok{, }\StringTok{"wt.init"}\NormalTok{, }\StringTok{"wt.loss"}\NormalTok{, }
+             \StringTok{"wt.tumor"}\NormalTok{, }\StringTok{"brain"}\NormalTok{, }\StringTok{"liver"}\NormalTok{, }\StringTok{"tlratio"}\NormalTok{, }\StringTok{"logTL"}\NormalTok{)}
+
+\NormalTok{bb.factors <-}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"sactime"}\NormalTok{, }\StringTok{"sex"}\NormalTok{, }\StringTok{"postin"}\NormalTok{)}
+
+\NormalTok{bb.att1 <-}\StringTok{ }\KeywordTok{CreateTableOne}\NormalTok{(}\DataTypeTok{data =}\NormalTok{ bloodbrain,}
+                          \DataTypeTok{vars =}\NormalTok{ bb.vars,}
+                          \DataTypeTok{factorVars =}\NormalTok{ bb.factors,}
+                          \DataTypeTok{strata =} \KeywordTok{c}\NormalTok{(}\StringTok{"solution"}\NormalTok{))}
+\KeywordTok{summary}\NormalTok{(bb.att1)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+
+     ### Summary of continuous variables ###
+
+solution: BD
+          n miss p.miss   mean    sd median    p25   p75    min   max
+wt.init  17    0      0    243 3e+01  2e+02  2e+02 3e+02  2e+02 3e+02
+wt.loss  17    0      0      3 5e+00  4e+00  1e+00 6e+00 -5e+00 1e+01
+wt.tumor 17    0      0    157 8e+01  2e+02  1e+02 2e+02  2e+01 4e+02
+brain    17    0      0  56043 3e+04  5e+04  4e+04 8e+04  6e+03 1e+05
+liver    17    0      0 672577 7e+05  6e+05  2e+04 1e+06  2e+03 2e+06
+tlratio  17    0      0      2 3e+00  1e-01  6e-02 3e+00  1e-02 9e+00
+logTL    17    0      0     -1 2e+00 -2e+00 -3e+00 1e+00 -4e+00 2e+00
+          skew kurt
+wt.init  -0.39  0.7
+wt.loss  -0.10  0.2
+wt.tumor  0.53  1.0
+brain     0.29 -0.6
+liver     0.35 -1.7
+tlratio   1.58  1.7
+logTL     0.08 -1.7
+-------------------------------------------------------- 
+solution: NS
+          n miss p.miss   mean    sd median    p25    p75    min   max
+wt.init  17    0      0    240 3e+01  2e+02  2e+02  3e+02  2e+02 3e+02
+wt.loss  17    0      0      4 4e+00  3e+00  2e+00  7e+00 -4e+00 1e+01
+wt.tumor 17    0      0    209 1e+02  2e+02  2e+02  3e+02  3e+01 5e+02
+brain    17    0      0  23887 1e+04  2e+04  1e+04  3e+04  1e+03 5e+04
+liver    17    0      0 664975 7e+05  7e+05  2e+04  1e+06  9e+02 2e+06
+tlratio  17    0      0      1 2e+00  5e-02  3e-02  9e-01  1e-02 7e+00
+logTL    17    0      0     -2 2e+00 -3e+00 -3e+00 -7e-02 -5e+00 2e+00
+          skew  kurt
+wt.init   0.33 -0.48
+wt.loss  -0.09  0.08
+wt.tumor  0.63  0.77
+brain     0.30 -0.35
+liver     0.40 -1.56
+tlratio   2.27  4.84
+logTL     0.27 -1.61
+
+p-values
+             pNormal  pNonNormal
+wt.init  0.807308940 0.641940278
+wt.loss  0.683756156 0.876749808
+wt.tumor 0.151510151 0.190482094
+brain    0.001027678 0.002579901
+liver    0.974853609 0.904045603
+tlratio  0.320501715 0.221425879
+logTL    0.351633525 0.221425879
+
+Standardize mean differences
+             1 vs 2
+wt.init  0.08435244
+wt.loss  0.14099823
+wt.tumor 0.50397184
+brain    1.23884159
+liver    0.01089667
+tlratio  0.34611465
+logTL    0.32420504
+
+=======================================================================================
+
+     ### Summary of categorical variables ### 
+
+solution: BD
+     var  n miss p.miss level freq percent cum.percent
+ sactime 17    0    0.0   0.5    5    29.4        29.4
+                            3    4    23.5        52.9
+                           24    4    23.5        76.5
+                           72    4    23.5       100.0
+                                                      
+  postin 17    0    0.0     9    1     5.9         5.9
+                           10   14    82.4        88.2
+                           11    2    11.8       100.0
+                                                      
+     sex 17    0    0.0     F   13    76.5        76.5
+                            M    4    23.5       100.0
+                                                      
+-------------------------------------------------------- 
+solution: NS
+     var  n miss p.miss level freq percent cum.percent
+ sactime 17    0    0.0   0.5    4    23.5        23.5
+                            3    5    29.4        52.9
+                           24    4    23.5        76.5
+                           72    4    23.5       100.0
+                                                      
+  postin 17    0    0.0     9    2    11.8        11.8
+                           10   13    76.5        88.2
+                           11    2    11.8       100.0
+                                                      
+     sex 17    0    0.0     F   13    76.5        76.5
+                            M    4    23.5       100.0
+                                                      
+
+p-values
+          pApprox pExact
+sactime 0.9739246      1
+postin  0.8309504      1
+sex     1.0000000      1
+
+Standardize mean differences
+           1 vs 2
+sactime 0.1622214
+postin  0.2098877
+sex     0.0000000
+\end{verbatim}
+
+\subsection{\texorpdfstring{Generate final Table 1 for
+\texttt{bloodbrain}}{Generate final Table 1 for bloodbrain}}\label{generate-final-table-1-for-bloodbrain}
+
+I'll choose to treat \texttt{tlratio} as non-Normal, but otherwise, use
+t tests.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{print}\NormalTok{(bb.att1, }\DataTypeTok{nonnormal =} \KeywordTok{c}\NormalTok{(}\StringTok{"tlratio"}\NormalTok{, }\StringTok{"logTL"}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+                        Stratified by solution
+                         BD                      NS                      
+  n                             17                      17               
+  sactime (%)                                                            
+     0.5                         5 (29.4)                4 (23.5)        
+     3                           4 (23.5)                5 (29.4)        
+     24                          4 (23.5)                4 (23.5)        
+     72                          4 (23.5)                4 (23.5)        
+  postin (%)                                                             
+     9                           1 ( 5.9)                2 (11.8)        
+     10                         14 (82.4)               13 (76.5)        
+     11                          2 (11.8)                2 (11.8)        
+  sex = M (%)                    4 (23.5)                4 (23.5)        
+  wt.init (mean (sd))       242.82 (27.23)          240.47 (28.54)       
+  wt.loss (mean (sd))         3.34 (4.68)             3.94 (3.88)        
+  wt.tumor (mean (sd))      157.29 (84.00)          208.53 (116.68)      
+  brain (mean (sd))       56043.41 (33675.40)     23887.18 (14610.53)    
+  liver (mean (sd))      672577.35 (694479.58)   664975.47 (700773.13)   
+  tlratio (median [IQR])      0.12 [0.06, 2.84]       0.05 [0.03, 0.94]  
+  logTL (median [IQR])       -2.10 [-2.74, 1.04]     -2.95 [-3.41, -0.07]
+                        Stratified by solution
+                         p      test   
+  n                                    
+  sactime (%)             0.974        
+     0.5                               
+     3                                 
+     24                                
+     72                                
+  postin (%)              0.831        
+     9                                 
+     10                                
+     11                                
+  sex = M (%)             1.000        
+  wt.init (mean (sd))     0.807        
+  wt.loss (mean (sd))     0.684        
+  wt.tumor (mean (sd))    0.152        
+  brain (mean (sd))       0.001        
+  liver (mean (sd))       0.975        
+  tlratio (median [IQR])  0.221 nonnorm
+  logTL (median [IQR])    0.221 nonnorm
+\end{verbatim}
+
+Or, we can get an Excel-readable version, using
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{bb.t1 <-}\StringTok{ }\KeywordTok{print}\NormalTok{(bb.att1, }\DataTypeTok{nonnormal =} \KeywordTok{c}\NormalTok{(}\StringTok{"tlratio"}\NormalTok{, }\StringTok{"logTL"}\NormalTok{), }\DataTypeTok{quote =} \OtherTok{FALSE}\NormalTok{,}
+               \DataTypeTok{noSpaces =} \OtherTok{TRUE}\NormalTok{, }\DataTypeTok{printToggle =} \OtherTok{FALSE}\NormalTok{)}
+
+\KeywordTok{write.csv}\NormalTok{(bb.t1, }\DataTypeTok{file =} \StringTok{"bb-table1.csv"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+which, when dropped into Excel, will look like this:
+
+\includegraphics[width=0.9\linewidth]{images/bb-table1inExcel}
+
+One thing I would definitely clean up here, in practice, is to change
+the presentation of the \emph{p} value for \texttt{sex} from 1 to
+\textgreater{} 0.99, or just omit it altogether. I'd also drop the
+\texttt{computer-ese} where possible, add units for the measures, round
+\textbf{a lot}, identify the outcomes carefully, and use notes to
+indicate deviations from the main approach.
+
+\subsection{A More Finished Version (after Cleanup in
+Word)}\label{a-more-finished-version-after-cleanup-in-word}
+
+\includegraphics[width=0.95\linewidth]{images/bb-table1inWord}
 
 \bibliography{text.bib}
 

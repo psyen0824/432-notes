@@ -106,9 +106,9 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li class="chapter" data-level="" data-path="r-packages-used-in-these-notes.html"><a href="r-packages-used-in-these-notes.html"><i class="fa fa-check"></i>R Packages used in these notes</a></li>
 <li class="chapter" data-level="" data-path="data-used-in-these-notes.html"><a href="data-used-in-these-notes.html"><i class="fa fa-check"></i>Data used in these notes</a></li>
 <li class="chapter" data-level="1" data-path="building-table-1.html"><a href="building-table-1.html"><i class="fa fa-check"></i><b>1</b> Building Table 1</a><ul>
-<li class="chapter" data-level="1.1" data-path="building-table-1.html"><a href="building-table-1.html#two-examples-from-the-new-england-journal-of-medicine"><i class="fa fa-check"></i><b>1.1</b> Two examples from the New England Journal of Medicine</a><ul>
+<li class="chapter" data-level="1.1" data-path="building-table-1.html"><a href="building-table-1.html#two-examples-from-the-new-england-journal-of-medicine"><i class="fa fa-check"></i><b>1.1</b> Two examples from the <em>New England Journal of Medicine</em></a><ul>
 <li class="chapter" data-level="1.1.1" data-path="building-table-1.html"><a href="building-table-1.html#a-simple-table-1"><i class="fa fa-check"></i><b>1.1.1</b> A simple Table 1</a></li>
-<li class="chapter" data-level="1.1.2" data-path="building-table-1.html"><a href="building-table-1.html#table-1-showing-a-group-comparison"><i class="fa fa-check"></i><b>1.1.2</b> Table 1 showing a group comparison</a></li>
+<li class="chapter" data-level="1.1.2" data-path="building-table-1.html"><a href="building-table-1.html#a-group-comparison"><i class="fa fa-check"></i><b>1.1.2</b> A group comparison</a></li>
 </ul></li>
 <li class="chapter" data-level="1.2" data-path="building-table-1.html"><a href="building-table-1.html#the-mr-clean-trial"><i class="fa fa-check"></i><b>1.2</b> The MR CLEAN trial</a></li>
 <li class="chapter" data-level="1.3" data-path="building-table-1.html"><a href="building-table-1.html#simulated-fakestroke-data"><i class="fa fa-check"></i><b>1.3</b> Simulated <code>fakestroke</code> data</a></li>
@@ -120,6 +120,16 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li class="chapter" data-level="1.5.1" data-path="building-table-1.html"><a href="building-table-1.html#what-summaries-should-we-show"><i class="fa fa-check"></i><b>1.5.1</b> What summaries should we show?</a></li>
 </ul></li>
 <li class="chapter" data-level="1.6" data-path="building-table-1.html"><a href="building-table-1.html#obtaining-a-more-detailed-summary"><i class="fa fa-check"></i><b>1.6</b> Obtaining a more detailed Summary</a></li>
+<li class="chapter" data-level="1.7" data-path="building-table-1.html"><a href="building-table-1.html#exporting-the-completed-table-1-from-r-to-excel-or-word"><i class="fa fa-check"></i><b>1.7</b> Exporting the Completed Table 1 from R to Excel or Word</a><ul>
+<li class="chapter" data-level="1.7.1" data-path="building-table-1.html"><a href="building-table-1.html#approach-a-save-and-open-in-excel"><i class="fa fa-check"></i><b>1.7.1</b> Approach A: Save and open in Excel</a></li>
+<li class="chapter" data-level="1.7.2" data-path="building-table-1.html"><a href="building-table-1.html#approach-b-produce-the-table-so-you-can-cut-and-paste-it"><i class="fa fa-check"></i><b>1.7.2</b> Approach B: Produce the Table so you can cut and paste it</a></li>
+</ul></li>
+<li class="chapter" data-level="1.8" data-path="building-table-1.html"><a href="building-table-1.html#a-controlled-biological-experiment---the-blood-brain-barrier"><i class="fa fa-check"></i><b>1.8</b> A Controlled Biological Experiment - The Blood-Brain Barrier</a></li>
+<li class="chapter" data-level="1.9" data-path="building-table-1.html"><a href="building-table-1.html#the-bloodbrain.csv-file"><i class="fa fa-check"></i><b>1.9</b> The <code>bloodbrain.csv</code> file</a></li>
+<li class="chapter" data-level="1.10" data-path="building-table-1.html"><a href="building-table-1.html#a-table-1-for-bloodbrain"><i class="fa fa-check"></i><b>1.10</b> A Table 1 for <code>bloodbrain</code></a><ul>
+<li class="chapter" data-level="1.10.1" data-path="building-table-1.html"><a href="building-table-1.html#generate-final-table-1-for-bloodbrain"><i class="fa fa-check"></i><b>1.10.1</b> Generate final Table 1 for <code>bloodbrain</code></a></li>
+<li class="chapter" data-level="1.10.2" data-path="building-table-1.html"><a href="building-table-1.html#a-more-finished-version-after-cleanup-in-word"><i class="fa fa-check"></i><b>1.10.2</b> A More Finished Version (after Cleanup in Word)</a></li>
+</ul></li>
 </ul></li>
 <li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>References</a></li>
 <li class="divider"></li>
@@ -146,7 +156,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <h1><span class="header-section-number">Chapter 1</span> Building Table 1</h1>
 <p>Many scientific articles involve direct comparison of results from various exposures, perhaps treatments. In 431, we studied numerous methods, including various sorts of hypothesis tests, confidence intervals, and descriptive summaries, which can help us to understand and compare outcomes in such a setting. One common approach is to present what’s often called Table 1. Table 1 provides a summary of the characteristics of a sample, or of groups of samples, which is most commonly used to help understand the nature of the data being compared.</p>
 <div id="two-examples-from-the-new-england-journal-of-medicine" class="section level2">
-<h2><span class="header-section-number">1.1</span> Two examples from the New England Journal of Medicine</h2>
+<h2><span class="header-section-number">1.1</span> Two examples from the <em>New England Journal of Medicine</em></h2>
 <div id="a-simple-table-1" class="section level3">
 <h3><span class="header-section-number">1.1.1</span> A simple Table 1</h3>
 <p>Table 1 is especially common in the context of clinical research. Consider the excerpt below, from a January 2015 article in the <em>New England Journal of Medicine</em> <span class="citation">(Tolaney et al. <a href="#ref-Tolaney2015">2015</a>)</span>.</p>
@@ -154,8 +164,8 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <p>This (partial) table reports baseline characteristics on age group, sex and race, describing 406 patients with HER2-positive<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a> invasive breast cancer that began the protocol therapy. Age, sex and race (along with severity of illness) are the most commonly identified characteristics in a Table 1.</p>
 <p>In addition to the measures shown in this excerpt, the full Table also includes detailed information on the primary tumor for each patient, including its size, nodal status and histologic grade. Footnotes tell us that the percentages shown are subject to rounding, and may not total 100, and that the race information was self-reported.</p>
 </div>
-<div id="table-1-showing-a-group-comparison" class="section level3">
-<h3><span class="header-section-number">1.1.2</span> Table 1 showing a group comparison</h3>
+<div id="a-group-comparison" class="section level3">
+<h3><span class="header-section-number">1.1.2</span> A group comparison</h3>
 <p>A more typical Table 1 involves a group comparison, for example in this excerpt from <span class="citation">Roy et al. (<a href="#ref-Roy2008">2008</a>)</span>. This Table 1 describes a multi-center randomized clinical trial comparing two different approaches to caring for patients with heart failure and atrial fibrillation<a href="#fn2" class="footnoteRef" id="fnref2"><sup>2</sup></a>.</p>
 <p><img src="images/Roy-snip1.png" width="90%" /></p>
 <p>The article provides percentages, means and standard deviations across groups, but note that it does not provide p values for the comparison of baseline characteristics. This is a common feature of NEJM reports on randomized clinical trials, where we anticipate that the two groups will be well matched at baseline. Note that the patients in this study were <em>randomly</em> assigned to either the rhythm-control group or to the rate-control group, using blocked randomizations stratified by study center.</p>
@@ -163,8 +173,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </div>
 <div id="the-mr-clean-trial" class="section level2">
 <h2><span class="header-section-number">1.2</span> The MR CLEAN trial</h2>
-<p>Consider the following simulated data, available on the Data and Code page of <a href="https://github.com/THOMASELOVE/432-2018">our course website</a> in the <code>fakestroke.csv</code> file, which I built to let us mirror the Table 1 for a real randomized clinical trial, called MR CLEAN <span class="citation">(Berkhemer et al. <a href="#ref-Berkhemer2015">2015</a>)</span>.</p>
-<p>The MR CLEAN trial report describes 500 patients with acute ischemic stroke at 16 medical centers in the Netherlands, where 233 were randomly assigned to the intervention (intraarterial treatment plus usual care) and 267 to control (usual care alone.)</p>
+<p><span class="citation">Berkhemer et al. (<a href="#ref-Berkhemer2015">2015</a>)</span> reported on the MR CLEAN trial, involving 500 patients with acute ischemic stroke caused by a proximal intracranial arterial occlusion. The trial was conducted at 16 medical centers in the Netherlands, where 233 were randomly assigned to the intervention (intraarterial treatment plus usual care) and 267 to control (usual care alone.) The primary outcome was the modified Rankin scale score at 90 days; this categorical scale measures functional outcome, with scores ranging from 0 (no symptoms) to 6 (death). The fundamental conclusion of <span class="citation">Berkhemer et al. (<a href="#ref-Berkhemer2015">2015</a>)</span> was that in patients with acute ischemic stroke caused by a proximal intracranial occlusion of the anterior circulation, intraarterial treatment administered within 6 hours after stroke onset was effective and safe.</p>
 <p>Here’s the Table 1 from <span class="citation">Berkhemer et al. (<a href="#ref-Berkhemer2015">2015</a>)</span>.</p>
 <p><img src="images/Berkhemer-snip4complete.png" width="90%" /></p>
 <p>The Table was accompanied by the following notes.</p>
@@ -172,7 +181,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </div>
 <div id="simulated-fakestroke-data" class="section level2">
 <h2><span class="header-section-number">1.3</span> Simulated <code>fakestroke</code> data</h2>
-<p>The <code>fakestroke.csv</code> file contains the following 18 variables for 500 patients.</p>
+<p>Consider the simulated data, available on the Data and Code page of <a href="https://github.com/THOMASELOVE/432-2018">our course website</a> in the <code>fakestroke.csv</code> file, which I built to let us mirror the Table 1 for MR CLEAN <span class="citation">(Berkhemer et al. <a href="#ref-Berkhemer2015">2015</a>)</span>. The <code>fakestroke.csv</code> file contains the following 18 variables for 500 patients.</p>
 <table style="width:75%;">
 <colgroup>
 <col width="16%" />
@@ -601,7 +610,314 @@ iv.altep  0.111897009
 ia.occlus 0.117394890
 extra.ica 0.129370206</code></pre>
 <p>Again, I have simulated the data to mirror the results in the published Table 1 for this study. In no way have I captured the full range of the real data, or any of the relationships in that data, so it’s more important here to see what’s available in the analysis, rather than to interpret it closely in the clinical context.</p>
+</div>
+<div id="exporting-the-completed-table-1-from-r-to-excel-or-word" class="section level2">
+<h2><span class="header-section-number">1.7</span> Exporting the Completed Table 1 from R to Excel or Word</h2>
+<p>Once you’ve built the table and are generally satisfied with it, you’ll probably want to be able to drop it into Excel or Word for final cleanup.</p>
+<div id="approach-a-save-and-open-in-excel" class="section level3">
+<h3><span class="header-section-number">1.7.1</span> Approach A: Save and open in Excel</h3>
+<p>One option is to <strong>save the Table 1</strong> to a <code>.csv</code> file, which you can then open directly in Excel. This is the approach I generally use. Note the addition of some <code>quote</code>, <code>noSpaces</code> and <code>printToggle</code> selections here.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">fs.table1save &lt;-<span class="st"> </span><span class="kw">print</span>(att2, 
+      <span class="dt">nonnormal =</span> <span class="kw">c</span>(<span class="st">&quot;age&quot;</span>, <span class="st">&quot;nihss&quot;</span>, <span class="st">&quot;time.iv&quot;</span>, <span class="st">&quot;aspects&quot;</span>, <span class="st">&quot;time.rand&quot;</span>),
+      <span class="dt">exact =</span> <span class="kw">c</span>(<span class="st">&quot;location&quot;</span>, <span class="st">&quot;mrankin&quot;</span>),
+      <span class="dt">quote =</span> <span class="ot">FALSE</span>, <span class="dt">noSpaces =</span> <span class="ot">TRUE</span>, <span class="dt">printToggle =</span> <span class="ot">FALSE</span>)
 
+<span class="kw">write.csv</span>(fs.table1save, <span class="dt">file =</span> <span class="st">&quot;fs-table1.csv&quot;</span>)</code></pre></div>
+<p>When I then open the <code>fs-table1.csv</code> file in Excel, it looks like this:</p>
+<p><img src="images/fs-table1inExcel.png" width="90%" /></p>
+<p>And from here, I can either drop it directly into Word, or present it as is, or start tweaking it to meet formatting needs.</p>
+</div>
+<div id="approach-b-produce-the-table-so-you-can-cut-and-paste-it" class="section level3">
+<h3><span class="header-section-number">1.7.2</span> Approach B: Produce the Table so you can cut and paste it</h3>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(att2, 
+      <span class="dt">nonnormal =</span> <span class="kw">c</span>(<span class="st">&quot;age&quot;</span>, <span class="st">&quot;nihss&quot;</span>, <span class="st">&quot;time.iv&quot;</span>, <span class="st">&quot;aspects&quot;</span>, <span class="st">&quot;time.rand&quot;</span>),
+      <span class="dt">exact =</span> <span class="kw">c</span>(<span class="st">&quot;location&quot;</span>, <span class="st">&quot;mrankin&quot;</span>),
+      <span class="dt">quote =</span> <span class="ot">TRUE</span>, <span class="dt">noSpaces =</span> <span class="ot">TRUE</span>)</code></pre></div>
+<p>This will look like a mess by itself, but if you:</p>
+<ol style="list-style-type: decimal">
+<li>copy and paste that mess into Excel</li>
+<li>select Text to Columns from the Data menu</li>
+<li>select Delimited, then Space and select Treat consecutive delimiters as one</li>
+</ol>
+<p>you should get something usable again.</p>
+<p>Or, in Word,</p>
+<ol style="list-style-type: decimal">
+<li>insert the text</li>
+<li>select the text with your mouse</li>
+<li>select Insert … Table … Convert Text to Table</li>
+<li>place a quotation mark in the “Other” area under Separate text at …</li>
+</ol>
+<p>After dropping blank columns, the result looks pretty good.</p>
+</div>
+</div>
+<div id="a-controlled-biological-experiment---the-blood-brain-barrier" class="section level2">
+<h2><span class="header-section-number">1.8</span> A Controlled Biological Experiment - The Blood-Brain Barrier</h2>
+<p>My source for the data and the following explanatory paragraph is page 307 from <span class="citation">F. L. Ramsey and Schafer (<a href="#ref-RamseySchafer2002">2002</a>)</span>. The original data come from <span class="citation">Barnett et al. (<a href="#ref-Barnett1995">1995</a>)</span>.</p>
+<blockquote>
+<p>The human brain (and that of rats, coincidentally) is protected from the bacteria and toxins that course through the bloodstream by something called the blood-brain barrier. After a method of disrupting the barrier was developed, researchers tested this new mechanism, as follows. A series of 34 rats were inoculated with human lung cancer cells to induce brain tumors. After 9-11 days they were infused with either the barrier disruption (BD) solution or, as a control, a normal saline (NS) solution. Fifteen minutes later, the rats received a standard dose of a particular therapeutic antibody (L6-F(ab’)2. The key measure of the effectiveness of transmission across the brain-blood barrier is the ratio of the antibody concentration in the brain tumor to the antibody concentration in normal tissue outside the brain. The rats were then sacrificed, and the amounts of antibody in the brain tumor and in normal tissue from the liver were measured. The study’s primary objective is to determine whether the antibody concentration in the tumor increased when the blood-barrier disruption infusion was given, and if so, by how much?</p>
+</blockquote>
+</div>
+<div id="the-bloodbrain.csv-file" class="section level2">
+<h2><span class="header-section-number">1.9</span> The <code>bloodbrain.csv</code> file</h2>
+<p>Consider the data, available on the Data and Code page of <a href="https://github.com/THOMASELOVE/432-2018">our course website</a> in the <code>bloodbrain.csv</code> file, which includes the following variables:</p>
+<table style="width:75%;">
+<colgroup>
+<col width="12%" />
+<col width="62%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="right">Variable</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right"><code>case</code></td>
+<td>identification number for the rat (1 - 34)</td>
+</tr>
+<tr class="even">
+<td align="right"><code>brain</code></td>
+<td>an outcome: Brain tumor antibody count (per gram)</td>
+</tr>
+<tr class="odd">
+<td align="right"><code>liver</code></td>
+<td>an outcome: Liver antibody count (per gram)</td>
+</tr>
+<tr class="even">
+<td align="right"><code>tlratio</code></td>
+<td>an outcome: tumor / liver concentration ratio</td>
+</tr>
+<tr class="odd">
+<td align="right"><code>solution</code></td>
+<td>the treatment: BD (barrier disruption) or NS (normal saline)</td>
+</tr>
+<tr class="even">
+<td align="right"><code>sactime</code></td>
+<td>a design variable: Sacrifice time (hours; either 0.5, 3, 24 or 72)</td>
+</tr>
+<tr class="odd">
+<td align="right"><code>postin</code></td>
+<td>covariate: Days post-inoculation of lung cancer cells (9, 10 or 11)</td>
+</tr>
+<tr class="even">
+<td align="right"><code>sex</code></td>
+<td>covariate: M or F</td>
+</tr>
+<tr class="odd">
+<td align="right"><code>wt.init</code></td>
+<td>covariate: Initial weight (grams)</td>
+</tr>
+<tr class="even">
+<td align="right"><code>wt.loss</code></td>
+<td>covariate: Weight loss (grams)</td>
+</tr>
+<tr class="odd">
+<td align="right"><code>wt.tumor</code></td>
+<td>covariate: Tumor weight (10<sup>-4</sup> grams)</td>
+</tr>
+</tbody>
+</table>
+<p>And here’s what the data look like in R.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">bloodbrain</code></pre></div>
+<pre><code># A tibble: 34 x 11
+    case  brain   liver tlratio solution sactime postin sex   wt.init
+   &lt;int&gt;  &lt;int&gt;   &lt;int&gt;   &lt;dbl&gt; &lt;fct&gt;      &lt;dbl&gt;  &lt;int&gt; &lt;fct&gt;   &lt;int&gt;
+ 1     1  41081 1456164  0.0282 BD         0.500     10 F         239
+ 2     2  44286 1602171  0.0276 BD         0.500     10 F         225
+ 3     3 102926 1601936  0.0642 BD         0.500     10 F         224
+ 4     4  25927 1776411  0.0146 BD         0.500     10 F         184
+ 5     5  42643 1351184  0.0316 BD         0.500     10 F         250
+ 6     6  31342 1790863  0.0175 NS         0.500     10 F         196
+ 7     7  22815 1633386  0.0140 NS         0.500     10 F         200
+ 8     8  16629 1618757  0.0103 NS         0.500     10 F         273
+ 9     9  22315 1567602  0.0142 NS         0.500     10 F         216
+10    10  77961 1060057  0.0735 BD         3.00      10 F         267
+# ... with 24 more rows, and 2 more variables: wt.loss &lt;dbl&gt;, wt.tumor
+#   &lt;int&gt;</code></pre>
+</div>
+<div id="a-table-1-for-bloodbrain" class="section level2">
+<h2><span class="header-section-number">1.10</span> A Table 1 for <code>bloodbrain</code></h2>
+<p><span class="citation">Barnett et al. (<a href="#ref-Barnett1995">1995</a>)</span> did not provide a Table 1 for these data, so let’s build one to compare the two <code>solutions</code> (<code>BD</code> vs. <code>NS</code>) on the covariates and outcomes, plus the natural logarithm of the tumor/liver concentration ratio (<code>tlratio</code>). We’ll opt to treat the sacrifice time (<code>sactime</code>) and the days post-inoculation of lung cancer cells (<code>postin</code>) as categorical rather than quantitative variables.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">bloodbrain &lt;-<span class="st"> </span>bloodbrain <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">mutate</span>(<span class="dt">logTL =</span> <span class="kw">log</span>(tlratio))
+
+<span class="kw">dput</span>(<span class="kw">names</span>(bloodbrain))</code></pre></div>
+<pre><code>c(&quot;case&quot;, &quot;brain&quot;, &quot;liver&quot;, &quot;tlratio&quot;, &quot;solution&quot;, &quot;sactime&quot;, 
+&quot;postin&quot;, &quot;sex&quot;, &quot;wt.init&quot;, &quot;wt.loss&quot;, &quot;wt.tumor&quot;, &quot;logTL&quot;)</code></pre>
+<p>OK - there’s the list of variables we’ll need. I’ll put the outcomes at the bottom of the table.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">bb.vars &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;sactime&quot;</span>, <span class="st">&quot;postin&quot;</span>, <span class="st">&quot;sex&quot;</span>, <span class="st">&quot;wt.init&quot;</span>, <span class="st">&quot;wt.loss&quot;</span>, 
+             <span class="st">&quot;wt.tumor&quot;</span>, <span class="st">&quot;brain&quot;</span>, <span class="st">&quot;liver&quot;</span>, <span class="st">&quot;tlratio&quot;</span>, <span class="st">&quot;logTL&quot;</span>)
+
+bb.factors &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;sactime&quot;</span>, <span class="st">&quot;sex&quot;</span>, <span class="st">&quot;postin&quot;</span>)
+
+bb.att1 &lt;-<span class="st"> </span><span class="kw">CreateTableOne</span>(<span class="dt">data =</span> bloodbrain,
+                          <span class="dt">vars =</span> bb.vars,
+                          <span class="dt">factorVars =</span> bb.factors,
+                          <span class="dt">strata =</span> <span class="kw">c</span>(<span class="st">&quot;solution&quot;</span>))
+<span class="kw">summary</span>(bb.att1)</code></pre></div>
+<pre><code>
+     ### Summary of continuous variables ###
+
+solution: BD
+          n miss p.miss   mean    sd median    p25   p75    min   max
+wt.init  17    0      0    243 3e+01  2e+02  2e+02 3e+02  2e+02 3e+02
+wt.loss  17    0      0      3 5e+00  4e+00  1e+00 6e+00 -5e+00 1e+01
+wt.tumor 17    0      0    157 8e+01  2e+02  1e+02 2e+02  2e+01 4e+02
+brain    17    0      0  56043 3e+04  5e+04  4e+04 8e+04  6e+03 1e+05
+liver    17    0      0 672577 7e+05  6e+05  2e+04 1e+06  2e+03 2e+06
+tlratio  17    0      0      2 3e+00  1e-01  6e-02 3e+00  1e-02 9e+00
+logTL    17    0      0     -1 2e+00 -2e+00 -3e+00 1e+00 -4e+00 2e+00
+          skew kurt
+wt.init  -0.39  0.7
+wt.loss  -0.10  0.2
+wt.tumor  0.53  1.0
+brain     0.29 -0.6
+liver     0.35 -1.7
+tlratio   1.58  1.7
+logTL     0.08 -1.7
+-------------------------------------------------------- 
+solution: NS
+          n miss p.miss   mean    sd median    p25    p75    min   max
+wt.init  17    0      0    240 3e+01  2e+02  2e+02  3e+02  2e+02 3e+02
+wt.loss  17    0      0      4 4e+00  3e+00  2e+00  7e+00 -4e+00 1e+01
+wt.tumor 17    0      0    209 1e+02  2e+02  2e+02  3e+02  3e+01 5e+02
+brain    17    0      0  23887 1e+04  2e+04  1e+04  3e+04  1e+03 5e+04
+liver    17    0      0 664975 7e+05  7e+05  2e+04  1e+06  9e+02 2e+06
+tlratio  17    0      0      1 2e+00  5e-02  3e-02  9e-01  1e-02 7e+00
+logTL    17    0      0     -2 2e+00 -3e+00 -3e+00 -7e-02 -5e+00 2e+00
+          skew  kurt
+wt.init   0.33 -0.48
+wt.loss  -0.09  0.08
+wt.tumor  0.63  0.77
+brain     0.30 -0.35
+liver     0.40 -1.56
+tlratio   2.27  4.84
+logTL     0.27 -1.61
+
+p-values
+             pNormal  pNonNormal
+wt.init  0.807308940 0.641940278
+wt.loss  0.683756156 0.876749808
+wt.tumor 0.151510151 0.190482094
+brain    0.001027678 0.002579901
+liver    0.974853609 0.904045603
+tlratio  0.320501715 0.221425879
+logTL    0.351633525 0.221425879
+
+Standardize mean differences
+             1 vs 2
+wt.init  0.08435244
+wt.loss  0.14099823
+wt.tumor 0.50397184
+brain    1.23884159
+liver    0.01089667
+tlratio  0.34611465
+logTL    0.32420504
+
+=======================================================================================
+
+     ### Summary of categorical variables ### 
+
+solution: BD
+     var  n miss p.miss level freq percent cum.percent
+ sactime 17    0    0.0   0.5    5    29.4        29.4
+                            3    4    23.5        52.9
+                           24    4    23.5        76.5
+                           72    4    23.5       100.0
+                                                      
+  postin 17    0    0.0     9    1     5.9         5.9
+                           10   14    82.4        88.2
+                           11    2    11.8       100.0
+                                                      
+     sex 17    0    0.0     F   13    76.5        76.5
+                            M    4    23.5       100.0
+                                                      
+-------------------------------------------------------- 
+solution: NS
+     var  n miss p.miss level freq percent cum.percent
+ sactime 17    0    0.0   0.5    4    23.5        23.5
+                            3    5    29.4        52.9
+                           24    4    23.5        76.5
+                           72    4    23.5       100.0
+                                                      
+  postin 17    0    0.0     9    2    11.8        11.8
+                           10   13    76.5        88.2
+                           11    2    11.8       100.0
+                                                      
+     sex 17    0    0.0     F   13    76.5        76.5
+                            M    4    23.5       100.0
+                                                      
+
+p-values
+          pApprox pExact
+sactime 0.9739246      1
+postin  0.8309504      1
+sex     1.0000000      1
+
+Standardize mean differences
+           1 vs 2
+sactime 0.1622214
+postin  0.2098877
+sex     0.0000000</code></pre>
+<div id="generate-final-table-1-for-bloodbrain" class="section level3">
+<h3><span class="header-section-number">1.10.1</span> Generate final Table 1 for <code>bloodbrain</code></h3>
+<p>I’ll choose to treat <code>tlratio</code> as non-Normal, but otherwise, use t tests.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(bb.att1, <span class="dt">nonnormal =</span> <span class="kw">c</span>(<span class="st">&quot;tlratio&quot;</span>, <span class="st">&quot;logTL&quot;</span>))</code></pre></div>
+<pre><code>                        Stratified by solution
+                         BD                      NS                      
+  n                             17                      17               
+  sactime (%)                                                            
+     0.5                         5 (29.4)                4 (23.5)        
+     3                           4 (23.5)                5 (29.4)        
+     24                          4 (23.5)                4 (23.5)        
+     72                          4 (23.5)                4 (23.5)        
+  postin (%)                                                             
+     9                           1 ( 5.9)                2 (11.8)        
+     10                         14 (82.4)               13 (76.5)        
+     11                          2 (11.8)                2 (11.8)        
+  sex = M (%)                    4 (23.5)                4 (23.5)        
+  wt.init (mean (sd))       242.82 (27.23)          240.47 (28.54)       
+  wt.loss (mean (sd))         3.34 (4.68)             3.94 (3.88)        
+  wt.tumor (mean (sd))      157.29 (84.00)          208.53 (116.68)      
+  brain (mean (sd))       56043.41 (33675.40)     23887.18 (14610.53)    
+  liver (mean (sd))      672577.35 (694479.58)   664975.47 (700773.13)   
+  tlratio (median [IQR])      0.12 [0.06, 2.84]       0.05 [0.03, 0.94]  
+  logTL (median [IQR])       -2.10 [-2.74, 1.04]     -2.95 [-3.41, -0.07]
+                        Stratified by solution
+                         p      test   
+  n                                    
+  sactime (%)             0.974        
+     0.5                               
+     3                                 
+     24                                
+     72                                
+  postin (%)              0.831        
+     9                                 
+     10                                
+     11                                
+  sex = M (%)             1.000        
+  wt.init (mean (sd))     0.807        
+  wt.loss (mean (sd))     0.684        
+  wt.tumor (mean (sd))    0.152        
+  brain (mean (sd))       0.001        
+  liver (mean (sd))       0.975        
+  tlratio (median [IQR])  0.221 nonnorm
+  logTL (median [IQR])    0.221 nonnorm</code></pre>
+<p>Or, we can get an Excel-readable version, using</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">bb.t1 &lt;-<span class="st"> </span><span class="kw">print</span>(bb.att1, <span class="dt">nonnormal =</span> <span class="kw">c</span>(<span class="st">&quot;tlratio&quot;</span>, <span class="st">&quot;logTL&quot;</span>), <span class="dt">quote =</span> <span class="ot">FALSE</span>,
+               <span class="dt">noSpaces =</span> <span class="ot">TRUE</span>, <span class="dt">printToggle =</span> <span class="ot">FALSE</span>)
+
+<span class="kw">write.csv</span>(bb.t1, <span class="dt">file =</span> <span class="st">&quot;bb-table1.csv&quot;</span>)</code></pre></div>
+<p>which, when dropped into Excel, will look like this:</p>
+<p><img src="images/bb-table1inExcel.png" width="90%" /></p>
+<p>One thing I would definitely clean up here, in practice, is to change the presentation of the <em>p</em> value for <code>sex</code> from 1 to &gt; 0.99, or just omit it altogether. I’d also drop the <code>computer-ese</code> where possible, add units for the measures, round <strong>a lot</strong>, identify the outcomes carefully, and use notes to indicate deviations from the main approach.</p>
+</div>
+<div id="a-more-finished-version-after-cleanup-in-word" class="section level3">
+<h3><span class="header-section-number">1.10.2</span> A More Finished Version (after Cleanup in Word)</h3>
+<p><img src="images/bb-table1inWord.png" width="95%" /></p>
+
+</div>
 </div>
 </div>
 <h3>References</h3>
@@ -614,6 +930,12 @@ extra.ica 0.129370206</code></pre>
 </div>
 <div id="ref-Berkhemer2015">
 <p>Berkhemer, Olvert A., Puck S. S. Fransen, Debbie Buemer, and others. 2015. “A Randomized Trial of Intraarterial Treatment for Acute Ischemic Stroke.” <em>New England Journal of Medicine</em> 372: 11–20. <a href="http://www.nejm.org/doi/full/10.1056/NEJMoa1411587" class="uri">http://www.nejm.org/doi/full/10.1056/NEJMoa1411587</a>.</p>
+</div>
+<div id="ref-RamseySchafer2002">
+<p>Ramsey, Fred L., and Daniel W. Schafer. 2002. <em>The Statistical Sleuth: A Course in Methods of Data Analysis</em>. Second. Pacific Grove, CA: Duxbury.</p>
+</div>
+<div id="ref-Barnett1995">
+<p>Barnett, Peggy A., Simon Roman-Golstein, Fred Ramsey, and others. 1995. “Differential Permeability and Quantitative Mr Imaging of a Human Lung Carcinoma Brain Xenograft in the Nude Rat.” <em>American Journal of Pathology</em> 146(2): 436–49. <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC1869863/" class="uri">https://www.ncbi.nlm.nih.gov/pmc/articles/PMC1869863/</a>.</p>
 </div>
 </div>
 <div class="footnotes">
