@@ -1,0 +1,13 @@
+# Building Table 1
+
+Many scientific articles involve direct comparison of results from various exposures, perhaps treatments. In 431, we studied numerous methods, including various sorts of hypothesis tests, confidence intervals, and descriptive summaries, which can help us to understand and compare outcomes in such a setting. One common approach is to present what's often called Table 1. Table 1 provides a summary of the characteristics of a sample, or of groups of samples, which is most commonly used to help understand the nature of the data being compared.
+
+Table 1 is especially common in the context of clinical research. Consider the excerpt below, from a January 2015 article in the *New England Journal of Medicine* [@Tolaney2015].
+
+```{r table1_NEJM_fig}
+knitr::include_graphics("images/Tolaney-snip1.png")
+```
+
+This (partial) table reports baseline characteristics on age group, sex and race, describing 406 patients with HER2-positive^[HER2 = human epidermal growth factor receptor type 2. Overexpression of this occurs in 15-20%  of invasive breast cancers, and has been associated with poor outcomes.] invasive breast cancer that began the protocol therapy. Age, sex and race (along with severity of illness) are the most commonly identified characteristics in a Table 1.
+
+In addition to the measures shown in this excerpt, the full Table also includes detailed information on the primary tumor for each patient, including its size, nodal status and histologic grade. Footnotes tell us that the percentages shown are subject to rounding, and may not total 100, and that the race information was self-reported.
