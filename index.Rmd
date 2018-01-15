@@ -12,6 +12,10 @@ github-repo: thomaselove/432-notes
 description: "These are the Course Notes for 432."
 ---
 
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(comment = NA)
+```
+
 # Introduction {-}
 
 These Notes provide a series of examples using R to work through issues that are likely to come up in PQHS/CRSP/MPHP 432.
@@ -32,3 +36,18 @@ Everything you see here is available to you as HTML or PDF. You will also have a
 
 To download the data and R code related to these notes, visit the Data and Code section of [the 432 course website](https://github.com/THOMASELOVE/432-2018).
 
+# R Packages used in these notes {-}
+
+Here, we'll load in the packages used in these notes.
+
+```{r load_packages}
+library(tableone); library(tidyverse)
+```
+
+# Data used in these notes {-}
+
+Here, we'll load in the data sets used in these notes.
+
+```{r load_data}
+fakestroke <- read.csv("data/fakestroke.csv") %>% tbl_df
+```

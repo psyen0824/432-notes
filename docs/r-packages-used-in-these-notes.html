@@ -31,8 +31,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   
   
-
-<link rel="next" href="r-packages-used-in-these-notes.html">
+<link rel="prev" href="index.html">
+<link rel="next" href="data-used-in-these-notes.html">
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
@@ -140,34 +140,26 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="header">
-<h1 class="title">Data Science for Biological, Medical and Health Research: Notes for 432</h1>
-<h4 class="author"><em>Thomas E. Love, Ph.D.</em></h4>
-<h4 class="date"><em>Version: 2018-01-15</em></h4>
-</div>
-<div id="introduction" class="section level1 unnumbered">
-<h1>Introduction</h1>
-<p>These Notes provide a series of examples using R to work through issues that are likely to come up in PQHS/CRSP/MPHP 432.</p>
-<p>While these Notes share some of the features of a textbook, they are neither comprehensive nor completely original. The main purpose is to give 432 students a set of common materials on which to draw during the course. In class, we will sometimes:</p>
-<ul>
-<li>reiterate points made in this document,</li>
-<li>amplify what is here,</li>
-<li>simplify the presentation of things done here,</li>
-<li>use new examples to show some of the same techniques,</li>
-<li>refer to issues not mentioned in this document,</li>
-</ul>
-<p>but what we don’t do is follow these notes very precisely. We assume instead that you will read the materials and try to learn from them, just as you will attend classes and try to learn from them. We welcome feedback of all kinds on this document or anything else. Just email us at <code>431-help at case dot edu</code>, or submit a pull request.</p>
-<p>What you will mostly find are brief explanations of a key idea or summary, accompanied (most of the time) by R code and a demonstration of the results of applying that code.</p>
-<p>Everything you see here is available to you as HTML or PDF. You will also have access to the R Markdown files, which contain the code which generates everything in the document, including all of the R results. We will demonstrate the use of R Markdown (this document is generated with the additional help of an R package called bookdown) and R Studio (the “program” which we use to interface with the R language) in class.</p>
-<p>To download the data and R code related to these notes, visit the Data and Code section of <a href="https://github.com/THOMASELOVE/432-2018">the 432 course website</a>.</p>
+<div id="r-packages-used-in-these-notes" class="section level1 unnumbered">
+<h1>R Packages used in these notes</h1>
+<p>Here, we’ll load in the packages used in these notes.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(tableone); <span class="kw">library</span>(tidyverse)</code></pre></div>
+<pre><code>-- Attaching packages ------------------------------------ tidyverse 1.2.1 --</code></pre>
+<pre><code>v ggplot2 2.2.1     v purrr   0.2.4
+v tibble  1.4.1     v dplyr   0.7.4
+v tidyr   0.7.2     v stringr 1.2.0
+v readr   1.1.1     v forcats 0.2.0</code></pre>
+<pre><code>-- Conflicts --------------------------------------- tidyverse_conflicts() --
+x dplyr::filter() masks stats::filter()
+x dplyr::lag()    masks stats::lag()</code></pre>
 </div>
             </section>
 
           </div>
         </div>
       </div>
-
-<a href="r-packages-used-in-these-notes.html" class="navigation navigation-next navigation-unique" aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="index.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="data-used-in-these-notes.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>

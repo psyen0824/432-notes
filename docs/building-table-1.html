@@ -31,7 +31,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   
   
-<link rel="prev" href="index.html">
+<link rel="prev" href="data-used-in-these-notes.html">
 <link rel="next" href="references.html">
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -103,7 +103,22 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <li class="divider"></li>
 <li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Introduction</a></li>
-<li class="chapter" data-level="1" data-path="building-table-1.html"><a href="building-table-1.html"><i class="fa fa-check"></i><b>1</b> Building Table 1</a></li>
+<li class="chapter" data-level="" data-path="r-packages-used-in-these-notes.html"><a href="r-packages-used-in-these-notes.html"><i class="fa fa-check"></i>R Packages used in these notes</a></li>
+<li class="chapter" data-level="" data-path="data-used-in-these-notes.html"><a href="data-used-in-these-notes.html"><i class="fa fa-check"></i>Data used in these notes</a></li>
+<li class="chapter" data-level="1" data-path="building-table-1.html"><a href="building-table-1.html"><i class="fa fa-check"></i><b>1</b> Building Table 1</a><ul>
+<li class="chapter" data-level="1.1" data-path="building-table-1.html"><a href="building-table-1.html#two-examples-from-the-new-england-journal-of-medicine"><i class="fa fa-check"></i><b>1.1</b> Two examples from the New England Journal of Medicine</a><ul>
+<li class="chapter" data-level="1.1.1" data-path="building-table-1.html"><a href="building-table-1.html#a-simple-table-1"><i class="fa fa-check"></i><b>1.1.1</b> A simple Table 1</a></li>
+<li class="chapter" data-level="1.1.2" data-path="building-table-1.html"><a href="building-table-1.html#table-1-showing-a-group-comparison"><i class="fa fa-check"></i><b>1.1.2</b> Table 1 showing a group comparison</a></li>
+</ul></li>
+<li class="chapter" data-level="1.2" data-path="building-table-1.html"><a href="building-table-1.html#simulating-data-from-a-clinical-trial"><i class="fa fa-check"></i><b>1.2</b> Simulating Data from a Clinical Trial</a><ul>
+<li class="chapter" data-level="1.2.1" data-path="building-table-1.html"><a href="building-table-1.html#the-fakestroke-data"><i class="fa fa-check"></i><b>1.2.1</b> The <code>fakestroke</code> data</a></li>
+<li class="chapter" data-level="1.2.2" data-path="building-table-1.html"><a href="building-table-1.html#fakestroke-table-1-attempt-1"><i class="fa fa-check"></i><b>1.2.2</b> <code>fakestroke</code> Table 1: Attempt 1</a></li>
+<li class="chapter" data-level="1.2.3" data-path="building-table-1.html"><a href="building-table-1.html#fakestroke-cleaning-up-categorical-variables"><i class="fa fa-check"></i><b>1.2.3</b> <code>fakestroke</code> Cleaning Up Categorical Variables</a></li>
+<li class="chapter" data-level="1.2.4" data-path="building-table-1.html"><a href="building-table-1.html#fakestroke-table-1-attempt-2"><i class="fa fa-check"></i><b>1.2.4</b> <code>fakestroke</code> Table 1: Attempt 2</a></li>
+<li class="chapter" data-level="1.2.5" data-path="building-table-1.html"><a href="building-table-1.html#what-summaries-should-we-show"><i class="fa fa-check"></i><b>1.2.5</b> What summaries should we show?</a></li>
+<li class="chapter" data-level="1.2.6" data-path="building-table-1.html"><a href="building-table-1.html#obtaining-a-detailed-summary"><i class="fa fa-check"></i><b>1.2.6</b> Obtaining a Detailed Summary</a></li>
+</ul></li>
+</ul></li>
 <li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>References</a></li>
 <li class="divider"></li>
 <li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
@@ -128,23 +143,488 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <div id="building-table-1" class="section level1">
 <h1><span class="header-section-number">Chapter 1</span> Building Table 1</h1>
 <p>Many scientific articles involve direct comparison of results from various exposures, perhaps treatments. In 431, we studied numerous methods, including various sorts of hypothesis tests, confidence intervals, and descriptive summaries, which can help us to understand and compare outcomes in such a setting. One common approach is to present what’s often called Table 1. Table 1 provides a summary of the characteristics of a sample, or of groups of samples, which is most commonly used to help understand the nature of the data being compared.</p>
+<div id="two-examples-from-the-new-england-journal-of-medicine" class="section level2">
+<h2><span class="header-section-number">1.1</span> Two examples from the New England Journal of Medicine</h2>
+<div id="a-simple-table-1" class="section level3">
+<h3><span class="header-section-number">1.1.1</span> A simple Table 1</h3>
 <p>Table 1 is especially common in the context of clinical research. Consider the excerpt below, from a January 2015 article in the <em>New England Journal of Medicine</em> <span class="citation">(Tolaney et al. <a href="#ref-Tolaney2015">2015</a>)</span>.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">knitr<span class="op">::</span><span class="kw">include_graphics</span>(<span class="st">&quot;images/Tolaney-snip1.png&quot;</span>)</code></pre></div>
-<p><img src="images/Tolaney-snip1.png" width="210" /></p>
+<p><img src="images/Tolaney-snip1.png" width="50%" /></p>
 <p>This (partial) table reports baseline characteristics on age group, sex and race, describing 406 patients with HER2-positive<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a> invasive breast cancer that began the protocol therapy. Age, sex and race (along with severity of illness) are the most commonly identified characteristics in a Table 1.</p>
 <p>In addition to the measures shown in this excerpt, the full Table also includes detailed information on the primary tumor for each patient, including its size, nodal status and histologic grade. Footnotes tell us that the percentages shown are subject to rounding, and may not total 100, and that the race information was self-reported.</p>
+</div>
+<div id="table-1-showing-a-group-comparison" class="section level3">
+<h3><span class="header-section-number">1.1.2</span> Table 1 showing a group comparison</h3>
+<p>A more typical Table 1 involves a group comparison, for example in this excerpt from <span class="citation">Roy et al. (<a href="#ref-Roy2008">2008</a>)</span>. This Table 1 describes a multi-center randomized clinical trial comparing two different approaches to caring for patients with heart failure and atrial fibrillation<a href="#fn2" class="footnoteRef" id="fnref2"><sup>2</sup></a>.</p>
+<p><img src="images/Roy-snip1.png" width="90%" /></p>
+<p>The article provides percentages, means and standard deviations across groups, but note that it does not provide p values for the comparison of baseline characteristics. This is a common feature of NEJM reports on randomized clinical trials, where we anticipate that the two groups will be well matched at baseline. Note that the patients in this study were <em>randomly</em> assigned to either the rhythm-control group or to the rate-control group, using blocked randomizations stratified by study center.</p>
+</div>
+</div>
+<div id="simulating-data-from-a-clinical-trial" class="section level2">
+<h2><span class="header-section-number">1.2</span> Simulating Data from a Clinical Trial</h2>
+<p>Consider the following simulated data, available on the Data and Code page of <a href="https://github.com/THOMASELOVE/432-2018">our course website</a> in the <code>fakestroke.csv</code> file, which I built to let us mirror the Table 1 for a real randomized clinical trial, called MR CLEAN <span class="citation">(Berkheimer et al. <a href="#ref-Berkheimer2015">2015</a>)</span>.</p>
+<p>The MR CLEAN trial report describes 500 patients with acute ischemic stroke at 16 medical centers in the Netherlands, where 233 were randomly assigned to the intervention (intraarterial treatment plus usual care) and 267 to control (usual care alone.)</p>
+<div id="the-fakestroke-data" class="section level3">
+<h3><span class="header-section-number">1.2.1</span> The <code>fakestroke</code> data</h3>
+<p>Here’s a quick look at the simulated data in <code>fakestroke</code>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">fakestroke</code></pre></div>
+<pre><code># A tibble: 500 x 18
+   studyid trt        age sex   nihss location hx.isch  afib    dm mrankin
+   &lt;fct&gt;   &lt;fct&gt;    &lt;dbl&gt; &lt;fct&gt; &lt;int&gt; &lt;fct&gt;    &lt;fct&gt;   &lt;int&gt; &lt;int&gt; &lt;fct&gt;  
+ 1 z001    Control   53.0 Male     21 Right    No          0     0 2      
+ 2 z002    Interve~  51.0 Male     23 Left     No          1     0 0      
+ 3 z003    Control   68.0 Fema~    11 Right    No          0     0 0      
+ 4 z004    Control   28.0 Male     22 Left     No          0     0 0      
+ 5 z005    Control   91.0 Male     24 Right    No          0     0 0      
+ 6 z006    Control   34.0 Fema~    18 Left     No          0     0 2      
+ 7 z007    Interve~  75.0 Male     25 Right    No          0     0 0      
+ 8 z008    Control   89.0 Fema~    18 Right    No          0     0 0      
+ 9 z009    Control   75.0 Male     25 Left     No          1     0 2      
+10 z010    Interve~  26.0 Fema~    27 Right    No          0     0 0      
+# ... with 490 more rows, and 8 more variables: sbp &lt;int&gt;, iv.altep &lt;fct&gt;,
+#   time.iv &lt;int&gt;, aspects &lt;int&gt;, ia.occlus &lt;fct&gt;, extra.ica &lt;int&gt;,
+#   time.rand &lt;int&gt;, time.punc &lt;int&gt;</code></pre>
+<p>The <code>fakestroke.csv</code> file contains the following 18 variables for 500 patients.</p>
+<table style="width:75%;">
+<colgroup>
+<col width="16%" />
+<col width="58%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="right">Variable</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right"><code>studyid</code></td>
+<td>Study ID # (z001 through z500)</td>
+</tr>
+<tr class="even">
+<td align="right"><code>trt</code></td>
+<td>Treatment group (Intervention or Control)</td>
+</tr>
+<tr class="odd">
+<td align="right"><code>age</code></td>
+<td>Age in years</td>
+</tr>
+<tr class="even">
+<td align="right"><code>sex</code></td>
+<td>Male or Female</td>
+</tr>
+<tr class="odd">
+<td align="right"><code>nihss</code></td>
+<td>NIH Stroke Scale Score (can range from 0-42; higher scores indicate more severe neurological deficits)</td>
+</tr>
+<tr class="even">
+<td align="right"><code>location</code></td>
+<td>Stroke Location - Left or Right Hemisphere</td>
+</tr>
+<tr class="odd">
+<td align="right"><code>hx.isch</code></td>
+<td>History of Ischemic Stroke (Yes/No)</td>
+</tr>
+<tr class="even">
+<td align="right"><code>afib</code></td>
+<td>Atrial Fibrillation (1 = Yes, 0 = No)</td>
+</tr>
+<tr class="odd">
+<td align="right"><code>dm</code></td>
+<td>Diabetes Mellitus (1 = Yes, 0 = No)</td>
+</tr>
+<tr class="even">
+<td align="right"><code>mrankin</code></td>
+<td>Pre-stroke modified Rankin scale score (0, 1, 2 or &gt; 2) indicating functional disability - complete range is 0 (no symptoms) to 6 (death)</td>
+</tr>
+<tr class="odd">
+<td align="right"><code>sbp</code></td>
+<td>Systolic blood pressure, in mm Hg</td>
+</tr>
+<tr class="even">
+<td align="right"><code>iv.altep</code></td>
+<td>Treatment with IV alteplase (Yes/No)</td>
+</tr>
+<tr class="odd">
+<td align="right"><code>time.iv</code></td>
+<td>Time from stroke onset to start of IV altepase (minutes) if iv.altep=Yes</td>
+</tr>
+<tr class="even">
+<td align="right"><code>aspects</code></td>
+<td>Alberta Stroke Program Early Computed Tomography score, which measures extent of stroke from 0 - 10; higher scores indicate fewer early ischemic changes</td>
+</tr>
+<tr class="odd">
+<td align="right"><code>ia.occlus</code></td>
+<td>Intracranial arterial occlusion, based on vessel imaging - five categories<a href="#fn3" class="footnoteRef" id="fnref3"><sup>3</sup></a></td>
+</tr>
+<tr class="even">
+<td align="right"><code>extra.ica</code></td>
+<td>Extracranial ICA occlusion (1 = Yes, 0 = No)</td>
+</tr>
+<tr class="odd">
+<td align="right"><code>time.rand</code></td>
+<td>Time from stroke onset to study randomization, in minutes</td>
+</tr>
+<tr class="even">
+<td align="right"><code>time.punc</code></td>
+<td>Time from stroke onset to groin puncture, in minutes (only if Intervention)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="fakestroke-table-1-attempt-1" class="section level3">
+<h3><span class="header-section-number">1.2.2</span> <code>fakestroke</code> Table 1: Attempt 1</h3>
+<p>Our goal, then, is to take the data in <code>fakestroke.csv</code> and use it to generate a Table 1 for the study that compares the 233 patients in the Intervention group to the 267 patients in the Control group, on all of the other variables (except study ID #) available. I’ll use the <code>tableone</code> package of functions available in R to help me complete this task. We’ll make a first attempt, using the <code>CreateTableOne</code> function in the <code>tableone</code> package. To use the function, we’ll need to specify:</p>
+<ul>
+<li>the <code>vars</code> or variables we want to place in the rows of our Table 1 (which will include just about everything in the <code>fakestroke</code> data except the <code>studyid</code> code and the <code>trt</code> variable for which we have other plans)
+<ul>
+<li>A useful trick here is to use the <code>dput</code> function, specifically something like <code>dput(names(fakestroke))</code> can be used to generate a list of all of the variables included in the <code>fakestroke</code> tibble, and then this can be copied and pasted into the <code>vars</code> specification, saving some typing.</li>
+</ul></li>
+<li>the <code>strata</code> which indicates the levels want to use in the columns of our Table 1 (for us, that’s <code>trt</code>)</li>
+</ul>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">fs.vars &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;age&quot;</span>, <span class="st">&quot;sex&quot;</span>, <span class="st">&quot;nihss&quot;</span>, <span class="st">&quot;location&quot;</span>, 
+          <span class="st">&quot;hx.isch&quot;</span>, <span class="st">&quot;afib&quot;</span>, <span class="st">&quot;dm&quot;</span>, <span class="st">&quot;mrankin&quot;</span>, <span class="st">&quot;sbp&quot;</span>,
+          <span class="st">&quot;iv.altep&quot;</span>, <span class="st">&quot;time.iv&quot;</span>, <span class="st">&quot;aspects&quot;</span>, 
+          <span class="st">&quot;ia.occlus&quot;</span>, <span class="st">&quot;extra.ica&quot;</span>, <span class="st">&quot;time.rand&quot;</span>, 
+          <span class="st">&quot;time.punc&quot;</span>)
 
+fs.trt &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;trt&quot;</span>)
+
+att1 &lt;-<span class="st"> </span><span class="kw">CreateTableOne</span>(<span class="dt">data =</span> fakestroke, 
+                       <span class="dt">vars =</span> fs.vars, 
+                       <span class="dt">strata =</span> fs.trt)
+<span class="kw">print</span>(att1)</code></pre></div>
+<pre><code>                       Stratified by trt
+                        Control        Intervention   p      test
+  n                        267            233                    
+  age (mean (sd))        65.38 (16.10)  63.93 (18.09)  0.343     
+  sex = Male (%)           157 (58.8)     135 (57.9)   0.917     
+  nihss (mean (sd))      18.08 (4.32)   17.97 (5.04)   0.787     
+  location = Right (%)     114 (42.7)     117 (50.2)   0.111     
+  hx.isch = Yes (%)         25 ( 9.4)      29 (12.4)   0.335     
+  afib (mean (sd))        0.26 (0.44)    0.28 (0.45)   0.534     
+  dm (mean (sd))          0.13 (0.33)    0.12 (0.33)   0.923     
+  mrankin (%)                                          0.922     
+     &gt; 2                    11 ( 4.1)      10 ( 4.3)             
+     0                     214 (80.1)     190 (81.5)             
+     1                      29 (10.9)      21 ( 9.0)             
+     2                      13 ( 4.9)      12 ( 5.2)             
+  sbp (mean (sd))       145.00 (24.40) 146.03 (26.00)  0.647     
+  iv.altep = Yes (%)       242 (90.6)     203 (87.1)   0.267     
+  time.iv (mean (sd))    87.96 (26.01)  98.22 (45.48)  0.003     
+  aspects (mean (sd))     8.65 (1.47)    8.35 (1.64)   0.033     
+  ia.occlus (%)                                        0.795     
+     A1 or A2                2 ( 0.8)       1 ( 0.4)             
+     ICA with M1            75 (28.2)      59 (25.3)             
+     Intracranial ICA        3 ( 1.1)       1 ( 0.4)             
+     M1                    165 (62.0)     154 (66.1)             
+     M2                     21 ( 7.9)      18 ( 7.7)             
+  extra.ica (mean (sd))   0.26 (0.44)    0.32 (0.47)   0.150     
+  time.rand (mean (sd)) 213.88 (70.29) 202.51 (57.33)  0.051     
+  time.punc (mean (sd))    NaN (NA)    263.02 (54.23)  NA        </code></pre>
+<p>Some of this is very useful, and other parts need to be fixed.</p>
+<ol style="list-style-type: decimal">
+<li>The 1/0 variables (<code>afib</code>, <code>dm</code>, <code>extra.ica</code>) might be better if they were treated as the factors they are, and reported as the Yes/No variables are reported, with counts and percentages rather than with means and standard deviations.</li>
+<li>In some cases, we may prefer to re-order the levels of the categorical (factor) variables, particularly the <code>mrankin</code> variable, but also the <code>ia.occlus</code> variable. It would also be more typical to put the Intervention group to the left and the Control group to the right, so we may need to adjust our <code>trt</code> variable’s levels accordingly.</li>
+<li>For each of the quantitative variables (<code>age</code>, <code>nihss</code>, <code>sbp</code>, <code>time.iv</code>, <code>aspects</code>, <code>extra.ica</code>, <code>time.rand</code> and <code>time.punc</code>) we should make a decision whether a summary with mean and standard deviation is appropriate, or whether we should instead summarize with, say, the median and quartiles. A mean and standard deviation really only yields an appropriate summary when the data are least approximately Normally distributed. This will make the <em>p</em> values a bit more reasonable, too. The <code>test</code> column in the first attempt will soon have something useful to tell us.</li>
+<li>We’ve got some warnings (which I’ve silenced here), having to do with the fact that <code>time.punc</code> is only relevant to patients in the Intervention group. We might consider removing that variable from this table, as a result, and summarizing those data separately.</li>
+</ol>
+</div>
+<div id="fakestroke-cleaning-up-categorical-variables" class="section level3">
+<h3><span class="header-section-number">1.2.3</span> <code>fakestroke</code> Cleaning Up Categorical Variables</h3>
+<p>Let’s specify each of the categorical variables as categorical explicitly. This helps the <code>CreateTableOne</code> function treat them appropriately, and display them with counts and percentages. This includes all of the 1/0, Yes/No and multi-categorical variables.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">fs.factorvars &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;sex&quot;</span>, <span class="st">&quot;location&quot;</span>, <span class="st">&quot;hx.isch&quot;</span>, <span class="st">&quot;afib&quot;</span>, <span class="st">&quot;dm&quot;</span>, 
+                   <span class="st">&quot;mrankin&quot;</span>, <span class="st">&quot;iv.altep&quot;</span>, <span class="st">&quot;ia.occlus&quot;</span>, <span class="st">&quot;extra.ica&quot;</span>)</code></pre></div>
+<p>Then we simply add a <code>factorVars = fs.factorvars</code> call to the <code>CreateTableOne</code> function.</p>
+<p>We also want to re-order some of those categorical variables, so that the levels are more useful to us. Specifically, we want to:</p>
+<ul>
+<li>place Intervention before Control in the <code>trt</code> variable,</li>
+<li>reorder the <code>mrankin</code> scale as 0, 1, 2, &gt; 2, and</li>
+<li>rearrange the <code>ia.occlus</code> variable to the order<a href="#fn4" class="footnoteRef" id="fnref4"><sup>4</sup></a> presented in <span class="citation">Berkheimer et al. (<a href="#ref-Berkheimer2015">2015</a>)</span>.</li>
+</ul>
+<p>To accomplish this, we’ll use the <code>fct_relevel</code> function from the <code>forcats</code> package (loaded with the rest of the core <code>tidyverse</code> packages) to reorder our levels manually.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">fakestroke &lt;-<span class="st"> </span>fakestroke <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">mutate</span>(<span class="dt">trt =</span> <span class="kw">fct_relevel</span>(trt, <span class="st">&quot;Intervention&quot;</span>, <span class="st">&quot;Control&quot;</span>),
+           <span class="dt">mrankin =</span> <span class="kw">fct_relevel</span>(mrankin, <span class="st">&quot;0&quot;</span>, <span class="st">&quot;1&quot;</span>, <span class="st">&quot;2&quot;</span>, <span class="st">&quot;&gt; 2&quot;</span>),
+           <span class="dt">ia.occlus =</span> <span class="kw">fct_relevel</span>(ia.occlus, <span class="st">&quot;Intracranial ICA&quot;</span>, 
+                                   <span class="st">&quot;ICA with M1&quot;</span>, <span class="st">&quot;M1&quot;</span>, <span class="st">&quot;M2&quot;</span>, 
+                                   <span class="st">&quot;A1 or A2&quot;</span>)
+           ) </code></pre></div>
+</div>
+<div id="fakestroke-table-1-attempt-2" class="section level3">
+<h3><span class="header-section-number">1.2.4</span> <code>fakestroke</code> Table 1: Attempt 2</h3>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">att2 &lt;-<span class="st"> </span><span class="kw">CreateTableOne</span>(<span class="dt">data =</span> fakestroke, 
+                       <span class="dt">vars =</span> fs.vars,
+                       <span class="dt">factorVars =</span> fs.factorvars,
+                       <span class="dt">strata =</span> fs.trt)
+<span class="kw">print</span>(att2)</code></pre></div>
+<pre><code>                       Stratified by trt
+                        Intervention   Control        p      test
+  n                        233            267                    
+  age (mean (sd))        63.93 (18.09)  65.38 (16.10)  0.343     
+  sex = Male (%)           135 (57.9)     157 (58.8)   0.917     
+  nihss (mean (sd))      17.97 (5.04)   18.08 (4.32)   0.787     
+  location = Right (%)     117 (50.2)     114 (42.7)   0.111     
+  hx.isch = Yes (%)         29 (12.4)      25 ( 9.4)   0.335     
+  afib = 1 (%)              66 (28.3)      69 (25.8)   0.601     
+  dm = 1 (%)                29 (12.4)      34 (12.7)   1.000     
+  mrankin (%)                                          0.922     
+     0                     190 (81.5)     214 (80.1)             
+     1                      21 ( 9.0)      29 (10.9)             
+     2                      12 ( 5.2)      13 ( 4.9)             
+     &gt; 2                    10 ( 4.3)      11 ( 4.1)             
+  sbp (mean (sd))       146.03 (26.00) 145.00 (24.40)  0.647     
+  iv.altep = Yes (%)       203 (87.1)     242 (90.6)   0.267     
+  time.iv (mean (sd))    98.22 (45.48)  87.96 (26.01)  0.003     
+  aspects (mean (sd))     8.35 (1.64)    8.65 (1.47)   0.033     
+  ia.occlus (%)                                        0.795     
+     Intracranial ICA        1 ( 0.4)       3 ( 1.1)             
+     ICA with M1            59 (25.3)      75 (28.2)             
+     M1                    154 (66.1)     165 (62.0)             
+     M2                     18 ( 7.7)      21 ( 7.9)             
+     A1 or A2                1 ( 0.4)       2 ( 0.8)             
+  extra.ica = 1 (%)         75 (32.2)      70 (26.3)   0.179     
+  time.rand (mean (sd)) 202.51 (57.33) 213.88 (70.29)  0.051     
+  time.punc (mean (sd)) 263.02 (54.23)    NaN (NA)     NA        </code></pre>
+<p>The categorical data presentation looks much improved.</p>
+</div>
+<div id="what-summaries-should-we-show" class="section level3">
+<h3><span class="header-section-number">1.2.5</span> What summaries should we show?</h3>
+<p>Now, we’ll move on to the issue of making a decision about what type of summary to show for the quantitative variables. Since the <code>fakestroke</code> data are just simulated and only match the summary statistics of the original results, not the details, we’ll adopt the decisions made by <span class="citation">Berkheimer et al. (<a href="#ref-Berkheimer2015">2015</a>)</span>, which was to use medians and interquartile ranges to summarize the distributions of all of the continuous variables <strong>except</strong> systolic blood pressure.</p>
+<ul>
+<li>Specifying certain quantitative variables as <em>non-normal</em> causes R to show them with medians and the 25th and 75th percentiles, rather than means and standard deviations, and also causes those variables to be tested using non-parametric tests, like the Wilcoxon signed rank test, rather than the t test. The <code>test</code> column indicates this with the word <code>nonnorm</code>.</li>
+<li>Specifying <em>exact</em> tests for certain categorical variables (we’ll try this for the <code>location</code> and <code>mrankin</code> variables) can be done, and these changes will be noted in the <code>test</code> column, as well.</li>
+</ul>
+<p>To accomplish this, we need to specify which variables should be treated as non-Normal in the <code>print</code> statement - notice that we don’t need to redo the <code>CreateTableOne</code> for this change.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(att2, 
+      <span class="dt">nonnormal =</span> <span class="kw">c</span>(<span class="st">&quot;age&quot;</span>, <span class="st">&quot;nihss&quot;</span>, <span class="st">&quot;time.iv&quot;</span>, <span class="st">&quot;aspects&quot;</span>, <span class="st">&quot;time.rand&quot;</span>,
+                    <span class="st">&quot;time.punc&quot;</span>),
+      <span class="dt">exact =</span> <span class="kw">c</span>(<span class="st">&quot;location&quot;</span>, <span class="st">&quot;mrankin&quot;</span>))</code></pre></div>
+<pre><code>                          Stratified by trt
+                           Intervention            Control                
+  n                           233                     267                 
+  age (median [IQR])        65.80 [54.50, 76.00]    65.70 [55.75, 76.20]  
+  sex = Male (%)              135 (57.9)              157 (58.8)          
+  nihss (median [IQR])      17.00 [14.00, 21.00]    18.00 [14.00, 22.00]  
+  location = Right (%)        117 (50.2)              114 (42.7)          
+  hx.isch = Yes (%)            29 (12.4)               25 ( 9.4)          
+  afib = 1 (%)                 66 (28.3)               69 (25.8)          
+  dm = 1 (%)                   29 (12.4)               34 (12.7)          
+  mrankin (%)                                                             
+     0                        190 (81.5)              214 (80.1)          
+     1                         21 ( 9.0)               29 (10.9)          
+     2                         12 ( 5.2)               13 ( 4.9)          
+     &gt; 2                       10 ( 4.3)               11 ( 4.1)          
+  sbp (mean (sd))          146.03 (26.00)          145.00 (24.40)         
+  iv.altep = Yes (%)          203 (87.1)              242 (90.6)          
+  time.iv (median [IQR])    85.00 [67.00, 110.00]   87.00 [65.00, 116.00] 
+  aspects (median [IQR])     9.00 [7.00, 10.00]      9.00 [8.00, 10.00]   
+  ia.occlus (%)                                                           
+     Intracranial ICA           1 ( 0.4)                3 ( 1.1)          
+     ICA with M1               59 (25.3)               75 (28.2)          
+     M1                       154 (66.1)              165 (62.0)          
+     M2                        18 ( 7.7)               21 ( 7.9)          
+     A1 or A2                   1 ( 0.4)                2 ( 0.8)          
+  extra.ica = 1 (%)            75 (32.2)               70 (26.3)          
+  time.rand (median [IQR]) 204.00 [152.00, 249.50] 196.00 [149.00, 266.00]
+  time.punc (median [IQR]) 260.00 [212.00, 313.00]     NA [NA, NA]        
+                          Stratified by trt
+                           p      test   
+  n                                      
+  age (median [IQR])        0.579 nonnorm
+  sex = Male (%)            0.917        
+  nihss (median [IQR])      0.453 nonnorm
+  location = Right (%)      0.106 exact  
+  hx.isch = Yes (%)         0.335        
+  afib = 1 (%)              0.601        
+  dm = 1 (%)                1.000        
+  mrankin (%)               0.917 exact  
+     0                                   
+     1                                   
+     2                                   
+     &gt; 2                                 
+  sbp (mean (sd))           0.647        
+  iv.altep = Yes (%)        0.267        
+  time.iv (median [IQR])    0.596 nonnorm
+  aspects (median [IQR])    0.075 nonnorm
+  ia.occlus (%)             0.795        
+     Intracranial ICA                    
+     ICA with M1                         
+     M1                                  
+     M2                                  
+     A1 or A2                            
+  extra.ica = 1 (%)         0.179        
+  time.rand (median [IQR])  0.251 nonnorm
+  time.punc (median [IQR])  NA    nonnorm</code></pre>
+</div>
+<div id="obtaining-a-detailed-summary" class="section level3">
+<h3><span class="header-section-number">1.2.6</span> Obtaining a Detailed Summary</h3>
+<p>If this was a real data set, we’d want to get a more detailed description of the data to make decisions about things like potentially collapsing categories of a variable, or whether or not a normal distribution was useful for a particular continuous variable, etc. You can do this with the <code>summary</code> command applied to a created Table 1, which shows, among other things, the effect of changing from normal to non-normal <em>p</em> values for continuous variables, and from approximate to “exact” <em>p</em> values for categorical factors.</p>
+<p>Note in the summary below that we have some missing values here. Often, we’ll present this information within the Table 1, as well.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(att2)</code></pre></div>
+<pre><code>
+     ### Summary of continuous variables ###
+
+trt: Intervention
+            n miss p.miss mean sd median p25 p75 min max  skew  kurt
+age       233    0    0.0   64 18     66  54  76  23  96 -0.34 -0.52
+nihss     233    0    0.0   18  5     17  14  21  10  28  0.48 -0.74
+sbp       233    0    0.0  146 26    146 129 164  78 214 -0.07 -0.22
+time.iv   233   30   12.9   98 45     85  67 110  42 218  1.03  0.08
+aspects   233    0    0.0    8  2      9   7  10   5  10 -0.56 -0.98
+time.rand 233    2    0.9  203 57    204 152 250 100 300  0.01 -1.16
+time.punc 233    0    0.0  263 54    260 212 313 180 360  0.11 -1.33
+-------------------------------------------------------- 
+trt: Control
+            n miss p.miss mean sd median p25 p75 min  max   skew  kurt
+age       267    0    0.0   65 16     66  56  76  24   94 -0.296 -0.28
+nihss     267    0    0.0   18  4     18  14  22  11   25  0.017 -1.24
+sbp       267    1    0.4  145 24    145 128 161  82  231  0.156  0.08
+time.iv   267   25    9.4   88 26     87  65 116  44  130  0.001 -1.32
+aspects   267    4    1.5    9  1      9   8  10   5   10 -1.071  0.36
+time.rand 267    0    0.0  214 70    196 149 266 120  360  0.508 -0.93
+time.punc 267  267  100.0  NaN NA     NA  NA  NA Inf -Inf    NaN   NaN
+
+p-values
+              pNormal pNonNormal
+age       0.342813660 0.57856976
+nihss     0.787487252 0.45311695
+sbp       0.647157646 0.51346132
+time.iv   0.003073372 0.59641104
+aspects   0.032662901 0.07464683
+time.rand 0.050803672 0.25134327
+time.punc          NA         NA
+
+Standardize mean differences
+              1 vs 2
+age       0.08478764
+nihss     0.02405390
+sbp       0.04100833
+time.iv   0.27691223
+aspects   0.19210662
+time.rand 0.17720957
+time.punc         NA
+
+=======================================================================================
+
+     ### Summary of categorical variables ### 
+
+trt: Intervention
+       var   n miss p.miss            level freq percent cum.percent
+       sex 233    0    0.0           Female   98    42.1        42.1
+                                       Male  135    57.9       100.0
+                                                                    
+  location 233    0    0.0             Left  116    49.8        49.8
+                                      Right  117    50.2       100.0
+                                                                    
+   hx.isch 233    0    0.0               No  204    87.6        87.6
+                                        Yes   29    12.4       100.0
+                                                                    
+      afib 233    0    0.0                0  167    71.7        71.7
+                                          1   66    28.3       100.0
+                                                                    
+        dm 233    0    0.0                0  204    87.6        87.6
+                                          1   29    12.4       100.0
+                                                                    
+   mrankin 233    0    0.0                0  190    81.5        81.5
+                                          1   21     9.0        90.6
+                                          2   12     5.2        95.7
+                                        &gt; 2   10     4.3       100.0
+                                                                    
+  iv.altep 233    0    0.0               No   30    12.9        12.9
+                                        Yes  203    87.1       100.0
+                                                                    
+ ia.occlus 233    0    0.0 Intracranial ICA    1     0.4         0.4
+                                ICA with M1   59    25.3        25.8
+                                         M1  154    66.1        91.8
+                                         M2   18     7.7        99.6
+                                   A1 or A2    1     0.4       100.0
+                                                                    
+ extra.ica 233    0    0.0                0  158    67.8        67.8
+                                          1   75    32.2       100.0
+                                                                    
+-------------------------------------------------------- 
+trt: Control
+       var   n miss p.miss            level freq percent cum.percent
+       sex 267    0    0.0           Female  110    41.2        41.2
+                                       Male  157    58.8       100.0
+                                                                    
+  location 267    0    0.0             Left  153    57.3        57.3
+                                      Right  114    42.7       100.0
+                                                                    
+   hx.isch 267    0    0.0               No  242    90.6        90.6
+                                        Yes   25     9.4       100.0
+                                                                    
+      afib 267    0    0.0                0  198    74.2        74.2
+                                          1   69    25.8       100.0
+                                                                    
+        dm 267    0    0.0                0  233    87.3        87.3
+                                          1   34    12.7       100.0
+                                                                    
+   mrankin 267    0    0.0                0  214    80.1        80.1
+                                          1   29    10.9        91.0
+                                          2   13     4.9        95.9
+                                        &gt; 2   11     4.1       100.0
+                                                                    
+  iv.altep 267    0    0.0               No   25     9.4         9.4
+                                        Yes  242    90.6       100.0
+                                                                    
+ ia.occlus 267    1    0.4 Intracranial ICA    3     1.1         1.1
+                                ICA with M1   75    28.2        29.3
+                                         M1  165    62.0        91.4
+                                         M2   21     7.9        99.2
+                                   A1 or A2    2     0.8       100.0
+                                                                    
+ extra.ica 267    1    0.4                0  196    73.7        73.7
+                                          1   70    26.3       100.0
+                                                                    
+
+p-values
+            pApprox    pExact
+sex       0.9171387 0.8561188
+location  0.1113553 0.1056020
+hx.isch   0.3352617 0.3124683
+afib      0.6009691 0.5460206
+dm        1.0000000 1.0000000
+mrankin   0.9224798 0.9173657
+iv.altep  0.2674968 0.2518374
+ia.occlus 0.7945580 0.8189090
+extra.ica 0.1793385 0.1667574
+
+Standardize mean differences
+               1 vs 2
+sex       0.017479025
+location  0.151168444
+hx.isch   0.099032275
+afib      0.055906317
+dm        0.008673478
+mrankin   0.062543164
+iv.altep  0.111897009
+ia.occlus 0.117394890
+extra.ica 0.129370206</code></pre>
+<p>Again, I have simulated the data to mirror the results in the published Table 1 for this study. In no way have I captured the full range of the real data, or any of the relationships in that data, so it’s more important here to see what’s available in the analysis, rather than to interpret it closely in the clinical context.</p>
+
+</div>
+</div>
 </div>
 <h3>References</h3>
 <div id="refs" class="references">
 <div id="ref-Tolaney2015">
 <p>Tolaney, Sara M, William T. Barry, T. Dang Chau, and others. 2015. “Adjuvant Paclitaxel and Trastuzumab for Node-Negative, Her2-Positive Breast Cancer.” <em>New England Journal of Medicine</em> 372: 134–41. <a href="http://www.nejm.org/doi/full/10.1056/NEJMoa1406281" class="uri">http://www.nejm.org/doi/full/10.1056/NEJMoa1406281</a>.</p>
 </div>
+<div id="ref-Roy2008">
+<p>Roy, Denis, Mario Talajic, Stanley Nattel, and others. 2008. “Rhythm Control Versus Rate Control for Atrial Fibrillation and Heart Failure.” <em>New England Journal of Medicine</em> 358: 2667–77. <a href="http://www.nejm.org/doi/full/10.1056/NEJMoa0708789" class="uri">http://www.nejm.org/doi/full/10.1056/NEJMoa0708789</a>.</p>
+</div>
+<div id="ref-Berkheimer2015">
+<p>Berkheimer, O. A., P. S. S. Fransen, D. Buerner, and others. 2015. “A Randomized Trial of Intraarterial Treatment for Acute Ischemic Stroke.” <em>New England Journal of Medicine</em> 372: 11–20. <a href="http://www.nejm.org/doi/full/10.1056/NEJMoa1411587" class="uri">http://www.nejm.org/doi/full/10.1056/NEJMoa1411587</a>.</p>
+</div>
 </div>
 <div class="footnotes">
 <hr />
 <ol start="1">
-<li id="fn1"><p>HER2 = human epidermal growth factor receptor type 2. Overexpression of this occurs in 15-20% of invasive breast cancers, and has been associated with poor outcomes.<a href="building-table-1.html#fnref1">↩</a></p></li>
+<li id="fn1"><p>HER2 = human epidermal growth factor receptor type 2. Over-expression of this occurs in 15-20% of invasive breast cancers, and has been associated with poor outcomes.<a href="building-table-1.html#fnref1">↩</a></p></li>
+<li id="fn2"><p>The complete Table 1 appears on pages 2668-2669 of <span class="citation">Roy et al. (<a href="#ref-Roy2008">2008</a>)</span>, but I have only reproduced the first page and the footnote in this excerpt.<a href="building-table-1.html#fnref2">↩</a></p></li>
+<li id="fn3"><p>The five categories are Intracranial ICA, ICA with involvement of the M1 middle cerebral artery segment, M1 middle cerebral artery segment, M2 middle cerebral artery segment, A1 or A2 anterior cerebral artery segment<a href="building-table-1.html#fnref3">↩</a></p></li>
+<li id="fn4"><p>We might also have considered reordering the <code>ia.occlus</code> factor by its frequency, using the <code>fct_infreq</code> function<a href="building-table-1.html#fnref4">↩</a></p></li>
 </ol>
 </div>
             </section>
@@ -152,7 +632,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
           </div>
         </div>
       </div>
-<a href="index.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="data-used-in-these-notes.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
 <a href="references.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>

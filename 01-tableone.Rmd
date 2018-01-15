@@ -2,12 +2,164 @@
 
 Many scientific articles involve direct comparison of results from various exposures, perhaps treatments. In 431, we studied numerous methods, including various sorts of hypothesis tests, confidence intervals, and descriptive summaries, which can help us to understand and compare outcomes in such a setting. One common approach is to present what's often called Table 1. Table 1 provides a summary of the characteristics of a sample, or of groups of samples, which is most commonly used to help understand the nature of the data being compared.
 
+## Two examples from the New England Journal of Medicine
+
+### A simple Table 1
+
 Table 1 is especially common in the context of clinical research. Consider the excerpt below, from a January 2015 article in the *New England Journal of Medicine* [@Tolaney2015].
 
-```{r table1_NEJM_fig}
+```{r Tolaney_table1_NEJM_fig, echo=FALSE, out.width='50%'}
 knitr::include_graphics("images/Tolaney-snip1.png")
 ```
 
-This (partial) table reports baseline characteristics on age group, sex and race, describing 406 patients with HER2-positive^[HER2 = human epidermal growth factor receptor type 2. Overexpression of this occurs in 15-20%  of invasive breast cancers, and has been associated with poor outcomes.] invasive breast cancer that began the protocol therapy. Age, sex and race (along with severity of illness) are the most commonly identified characteristics in a Table 1.
+This (partial) table reports baseline characteristics on age group, sex and race, describing 406 patients with HER2-positive^[HER2 = human epidermal growth factor receptor type 2. Over-expression of this occurs in 15-20%  of invasive breast cancers, and has been associated with poor outcomes.] invasive breast cancer that began the protocol therapy. Age, sex and race (along with severity of illness) are the most commonly identified characteristics in a Table 1.
 
 In addition to the measures shown in this excerpt, the full Table also includes detailed information on the primary tumor for each patient, including its size, nodal status and histologic grade. Footnotes tell us that the percentages shown are subject to rounding, and may not total 100, and that the race information was self-reported.
+
+### Table 1 showing a group comparison
+
+A more typical Table 1 involves a group comparison, for example in this excerpt from @Roy2008. This Table 1 describes a multi-center randomized clinical trial comparing two different approaches to caring for patients with heart failure and atrial fibrillation^[The complete Table 1 appears on pages 2668-2669 of @Roy2008, but I have only reproduced the first page and the footnote in this excerpt.].
+
+```{r Roy_table1_NEJM_fig, echo=FALSE, out.width='90%'}
+knitr::include_graphics("images/Roy-snip1.png")
+```
+
+The article provides percentages, means and standard deviations across groups, but note that it does not provide p values for the comparison of baseline characteristics. This is a common feature of NEJM reports on randomized clinical trials, where we anticipate that the two groups will be well matched at baseline. Note that the patients in this study were *randomly* assigned to either the rhythm-control group or to the rate-control group, using blocked randomizations stratified by study center.
+
+## Simulating Data from a Clinical Trial
+
+Consider the following simulated data, available on the Data and Code page of [our course website](https://github.com/THOMASELOVE/432-2018) in the `fakestroke.csv` file, which I built to let us mirror the Table 1 for a real randomized clinical trial, called MR CLEAN [@Berkheimer2015].
+
+The MR CLEAN trial report describes 500 patients with acute ischemic stroke at 16 medical centers in the Netherlands, where 233 were randomly assigned to the intervention (intraarterial treatment plus usual care) and 267 to control (usual care alone.) 
+
+### The `fakestroke` data
+
+Here's a quick look at the simulated data in `fakestroke`.
+
+```{r fakestroke_printtibble}
+fakestroke
+```
+
+The `fakestroke.csv` file contains the following 18 variables for 500 patients.
+
+Variable |	Description
+----------: | -----------------------------------------
+`studyid` |	Study ID # (z001 through z500)
+`trt`	| Treatment group (Intervention or Control)
+`age`	| Age in years
+`sex`	| Male or Female
+`nihss`	| NIH Stroke Scale Score (can range from 0-42; higher scores indicate more severe neurological deficits)
+`location` |	Stroke Location - Left or Right Hemisphere
+`hx.isch`	| History of Ischemic Stroke (Yes/No)
+`afib`	| Atrial Fibrillation (1 = Yes, 0 = No)
+`dm`	| Diabetes Mellitus (1 = Yes, 0 = No)
+`mrankin` |	Pre-stroke modified Rankin scale score (0, 1, 2 or > 2) indicating functional disability - complete range is 0 (no symptoms) to 6 (death)
+`sbp`	| Systolic blood pressure, in mm Hg
+`iv.altep`	| Treatment with IV alteplase (Yes/No)
+`time.iv`	| Time from stroke onset to start of IV altepase (minutes) if iv.altep=Yes
+`aspects`	| Alberta Stroke Program Early Computed Tomography score, which measures extent of stroke from 0 - 10; higher scores indicate fewer early ischemic changes
+`ia.occlus`	| Intracranial arterial occlusion, based on vessel imaging - five categories^[The five categories are Intracranial ICA, ICA with involvement of the M1 middle cerebral artery segment, M1 middle cerebral artery segment, M2 middle cerebral artery segment, A1 or A2 anterior cerebral artery segment]
+`extra.ica`	| Extracranial ICA occlusion (1 = Yes, 0 = No)
+`time.rand`	| Time from stroke onset to study randomization, in minutes
+`time.punc`	| Time from stroke onset to groin puncture, in minutes (only if Intervention)
+
+### `fakestroke` Table 1: Attempt 1
+
+Our goal, then, is to take the data in `fakestroke.csv` and use it to generate a Table 1 for the study that compares the 233 patients in the Intervention group to the 267 patients in the Control group, on all of the other variables (except study ID #) available. I'll use the `tableone` package of functions available in R to help me complete this task. We'll make a first attempt, using the `CreateTableOne` function in the `tableone` package. To use the function, we'll need to specify:
+
+- the `vars` or variables we want to place in the rows of our Table 1 (which will include just about everything in the `fakestroke` data except the `studyid` code and the `trt` variable for which we have other plans)
+    - A useful trick here is to use the `dput` function, specifically something like `dput(names(fakestroke))` can be used to generate a list of all of the variables included in the `fakestroke` tibble, and then this can be copied and pasted into the `vars` specification, saving some typing.
+- the `strata` which indicates the levels want to use in the columns of our Table 1 (for us, that's `trt`)
+
+```{r attempt1_fakestroke, warning = FALSE}
+fs.vars <- c("age", "sex", "nihss", "location", 
+          "hx.isch", "afib", "dm", "mrankin", "sbp",
+          "iv.altep", "time.iv", "aspects", 
+          "ia.occlus", "extra.ica", "time.rand", 
+          "time.punc")
+
+fs.trt <- c("trt")
+
+att1 <- CreateTableOne(data = fakestroke, 
+                       vars = fs.vars, 
+                       strata = fs.trt)
+print(att1)
+```
+
+Some of this is very useful, and other parts need to be fixed. 
+
+1. The 1/0 variables (`afib`, `dm`, `extra.ica`) might be better if they were treated as the factors they are, and reported as the Yes/No variables are reported, with counts and percentages rather than with means and standard deviations.
+2. In some cases, we may prefer to re-order the levels of the categorical (factor) variables, particularly the `mrankin` variable, but also the `ia.occlus` variable. It would also be more typical to put the Intervention group to the left and the Control group to the right, so we may need to adjust our `trt` variable's levels accordingly.
+3. For each of the quantitative variables (`age`, `nihss`, `sbp`, `time.iv`, `aspects`, `extra.ica`, `time.rand` and `time.punc`) we should make a decision whether a summary with mean and standard deviation is appropriate, or whether we should instead summarize with, say, the median and quartiles. A mean and standard deviation really only yields an appropriate summary when the data are least approximately Normally distributed. This will make the *p* values a bit more reasonable, too. The `test` column in the first attempt will soon have something useful to tell us.
+4. We've got some warnings (which I've silenced here), having to do with the fact that `time.punc` is only relevant to patients in the Intervention group. We might consider removing that variable from this table, as a result, and summarizing those data separately.
+
+### `fakestroke` Cleaning Up Categorical Variables
+
+Let's specify each of the categorical variables as categorical explicitly. This helps the `CreateTableOne` function treat them appropriately, and display them with counts and percentages. This includes all of the 1/0, Yes/No and multi-categorical variables.
+
+```{r specify_fs_factors}
+fs.factorvars <- c("sex", "location", "hx.isch", "afib", "dm", 
+                   "mrankin", "iv.altep", "ia.occlus", "extra.ica")
+```
+
+Then we simply add a `factorVars = fs.factorvars` call to the `CreateTableOne` function.
+
+We also want to re-order some of those categorical variables, so that the levels are more useful to us. Specifically, we want to:
+
+- place Intervention before Control in the `trt` variable,
+- reorder the `mrankin` scale as 0, 1, 2, > 2, and
+- rearrange the `ia.occlus` variable to the order^[We might also have considered reordering the `ia.occlus` factor by its frequency, using the `fct_infreq` function] presented in @Berkheimer2015.
+
+To accomplish this, we'll use the `fct_relevel` function from the `forcats` package (loaded with the rest of the core `tidyverse` packages) to reorder our levels manually.
+
+```{r adjust_factor_level_order}
+fakestroke <- fakestroke %>%
+    mutate(trt = fct_relevel(trt, "Intervention", "Control"),
+           mrankin = fct_relevel(mrankin, "0", "1", "2", "> 2"),
+           ia.occlus = fct_relevel(ia.occlus, "Intracranial ICA", 
+                                   "ICA with M1", "M1", "M2", 
+                                   "A1 or A2")
+           ) 
+```
+
+### `fakestroke` Table 1: Attempt 2
+
+```{r attempt2_fakestroke, warning = FALSE}
+att2 <- CreateTableOne(data = fakestroke, 
+                       vars = fs.vars,
+                       factorVars = fs.factorvars,
+                       strata = fs.trt)
+print(att2)
+```
+
+The categorical data presentation looks much improved. 
+
+### What summaries should we show?
+
+Now, we'll move on to the issue of making a decision about what type of summary to show for the quantitative variables. Since the `fakestroke` data are just simulated and only match the summary statistics of the original results, not the details, we'll adopt the decisions made by @Berkheimer2015, which was to use medians and interquartile ranges to summarize the distributions of all of the continuous variables **except** systolic blood pressure. 
+
+- Specifying certain quantitative variables as *non-normal* causes R to show them with medians and the 25th and 75th percentiles, rather than means and standard deviations, and also causes those variables to be tested using non-parametric tests, like the Wilcoxon signed rank test, rather than the t test. The `test` column indicates this with the word `nonnorm`.
+- Specifying *exact* tests for certain categorical variables (we'll try this for the `location` and `mrankin` variables) can be done, and these changes will be noted in the `test` column, as well.
+
+To accomplish this, we need to specify which variables should be treated as non-Normal in the `print` statement - notice that we don't need to redo the `CreateTableOne` for this change.
+
+```{r attempt2_withprintchanges, warning = FALSE}
+print(att2, 
+      nonnormal = c("age", "nihss", "time.iv", "aspects", "time.rand",
+                    "time.punc"),
+      exact = c("location", "mrankin"))
+```
+
+### Obtaining a Detailed Summary
+
+If this was a real data set, we'd want to get a more detailed description of the data to make decisions about things like potentially collapsing categories of a variable, or whether or not a normal distribution was useful for a particular continuous variable, etc. You can do this with the `summary` command applied to a created Table 1, which shows, among other things, the effect of changing from normal to non-normal *p* values for continuous variables, and from approximate to "exact" *p* values for categorical factors.
+
+Note in the summary below that we have some missing values here. Often, we'll present this information within the Table 1, as well. 
+
+```{r summary_attempt2, warning = FALSE}
+summary(att2)
+```
+
+Again, I have simulated the data to mirror the results in the published Table 1 for this study. In no way have I captured the full range of the real data, or any of the relationships in that data, so it's more important here to see what's available in the analysis, rather than to interpret it closely in the clinical context.
+
+
