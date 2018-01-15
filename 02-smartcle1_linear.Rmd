@@ -1,0 +1,107 @@
+# Linear Regression on a small SMART data set
+
+## BRFSS and SMART 
+
+The Centers for Disease Control analyzes Behavioral Risk Factor Surveillance System (BRFSS) survey data for specific metropolitan and micropolitan statistical areas (MMSAs) in a program called the [Selected Metropolitan/Micropolitan Area Risk Trends of BRFSS](https://www.cdc.gov/brfss/smart/Smart_data.htm) (SMART BRFSS.)
+
+In this work, we will focus on [data from the 2016 SMART](https://www.cdc.gov/brfss/smart/smart_2016.html), and in particular on data from the Cleveland-Elyria, OH, Metropolitan Statistical Area. The purpose of this survey is to provide localized health information that can help public health practitioners identify local emerging health problems, plan and evaluate local responses, and efficiently allocate resources to specific needs.
+
+### Key resources
+
+- the full data are available in the form of the 2016 SMART BRFSS MMSA Data, found in a zipped [SAS Transport Format](https://www.cdc.gov/brfss/smart/2016/MMSA2016_XPT.zip) file. The data were released in August 2017.
+- the [MMSA Variable Layout PDF](https://www.cdc.gov/brfss/smart/2016/mmsa_varlayout_16.pdf) which simply lists the variables included in the data file
+- the [Calculated Variables PDF](https://www.cdc.gov/brfss/annual_data/2016/pdf/2016_calculated_variables_version4.pdf) which describes the risk factors by data variable names - there is also an [online summary matrix of these calculated variables](https://www.cdc.gov/brfss/annual_data/2016/Summary_Matrix_16.html), as well.
+- the lengthy [2016 Survey Questions PDF](https://www.cdc.gov/brfss/questionnaires/pdf-ques/2016_BRFSS_Questionnaire_FINAL.pdf) which lists all questions asked as part of the BRFSS in 2016
+- the enormous [Codebook for the 2016 BRFSS Survey PDF](https://www.cdc.gov/brfss/annual_data/2016/pdf/codebook16_llcp.pdf) which identifies the variables by name for us.
+
+Later this term, we'll use all of those resources to help construct a more complete data set than we'll study today. I'll also demonstrate how I built the `smartcle1` data set that we'll use in this Chapter.
+
+## The `smartcle1` data: Cookbook
+
+The `smartcle1.csv` data file available on the Data and Code page of [our website](https://github.com/THOMASELOVE/432-2018) describes information on `r ncol(smartcle1)` variables for `r nrow(smartcle1)` respondents to the BRFSS 2016, who live in the Cleveland-Elyria, OH, Metropolitan Statistical Area. The variables in the `smartcle1.csv` file are listed below, along with (in some cases) the BRFSS items that generate these responses.
+
+Variable | Description
+---------: | --------------------------------------------------------
+`SEQNO` | respondent identification number (all begin with 2016)
+`physhealth` | Now thinking about your physical health, which includes physical illness and injury, for how many days during the past 30 days was your physical health not good?
+`menthealth` | Now thinking about your mental health, which includes stress, depression, and problems with emotions, for how many days during the past 30 days was your mental health not good?
+`poorhealth` | During the past 30 days, for about how many days did poor physical or mental health keep you from doing your usual activities, such as self-care, work, or recreation?
+`genhealth` | Would you say that in general, your health is ... (five categories: Excellent, Very Good, Good, Fair or Poor)
+`bmi` | Body mass index, in kg/m^2^
+`female` | Sex, 1 = female, 0 = male
+`internet30` | Have you used the internet in the past 30 days? (1 = yes, 0 = no)
+`exerany` | During the past month, other than your regular job, did you participate in any physical activities or exercises such as running, calisthenics, golf, gardening, or walking for exercise? (1 = yes, 0 = no)
+`sleephrs` | On average, how many hours of sleep do you get in a 24-hour period?
+`alcdays` | How many days during the past 30 days did you have at least one drink of any alcoholic beverage such as beer, wine, a malt beverage or liquor?
+
+```{r smartcle1_structure}
+str(smartcle1)
+```
+
+### Omitting Missing Observations: Complete-Case Analyses
+
+For the purpose of fitting our first few models, we will eliminate the missingness problem, and look only at the *complete cases* in our `smartcle1` data. 
+
+To inspect the missingness in our data, we might consider using the `skim` function from the `skimr` package. We'll exclude the respondent identifier code (`SEQNO`) from this summary as uninteresting. In this case, we'll use the `skim_with` command to set some options that will make this book work a bit more effectively, by eliminating the spark graphs that we'll demonstrate in class.
+
+```{r}
+skim_with(numeric = list(hist = NULL), ts = list(line_graph = NULL))
+
+smartcle1 %>% skim(-SEQNO)
+```
+
+Now, we'll create a new tibble called `smartcle2` which contains every variable except `poorhealth`, and which includes all respondents with complete data on the variables (other than `poorhealth`). We'll store those observations with complete data in the `smartcle2` tibble.
+
+```{r create_smartcle2}
+smartcle2 <- smartcle1 %>% 
+    select(-poorhealth) %>%
+    filter(complete.cases(.))
+
+smartcle2
+```
+
+Note that there are only `r nrow(smartcle2)` respondents with **complete** data on the `r ncol(smartcle2)` variables (excluding `poorhealth`) in the `smartcle2` tibble, as compared to our original `smartcle1` data which described `r nrow(smartcle1)` respondents and `r ncol(smartcle1)` variables, but with lots of missing data.
+
+## Model A: Predicting `physhealth`
+
+We'll begin by investigating the problem of predicting `physhealth`, at first with just two predictor variables: `exerany` and `bmi`, in our new `smartcle2` data set. 
+
+### Graphing The Data
+
+We'll start by building an exploratory figure to show the relationship between `bmi` and `physhealth` within each of the two `exerany` groups.
+
+```{r gr_smartcle2_1_fig}
+ggplot(smartcle2, aes(x = bmi, y = physhealth, group = exerany, color = factor(exerany))) +
+    geom_point() +
+    geom_smooth(method = "lm", se = FALSE) + 
+    theme_bw()
+```
+
+The figure *could* be improved by separating the two groups into facets.
+
+```{r gr_smartcle2_2_fig}
+ggplot(smartcle2, aes(x = bmi, y = physhealth, group = exerany, color = factor(exerany))) +
+    geom_point() +
+    geom_smooth(method = "lm", se = FALSE) + 
+    theme_bw() + 
+    guides(color = FALSE) +
+    facet_wrap(~ exerany)
+```
+
+Now, what can we learn from these plots?
+
+1. Does `physhealth` look like a good candidate for a linear model?
+2. Does there seem to be a meaningful difference in the slopes of the two fitted lines?
+3. In what BMI range can we make a reasonable prediction of `physhealth`?
+
+### Building Model A
+
+First, we'll fit a simple model describing the main effects but not the interaction of `exerany` and `bmi`, without doing any of the exploratory ground work we should do in advance. 
+
+```{r modelA_smartcle2}
+modA <- lm(physhealth ~ exerany * bmi, data = smartcle2)
+glance(modA)
+tidy(modA)
+summary(modA)
+```
+

@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html >
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Data Science for Biological, Medical and Health Research: Notes for 432</title>
+  <meta name="description" content="These are the Course Notes for 432.">
+  <meta name="generator" content="bookdown 0.5 and GitBook 2.6.7">
+
+  <meta property="og:title" content="Data Science for Biological, Medical and Health Research: Notes for 432" />
+  <meta property="og:type" content="book" />
+  
+  
+  <meta property="og:description" content="These are the Course Notes for 432." />
+  <meta name="github-repo" content="thomaselove/432-notes" />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Data Science for Biological, Medical and Health Research: Notes for 432" />
+  
+  <meta name="twitter:description" content="These are the Course Notes for 432." />
+  
+
+<meta name="author" content="Thomas E. Love, Ph.D.">
+
+
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  
+  
+<link rel="prev" href="building-table-1.html">
+<link rel="next" href="references.html">
+<script src="libs/jquery-2.2.3/jquery.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">432 Course Notes</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Introduction</a></li>
+<li class="chapter" data-level="" data-path="r-packages-used-in-these-notes.html"><a href="r-packages-used-in-these-notes.html"><i class="fa fa-check"></i>R Packages used in these notes</a></li>
+<li class="chapter" data-level="" data-path="data-used-in-these-notes.html"><a href="data-used-in-these-notes.html"><i class="fa fa-check"></i>Data used in these notes</a></li>
+<li class="chapter" data-level="1" data-path="building-table-1.html"><a href="building-table-1.html"><i class="fa fa-check"></i><b>1</b> Building Table 1</a><ul>
+<li class="chapter" data-level="1.1" data-path="building-table-1.html"><a href="building-table-1.html#two-examples-from-the-new-england-journal-of-medicine"><i class="fa fa-check"></i><b>1.1</b> Two examples from the <em>New England Journal of Medicine</em></a><ul>
+<li class="chapter" data-level="1.1.1" data-path="building-table-1.html"><a href="building-table-1.html#a-simple-table-1"><i class="fa fa-check"></i><b>1.1.1</b> A simple Table 1</a></li>
+<li class="chapter" data-level="1.1.2" data-path="building-table-1.html"><a href="building-table-1.html#a-group-comparison"><i class="fa fa-check"></i><b>1.1.2</b> A group comparison</a></li>
+</ul></li>
+<li class="chapter" data-level="1.2" data-path="building-table-1.html"><a href="building-table-1.html#the-mr-clean-trial"><i class="fa fa-check"></i><b>1.2</b> The MR CLEAN trial</a></li>
+<li class="chapter" data-level="1.3" data-path="building-table-1.html"><a href="building-table-1.html#simulated-fakestroke-data"><i class="fa fa-check"></i><b>1.3</b> Simulated <code>fakestroke</code> data</a></li>
+<li class="chapter" data-level="1.4" data-path="building-table-1.html"><a href="building-table-1.html#building-table-1-for-fakestroke-attempt-1"><i class="fa fa-check"></i><b>1.4</b> Building Table 1 for <code>fakestroke</code>: Attempt 1</a><ul>
+<li class="chapter" data-level="1.4.1" data-path="building-table-1.html"><a href="building-table-1.html#some-of-this-is-very-useful-and-other-parts-need-to-be-fixed."><i class="fa fa-check"></i><b>1.4.1</b> Some of this is very useful, and other parts need to be fixed.</a></li>
+<li class="chapter" data-level="1.4.2" data-path="building-table-1.html"><a href="building-table-1.html#fakestroke-cleaning-up-categorical-variables"><i class="fa fa-check"></i><b>1.4.2</b> <code>fakestroke</code> Cleaning Up Categorical Variables</a></li>
+</ul></li>
+<li class="chapter" data-level="1.5" data-path="building-table-1.html"><a href="building-table-1.html#fakestroke-table-1-attempt-2"><i class="fa fa-check"></i><b>1.5</b> <code>fakestroke</code> Table 1: Attempt 2</a><ul>
+<li class="chapter" data-level="1.5.1" data-path="building-table-1.html"><a href="building-table-1.html#what-summaries-should-we-show"><i class="fa fa-check"></i><b>1.5.1</b> What summaries should we show?</a></li>
+</ul></li>
+<li class="chapter" data-level="1.6" data-path="building-table-1.html"><a href="building-table-1.html#obtaining-a-more-detailed-summary"><i class="fa fa-check"></i><b>1.6</b> Obtaining a more detailed Summary</a></li>
+<li class="chapter" data-level="1.7" data-path="building-table-1.html"><a href="building-table-1.html#exporting-the-completed-table-1-from-r-to-excel-or-word"><i class="fa fa-check"></i><b>1.7</b> Exporting the Completed Table 1 from R to Excel or Word</a><ul>
+<li class="chapter" data-level="1.7.1" data-path="building-table-1.html"><a href="building-table-1.html#approach-a-save-and-open-in-excel"><i class="fa fa-check"></i><b>1.7.1</b> Approach A: Save and open in Excel</a></li>
+<li class="chapter" data-level="1.7.2" data-path="building-table-1.html"><a href="building-table-1.html#approach-b-produce-the-table-so-you-can-cut-and-paste-it"><i class="fa fa-check"></i><b>1.7.2</b> Approach B: Produce the Table so you can cut and paste it</a></li>
+</ul></li>
+<li class="chapter" data-level="1.8" data-path="building-table-1.html"><a href="building-table-1.html#a-controlled-biological-experiment---the-blood-brain-barrier"><i class="fa fa-check"></i><b>1.8</b> A Controlled Biological Experiment - The Blood-Brain Barrier</a></li>
+<li class="chapter" data-level="1.9" data-path="building-table-1.html"><a href="building-table-1.html#the-bloodbrain.csv-file"><i class="fa fa-check"></i><b>1.9</b> The <code>bloodbrain.csv</code> file</a></li>
+<li class="chapter" data-level="1.10" data-path="building-table-1.html"><a href="building-table-1.html#a-table-1-for-bloodbrain"><i class="fa fa-check"></i><b>1.10</b> A Table 1 for <code>bloodbrain</code></a><ul>
+<li class="chapter" data-level="1.10.1" data-path="building-table-1.html"><a href="building-table-1.html#generate-final-table-1-for-bloodbrain"><i class="fa fa-check"></i><b>1.10.1</b> Generate final Table 1 for <code>bloodbrain</code></a></li>
+<li class="chapter" data-level="1.10.2" data-path="building-table-1.html"><a href="building-table-1.html#a-more-finished-version-after-cleanup-in-word"><i class="fa fa-check"></i><b>1.10.2</b> A More Finished Version (after Cleanup in Word)</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html"><i class="fa fa-check"></i><b>2</b> Linear Regression on a small SMART data set</a><ul>
+<li class="chapter" data-level="2.1" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#brfss-and-smart"><i class="fa fa-check"></i><b>2.1</b> BRFSS and SMART</a><ul>
+<li class="chapter" data-level="2.1.1" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#key-resources"><i class="fa fa-check"></i><b>2.1.1</b> Key resources</a></li>
+</ul></li>
+<li class="chapter" data-level="2.2" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#the-smartcle1-data-cookbook"><i class="fa fa-check"></i><b>2.2</b> The <code>smartcle1</code> data: Cookbook</a><ul>
+<li class="chapter" data-level="2.2.1" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#omitting-missing-observations-complete-case-analyses"><i class="fa fa-check"></i><b>2.2.1</b> Omitting Missing Observations: Complete-Case Analyses</a></li>
+</ul></li>
+<li class="chapter" data-level="2.3" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#model-a-predicting-physhealth"><i class="fa fa-check"></i><b>2.3</b> Model A: Predicting <code>physhealth</code></a><ul>
+<li class="chapter" data-level="2.3.1" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#graphing-the-data"><i class="fa fa-check"></i><b>2.3.1</b> Graphing The Data</a></li>
+<li class="chapter" data-level="2.3.2" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#building-model-a"><i class="fa fa-check"></i><b>2.3.2</b> Building Model A</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>References</a></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Data Science for Biological, Medical and Health Research: Notes for 432</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="linear-regression-on-a-small-smart-data-set" class="section level1">
+<h1><span class="header-section-number">Chapter 2</span> Linear Regression on a small SMART data set</h1>
+<div id="brfss-and-smart" class="section level2">
+<h2><span class="header-section-number">2.1</span> BRFSS and SMART</h2>
+<p>The Centers for Disease Control analyzes Behavioral Risk Factor Surveillance System (BRFSS) survey data for specific metropolitan and micropolitan statistical areas (MMSAs) in a program called the <a href="https://www.cdc.gov/brfss/smart/Smart_data.htm">Selected Metropolitan/Micropolitan Area Risk Trends of BRFSS</a> (SMART BRFSS.)</p>
+<p>In this work, we will focus on <a href="https://www.cdc.gov/brfss/smart/smart_2016.html">data from the 2016 SMART</a>, and in particular on data from the Cleveland-Elyria, OH, Metropolitan Statistical Area. The purpose of this survey is to provide localized health information that can help public health practitioners identify local emerging health problems, plan and evaluate local responses, and efficiently allocate resources to specific needs.</p>
+<div id="key-resources" class="section level3">
+<h3><span class="header-section-number">2.1.1</span> Key resources</h3>
+<ul>
+<li>the full data are available in the form of the 2016 SMART BRFSS MMSA Data, found in a zipped <a href="https://www.cdc.gov/brfss/smart/2016/MMSA2016_XPT.zip">SAS Transport Format</a> file. The data were released in August 2017.</li>
+<li>the <a href="https://www.cdc.gov/brfss/smart/2016/mmsa_varlayout_16.pdf">MMSA Variable Layout PDF</a> which simply lists the variables included in the data file</li>
+<li>the <a href="https://www.cdc.gov/brfss/annual_data/2016/pdf/2016_calculated_variables_version4.pdf">Calculated Variables PDF</a> which describes the risk factors by data variable names - there is also an <a href="https://www.cdc.gov/brfss/annual_data/2016/Summary_Matrix_16.html">online summary matrix of these calculated variables</a>, as well.</li>
+<li>the lengthy <a href="https://www.cdc.gov/brfss/questionnaires/pdf-ques/2016_BRFSS_Questionnaire_FINAL.pdf">2016 Survey Questions PDF</a> which lists all questions asked as part of the BRFSS in 2016</li>
+<li>the enormous <a href="https://www.cdc.gov/brfss/annual_data/2016/pdf/codebook16_llcp.pdf">Codebook for the 2016 BRFSS Survey PDF</a> which identifies the variables by name for us.</li>
+</ul>
+<p>Later this term, we’ll use all of those resources to help construct a more complete data set than we’ll study today. I’ll also demonstrate how I built the <code>smartcle1</code> data set that we’ll use in this Chapter.</p>
+</div>
+</div>
+<div id="the-smartcle1-data-cookbook" class="section level2">
+<h2><span class="header-section-number">2.2</span> The <code>smartcle1</code> data: Cookbook</h2>
+<p>The <code>smartcle1.csv</code> data file available on the Data and Code page of <a href="https://github.com/THOMASELOVE/432-2018">our website</a> describes information on 11 variables for 1036 respondents to the BRFSS 2016, who live in the Cleveland-Elyria, OH, Metropolitan Statistical Area. The variables in the <code>smartcle1.csv</code> file are listed below, along with (in some cases) the BRFSS items that generate these responses.</p>
+<table style="width:94%;">
+<colgroup>
+<col width="15%" />
+<col width="79%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="right">Variable</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right"><code>SEQNO</code></td>
+<td>respondent identification number (all begin with 2016)</td>
+</tr>
+<tr class="even">
+<td align="right"><code>physhealth</code></td>
+<td>Now thinking about your physical health, which includes physical illness and injury, for how many days during the past 30 days was your physical health not good?</td>
+</tr>
+<tr class="odd">
+<td align="right"><code>menthealth</code></td>
+<td>Now thinking about your mental health, which includes stress, depression, and problems with emotions, for how many days during the past 30 days was your mental health not good?</td>
+</tr>
+<tr class="even">
+<td align="right"><code>poorhealth</code></td>
+<td>During the past 30 days, for about how many days did poor physical or mental health keep you from doing your usual activities, such as self-care, work, or recreation?</td>
+</tr>
+<tr class="odd">
+<td align="right"><code>genhealth</code></td>
+<td>Would you say that in general, your health is … (five categories: Excellent, Very Good, Good, Fair or Poor)</td>
+</tr>
+<tr class="even">
+<td align="right"><code>bmi</code></td>
+<td>Body mass index, in kg/m<sup>2</sup></td>
+</tr>
+<tr class="odd">
+<td align="right"><code>female</code></td>
+<td>Sex, 1 = female, 0 = male</td>
+</tr>
+<tr class="even">
+<td align="right"><code>internet30</code></td>
+<td>Have you used the internet in the past 30 days? (1 = yes, 0 = no)</td>
+</tr>
+<tr class="odd">
+<td align="right"><code>exerany</code></td>
+<td>During the past month, other than your regular job, did you participate in any physical activities or exercises such as running, calisthenics, golf, gardening, or walking for exercise? (1 = yes, 0 = no)</td>
+</tr>
+<tr class="even">
+<td align="right"><code>sleephrs</code></td>
+<td>On average, how many hours of sleep do you get in a 24-hour period?</td>
+</tr>
+<tr class="odd">
+<td align="right"><code>alcdays</code></td>
+<td>How many days during the past 30 days did you have at least one drink of any alcoholic beverage such as beer, wine, a malt beverage or liquor?</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">str</span>(smartcle1)</code></pre></div>
+<pre><code>Classes &#39;tbl_df&#39;, &#39;tbl&#39; and &#39;data.frame&#39;:   1036 obs. of  11 variables:
+ $ SEQNO     : num  2.02e+09 2.02e+09 2.02e+09 2.02e+09 2.02e+09 ...
+ $ physhealth: int  0 0 1 0 5 4 2 2 0 0 ...
+ $ menthealth: int  0 0 5 0 0 18 0 3 0 0 ...
+ $ poorhealth: int  NA NA 0 NA 0 6 0 0 NA NA ...
+ $ genhealth : Factor w/ 5 levels &quot;1_Excellent&quot;,..: 2 1 2 3 1 2 3 3 2 3 ...
+ $ bmi       : num  26.7 23.7 26.9 21.7 24.1 ...
+ $ female    : int  1 0 0 1 0 0 1 1 0 0 ...
+ $ internet30: int  1 1 1 1 1 1 1 1 1 1 ...
+ $ exerany   : int  1 1 0 1 1 1 1 1 1 0 ...
+ $ sleephrs  : int  6 6 8 9 7 5 9 7 7 7 ...
+ $ alcdays   : int  1 4 4 3 2 28 4 2 4 25 ...</code></pre>
+<div id="omitting-missing-observations-complete-case-analyses" class="section level3">
+<h3><span class="header-section-number">2.2.1</span> Omitting Missing Observations: Complete-Case Analyses</h3>
+<p>For the purpose of fitting our first few models, we will eliminate the missingness problem, and look only at the <em>complete cases</em> in our <code>smartcle1</code> data.</p>
+<p>To inspect the missingness in our data, we might consider using the <code>skim</code> function from the <code>skimr</code> package. We’ll exclude the respondent identifier code (<code>SEQNO</code>) from this summary as uninteresting. In this case, we’ll use the <code>skim_with</code> command to set some options that will make this book work a bit more effectively, by eliminating the spark graphs that we’ll demonstrate in class.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">skim_with</span>(<span class="dt">numeric =</span> <span class="kw">list</span>(<span class="dt">hist =</span> <span class="ot">NULL</span>), <span class="dt">ts =</span> <span class="kw">list</span>(<span class="dt">line_graph =</span> <span class="ot">NULL</span>))
+
+smartcle1 <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">skim</span>(<span class="op">-</span>SEQNO)</code></pre></div>
+<pre><code>Skim summary statistics
+ n obs: 1036 
+ n variables: 11 
+
+Variable type: factor 
+  variable missing complete    n n_unique
+ genhealth       3     1033 1036        5
+                             top_counts ordered
+ 2_V: 350, 3_G: 344, 1_E: 173, 4_F: 122   FALSE
+
+Variable type: integer 
+   variable missing complete    n mean   sd p0 p25 median p75 p100
+    alcdays      46      990 1036 4.65 8.05  0   0      1   4   30
+    exerany       3     1033 1036 0.76 0.43  0   1      1   1    1
+     female       0     1036 1036 0.6  0.49  0   0      1   1    1
+ internet30       6     1030 1036 0.81 0.39  0   1      1   1    1
+ menthealth      11     1025 1036 2.72 6.82  0   0      0   2   30
+ physhealth      17     1019 1036 3.97 8.67  0   0      0   2   30
+ poorhealth     543      493 1036 4.07 8.09  0   0      0   3   30
+   sleephrs       8     1028 1036 7.02 1.53  1   6      7   8   20
+     hist
+ &lt;U+2587&gt;&lt;U+2582&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2581&gt;
+ &lt;U+2582&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2587&gt;
+ &lt;U+2585&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2587&gt;
+ &lt;U+2582&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2587&gt;
+ &lt;U+2587&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2581&gt;
+ &lt;U+2587&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2581&gt;
+ &lt;U+2587&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2581&gt;
+ &lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2587&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2581&gt;
+
+Variable type: numeric 
+ variable missing complete    n  mean   sd    p0  p25 median   p75  p100
+      bmi      84      952 1036 27.89 6.47 12.71 23.7  26.68 30.53 66.06</code></pre>
+<p>Now, we’ll create a new tibble called <code>smartcle2</code> which contains every variable except <code>poorhealth</code>, and which includes all respondents with complete data on the variables (other than <code>poorhealth</code>). We’ll store those observations with complete data in the <code>smartcle2</code> tibble.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">smartcle2 &lt;-<span class="st"> </span>smartcle1 <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">    </span><span class="kw">select</span>(<span class="op">-</span>poorhealth) <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">filter</span>(<span class="kw">complete.cases</span>(.))
+
+smartcle2</code></pre></div>
+<pre><code># A tibble: 896 x 10
+     SEQNO physhealth menthealth genhealth   bmi female internet30 exerany
+     &lt;dbl&gt;      &lt;int&gt;      &lt;int&gt; &lt;fct&gt;     &lt;dbl&gt;  &lt;int&gt;      &lt;int&gt;   &lt;int&gt;
+ 1  2.02e9          0          0 2_VeryGo~  26.7      1          1       1
+ 2  2.02e9          0          0 1_Excell~  23.7      0          1       1
+ 3  2.02e9          1          5 2_VeryGo~  26.9      0          1       0
+ 4  2.02e9          0          0 3_Good     21.7      1          1       1
+ 5  2.02e9          5          0 1_Excell~  24.1      0          1       1
+ 6  2.02e9          4         18 2_VeryGo~  27.6      0          1       1
+ 7  2.02e9          2          0 3_Good     25.7      1          1       1
+ 8  2.02e9          2          3 3_Good     28.5      1          1       1
+ 9  2.02e9          0          0 2_VeryGo~  28.6      0          1       1
+10  2.02e9          0          0 3_Good     23.1      0          1       0
+# ... with 886 more rows, and 2 more variables: sleephrs &lt;int&gt;, alcdays
+#   &lt;int&gt;</code></pre>
+<p>Note that there are only 896 respondents with <strong>complete</strong> data on the 10 variables (excluding <code>poorhealth</code>) in the <code>smartcle2</code> tibble, as compared to our original <code>smartcle1</code> data which described 1036 respondents and 11 variables, but with lots of missing data.</p>
+</div>
+</div>
+<div id="model-a-predicting-physhealth" class="section level2">
+<h2><span class="header-section-number">2.3</span> Model A: Predicting <code>physhealth</code></h2>
+<p>We’ll begin by investigating the problem of predicting <code>physhealth</code>, at first with just two predictor variables: <code>exerany</code> and <code>bmi</code>, in our new <code>smartcle2</code> data set.</p>
+<div id="graphing-the-data" class="section level3">
+<h3><span class="header-section-number">2.3.1</span> Graphing The Data</h3>
+<p>We’ll start by building an exploratory figure to show the relationship between <code>bmi</code> and <code>physhealth</code> within each of the two <code>exerany</code> groups.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">ggplot</span>(smartcle2, <span class="kw">aes</span>(<span class="dt">x =</span> bmi, <span class="dt">y =</span> physhealth, <span class="dt">group =</span> exerany, <span class="dt">color =</span> <span class="kw">factor</span>(exerany))) <span class="op">+</span>
+<span class="st">    </span><span class="kw">geom_point</span>() <span class="op">+</span>
+<span class="st">    </span><span class="kw">geom_smooth</span>(<span class="dt">method =</span> <span class="st">&quot;lm&quot;</span>, <span class="dt">se =</span> <span class="ot">FALSE</span>) <span class="op">+</span><span class="st"> </span>
+<span class="st">    </span><span class="kw">theme_bw</span>()</code></pre></div>
+<p><img src="bookdown-demo_files/figure-html/gr_smartcle2_1_fig-1.png" width="672" /></p>
+<p>The figure <em>could</em> be improved by separating the two groups into facets.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">ggplot</span>(smartcle2, <span class="kw">aes</span>(<span class="dt">x =</span> bmi, <span class="dt">y =</span> physhealth, <span class="dt">group =</span> exerany, <span class="dt">color =</span> <span class="kw">factor</span>(exerany))) <span class="op">+</span>
+<span class="st">    </span><span class="kw">geom_point</span>() <span class="op">+</span>
+<span class="st">    </span><span class="kw">geom_smooth</span>(<span class="dt">method =</span> <span class="st">&quot;lm&quot;</span>, <span class="dt">se =</span> <span class="ot">FALSE</span>) <span class="op">+</span><span class="st"> </span>
+<span class="st">    </span><span class="kw">theme_bw</span>() <span class="op">+</span><span class="st"> </span>
+<span class="st">    </span><span class="kw">guides</span>(<span class="dt">color =</span> <span class="ot">FALSE</span>) <span class="op">+</span>
+<span class="st">    </span><span class="kw">facet_wrap</span>(<span class="op">~</span><span class="st"> </span>exerany)</code></pre></div>
+<p><img src="bookdown-demo_files/figure-html/gr_smartcle2_2_fig-1.png" width="672" /></p>
+<p>Now, what can we learn from these plots?</p>
+<ol style="list-style-type: decimal">
+<li>Does <code>physhealth</code> look like a good candidate for a linear model?</li>
+<li>Does there seem to be a meaningful difference in the slopes of the two fitted lines?</li>
+<li>In what BMI range can we make a reasonable prediction of <code>physhealth</code>?</li>
+</ol>
+</div>
+<div id="building-model-a" class="section level3">
+<h3><span class="header-section-number">2.3.2</span> Building Model A</h3>
+<p>First, we’ll fit a simple model describing the main effects but not the interaction of <code>exerany</code> and <code>bmi</code>, without doing any of the exploratory ground work we should do in advance.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">modA &lt;-<span class="st"> </span><span class="kw">lm</span>(physhealth <span class="op">~</span><span class="st"> </span>exerany <span class="op">*</span><span class="st"> </span>bmi, <span class="dt">data =</span> smartcle2)
+<span class="kw">glance</span>(modA)</code></pre></div>
+<pre><code>   r.squared adj.r.squared    sigma statistic     p.value df    logLik
+1 0.07607716     0.0729698 8.318521  24.48286 3.14356e-15  4 -3167.527
+       AIC      BIC deviance df.residual
+1 6345.053 6369.043 61724.43         892</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">tidy</span>(modA)</code></pre></div>
+<pre><code>         term    estimate std.error  statistic    p.value
+1 (Intercept)  5.13460484 2.3570652  2.1783890 0.02963831
+2     exerany -7.06992980 2.8044237 -2.5209921 0.01187578
+3         bmi  0.09527214 0.0772901  1.2326565 0.21802872
+4 exerany:bmi  0.07732883 0.0944822  0.8184487 0.41331959</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(modA)</code></pre></div>
+<pre><code>
+Call:
+lm(formula = physhealth ~ exerany * bmi, data = smartcle2)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-10.0992  -3.4231  -2.3780  -0.9199  28.9493 
+
+Coefficients:
+            Estimate Std. Error t value Pr(&gt;|t|)  
+(Intercept)  5.13460    2.35707   2.178   0.0296 *
+exerany     -7.06993    2.80442  -2.521   0.0119 *
+bmi          0.09527    0.07729   1.233   0.2180  
+exerany:bmi  0.07733    0.09448   0.818   0.4133  
+---
+Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+
+Residual standard error: 8.319 on 892 degrees of freedom
+Multiple R-squared:  0.07608,   Adjusted R-squared:  0.07297 
+F-statistic: 24.48 on 3 and 892 DF,  p-value: 3.144e-15</code></pre>
+
+</div>
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="building-table-1.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="references.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"google": false,
+"weibo": false,
+"instapper": false,
+"vk": false,
+"all": ["facebook", "google", "twitter", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": "https://github.com/rstudio/bookdown-demo/edit/master/02-smartcle1_linear.Rmd",
+"text": "Edit"
+},
+"download": ["bookdown-demo.pdf", "bookdown-demo.epub"],
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+</body>
+
+</html>

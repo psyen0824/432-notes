@@ -31,8 +31,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   
   
-
-<link rel="next" href="r-packages-used-in-these-notes.html">
+<link rel="prev" href="building-table-1.html">
+<link rel="next" href="references.html">
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
@@ -131,17 +131,12 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li class="chapter" data-level="1.10.2" data-path="building-table-1.html"><a href="building-table-1.html#a-more-finished-version-after-cleanup-in-word"><i class="fa fa-check"></i><b>1.10.2</b> A More Finished Version (after Cleanup in Word)</a></li>
 </ul></li>
 </ul></li>
-<li class="chapter" data-level="2" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html"><i class="fa fa-check"></i><b>2</b> Linear Regression on a small SMART data set</a><ul>
-<li class="chapter" data-level="2.1" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#brfss-and-smart"><i class="fa fa-check"></i><b>2.1</b> BRFSS and SMART</a><ul>
-<li class="chapter" data-level="2.1.1" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#key-resources"><i class="fa fa-check"></i><b>2.1.1</b> Key resources</a></li>
+<li class="chapter" data-level="2" data-path="linear-regression-on-smart-data.html"><a href="linear-regression-on-smart-data.html"><i class="fa fa-check"></i><b>2</b> Linear Regression on SMART data</a><ul>
+<li class="chapter" data-level="2.1" data-path="linear-regression-on-smart-data.html"><a href="linear-regression-on-smart-data.html#brfss-and-smart"><i class="fa fa-check"></i><b>2.1</b> BRFSS and SMART</a><ul>
+<li class="chapter" data-level="2.1.1" data-path="linear-regression-on-smart-data.html"><a href="linear-regression-on-smart-data.html#key-resources"><i class="fa fa-check"></i><b>2.1.1</b> Key resources</a></li>
 </ul></li>
-<li class="chapter" data-level="2.2" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#the-smartcle1-data-cookbook"><i class="fa fa-check"></i><b>2.2</b> The <code>smartcle1</code> data: Cookbook</a><ul>
-<li class="chapter" data-level="2.2.1" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#omitting-missing-observations-complete-case-analyses"><i class="fa fa-check"></i><b>2.2.1</b> Omitting Missing Observations: Complete-Case Analyses</a></li>
-</ul></li>
-<li class="chapter" data-level="2.3" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#model-a-predicting-physhealth"><i class="fa fa-check"></i><b>2.3</b> Model A: Predicting <code>physhealth</code></a><ul>
-<li class="chapter" data-level="2.3.1" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#graphing-the-data"><i class="fa fa-check"></i><b>2.3.1</b> Graphing The Data</a></li>
-<li class="chapter" data-level="2.3.2" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#building-model-a"><i class="fa fa-check"></i><b>2.3.2</b> Building Model A</a></li>
-</ul></li>
+<li class="chapter" data-level="2.2" data-path="linear-regression-on-smart-data.html"><a href="linear-regression-on-smart-data.html#the-smartcle1-data-cookbook"><i class="fa fa-check"></i><b>2.2</b> The <code>smartcle1</code> data: Cookbook</a></li>
+<li class="chapter" data-level="2.3" data-path="linear-regression-on-smart-data.html"><a href="linear-regression-on-smart-data.html#model-a-predicting-physhealth"><i class="fa fa-check"></i><b>2.3</b> Model A: Predicting <code>physhealth</code></a></li>
 </ul></li>
 <li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>References</a></li>
 <li class="divider"></li>
@@ -164,35 +159,144 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="header">
-<h1 class="title">Data Science for Biological, Medical and Health Research: Notes for 432</h1>
-<h4 class="author"><em>Thomas E. Love, Ph.D.</em></h4>
-<h4 class="date"><em>Version: 2018-01-15</em></h4>
-</div>
-<div id="introduction" class="section level1 unnumbered">
-<h1>Introduction</h1>
-<p>These Notes provide a series of examples using R to work through issues that are likely to come up in PQHS/CRSP/MPHP 432.</p>
-<p>While these Notes share some of the features of a textbook, they are neither comprehensive nor completely original. The main purpose is to give students in 432 a set of common materials on which to draw during the course. In class, we will sometimes:</p>
+<div id="linear-regression-on-smart-data" class="section level1">
+<h1><span class="header-section-number">Chapter 2</span> Linear Regression on SMART data</h1>
+<div id="brfss-and-smart" class="section level2">
+<h2><span class="header-section-number">2.1</span> BRFSS and SMART</h2>
+<p>The Centers for Disease Control analyzes Behavioral Risk Factor Surveillance System (BRFSS) survey data for specific metropolitan and micropolitan statistical areas (MMSAs) in a program called the <a href="https://www.cdc.gov/brfss/smart/Smart_data.htm">Selected Metropolitan/Micropolitan Area Risk Trends of BRFSS</a> (SMART BRFSS.)</p>
+<p>In this work, we will focus on <a href="https://www.cdc.gov/brfss/smart/smart_2016.html">data from the 2016 SMART</a>, and in particular on data from the Cleveland-Elyria, OH, Metropolitan Statistical Area. The purpose of this survey is to provide localized health information that can help public health practitioners identify local emerging health problems, plan and evaluate local responses, and efficiently allocate resources to specific needs.</p>
+<div id="key-resources" class="section level3">
+<h3><span class="header-section-number">2.1.1</span> Key resources</h3>
 <ul>
-<li>reiterate points made in this document,</li>
-<li>amplify what is here,</li>
-<li>simplify the presentation of things done here,</li>
-<li>use new examples to show some of the same techniques,</li>
-<li>refer to issues not mentioned in this document,</li>
+<li>the full data are available in the form of the 2016 SMART BRFSS MMSA Data, found in a zipped <a href="https://www.cdc.gov/brfss/smart/2016/MMSA2016_XPT.zip">SAS Transport Format</a> file. The data were released in August 2017.</li>
+<li>the <a href="https://www.cdc.gov/brfss/smart/2016/mmsa_varlayout_16.pdf">MMSA Variable Layout PDF</a> which simply lists the variables included in the data file</li>
+<li>the <a href="https://www.cdc.gov/brfss/annual_data/2016/pdf/2016_calculated_variables_version4.pdf">Calculated Variables PDF</a> which describes the risk factors by data variable names - there is also an <a href="https://www.cdc.gov/brfss/annual_data/2016/Summary_Matrix_16.html">online summary matrix of these calculated variables</a>, as well.</li>
+<li>the lengthy <a href="https://www.cdc.gov/brfss/questionnaires/pdf-ques/2016_BRFSS_Questionnaire_FINAL.pdf">2016 Survey Questions PDF</a> which lists all questions asked as part of the BRFSS in 2016</li>
+<li>the enormous <a href="https://www.cdc.gov/brfss/annual_data/2016/pdf/codebook16_llcp.pdf">Codebook for the 2016 BRFSS Survey PDF</a> which identifies the variables by name for us.</li>
 </ul>
-<p>but what we don’t (always) do is follow these notes very precisely. We assume instead that you will read the materials and try to learn from them, just as you will attend classes and try to learn from them. We welcome feedback of all kinds on this document or anything else. Just email us at <code>431-help at case dot edu</code>, or submit a pull request. Note that we still use <code>431-help</code> even though we’re now in 432.</p>
-<p>What you will mostly find are brief explanations of a key idea or summary, accompanied (most of the time) by R code and a demonstration of the results of applying that code.</p>
-<p>Everything you see here is available to you as HTML or PDF. You will also have access to the R Markdown files, which contain the code which generates everything in the document, including all of the R results. We will demonstrate the use of R Markdown (this document is generated with the additional help of an R package called bookdown) and R Studio (the “program” which we use to interface with the R language) in class.</p>
-<p>To download the data and R code related to these notes, visit the Data and Code section of <a href="https://github.com/THOMASELOVE/432-2018">the 432 course website</a>.</p>
+<p>Later this term, we’ll use all of those resources to help construct a more complete data set than we’ll study today. I’ll also demonstrate how I built the <code>smartcle1</code> data set that we’ll use in this Chapter.</p>
+</div>
+</div>
+<div id="the-smartcle1-data-cookbook" class="section level2">
+<h2><span class="header-section-number">2.2</span> The <code>smartcle1</code> data: Cookbook</h2>
+<p>The <code>smartcle1.csv</code> data file available on the Data and Code page of <a href="https://github.com/THOMASELOVE/432-2018">our website</a> describes information on 11 variables for 1036 respondents to the BRFSS 2016, who live in the Cleveland-Elyria, OH, Metropolitan Statistical Area. The variables in the <code>smartcle1.csv</code> file are listed below, along with (in some cases) the BRFSS items that generate these responses.</p>
+<table style="width:94%;">
+<colgroup>
+<col width="15%" />
+<col width="79%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="right">Variable</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right"><code>SEQNO</code></td>
+<td>respondent identification number (all begin with 2016)</td>
+</tr>
+<tr class="even">
+<td align="right"><code>physhealth</code></td>
+<td>Now thinking about your physical health, which includes physical illness and injury, for how many days during the past 30 days was your physical health not good?</td>
+</tr>
+<tr class="odd">
+<td align="right"><code>menthealth</code></td>
+<td>Now thinking about your mental health, which includes stress, depression, and problems with emotions, for how many days during the past 30 days was your mental health not good?</td>
+</tr>
+<tr class="even">
+<td align="right"><code>poorhealth</code></td>
+<td>During the past 30 days, for about how many days did poor physical or mental health keep you from doing your usual activities, such as self-care, work, or recreation?</td>
+</tr>
+<tr class="odd">
+<td align="right"><code>genhealth</code></td>
+<td>Would you say that in general, your health is … (five categories: Excellent, Very Good, Good, Fair or Poor)</td>
+</tr>
+<tr class="even">
+<td align="right"><code>bmi</code></td>
+<td>Body mass index, in kg/m<sup>2</sup></td>
+</tr>
+<tr class="odd">
+<td align="right"><code>female</code></td>
+<td>Sex, 1 = female, 0 = male</td>
+</tr>
+<tr class="even">
+<td align="right"><code>internet30</code></td>
+<td>Have you used the internet in the past 30 days? (1 = yes, 0 = no)</td>
+</tr>
+<tr class="odd">
+<td align="right"><code>exerany</code></td>
+<td>During the past month, other than your regular job, did you participate in any physical activities or exercises such as running, calisthenics, golf, gardening, or walking for exercise? (1 = yes, 0 = no)</td>
+</tr>
+<tr class="even">
+<td align="right"><code>sleephrs</code></td>
+<td>On average, how many hours of sleep do you get in a 24-hour period?</td>
+</tr>
+<tr class="odd">
+<td align="right"><code>alcdays</code></td>
+<td>How many days during the past 30 days did you have at least one drink of any alcoholic beverage such as beer, wine, a malt beverage or liquor?</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">str</span>(smartcle1)</code></pre></div>
+<pre><code>Classes &#39;tbl_df&#39;, &#39;tbl&#39; and &#39;data.frame&#39;:   1036 obs. of  11 variables:
+ $ SEQNO     : num  2.02e+09 2.02e+09 2.02e+09 2.02e+09 2.02e+09 ...
+ $ physhealth: int  0 0 1 0 5 4 2 2 0 0 ...
+ $ menthealth: int  0 0 5 0 0 18 0 3 0 0 ...
+ $ poorhealth: int  NA NA 0 NA 0 6 0 0 NA NA ...
+ $ genhealth : Factor w/ 5 levels &quot;1_Excellent&quot;,..: 2 1 2 3 1 2 3 3 2 3 ...
+ $ bmi       : num  26.7 23.7 26.9 21.7 24.1 ...
+ $ female    : int  1 0 0 1 0 0 1 1 0 0 ...
+ $ internet30: int  1 1 1 1 1 1 1 1 1 1 ...
+ $ exerany   : int  1 1 0 1 1 1 1 1 1 0 ...
+ $ sleephrs  : int  6 6 8 9 7 5 9 7 7 7 ...
+ $ alcdays   : int  1 4 4 3 2 28 4 2 4 25 ...</code></pre>
+</div>
+<div id="model-a-predicting-physhealth" class="section level2">
+<h2><span class="header-section-number">2.3</span> Model A: Predicting <code>physhealth</code></h2>
+<p>We’ll begin by investigating the problem of predicting <code>physhealth</code>, at first with just two predictor variables: <code>exerany</code> and <code>bmi</code>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">modA &lt;-<span class="st"> </span><span class="kw">lm</span>(physhealth <span class="op">~</span><span class="st"> </span>exerany <span class="op">+</span><span class="st"> </span>bmi, <span class="dt">data =</span> smartcle1)
+<span class="kw">glance</span>(modA)</code></pre></div>
+<pre><code>   r.squared adj.r.squared    sigma statistic      p.value df    logLik
+1 0.07540472    0.07342274 8.337274  38.04508 1.307539e-16  3 -3311.633
+       AIC      BIC deviance df.residual
+1 6631.266 6650.633 64852.96         933</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">tidy</span>(modA)</code></pre></div>
+<pre><code>         term  estimate  std.error statistic      p.value
+1 (Intercept)  3.607490 1.38217020  2.610019 9.198811e-03
+2     exerany -4.815988 0.64545439 -7.461392 1.958704e-13
+3         bmi  0.145394 0.04282778  3.394853 7.155975e-04</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(modA)</code></pre></div>
+<pre><code>
+Call:
+lm(formula = physhealth ~ exerany + bmi, data = smartcle1)
 
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-11.9008  -3.3434  -2.4264  -0.8817  28.6932 
+
+Coefficients:
+            Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)  3.60749    1.38217   2.610 0.009199 ** 
+exerany     -4.81599    0.64545  -7.461 1.96e-13 ***
+bmi          0.14539    0.04283   3.395 0.000716 ***
+---
+Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+
+Residual standard error: 8.337 on 933 degrees of freedom
+  (100 observations deleted due to missingness)
+Multiple R-squared:  0.0754,    Adjusted R-squared:  0.07342 
+F-statistic: 38.05 on 2 and 933 DF,  p-value: &lt; 2.2e-16</code></pre>
+
+</div>
 </div>
             </section>
 
           </div>
         </div>
       </div>
-
-<a href="r-packages-used-in-these-notes.html" class="navigation navigation-next navigation-unique" aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="building-table-1.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="references.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
@@ -221,7 +325,7 @@ gitbook.start({
 "size": 2
 },
 "edit": {
-"link": "https://github.com/rstudio/bookdown-demo/edit/master/index.Rmd",
+"link": "https://github.com/rstudio/bookdown-demo/edit/master/02-smartcle1_linear.Rmd",
 "text": "Edit"
 },
 "download": ["bookdown-demo.pdf", "bookdown-demo.epub"],

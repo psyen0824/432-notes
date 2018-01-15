@@ -1,0 +1,20 @@
+# R Packages used in these notes {-}
+
+Here, we'll load in the packages used in these notes.
+
+```{r load_packages}
+library(tableone)
+library(skimr)
+library(broom)
+library(tidyverse)
+```
+
+# Data used in these notes {-}
+
+Here, we'll load in the data sets used in these notes.
+
+```{r load_data}
+fakestroke <- read.csv("data/fakestroke.csv") %>% tbl_df
+bloodbrain <- read.csv("data/bloodbrain.csv") %>% tbl_df
+smartcle1 <- read.csv("data/smartcle1.csv") %>% tbl_df
+```

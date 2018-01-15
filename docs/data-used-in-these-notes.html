@@ -131,6 +131,18 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li class="chapter" data-level="1.10.2" data-path="building-table-1.html"><a href="building-table-1.html#a-more-finished-version-after-cleanup-in-word"><i class="fa fa-check"></i><b>1.10.2</b> A More Finished Version (after Cleanup in Word)</a></li>
 </ul></li>
 </ul></li>
+<li class="chapter" data-level="2" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html"><i class="fa fa-check"></i><b>2</b> Linear Regression on a small SMART data set</a><ul>
+<li class="chapter" data-level="2.1" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#brfss-and-smart"><i class="fa fa-check"></i><b>2.1</b> BRFSS and SMART</a><ul>
+<li class="chapter" data-level="2.1.1" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#key-resources"><i class="fa fa-check"></i><b>2.1.1</b> Key resources</a></li>
+</ul></li>
+<li class="chapter" data-level="2.2" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#the-smartcle1-data-cookbook"><i class="fa fa-check"></i><b>2.2</b> The <code>smartcle1</code> data: Cookbook</a><ul>
+<li class="chapter" data-level="2.2.1" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#omitting-missing-observations-complete-case-analyses"><i class="fa fa-check"></i><b>2.2.1</b> Omitting Missing Observations: Complete-Case Analyses</a></li>
+</ul></li>
+<li class="chapter" data-level="2.3" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#model-a-predicting-physhealth"><i class="fa fa-check"></i><b>2.3</b> Model A: Predicting <code>physhealth</code></a><ul>
+<li class="chapter" data-level="2.3.1" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#graphing-the-data"><i class="fa fa-check"></i><b>2.3.1</b> Graphing The Data</a></li>
+<li class="chapter" data-level="2.3.2" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#building-model-a"><i class="fa fa-check"></i><b>2.3.2</b> Building Model A</a></li>
+</ul></li>
+</ul></li>
 <li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>References</a></li>
 <li class="divider"></li>
 <li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
@@ -156,7 +168,8 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <h1>Data used in these notes</h1>
 <p>Here, we’ll load in the data sets used in these notes.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">fakestroke &lt;-<span class="st"> </span><span class="kw">read.csv</span>(<span class="st">&quot;data/fakestroke.csv&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>tbl_df
-bloodbrain &lt;-<span class="st"> </span><span class="kw">read.csv</span>(<span class="st">&quot;data/bloodbrain.csv&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>tbl_df</code></pre></div>
+bloodbrain &lt;-<span class="st"> </span><span class="kw">read.csv</span>(<span class="st">&quot;data/bloodbrain.csv&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>tbl_df
+smartcle1 &lt;-<span class="st"> </span><span class="kw">read.csv</span>(<span class="st">&quot;data/smartcle1.csv&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>tbl_df</code></pre></div>
 
 </div>
             </section>
@@ -194,7 +207,7 @@ gitbook.start({
 "size": 2
 },
 "edit": {
-"link": "https://github.com/rstudio/bookdown-demo/edit/master/index.Rmd",
+"link": "https://github.com/rstudio/bookdown-demo/edit/master/00_setup.Rmd",
 "text": "Edit"
 },
 "download": ["bookdown-demo.pdf", "bookdown-demo.epub"],
