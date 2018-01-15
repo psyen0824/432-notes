@@ -598,39 +598,37 @@ lowest :  0  1  2  3  4, highest: 25 26 27 28 30
 <li><code>bmi</code> = body mass index (treated as qualitative and continuous)</li>
 </ul></li>
 </ul>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">modA &lt;-<span class="st"> </span><span class="kw">lm</span>(physhealth <span class="op">~</span><span class="st"> </span>exerany <span class="op">*</span><span class="st"> </span>bmi, <span class="dt">data =</span> smartcle2)
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">modA &lt;-<span class="st"> </span><span class="kw">lm</span>(physhealth <span class="op">~</span><span class="st"> </span>exerany <span class="op">+</span><span class="st"> </span>bmi, <span class="dt">data =</span> smartcle2)
 <span class="kw">glance</span>(modA)</code></pre></div>
-<pre><code>   r.squared adj.r.squared    sigma statistic     p.value df    logLik
-1 0.07607716     0.0729698 8.318521  24.48286 3.14356e-15  4 -3167.527
+<pre><code>   r.squared adj.r.squared    sigma statistic      p.value df    logLik
+1 0.07538333    0.07331252 8.316983  36.40282 6.337345e-16  3 -3167.863
        AIC      BIC deviance df.residual
-1 6345.053 6369.043 61724.43         892</code></pre>
+1 6343.726 6362.917 61770.78         893</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">tidy</span>(modA)</code></pre></div>
-<pre><code>         term    estimate std.error  statistic    p.value
-1 (Intercept)  5.13460484 2.3570652  2.1783890 0.02963831
-2     exerany -7.06992980 2.8044237 -2.5209921 0.01187578
-3         bmi  0.09527214 0.0772901  1.2326565 0.21802872
-4 exerany:bmi  0.07732883 0.0944822  0.8184487 0.41331959</code></pre>
+<pre><code>         term   estimate  std.error statistic      p.value
+1 (Intercept)  3.6042411 1.43482193  2.511978 1.218103e-02
+2     exerany -4.8400260 0.66442519 -7.284531 7.091236e-13
+3         bmi  0.1470196 0.04444619  3.307811 9.778491e-04</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(modA)</code></pre></div>
 <pre><code>
 Call:
-lm(formula = physhealth ~ exerany * bmi, data = smartcle2)
+lm(formula = physhealth ~ exerany + bmi, data = smartcle2)
 
 Residuals:
      Min       1Q   Median       3Q      Max 
--10.0992  -3.4231  -2.3780  -0.9199  28.9493 
+-11.2654  -3.3284  -2.4368  -0.8999  28.6923 
 
 Coefficients:
-            Estimate Std. Error t value Pr(&gt;|t|)  
-(Intercept)  5.13460    2.35707   2.178   0.0296 *
-exerany     -7.06993    2.80442  -2.521   0.0119 *
-bmi          0.09527    0.07729   1.233   0.2180  
-exerany:bmi  0.07733    0.09448   0.818   0.4133  
+            Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)  3.60424    1.43482   2.512 0.012181 *  
+exerany     -4.84003    0.66443  -7.285 7.09e-13 ***
+bmi          0.14702    0.04445   3.308 0.000978 ***
 ---
 Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 
-Residual standard error: 8.319 on 892 degrees of freedom
-Multiple R-squared:  0.07608,   Adjusted R-squared:  0.07297 
-F-statistic: 24.48 on 3 and 892 DF,  p-value: 3.144e-15</code></pre>
+Residual standard error: 8.317 on 893 degrees of freedom
+Multiple R-squared:  0.07538,   Adjusted R-squared:  0.07331 
+F-statistic:  36.4 on 2 and 893 DF,  p-value: 6.337e-16</code></pre>
 <p>What conclusions can we draw here?</p>
 
 </div>

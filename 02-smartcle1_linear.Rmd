@@ -179,7 +179,7 @@ First, we'll fit a simple model describing the main effects but not the interact
     - `bmi` = body mass index (treated as qualitative and continuous)
 
 ```{r modelA_smartcle2}
-modA <- lm(physhealth ~ exerany * bmi, data = smartcle2)
+modA <- lm(physhealth ~ exerany + bmi, data = smartcle2)
 glance(modA)
 tidy(modA)
 summary(modA)
