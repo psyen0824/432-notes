@@ -124,7 +124,7 @@
   \postauthor{\par}
   \predate{\centering\large\emph}
   \postdate{\par}
-  \date{Version: 2018-01-15}
+  \date{Version: 2018-01-16 21:03:39}
 
 \usepackage{booktabs}
 \usepackage{amsthm}
@@ -695,16 +695,43 @@ continuous variables \textbf{except} systolic blood pressure.
   be tested using non-parametric tests, like the Wilcoxon signed rank
   test, rather than the t test. The \texttt{test} column indicates this
   with the word \texttt{nonnorm}.
+
+  \begin{itemize}
+  \tightlist
+  \item
+    In real data situations, what should we do? The answer is to look at
+    the data. I would not make the decision as to which approach to take
+    without first plotting (perhaps in a histogram or a Normal Q-Q plot)
+    the observed distributions in each of the two samples, so that I
+    could make a sound decision about whether Normality was a reasonable
+    assumption. If the means and medians are meaningfully different from
+    each other, this is especially important.
+  \item
+    To be honest, though, if the variable in question is a relatively
+    unimportant covariate and the \emph{p} values for the two approaches
+    are nearly the same, I'm not sure that further investigation is
+    especially important,
+  \end{itemize}
 \item
   Specifying \emph{exact} tests for certain categorical variables (we'll
   try this for the \texttt{location} and \texttt{mrankin} variables) can
   be done, and these changes will be noted in the \texttt{test} column,
   as well.
+
+  \begin{itemize}
+  \tightlist
+  \item
+    In real data situations, I would rarely be concerned about this
+    issue, and often choose Pearson (approximate) options across the
+    board. This is reasonable so long as the number of subjects falling
+    in each category is reasonably large, say above 10. If not, then an
+    exact test may be an improvement.
+  \end{itemize}
 \end{itemize}
 
-To accomplish this, we need to specify which variables should be treated
-as non-Normal in the \texttt{print} statement - notice that we don't
-need to redo the \texttt{CreateTableOne} for this change.
+To accomplish the Table 1, then, we need to specify which variables
+should be treated as non-Normal in the \texttt{print} statement - notice
+that we don't need to redo the \texttt{CreateTableOne} for this change.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -782,6 +809,10 @@ can do this with the \texttt{summary} command applied to a created Table
 1, which shows, among other things, the effect of changing from normal
 to non-normal \emph{p} values for continuous variables, and from
 approximate to ``exact'' \emph{p} values for categorical factors.
+
+Again, as noted above, in a real data situation, we'd want to plot the
+quantitative variables (within each group) to make a smart decision
+about whether a t test or Wilcoxon approach is more appropriate.
 
 Note in the summary below that we have some missing values here. Often,
 we'll present this information within the Table 1, as well.
@@ -931,11 +962,11 @@ ia.occlus 0.117394890
 extra.ica 0.129370206
 \end{verbatim}
 
-Again, I have simulated the data to mirror the results in the published
-Table 1 for this study. In no way have I captured the full range of the
-real data, or any of the relationships in that data, so it's more
-important here to see what's available in the analysis, rather than to
-interpret it closely in the clinical context.
+In this case, I have simulated the data to mirror the results in the
+published Table 1 for this study. In no way have I captured the full
+range of the real data, or any of the relationships in that data, so
+it's more important here to see what's available in the analysis, rather
+than to interpret it closely in the clinical context.
 
 \section{Exporting the Completed Table 1 from R to Excel or
 Word}\label{exporting-the-completed-table-1-from-r-to-excel-or-word}
@@ -1295,11 +1326,19 @@ postin  0.2098877
 sex     0.0000000
 \end{verbatim}
 
+Note that, in this particular case, the decisions we make about
+normality vs.~non-normality (for quantitative variables) and the
+decisions we make about approximate vs.~exact testing (for categorical
+variables) won't actually change the implications of the \emph{p}
+values. Each approach gives similar results for each variable. Of
+course, that's not always true.
+
 \subsection{\texorpdfstring{Generate final Table 1 for
 \texttt{bloodbrain}}{Generate final Table 1 for bloodbrain}}\label{generate-final-table-1-for-bloodbrain}
 
-I'll choose to treat \texttt{tlratio} as non-Normal, but otherwise, use
-t tests.
+I'll choose to treat \texttt{tlratio} and its logarithm as non-Normal,
+but otherwise, use t tests, but admittedly, that's an arbitrary
+decision, really.
 
 \begin{Shaded}
 \begin{Highlighting}[]

@@ -419,10 +419,17 @@ att1 &lt;-<span class="st"> </span><span class="kw">CreateTableOne</span>(<span 
 <h3><span class="header-section-number">1.5.1</span> What summaries should we show?</h3>
 <p>Now, we’ll move on to the issue of making a decision about what type of summary to show for the quantitative variables. Since the <code>fakestroke</code> data are just simulated and only match the summary statistics of the original results, not the details, we’ll adopt the decisions made by <span class="citation">Berkhemer et al. (<a href="#ref-Berkhemer2015">2015</a>)</span>, which were to use medians and interquartile ranges to summarize the distributions of all of the continuous variables <strong>except</strong> systolic blood pressure.</p>
 <ul>
-<li>Specifying certain quantitative variables as <em>non-normal</em> causes R to show them with medians and the 25th and 75th percentiles, rather than means and standard deviations, and also causes those variables to be tested using non-parametric tests, like the Wilcoxon signed rank test, rather than the t test. The <code>test</code> column indicates this with the word <code>nonnorm</code>.</li>
-<li>Specifying <em>exact</em> tests for certain categorical variables (we’ll try this for the <code>location</code> and <code>mrankin</code> variables) can be done, and these changes will be noted in the <code>test</code> column, as well.</li>
+<li>Specifying certain quantitative variables as <em>non-normal</em> causes R to show them with medians and the 25th and 75th percentiles, rather than means and standard deviations, and also causes those variables to be tested using non-parametric tests, like the Wilcoxon signed rank test, rather than the t test. The <code>test</code> column indicates this with the word <code>nonnorm</code>.
+<ul>
+<li>In real data situations, what should we do? The answer is to look at the data. I would not make the decision as to which approach to take without first plotting (perhaps in a histogram or a Normal Q-Q plot) the observed distributions in each of the two samples, so that I could make a sound decision about whether Normality was a reasonable assumption. If the means and medians are meaningfully different from each other, this is especially important.</li>
+<li>To be honest, though, if the variable in question is a relatively unimportant covariate and the <em>p</em> values for the two approaches are nearly the same, I’m not sure that further investigation is especially important,</li>
+</ul></li>
+<li>Specifying <em>exact</em> tests for certain categorical variables (we’ll try this for the <code>location</code> and <code>mrankin</code> variables) can be done, and these changes will be noted in the <code>test</code> column, as well.
+<ul>
+<li>In real data situations, I would rarely be concerned about this issue, and often choose Pearson (approximate) options across the board. This is reasonable so long as the number of subjects falling in each category is reasonably large, say above 10. If not, then an exact test may be an improvement.</li>
+</ul></li>
 </ul>
-<p>To accomplish this, we need to specify which variables should be treated as non-Normal in the <code>print</code> statement - notice that we don’t need to redo the <code>CreateTableOne</code> for this change.</p>
+<p>To accomplish the Table 1, then, we need to specify which variables should be treated as non-Normal in the <code>print</code> statement - notice that we don’t need to redo the <code>CreateTableOne</code> for this change.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(att2, 
       <span class="dt">nonnormal =</span> <span class="kw">c</span>(<span class="st">&quot;age&quot;</span>, <span class="st">&quot;nihss&quot;</span>, <span class="st">&quot;time.iv&quot;</span>, <span class="st">&quot;aspects&quot;</span>, <span class="st">&quot;time.rand&quot;</span>),
       <span class="dt">exact =</span> <span class="kw">c</span>(<span class="st">&quot;location&quot;</span>, <span class="st">&quot;mrankin&quot;</span>))</code></pre></div>
@@ -485,6 +492,7 @@ att1 &lt;-<span class="st"> </span><span class="kw">CreateTableOne</span>(<span 
 <div id="obtaining-a-more-detailed-summary" class="section level2">
 <h2><span class="header-section-number">1.6</span> Obtaining a more detailed Summary</h2>
 <p>If this was a real data set, we’d want to get a more detailed description of the data to make decisions about things like potentially collapsing categories of a variable, or whether or not a normal distribution was useful for a particular continuous variable, etc. You can do this with the <code>summary</code> command applied to a created Table 1, which shows, among other things, the effect of changing from normal to non-normal <em>p</em> values for continuous variables, and from approximate to “exact” <em>p</em> values for categorical factors.</p>
+<p>Again, as noted above, in a real data situation, we’d want to plot the quantitative variables (within each group) to make a smart decision about whether a t test or Wilcoxon approach is more appropriate.</p>
 <p>Note in the summary below that we have some missing values here. Often, we’ll present this information within the Table 1, as well.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(att2)</code></pre></div>
 <pre><code>
@@ -623,7 +631,7 @@ mrankin   0.062543164
 iv.altep  0.111897009
 ia.occlus 0.117394890
 extra.ica 0.129370206</code></pre>
-<p>Again, I have simulated the data to mirror the results in the published Table 1 for this study. In no way have I captured the full range of the real data, or any of the relationships in that data, so it’s more important here to see what’s available in the analysis, rather than to interpret it closely in the clinical context.</p>
+<p>In this case, I have simulated the data to mirror the results in the published Table 1 for this study. In no way have I captured the full range of the real data, or any of the relationships in that data, so it’s more important here to see what’s available in the analysis, rather than to interpret it closely in the clinical context.</p>
 </div>
 <div id="exporting-the-completed-table-1-from-r-to-excel-or-word" class="section level2">
 <h2><span class="header-section-number">1.7</span> Exporting the Completed Table 1 from R to Excel or Word</h2>
@@ -874,9 +882,10 @@ Standardize mean differences
 sactime 0.1622214
 postin  0.2098877
 sex     0.0000000</code></pre>
+<p>Note that, in this particular case, the decisions we make about normality vs. non-normality (for quantitative variables) and the decisions we make about approximate vs. exact testing (for categorical variables) won’t actually change the implications of the <em>p</em> values. Each approach gives similar results for each variable. Of course, that’s not always true.</p>
 <div id="generate-final-table-1-for-bloodbrain" class="section level3">
 <h3><span class="header-section-number">1.10.1</span> Generate final Table 1 for <code>bloodbrain</code></h3>
-<p>I’ll choose to treat <code>tlratio</code> as non-Normal, but otherwise, use t tests.</p>
+<p>I’ll choose to treat <code>tlratio</code> and its logarithm as non-Normal, but otherwise, use t tests, but admittedly, that’s an arbitrary decision, really.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(bb.att1, <span class="dt">nonnormal =</span> <span class="kw">c</span>(<span class="st">&quot;tlratio&quot;</span>, <span class="st">&quot;logTL&quot;</span>))</code></pre></div>
 <pre><code>                        Stratified by solution
                          BD                      NS                      

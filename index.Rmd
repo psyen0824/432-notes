@@ -1,7 +1,7 @@
 --- 
 title: "Data Science for Biological, Medical and Health Research: Notes for 432"
 author: "Thomas E. Love, Ph.D."
-date: "Version: `r Sys.Date()`"
+date: "Version: `r Sys.time()`"
 site: bookdown::bookdown_site
 output: bookdown::gitbook
 documentclass: book
