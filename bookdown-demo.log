@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.1415926-2.5-0.9999.3 (MiKTeX 2.9) (preloaded format=xelatex 2016.8.27)  17 JAN 2018 22:28
+This is XeTeX, Version 3.1415926-2.5-0.9999.3 (MiKTeX 2.9) (preloaded format=xelatex 2016.8.27)  17 JAN 2018 22:58
 entering extended mode
 **bookdown-demo.tex
 (C:\Users\Thomas\Dropbox\2018-432\432-notes\bookdown-demo.tex
@@ -994,7 +994,18 @@ Underfull \vbox (badness 10000) has occurred while \output is active []
 Chapter 2.
 [31
 
-] [32] [33]
+] [32] [33] [34] [35]
+File: bookdown-demo_files/figure-latex/c2_histogram_sleephrs_smartcle2-1.pdf Gr
+aphic file (type QTm)
+
+<use  "bookdown-demo_files/figure-latex/c2_histogram_sleephrs_smartcle2-1.pdf" 
+> [36]
+File: bookdown-demo_files/figure-latex/c2_histogram_bmi_smartcle2-1.pdf Graphic
+ file (type QTm)
+<use  "bookdown-demo_files/figure-latex/c2_histogram_bmi_smartcle2-1.pdf" >
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+[37] [38] [39]
 File: bookdown-demo_files/figure-latex/scatter_physhealth_bmi_1-1.pdf Graphic f
 ile (type QTm)
 <use  "bookdown-demo_files/figure-latex/scatter_physhealth_bmi_1-1.pdf" >
@@ -1003,114 +1014,15 @@ c file (type QTm)
 <use  "bookdown-demo_files/figure-latex/c2_scatter_physhealth_bmi_2-1.pdf" >
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-[34] [35] [36] [37] [38]
-Underfull \vbox (badness 1237) has occurred while \output is active []
-
-[39]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-[40]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-[41]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-[42]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-[43]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-[44]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-[45]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-[46]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-[47]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-[48]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-[49]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-[50]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-[51]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-[52]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-[53]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-[54]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-[55]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-[56]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-[57]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-[58]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-[59]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-[60]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-[61]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-[62]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-[63]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-[64]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-[65]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-[66]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-[67]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-[68]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-[69]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-[70]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-[71]
+[40] [41] [42] [43] [44]
 File: bookdown-demo_files/figure-latex/chapter2_first_resid_plot_model_A-1.pdf 
 Graphic file (type QTm)
 
 <use  "bookdown-demo_files/figure-latex/chapter2_first_resid_plot_model_A-1.pdf
 " >
-Underfull \vbox (badness 10000) has occurred while \output is active []
+Underfull \vbox (badness 7326) has occurred while \output is active []
 
-[72]
+[45]
 File: bookdown-demo_files/figure-latex/chapter2_ggplot_first_resid_plot_model_A
 -1.pdf Graphic file (type QTm)
 
@@ -1118,7 +1030,7 @@ File: bookdown-demo_files/figure-latex/chapter2_ggplot_first_resid_plot_model_A
 A-1.pdf" >
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-[73]
+[46]
 File: bookdown-demo_files/figure-latex/histogram_of_physhealth_smartcle2-1.pdf 
 Graphic file (type QTm)
 
@@ -1126,7 +1038,7 @@ Graphic file (type QTm)
 " >
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-[74]
+[47]
 File: bookdown-demo_files/figure-latex/chapter2_second_resid_plot_model_A-1.pdf
  Graphic file (type QTm)
 
@@ -1134,38 +1046,21 @@ File: bookdown-demo_files/figure-latex/chapter2_second_resid_plot_model_A-1.pdf
 f" >
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-[75] [76]
-File: bookdown-demo_files/figure-latex/c2_histogram_sleephrs_smartcle2-1.pdf Gr
-aphic file (type QTm)
-
-<use  "bookdown-demo_files/figure-latex/c2_histogram_sleephrs_smartcle2-1.pdf" 
-> [77]
-File: bookdown-demo_files/figure-latex/c2_histogram_bmi_smartcle2-1.pdf Graphic
- file (type QTm)
-<use  "bookdown-demo_files/figure-latex/c2_histogram_bmi_smartcle2-1.pdf" >
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-[78] [79] [80] [81]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-[82]
+[48]
 File: bookdown-demo_files/figure-latex/c2_sex_bmi_plot1-1.pdf Graphic file (typ
 e QTm)
-<use  "bookdown-demo_files/figure-latex/c2_sex_bmi_plot1-1.pdf" >
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-[83]
+<use  "bookdown-demo_files/figure-latex/c2_sex_bmi_plot1-1.pdf" > [49]
 File: bookdown-demo_files/figure-latex/c2_sex_bmi_plot2-1.pdf Graphic file (typ
 e QTm)
 <use  "bookdown-demo_files/figure-latex/c2_sex_bmi_plot2-1.pdf" >
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-[84] [85]
+[50] [51]
 File: bookdown-demo_files/figure-latex/c2_smartcle2_plot_bmi_hist_by_female_exe
 rany-1.pdf Graphic file (type QTm)
 
 <use  "bookdown-demo_files/figure-latex/c2_smartcle2_plot_bmi_hist_by_female_ex
-erany-1.pdf" > [86]
+erany-1.pdf" > [52]
 File: bookdown-demo_files/figure-latex/c2_smartcle2_plot_bmi_box_by_female_exer
 any-1.pdf Graphic file (type QTm)
 
@@ -1173,7 +1068,7 @@ any-1.pdf Graphic file (type QTm)
 rany-1.pdf" >
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-[87]
+[53]
 File: bookdown-demo_files/figure-latex/c2_smartcle2_plot_bmi_points_by_female_e
 xerany-1.pdf Graphic file (type QTm)
 
@@ -1181,48 +1076,50 @@ xerany-1.pdf Graphic file (type QTm)
 exerany-1.pdf" >
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-[88] [89] [90] [91]
+[54] [55] [56] [57]
 File: bookdown-demo_files/figure-latex/graph_to_set_up_c2_m4-1.pdf Graphic file
  (type QTm)
-<use  "bookdown-demo_files/figure-latex/graph_to_set_up_c2_m4-1.pdf" > [92] [93
-] [94] [95]
-File: bookdown-demo_files/figure-latex/unnamed-chunk-11-1.pdf Graphic file (typ
-e QTm)
-<use  "bookdown-demo_files/figure-latex/unnamed-chunk-11-1.pdf" >
+<use  "bookdown-demo_files/figure-latex/graph_to_set_up_c2_m4-1.pdf" > [58] [59
+] [60] [61]
+File: bookdown-demo_files/figure-latex/c2_m6_residuals_normality-1.pdf Graphic 
+file (type QTm)
+<use  "bookdown-demo_files/figure-latex/c2_m6_residuals_normality-1.pdf" >
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-[96] [97]
-File: bookdown-demo_files/figure-latex/unnamed-chunk-13-1.pdf Graphic file (typ
-e QTm)
-<use  "bookdown-demo_files/figure-latex/unnamed-chunk-13-1.pdf" >
-File: bookdown-demo_files/figure-latex/unnamed-chunk-14-1.pdf Graphic file (typ
-e QTm)
-<use  "bookdown-demo_files/figure-latex/unnamed-chunk-14-1.pdf" >
+[62] [63]
+File: bookdown-demo_files/figure-latex/residual_plot1_c2_m7-1.pdf Graphic file 
+(type QTm)
+<use  "bookdown-demo_files/figure-latex/residual_plot1_c2_m7-1.pdf" >
+File: bookdown-demo_files/figure-latex/residual_plot5_c2_m7-1.pdf Graphic file 
+(type QTm)
+<use  "bookdown-demo_files/figure-latex/residual_plot5_c2_m7-1.pdf" >
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-[98] [99]
-File: bookdown-demo_files/figure-latex/unnamed-chunk-17-1.pdf Graphic file (typ
-e QTm)
-<use  "bookdown-demo_files/figure-latex/unnamed-chunk-17-1.pdf" >
+[64] [65]
+File: bookdown-demo_files/figure-latex/validation_c2_m7_first_approach_errorhis
+togram-1.pdf Graphic file (type QTm)
+
+<use  "bookdown-demo_files/figure-latex/validation_c2_m7_first_approach_errorhi
+stogram-1.pdf" >
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-[100] (C:\Users\Thomas\Dropbox\2018-432\432-notes\bookdown-demo.bbl [101] [102
+[66] (C:\Users\Thomas\Dropbox\2018-432\432-notes\bookdown-demo.bbl [67] [68
 
 ])
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 5351.
-[103]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 5351.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 3563.
+[69]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 3563.
 (C:\Users\Thomas\Dropbox\2018-432\432-notes\bookdown-demo.aux)
-Package atveryend Info: Empty hook `AtVeryEndDocument' on input line 5351.
-Package atveryend Info: Empty hook `AtEndAfterFileList' on input line 5351.
+Package atveryend Info: Empty hook `AtVeryEndDocument' on input line 3563.
+Package atveryend Info: Empty hook `AtEndAfterFileList' on input line 3563.
  ) 
 Here is how much of TeX's memory you used:
- 25249 strings out of 428790
- 452933 string characters out of 3163802
- 630952 words of memory out of 3000000
- 28261 multiletter control sequences out of 15000+200000
+ 25253 strings out of 428790
+ 453189 string characters out of 3163802
+ 553932 words of memory out of 3000000
+ 28265 multiletter control sequences out of 15000+200000
  24474 words of font info for 66 fonts, out of 3000000 for 9000
  1096 hyphenation exceptions out of 8191
  52i,11n,68p,10422b,473s stack positions out of 5000i,500n,10000p,200000b,50000s
 
-Output written on bookdown-demo.pdf (103 pages).
+Output written on bookdown-demo.pdf (69 pages).
