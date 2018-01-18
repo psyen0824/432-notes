@@ -6,6 +6,7 @@ Here, we'll load in the packages used in these notes.
 library(tableone)
 library(skimr)
 library(broom)
+library(magrittr)
 library(tidyverse)
 ```
 
