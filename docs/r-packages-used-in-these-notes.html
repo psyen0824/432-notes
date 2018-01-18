@@ -154,7 +154,8 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li class="chapter" data-level="2.10" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#m5-what-if-we-add-more-variables"><i class="fa fa-check"></i><b>2.10</b> m5: What if we add more variables?</a></li>
 <li class="chapter" data-level="2.11" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#m6-would-adding-self-reported-health-help"><i class="fa fa-check"></i><b>2.11</b> m6: Would adding self-reported health help?</a></li>
 <li class="chapter" data-level="2.12" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#m7-what-if-we-added-days-of-work-missed"><i class="fa fa-check"></i><b>2.12</b> m7: What if we added days of work missed?</a></li>
-<li class="chapter" data-level="2.13" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#next-up"><i class="fa fa-check"></i><b>2.13</b> Next Up</a></li>
+<li class="chapter" data-level="2.13" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#how-might-we-validate-this-model"><i class="fa fa-check"></i><b>2.13</b> How might we validate this model?</a></li>
+<li class="chapter" data-level="2.14" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#coming-soon-to-this-space"><i class="fa fa-check"></i><b>2.14</b> Coming Soon to this Space…</a></li>
 </ul></li>
 <li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>References</a></li>
 <li class="divider"></li>
@@ -184,13 +185,20 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <span class="kw">library</span>(skimr)
 <span class="kw">library</span>(broom)
 <span class="kw">library</span>(magrittr)
-<span class="kw">library</span>(tidyverse)</code></pre></div>
+<span class="kw">library</span>(modelr)</code></pre></div>
+<pre><code>
+Attaching package: &#39;modelr&#39;</code></pre>
+<pre><code>The following object is masked from &#39;package:broom&#39;:
+
+    bootstrap</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(tidyverse)</code></pre></div>
 <pre><code>-- Attaching packages -------------------- tidyverse 1.2.1 --</code></pre>
 <pre><code>v ggplot2 2.2.1     v purrr   0.2.4
 v tibble  1.4.1     v dplyr   0.7.4
 v tidyr   0.7.2     v stringr 1.2.0
 v readr   1.1.1     v forcats 0.2.0</code></pre>
 <pre><code>-- Conflicts ----------------------- tidyverse_conflicts() --
+x modelr::bootstrap()  masks broom::bootstrap()
 x dplyr::contains()    masks skimr::contains()
 x dplyr::ends_with()   masks skimr::ends_with()
 x dplyr::everything()  masks skimr::everything()

@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.1415926-2.5-0.9999.3 (MiKTeX 2.9) (preloaded format=xelatex 2016.8.27)  17 JAN 2018 21:07
+This is XeTeX, Version 3.1415926-2.5-0.9999.3 (MiKTeX 2.9) (preloaded format=xelatex 2016.8.27)  17 JAN 2018 22:28
 entering extended mode
 **bookdown-demo.tex
 (C:\Users\Thomas\Dropbox\2018-432\432-notes\bookdown-demo.tex
@@ -941,9 +941,9 @@ Chapter 1.
 File: images/Tolaney-snip1.png Graphic file (type QTm)
 <use  "images/Tolaney-snip1.png" >
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <8> on input line 263.
+(Font)              <8> on input line 264.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <6> on input line 263.
+(Font)              <6> on input line 264.
 [11]
 File: images/Roy-snip1.png Graphic file (type QTm)
 <use  "images/Roy-snip1.png" > [12]
@@ -955,9 +955,9 @@ Underfull \vbox (badness 10000) has occurred while \output is active []
 
 [13]
 LaTeX Font Info:    Font shape `EU1/lmtt/bx/n' in size <14.4> not available
-(Font)              Font shape `EU1/lmtt/b/n' tried instead on input line 317.
+(Font)              Font shape `EU1/lmtt/b/n' tried instead on input line 318.
 [14]
-Overfull \hbox (8.15593pt too wide) in paragraph at lines 492--497
+Overfull \hbox (8.15593pt too wide) in paragraph at lines 493--498
 []\EU1/lmr/m/n/10 A useful trick here is to use the \EU1/lmtt/m/n/10 dput \EU1/
 lmr/m/n/10 function, specifically something like \EU1/lmtt/m/n/10 dput(names(fa
 kestroke))
@@ -965,7 +965,7 @@ kestroke))
 
 [15]
 LaTeX Font Info:    Font shape `EU1/lmtt/bx/n' in size <12> not available
-(Font)              Font shape `EU1/lmtt/b/n' tried instead on input line 585.
+(Font)              Font shape `EU1/lmtt/b/n' tried instead on input line 586.
 [16] [17] [18] [19]
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
@@ -1186,26 +1186,43 @@ File: bookdown-demo_files/figure-latex/graph_to_set_up_c2_m4-1.pdf Graphic file
  (type QTm)
 <use  "bookdown-demo_files/figure-latex/graph_to_set_up_c2_m4-1.pdf" > [92] [93
 ] [94] [95]
-File: bookdown-demo_files/figure-latex/unnamed-chunk-9-1.pdf Graphic file (type
- QTm)
-<use  "bookdown-demo_files/figure-latex/unnamed-chunk-9-1.pdf" > (C:\Users\Thom
-as\Dropbox\2018-432\432-notes\bookdown-demo.bbl [96])
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 5125.
-[97
+File: bookdown-demo_files/figure-latex/unnamed-chunk-11-1.pdf Graphic file (typ
+e QTm)
+<use  "bookdown-demo_files/figure-latex/unnamed-chunk-11-1.pdf" >
+Underfull \vbox (badness 10000) has occurred while \output is active []
 
-]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 5125.
+[96] [97]
+File: bookdown-demo_files/figure-latex/unnamed-chunk-13-1.pdf Graphic file (typ
+e QTm)
+<use  "bookdown-demo_files/figure-latex/unnamed-chunk-13-1.pdf" >
+File: bookdown-demo_files/figure-latex/unnamed-chunk-14-1.pdf Graphic file (typ
+e QTm)
+<use  "bookdown-demo_files/figure-latex/unnamed-chunk-14-1.pdf" >
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+[98] [99]
+File: bookdown-demo_files/figure-latex/unnamed-chunk-17-1.pdf Graphic file (typ
+e QTm)
+<use  "bookdown-demo_files/figure-latex/unnamed-chunk-17-1.pdf" >
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+[100] (C:\Users\Thomas\Dropbox\2018-432\432-notes\bookdown-demo.bbl [101] [102
+
+])
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 5351.
+[103]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 5351.
 (C:\Users\Thomas\Dropbox\2018-432\432-notes\bookdown-demo.aux)
-Package atveryend Info: Empty hook `AtVeryEndDocument' on input line 5125.
-Package atveryend Info: Empty hook `AtEndAfterFileList' on input line 5125.
+Package atveryend Info: Empty hook `AtVeryEndDocument' on input line 5351.
+Package atveryend Info: Empty hook `AtEndAfterFileList' on input line 5351.
  ) 
 Here is how much of TeX's memory you used:
- 25241 strings out of 428790
- 452630 string characters out of 3163802
- 629867 words of memory out of 3000000
- 28256 multiletter control sequences out of 15000+200000
+ 25249 strings out of 428790
+ 452933 string characters out of 3163802
+ 630952 words of memory out of 3000000
+ 28261 multiletter control sequences out of 15000+200000
  24474 words of font info for 66 fonts, out of 3000000 for 9000
  1096 hyphenation exceptions out of 8191
  52i,11n,68p,10422b,473s stack positions out of 5000i,500n,10000p,200000b,50000s
 
-Output written on bookdown-demo.pdf (97 pages).
+Output written on bookdown-demo.pdf (103 pages).

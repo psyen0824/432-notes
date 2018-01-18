@@ -45,6 +45,11 @@ For the purpose of fitting our first few models, we will eliminate the missingne
 To inspect the missingness in our data, we might consider using the `skim` function from the `skimr` package. We'll exclude the respondent identifier code (`SEQNO`) from this summary as uninteresting. 
 
 ```{r}
+skim_with(numeric = list(hist = NULL), integer = list(hist = NULL))
+## above line eliminates the sparkline histograms
+## it can be commented out when working in the console,
+## but I need it to produce the Notes without errors right now
+
 smartcle1 %>% 
     skim(-SEQNO)
 ```
@@ -252,7 +257,7 @@ All right, so that didn't go anywhere great. Let's try again, with a new outcome
 
 ## A New Small Study
 
-We'll begin by investigating the problem of predicting `bmi`, at first with just three regerssion inputs: `sex`, `exerany` and `sleephrs`, in our new `smartcle2` data set. 
+We'll begin by investigating the problem of predicting `bmi`, at first with just three regression inputs: `sex`, `exerany` and `sleephrs`, in our new `smartcle2` data set. 
 
 - The outcome of interest is `bmi`.
 - Inputs to the regression model are:
@@ -341,11 +346,6 @@ smartcle2 %>%
 The **skim** function works within pipes and with the other `tidyverse` functions.
 
 ```{r}
-skim_with(numeric = list(hist = NULL), integer = list(hist = NULL))
-## above line eliminates the sparkline histograms
-## it can be commented out when working in the console,
-## but I need it to produce the Notes without errors right now
-
 smartcle2 %>%
     group_by(exerany) %>%
     skim(bmi, sleephrs)
@@ -570,6 +570,30 @@ c2_m5 <- lm(bmi ~ female + exerany + sleephrs + internet30 + alcdays,
 summary(c2_m5)
 ```
 
+1. Here's the ANOVA for this model. What can we study with this? 
+
+```{r}
+anova(c2_m5)
+```
+
+2. Consider the revised output below. Now what can we study?
+
+```{r}
+anova(lm(bmi ~ exerany + internet30 + alcdays + female + sleephrs,
+         data = smartcle2))
+```
+
+3. What does the output below let us conclude?
+
+```{r}
+anova(lm(bmi ~ exerany + internet30 + alcdays + female + sleephrs, 
+         data = smartcle2),
+      lm(bmi ~ exerany + female + alcdays, 
+         data = smartcle2))
+```
+
+4. What does it mean for the models to be "nested"?
+
 ## m6: Would adding self-reported health help?
 
 And we can do even a bit better than that by adding in a multi-categorical measure: self-reported general health.
@@ -578,6 +602,14 @@ And we can do even a bit better than that by adding in a multi-categorical measu
 c2_m6 <- lm(bmi ~ female + exerany + sleephrs + internet30 + alcdays + genhealth,
          data = smartcle2)
 summary(c2_m6)
+```
+
+1. If Harry and Marty have the same values of `female`, `exerany`, `sleephrs`, `internet30` and `alcdays`, but Harry rates his helath as Good, and Marty rates his as Fair, then what is the difference in the predictions? Who is predicted to have a larger BMI, and by how much?
+
+2. What does this normal probability plot of the residuals suggest?
+
+```{r}
+plot(c2_m6, which = 2)
 ```
 
 ## m7: What if we added days of work missed?
@@ -589,18 +621,68 @@ c2_m7 <- lm(bmi ~ female + exerany + sleephrs + internet30 + alcdays +
 summary(c2_m7)
 ```
 
-How do the assumptions behind this model look?
+1. How do the assumptions behind this model look?
 
 ```{r}
 plot(c2_m7, which = 1)
 ```
 
-## Next Up
+2. What can we conclude from the plot below?
 
-- Would stepwise regression help us build a better model?
-    - Is there another, better, approach for variable selection?
-- How should we validate this model? 
-    - Is breaking into training and test samples our best option?
+```{r}
+plot(c2_m7, which = 5)
+```
+
+## How might we validate this model?
+
+Here's some early code for that issue, which is built on some material by David Robinson at https://rpubs.com/dgrtwo/cv-modelr
+
+This bit of code performs 10-crossfold separation (splits the data into 10 exclusive partitions and uses each partition for a test vs. training split), then maps a modeling step to the training data (which is 10% of the full data), and then fits the resulting model on the new data with augment from the `broom` package. We've selected the variables so that the model we'll fit is the `m2_c7` model from above.
+
+```{r}
+set.seed(4320118)
+
+models <- smartcle2 %>%
+    select(bmi, female, exerany, sleephrs, 
+           internet30, alcdays, genhealth) %>%
+    crossv_kfold(k = 10) %>%
+    mutate(model = map(train, ~ lm(bmi ~ ., data = .)))
+
+predictions <- models %>%
+    unnest(map2(model, test, ~ augment(.x, newdata = .y)))
+
+predictions
+```
+
+The results are a set of predictions (one for each of the original observations) based on the splits into training and test groups (remember there are 10 of them, indexed by `.id`) that describe the complete set of 896 respondents again.
+
+What this lets us now do is calculate the root Mean Squared Prediction Error (RMSE) and Mean Absolute Prediction Error (MAE) for this model (the `c2_m7` model) across these observations, and also to compare that error to a model that simply predicts the mean `bmi` across all patients (the `intercept only` model.) In practice, we could consider two distinct models in doing this work.
+
+```{r}
+predictions %>%
+    summarize(RMSE_c2_m7 = sqrt(mean((bmi - .fitted) ^2)),
+              MAE_c2_m7 = mean(abs(bmi - .fitted)),
+              RMSE_interceptonly = sqrt(mean((bmi - mean(bmi))^2)),
+              MAE_interceptonly = mean(abs(bmi - mean(bmi))))
+```
+
+Another thing we could do with this is to graph the size of the errors we see in our model.
+
+```{r}
+predictions %>%
+    mutate(errors = bmi - .fitted) %>%
+    ggplot(., aes(x = errors)) +
+    geom_histogram(bins = 30, fill = "darkviolet", col = "yellow") + 
+    labs(title = "Cross-Validated Errors in Prediction of BMI",
+         subtitle = "Using a model (`c2_m7`) including 6 regression inputs",
+         caption = "SMART BRFSS 2016 data for Cleveland-Elyria MMSA, n = 896",
+         x = "Error in predicting BMI")
+```
+
+## Coming Soon to this Space...
+
+- Would stepwise regression help us build a better model for `bmi`?
+    - Is there a better approach for variable selection?
 - How should we think about potential transformations of these predictors?
     - What's a Spearman rho-squared plot, and how might it help us decide how to spend degrees of freedom on non-linear terms better?
 
