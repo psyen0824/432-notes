@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.1415926-2.5-0.9999.3 (MiKTeX 2.9) (preloaded format=xelatex 2016.8.27)  17 JAN 2018 22:58
+This is XeTeX, Version 3.1415926-2.5-0.9999.3 (MiKTeX 2.9) (preloaded format=xelatex 2016.8.27)  19 JAN 2018 00:45
 entering extended mode
 **bookdown-demo.tex
 (C:\Users\Thomas\Dropbox\2018-432\432-notes\bookdown-demo.tex
@@ -923,11 +923,11 @@ File: mt-msb.cfg 2005/06/01 v1.0 microtype config. file: AMS symbols (b) (RS)
 LaTeX Font Info:    Try loading font information for EU1+lmtt on input line 9.
 ("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\euenc\eu1lmtt.fd"
 File: eu1lmtt.fd 2009/10/30 v1.6 Font defs for Latin Modern
-))
+) [3])
 \tf@toc=\write5
-[3] [4
+[4] [5
 
-] [5] [6
+] [6
 
 ]
 LaTeX Font Info:    Font shape `EU1/lmtt/bx/n' in size <10> not available
@@ -941,9 +941,9 @@ Chapter 1.
 File: images/Tolaney-snip1.png Graphic file (type QTm)
 <use  "images/Tolaney-snip1.png" >
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <8> on input line 264.
+(Font)              <8> on input line 266.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <6> on input line 264.
+(Font)              <6> on input line 266.
 [11]
 File: images/Roy-snip1.png Graphic file (type QTm)
 <use  "images/Roy-snip1.png" > [12]
@@ -955,9 +955,9 @@ Underfull \vbox (badness 10000) has occurred while \output is active []
 
 [13]
 LaTeX Font Info:    Font shape `EU1/lmtt/bx/n' in size <14.4> not available
-(Font)              Font shape `EU1/lmtt/b/n' tried instead on input line 318.
+(Font)              Font shape `EU1/lmtt/b/n' tried instead on input line 320.
 [14]
-Overfull \hbox (8.15593pt too wide) in paragraph at lines 493--498
+Overfull \hbox (8.15593pt too wide) in paragraph at lines 495--500
 []\EU1/lmr/m/n/10 A useful trick here is to use the \EU1/lmtt/m/n/10 dput \EU1/
 lmr/m/n/10 function, specifically something like \EU1/lmtt/m/n/10 dput(names(fa
 kestroke))
@@ -965,7 +965,7 @@ kestroke))
 
 [15]
 LaTeX Font Info:    Font shape `EU1/lmtt/bx/n' in size <12> not available
-(Font)              Font shape `EU1/lmtt/b/n' tried instead on input line 586.
+(Font)              Font shape `EU1/lmtt/b/n' tried instead on input line 588.
 [16] [17] [18] [19]
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
@@ -1103,23 +1103,72 @@ togram-1.pdf Graphic file (type QTm)
 stogram-1.pdf" >
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-[66] (C:\Users\Thomas\Dropbox\2018-432\432-notes\bookdown-demo.bbl [67] [68
+[66] [67] [68
+
+]
+Chapter 3.
+[69]
+File: bookdown-demo_files/figure-latex/c3_bonding_points_plot-1.pdf Graphic fil
+e (type QTm)
+<use  "bookdown-demo_files/figure-latex/c3_bonding_points_plot-1.pdf" > [70]
+File: bookdown-demo_files/figure-latex/c3_ggplot_means_plot_bonding-1.pdf Graph
+ic file (type QTm)
+<use  "bookdown-demo_files/figure-latex/c3_ggplot_means_plot_bonding-1.pdf" > [
+71] [72] [73]
+Overfull \hbox (176.78111pt too wide) detected at line 3868
+\OML/lmm/m/it/10 strength \OT1/lmr/m/n/10 = 17\OML/lmm/m/it/10 :\OT1/lmr/m/n/10
+ 77 + 2\OML/lmm/m/it/10 :\OT1/lmr/m/n/10 13\OML/lmm/m/it/10 resinB \OT1/lmr/m/n
+/10 + 4\OML/lmm/m/it/10 :\OT1/lmr/m/n/10 77\OML/lmm/m/it/10 resinC \OT1/lmr/m/n
+/10 + 22\OML/lmm/m/it/10 :\OT1/lmr/m/n/10 53\OML/lmm/m/it/10 resinD[]  \OT1/lmr
+/m/n/10 + 1\OML/lmm/m/it/10 :\OT1/lmr/m/n/10 29\OML/lmm/m/it/10 lightLED \OT1/l
+mr/m/n/10 + 3\OML/lmm/m/it/10 :\OT1/lmr/m/n/10 37\OML/lmm/m/it/10 resinB \OMS/l
+msy/m/n/10 ^^C \OML/lmm/m/it/10 lightLED[]  \OT1/lmr/m/n/10 + 3\OML/lmm/m/it/10
+ :\OT1/lmr/m/n/10 94\OML/lmm/m/it/10 resinC \OMS/lmsy/m/n/10 ^^C \OML/lmm/m/it/
+10 lightLED \OMS/lmsy/m/n/10 ^^@ \OT1/lmr/m/n/10 17\OML/lmm/m/it/10 :\OT1/lmr/m
+/n/10 74\OML/lmm/m/it/10 resinD \OMS/lmsy/m/n/10 ^^C \OML/lmm/m/it/10 lightLED
+ []
+
+[74]
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+[75] [76]
+File: bookdown-demo_files/figure-latex/boxplots_c3_bonding_without_interaction-
+1.pdf Graphic file (type QTm)
+
+<use  "bookdown-demo_files/figure-latex/boxplots_c3_bonding_without_interaction
+-1.pdf" > [77] [78]
+File: bookdown-demo_files/figure-latex/c3_ggplot_means_plot_cortisol-1.pdf Grap
+hic file (type QTm)
+
+<use  "bookdown-demo_files/figure-latex/c3_ggplot_means_plot_cortisol-1.pdf" >
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+[79] [80]
+File: bookdown-demo_files/figure-latex/boxplots_c3_cortisol_without_interaction
+-1.pdf Graphic file (type QTm)
+
+<use  "bookdown-demo_files/figure-latex/boxplots_c3_cortisol_without_interactio
+n-1.pdf" >
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+[81] [82] (C:\Users\Thomas\Dropbox\2018-432\432-notes\bookdown-demo.bbl [83] [8
+4
 
 ])
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 3563.
-[69]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 3563.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 4408.
+[85]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 4408.
 (C:\Users\Thomas\Dropbox\2018-432\432-notes\bookdown-demo.aux)
-Package atveryend Info: Empty hook `AtVeryEndDocument' on input line 3563.
-Package atveryend Info: Empty hook `AtEndAfterFileList' on input line 3563.
+Package atveryend Info: Empty hook `AtVeryEndDocument' on input line 4408.
+Package atveryend Info: Empty hook `AtEndAfterFileList' on input line 4408.
  ) 
 Here is how much of TeX's memory you used:
- 25253 strings out of 428790
- 453189 string characters out of 3163802
- 553932 words of memory out of 3000000
- 28265 multiletter control sequences out of 15000+200000
+ 25289 strings out of 428790
+ 454621 string characters out of 3163802
+ 557293 words of memory out of 3000000
+ 28296 multiletter control sequences out of 15000+200000
  24474 words of font info for 66 fonts, out of 3000000 for 9000
  1096 hyphenation exceptions out of 8191
  52i,11n,68p,10422b,473s stack positions out of 5000i,500n,10000p,200000b,50000s
 
-Output written on bookdown-demo.pdf (69 pages).
+Output written on bookdown-demo.pdf (85 pages).

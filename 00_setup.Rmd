@@ -5,9 +5,9 @@ Here, we'll load in the packages used in these notes.
 ```{r load_packages}
 library(tableone)
 library(skimr)
-library(broom)
 library(magrittr)
 library(modelr)
+library(broom)
 library(tidyverse)
 ```
 
@@ -19,4 +19,6 @@ Here, we'll load in the data sets used in these notes.
 fakestroke <- read.csv("data/fakestroke.csv") %>% tbl_df
 bloodbrain <- read.csv("data/bloodbrain.csv") %>% tbl_df
 smartcle1 <- read.csv("data/smartcle1.csv") %>% tbl_df
+bonding <- read.csv("data/bonding.csv") %>% tbl_df
+cortisol <- read.csv("data/cortisol.csv") %>% tbl_df
 ```
