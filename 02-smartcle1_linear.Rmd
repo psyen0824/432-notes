@@ -220,7 +220,7 @@ Each of the 896 respondents included in the `smartcle2` data makes a contributio
 Suppose Harry is one of the people in that group, and Harry's data is `bmi` = 20, and `physhealth` = 3.
 
 - Harry's *observed* value of `physhealth` is just the value we have in the data for them, in this case, observed `physhealth` = 3 for Harry.
-- Harry's *fitted* or *predicted* `physhealth` value is the result of calculating -1.45 + 0.195*`bmi` for Harry. So, if Harry's BMI was 20, then Harry's predicted `physhealth` value is -1.45 + (0.195*20) = 2.45.
+- Harry's *fitted* or *predicted* `physhealth` value is the result of calculating -1.45 + 0.195*`bmi` for Harry. So, if Harry's BMI was 20, then Harry's predicted `physhealth` value is -1.45 + (0.195)(20) = 2.45.
 - The *residual* for Harry is then his *observed* outcome minus his *fitted* outcome, so Harry has a residual of 3 - 2.45 = 0.55.
 - Graphically, a residual represents vertical distance between the observed point and the fitted regression line. 
 - Points above the regression line will have positive residuals, and points below the regression line will have negative residuals. Points on the line have zero residuals.
