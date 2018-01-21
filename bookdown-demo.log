@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.1415926-2.5-0.9999.3 (MiKTeX 2.9) (preloaded format=xelatex 2016.8.27)  21 JAN 2018 13:21
+This is XeTeX, Version 3.1415926-2.5-0.9999.3 (MiKTeX 2.9) (preloaded format=xelatex 2016.8.27)  21 JAN 2018 13:27
 entering extended mode
 **bookdown-demo.tex
 (C:\Users\Thomas\Dropbox\2018-432\432-notes\bookdown-demo.tex
@@ -1181,8 +1181,8 @@ Package atveryend Info: Empty hook `AtEndAfterFileList' on input line 4930.
  ) 
 Here is how much of TeX's memory you used:
  25308 strings out of 428790
- 455280 string characters out of 3163802
- 559412 words of memory out of 3000000
+ 455270 string characters out of 3163802
+ 559382 words of memory out of 3000000
  28315 multiletter control sequences out of 15000+200000
  24474 words of font info for 66 fonts, out of 3000000 for 9000
  1096 hyphenation exceptions out of 8191

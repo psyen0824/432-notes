@@ -1,4 +1,4 @@
-# Missing Data, 1: Mechanisms and Single Imputation Methods
+# Missing Data Mechanisms and Single Imputation
 
 Almost all serious statistical analyses have to deal with missing data. Data values that are missing are indicated in R, and to R, by the symbol `NA`.
 
