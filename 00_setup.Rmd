@@ -5,6 +5,7 @@ Here, we'll load in the packages used in these notes.
 ```{r load_packages}
 library(tableone)
 library(skimr)
+library(simputation)
 library(magrittr)
 library(modelr)
 library(broom)

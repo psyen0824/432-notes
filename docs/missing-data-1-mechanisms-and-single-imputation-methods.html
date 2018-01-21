@@ -31,8 +31,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   
   
-
-<link rel="next" href="r-packages-used-in-these-notes.html">
+<link rel="prev" href="two-factor-analysis-of-variance-and-interactions.html">
+<link rel="next" href="references.html">
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
@@ -237,35 +237,289 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="header">
-<h1 class="title">Data Science for Biological, Medical and Health Research: Notes for 432</h1>
-<h4 class="author"><em>Thomas E. Love, Ph.D.</em></h4>
-<h4 class="date"><em>Built 2018-01-21 13:21:12</em></h4>
-</div>
-<div id="introduction" class="section level1 unnumbered">
-<h1>Introduction</h1>
-<p>These Notes provide a series of examples using R to work through issues that are likely to come up in PQHS/CRSP/MPHP 432.</p>
-<p>While these Notes share some of the features of a textbook, they are neither comprehensive nor completely original. The main purpose is to give students in 432 a set of common materials on which to draw during the course. In class, we will sometimes:</p>
+<div id="missing-data-1-mechanisms-and-single-imputation-methods" class="section level1">
+<h1><span class="header-section-number">Chapter 4</span> Missing Data, 1: Mechanisms and Single Imputation Methods</h1>
+<p>Almost all serious statistical analyses have to deal with missing data. Data values that are missing are indicated in R, and to R, by the symbol <code>NA</code>.</p>
+<div id="a-toy-example" class="section level2">
+<h2><span class="header-section-number">4.1</span> A Toy Example</h2>
+<p>In the following tiny data set called <code>sbp_example</code>, we have four variables for a set of 15 subjects. In addition to a subject id, we have:</p>
 <ul>
-<li>reiterate points made in this document,</li>
-<li>amplify what is here,</li>
-<li>simplify the presentation of things done here,</li>
-<li>use new examples to show some of the same techniques,</li>
-<li>refer to issues not mentioned in this document,</li>
+<li>the treatment this subject received (A, B or C are the treatments),</li>
+<li>an indicator (1 = yes, 0 = no) of whether the subject has diabetes,</li>
+<li>the subject’s systolic blood pressure at baseline</li>
+<li>the subject’s systolic blood pressure after the application of the treatment</li>
 </ul>
-<p>but what we don’t (always) do is follow these notes very precisely. We assume instead that you will read the materials and try to learn from them, just as you will attend classes and try to learn from them. We welcome feedback of all kinds on this document or anything else. Just email us at <code>431-help at case dot edu</code>, or submit a pull request. Note that we still use <code>431-help</code> even though we’re now in 432.</p>
-<p>What you will mostly find are brief explanations of a key idea or summary, accompanied (most of the time) by R code and a demonstration of the results of applying that code.</p>
-<p>Everything you see here is available to you as HTML or PDF. You will also have access to the R Markdown files, which contain the code which generates everything in the document, including all of the R results. We will demonstrate the use of R Markdown (this document is generated with the additional help of an R package called bookdown) and R Studio (the “program” which we use to interface with the R language) in class.</p>
-<p>To download the data and R code related to these notes, visit the Data and Code section of <a href="https://github.com/THOMASELOVE/432-2018">the 432 course website</a>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># create some temporary variables</span>
 
+subject &lt;-<span class="st"> </span><span class="dv">101</span><span class="op">:</span><span class="dv">115</span>
+x1 &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;A&quot;</span>, <span class="st">&quot;B&quot;</span>, <span class="st">&quot;C&quot;</span>, <span class="st">&quot;A&quot;</span>, <span class="st">&quot;C&quot;</span>, <span class="st">&quot;A&quot;</span>, <span class="st">&quot;A&quot;</span>, <span class="ot">NA</span>, <span class="st">&quot;B&quot;</span>, <span class="st">&quot;C&quot;</span>, <span class="st">&quot;A&quot;</span>, <span class="st">&quot;B&quot;</span>, <span class="st">&quot;C&quot;</span>, <span class="st">&quot;A&quot;</span>, <span class="st">&quot;B&quot;</span>)
+x2 &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="ot">NA</span>, <span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="ot">NA</span>, <span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="ot">NA</span>)
+x3 &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">120</span>, <span class="dv">145</span>, <span class="dv">150</span>, <span class="ot">NA</span>, <span class="dv">155</span>, <span class="ot">NA</span>, <span class="dv">135</span>, <span class="ot">NA</span>, <span class="dv">115</span>, <span class="dv">170</span>, <span class="dv">150</span>, <span class="dv">145</span>, <span class="dv">140</span>, <span class="dv">160</span>, <span class="dv">135</span>)
+x4 &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">105</span>, <span class="dv">135</span>, <span class="dv">150</span>, <span class="dv">120</span>, <span class="dv">135</span>, <span class="dv">115</span>, <span class="dv">160</span>, <span class="dv">150</span>, <span class="dv">130</span>, <span class="dv">155</span>, <span class="dv">140</span>, <span class="dv">140</span>, <span class="dv">150</span>, <span class="dv">135</span>, <span class="dv">120</span>)
+
+sbp_example &lt;-<span class="st"> </span>
+<span class="st">  </span><span class="kw">data.frame</span>(subject, <span class="dt">treat =</span> x1, <span class="dt">diabetes =</span> x2, 
+             <span class="dt">sbp.before =</span> x3, <span class="dt">sbp.after =</span> x4) <span class="op">%&gt;%</span>
+<span class="st">  </span>tbl_df
+
+<span class="kw">rm</span>(subject, x1, x2, x3, x4) <span class="co"># just cleaning up</span>
+
+sbp_example</code></pre></div>
+<pre><code># A tibble: 15 x 5
+   subject treat diabetes sbp.before sbp.after
+     &lt;int&gt; &lt;fct&gt;    &lt;dbl&gt;      &lt;dbl&gt;     &lt;dbl&gt;
+ 1     101 A         1.00        120       105
+ 2     102 B         0           145       135
+ 3     103 C         0           150       150
+ 4     104 A         1.00         NA       120
+ 5     105 C        NA           155       135
+ 6     106 A         1.00         NA       115
+ 7     107 A         0           135       160
+ 8     108 &lt;NA&gt;      1.00         NA       150
+ 9     109 B        NA           115       130
+10     110 C         1.00        170       155
+11     111 A         0           150       140
+12     112 B         0           145       140
+13     113 C         1.00        140       150
+14     114 A         1.00        160       135
+15     115 B        NA           135       120</code></pre>
+<div id="how-many-missing-values-do-we-have-in-each-column" class="section level3">
+<h3><span class="header-section-number">4.1.1</span> How many missing values do we have in each column?</h3>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">colSums</span>(<span class="kw">is.na</span>(sbp_example))</code></pre></div>
+<pre><code>   subject      treat   diabetes sbp.before  sbp.after 
+         0          1          3          3          0 </code></pre>
+<p>We are missing one <code>treat</code>, 3 <code>diabetes</code> and 3 <code>sbp.before</code> values.</p>
+</div>
+<div id="what-is-the-pattern-of-missing-data" class="section level3">
+<h3><span class="header-section-number">4.1.2</span> What is the pattern of missing data?</h3>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">mice<span class="op">::</span><span class="kw">md.pattern</span>(sbp_example)</code></pre></div>
+<pre><code>  subject sbp.after treat diabetes sbp.before  
+9       1         1     1        1          1 0
+3       1         1     1        0          1 1
+2       1         1     1        1          0 1
+1       1         1     0        1          0 2
+        0         0     1        3          3 7</code></pre>
+<p>We have nine subjects with complete data, three subjects with missing <code>diabetes</code> (only), two subjects with missing <code>sbp.before</code> (only), and 1 subject with missing <code>treat</code> and <code>sbp.before</code>.</p>
+</div>
+<div id="how-can-we-identify-the-subjects-with-missing-data" class="section level3">
+<h3><span class="header-section-number">4.1.3</span> How can we identify the subjects with missing data?</h3>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">sbp_example <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">filter</span>(<span class="op">!</span><span class="kw">complete.cases</span>(.))</code></pre></div>
+<pre><code># A tibble: 6 x 5
+  subject treat diabetes sbp.before sbp.after
+    &lt;int&gt; &lt;fct&gt;    &lt;dbl&gt;      &lt;dbl&gt;     &lt;dbl&gt;
+1     104 A         1.00         NA       120
+2     105 C        NA           155       135
+3     106 A         1.00         NA       115
+4     108 &lt;NA&gt;      1.00         NA       150
+5     109 B        NA           115       130
+6     115 B        NA           135       120</code></pre>
+</div>
+</div>
+<div id="missing-data-mechanisms" class="section level2">
+<h2><span class="header-section-number">4.2</span> Missing-data mechanisms</h2>
+<p>My source for this description of mechanisms is Chapter 25 of <span class="citation">Gelman and Hill (<a href="#ref-GelmanHill2007">2007</a>)</span>, and that chapter is <a href="http://www.stat.columbia.edu/~gelman/arm/missing.pdf">available at this link</a>.</p>
+<ol style="list-style-type: decimal">
+<li><strong>MCAR = Missingness completely at random</strong>. A variable is missing completely at random if the probability of missingness is the same for all units, for example, if for each subject, we decide whether to collect the <code>diabetes</code> status by rolling a die and refusing to answer if a “6” shows up. If data are missing completely at random, then throwing out cases with missing data does not bias your inferences.</li>
+<li><strong>Missingness that depends only on observed predictors</strong>. A more general assumption, called <strong>missing at random</strong> or <strong>MAR</strong>, is that the probability a variable is missing depends only on available information. Here, we would have to be willing to assume that the probability of nonresponse to <code>diabetes</code> depends only on the other, fully recorded variables in the data. It is often reasonable to model this process as a logistic regression, where the outcome variable equals 1 for observed cases and 0 for missing. When an outcome variable is missing at random, it is acceptable to exclude the missing cases (that is, to treat them as NA), as long as the regression controls for all the variables that affect the probability of missingness.</li>
+<li><strong>Missingness that depends on unobserved predictors</strong>. Missingness is no longer “at random” if it depends on information that has not been recorded and this information also predicts the missing values. If a particular treatment causes discomfort, a patient is more likely to drop out of the study. This missingness is not at random (unless “discomfort” is measured and observed for all patients). If missingness is not at random, it must be explicitly modeled, or else you must accept some bias in your inferences.</li>
+<li><strong>Missingness that depends on the missing value itself.</strong> Finally, a particularly difficult situation arises when the probability of missingness depends on the (potentially missing) variable itself. For example, suppose that people with higher earnings are less likely to reveal them.</li>
+</ol>
+<p>Essentially, situations 3 and 4 are referred to collectively as <strong>non-random missingness</strong>, and cause more trouble for us than 1 and 2.</p>
+</div>
+<div id="options-for-dealing-with-missingness" class="section level2">
+<h2><span class="header-section-number">4.3</span> Options for Dealing with Missingness</h2>
+<p>There are several available methods for dealing with missing data that are MCAR or MAR, but they basically boil down to:</p>
+<ul>
+<li>Complete Case (or Available Case) analyses</li>
+<li>Single Imputation</li>
+<li>Multiple Imputation</li>
+</ul>
+</div>
+<div id="complete-case-and-available-case-analyses" class="section level2">
+<h2><span class="header-section-number">4.4</span> Complete Case (and Available Case) analyses</h2>
+<p>In <strong>Complete Case</strong> analyses, rows containing NA values are omitted from the data before analyses commence. This is the default approach for many statistical software packages, and may introduce unpredictable bias and fail to include some useful, often hard-won information.</p>
+<ul>
+<li>A complete case analysis can be appropriate when the number of missing observations is not large, and the missing pattern is either MCAR (missing completely at random) or MAR (missing at random.)</li>
+<li>Two problems arise with complete-case analysis:
+<ol style="list-style-type: decimal">
+<li>If the units with missing values differ systematically from the completely observed cases, this could bias the complete-case analysis.</li>
+<li>If many variables are included in a model, there may be very few complete cases, so that most of the data would be discarded for the sake of a straightforward analysis.</li>
+</ol></li>
+<li>A related approach is <em>available-case</em> analysis where different aspects of a problem are studied with different subsets of the data, perhaps identified on the basis of what is missing in them.</li>
+</ul>
+</div>
+<div id="single-imputation" class="section level2">
+<h2><span class="header-section-number">4.5</span> Single Imputation</h2>
+<p>In <strong>single imputation</strong> analyses, NA values are estimated/replaced <em>one time</em> with <em>one particular data value</em> for the purpose of obtaining more complete samples, at the expense of creating some potential bias in the eventual conclusions or obtaining slightly <em>less</em> accurate estimates than would be available if there were no missing values in the data.</p>
+<ul>
+<li>A single imputation can be just a replacement with the mean or median (for a quantity) or the mode (for a categorical variable.) However, such an approach, though easy to understand, underestimates variance and ignores the relationship of missing values to other variables.</li>
+<li>Single imputation can also be done using a variety of models to try to capture information about the NA values that are available in other variables within the data set.</li>
+<li>The <code>simputation</code> package can help us execute single imputations using a wide variety of techniques, within the pipe approach used by the <code>tidyverse</code>. Another approach I have used in the past is the <code>mice</code> package, which can also perform single imputations.</li>
+</ul>
+</div>
+<div id="multiple-imputation" class="section level2">
+<h2><span class="header-section-number">4.6</span> Multiple Imputation</h2>
+<p><strong>Multiple imputation</strong>, where NA values are repeatedly estimated/replaced with multiple data values, for the purpose of obtaining mode complete samples <em>and</em> capturing details of the variation inherent in the fact that the data have missingness, so as to obtain <em>more</em> accurate estimates than are possible with single imputation.</p>
+<ul>
+<li>We’ll postpone the discussion of multiple imputation for a while.</li>
+</ul>
+</div>
+<div id="building-a-complete-case-analysis" class="section level2">
+<h2><span class="header-section-number">4.7</span> Building a Complete Case Analysis</h2>
+<p>We can drop all of the missing values from a data set with <code>drop_na</code> or with <code>na.omit</code> or by filtering for <code>complete.cases</code>. Any of these approaches produces the same result - a new data set with 9 rows (after dropping the six subjects with any NA values) and 5 columns.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">cc.<span class="dv">1</span> &lt;-<span class="st"> </span><span class="kw">na.omit</span>(sbp_example)
+cc.<span class="dv">2</span> &lt;-<span class="st"> </span>sbp_example <span class="op">%&gt;%</span><span class="st"> </span>drop_na
+cc.<span class="dv">3</span> &lt;-<span class="st"> </span>sbp_example <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">filter</span>(<span class="kw">complete.cases</span>(.))</code></pre></div>
+</div>
+<div id="single-imputation-with-the-mean-or-mode" class="section level2">
+<h2><span class="header-section-number">4.8</span> Single Imputation with the Mean or Mode</h2>
+<p>The most straightforward approach to single imputation is to impute a single summary of the variable, such as the mean, median or mode.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">skim</span>(sbp_example)</code></pre></div>
+<pre><code>Skim summary statistics
+ n obs: 15 
+ n variables: 5 
+
+Variable type: factor 
+ variable missing complete  n n_unique              top_counts ordered
+    treat       1       14 15        3 A: 6, B: 4, C: 4, NA: 1   FALSE
+
+Variable type: integer 
+ variable missing complete  n mean   sd  p0   p25 median   p75 p100
+  subject       0       15 15  108 4.47 101 104.5    108 111.5  115
+
+Variable type: numeric 
+   variable missing complete  n   mean    sd  p0 p25 median    p75 p100
+   diabetes       3       12 15   0.58  0.51   0   0      1   1       1
+  sbp.after       0       15 15 136    15.83 105 125    135 150     160
+ sbp.before       3       12 15 143.33 15.72 115 135    145 151.25  170</code></pre>
+<p>Here, suppose we decide to impute</p>
+<ul>
+<li><code>sbp.before</code> with the mean (143.33) among non-missing values,</li>
+<li><code>diabetes</code> with its median (1) among non-missing values, and</li>
+<li><code>treat</code> with its most common value, or mode (A)</li>
+</ul>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">si.<span class="dv">1</span> &lt;-<span class="st"> </span>sbp_example <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">replace_na</span>(<span class="kw">list</span>(<span class="dt">sbp.before =</span> <span class="fl">143.33</span>,
+                    <span class="dt">diabetes =</span> <span class="dv">1</span>,
+                    <span class="dt">treat =</span> <span class="st">&quot;A&quot;</span>))
+si.<span class="dv">1</span></code></pre></div>
+<pre><code># A tibble: 15 x 5
+   subject treat diabetes sbp.before sbp.after
+     &lt;int&gt; &lt;fct&gt;    &lt;dbl&gt;      &lt;dbl&gt;     &lt;dbl&gt;
+ 1     101 A         1.00        120       105
+ 2     102 B         0           145       135
+ 3     103 C         0           150       150
+ 4     104 A         1.00        143       120
+ 5     105 C         1.00        155       135
+ 6     106 A         1.00        143       115
+ 7     107 A         0           135       160
+ 8     108 A         1.00        143       150
+ 9     109 B         1.00        115       130
+10     110 C         1.00        170       155
+11     111 A         0           150       140
+12     112 B         0           145       140
+13     113 C         1.00        140       150
+14     114 A         1.00        160       135
+15     115 B         1.00        135       120</code></pre>
+<p>We could accomplish the same thing with, for example:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">si.<span class="dv">2</span> &lt;-<span class="st"> </span>sbp_example <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">replace_na</span>(<span class="kw">list</span>(<span class="dt">sbp.before =</span> <span class="kw">mean</span>(sbp_example<span class="op">$</span>sbp.before, <span class="dt">na.rm =</span> <span class="ot">TRUE</span>),
+                    <span class="dt">diabetes =</span> <span class="kw">median</span>(sbp_example<span class="op">$</span>diabetes, <span class="dt">na.rm =</span> <span class="ot">TRUE</span>),
+                    <span class="dt">treat =</span> <span class="st">&quot;A&quot;</span>))</code></pre></div>
+</div>
+<div id="doing-single-imputation-with-simputation" class="section level2">
+<h2><span class="header-section-number">4.9</span> Doing Single Imputation with <code>simputation</code></h2>
+<p>Single imputation is a potentially appropriate method when missingness can be assumed to be either completely at random (MCAR) or dependent only on observed predictors (MAR). We’ll use the <code>simputation</code> package to accomplish it.</p>
+<ul>
+<li>The <code>simputation</code> vignette is available at <a href="https://cran.r-project.org/web/packages/simputation/vignettes/intro.html" class="uri">https://cran.r-project.org/web/packages/simputation/vignettes/intro.html</a></li>
+<li>The <code>simputation</code> reference manual is available at <a href="https://cran.r-project.org/web/packages/simputation/simputation.pdf" class="uri">https://cran.r-project.org/web/packages/simputation/simputation.pdf</a></li>
+</ul>
+<div id="mirroring-our-prior-approach-imputing-meansmediansmodes" class="section level3">
+<h3><span class="header-section-number">4.9.1</span> Mirroring Our Prior Approach (imputing means/medians/modes)</h3>
+<p>Suppose we want to mirror what we did above, simply impute the mean for <code>sbp.before</code> and the median for <code>diabetes</code> again.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">si.<span class="dv">3</span> &lt;-<span class="st"> </span>sbp_example <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">impute_lm</span>(sbp.before <span class="op">~</span><span class="st"> </span><span class="dv">1</span>) <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">impute_median</span>(diabetes <span class="op">~</span><span class="st"> </span><span class="dv">1</span>) <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">replace_na</span>(<span class="kw">list</span>(<span class="dt">treat =</span> <span class="st">&quot;A&quot;</span>))
+
+si.<span class="dv">3</span></code></pre></div>
+<pre><code># A tibble: 15 x 5
+   subject treat diabetes sbp.before sbp.after
+ *   &lt;int&gt; &lt;fct&gt;    &lt;dbl&gt;      &lt;dbl&gt;     &lt;dbl&gt;
+ 1     101 A         1.00        120       105
+ 2     102 B         0           145       135
+ 3     103 C         0           150       150
+ 4     104 A         1.00        143       120
+ 5     105 C         1.00        155       135
+ 6     106 A         1.00        143       115
+ 7     107 A         0           135       160
+ 8     108 A         1.00        143       150
+ 9     109 B         1.00        115       130
+10     110 C         1.00        170       155
+11     111 A         0           150       140
+12     112 B         0           145       140
+13     113 C         1.00        140       150
+14     114 A         1.00        160       135
+15     115 B         1.00        135       120</code></pre>
+</div>
+<div id="using-a-model-to-impute-sbp.before-and-diabetes" class="section level3">
+<h3><span class="header-section-number">4.9.2</span> Using a model to impute <code>sbp.before</code> and <code>diabetes</code></h3>
+<p>Suppose we wanted to use:</p>
+<ul>
+<li>a robust linear model to predict <code>sbp.before</code> missing values, on the basis of <code>sbp.after</code> and <code>diabetes</code> status, and</li>
+<li>a predictive mean matching approach to predict <code>diabetes</code> status, on the basis of <code>sbp.after</code>, and</li>
+<li>a decision tree approach to predict <code>treat</code> status, using all other variables in the data</li>
+</ul>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">set.seed</span>(<span class="dv">50001</span>)
+
+imp.<span class="dv">4</span> &lt;-<span class="st"> </span>sbp_example <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">impute_rlm</span>(sbp.before <span class="op">~</span><span class="st"> </span>sbp.after <span class="op">+</span><span class="st"> </span>diabetes) <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">impute_pmm</span>(diabetes <span class="op">~</span><span class="st"> </span>sbp.after) <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">impute_cart</span>(treat <span class="op">~</span><span class="st"> </span>.)
+
+imp.<span class="dv">4</span></code></pre></div>
+<pre><code># A tibble: 15 x 5
+   subject treat diabetes sbp.before sbp.after
+ *   &lt;int&gt; &lt;fct&gt;    &lt;dbl&gt;      &lt;dbl&gt;     &lt;dbl&gt;
+ 1     101 A         1.00        120       105
+ 2     102 B         0           145       135
+ 3     103 C         0           150       150
+ 4     104 A         1.00        139       120
+ 5     105 C         1.00        155       135
+ 6     106 A         1.00        136       115
+ 7     107 A         0           135       160
+ 8     108 A         1.00        155       150
+ 9     109 B         1.00        115       130
+10     110 C         1.00        170       155
+11     111 A         0           150       140
+12     112 B         0           145       140
+13     113 C         1.00        140       150
+14     114 A         1.00        160       135
+15     115 B         1.00        135       120</code></pre>
+<p>Details on the many available methods in <code>simputation</code> are provided <a href="https://cran.r-project.org/web/packages/simputation/simputation.pdf">in its manual</a>. These include:</p>
+<ul>
+<li><code>impute_cart</code> uses a Classification and Regression Tree approach for numerical or categorical data. There is also an <code>impute_rf</code> command which uses Random Forests for imputation.</li>
+<li><code>impute_pmm</code> is one of several “hot deck” options for imputation, this one is predictive mean matching, which can be used with numeric data (only). Missing values are first imputed using a predictive model. Next, these predictions are replaced with the observed values which are nearest to the prediction. Other imputation options in this group include random hot deck, sequential hot deck and k-nearest neighbor imputation.</li>
+<li><code>impute_rlm</code> is one of several regression imputation methods, including linear models, robust linear models (which use what is called M-estimation to impute numerical variables) and lasso/elastic net/ridge regression models.</li>
+</ul>
+<p><code>simputation</code> can also do EM-based multivariate imputation, and multivariate random forest imputation, as well as many other sorts of approaches.</p>
+
+</div>
+</div>
+</div>
+<h3>References</h3>
+<div id="refs" class="references">
+<div id="ref-GelmanHill2007">
+<p>Gelman, Andrew, and Jennifer Hill. 2007. <em>Data Analysis Using Regression and Multilevel/Hierarchical Models</em>. New York: Cambridge University Press.</p>
+</div>
 </div>
             </section>
 
           </div>
         </div>
       </div>
-
-<a href="r-packages-used-in-these-notes.html" class="navigation navigation-next navigation-unique" aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="two-factor-analysis-of-variance-and-interactions.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="references.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
@@ -294,7 +548,7 @@ gitbook.start({
 "size": 2
 },
 "edit": {
-"link": "https://github.com/rstudio/bookdown-demo/edit/master/index.Rmd",
+"link": "https://github.com/rstudio/bookdown-demo/edit/master/04-missingdata1.Rmd",
 "text": "Edit"
 },
 "download": ["bookdown-demo.pdf", "bookdown-demo.epub"],

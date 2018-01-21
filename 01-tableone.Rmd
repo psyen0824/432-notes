@@ -182,7 +182,7 @@ Once you've built the table and are generally satisfied with it, you'll probably
 
 ### Approach A: Save and open in Excel
 
-One option is to **save the Table 1** to a `.csv` file, which you can then open directly in Excel. This is the approach I generally use. Note the addition of some `quote`, `noSpaces` and `printToggle` selections here.
+One option is to **save the Table 1** to a `.csv` file within our `data` subfolder (note that the `data` folder must already exist), which you can then open directly in Excel. This is the approach I generally use. Note the addition of some `quote`, `noSpaces` and `printToggle` selections here.
 
 ```{r save_fs_table1_to_csv, eval = FALSE}
 fs.table1save <- print(att2, 
@@ -190,7 +190,7 @@ fs.table1save <- print(att2,
       exact = c("location", "mrankin"),
       quote = FALSE, noSpaces = TRUE, printToggle = FALSE)
 
-write.csv(fs.table1save, file = "fs-table1.csv")
+write.csv(fs.table1save, file = "data/fs-table1.csv")
 ```
 
 When I then open the `fs-table1.csv` file in Excel, it looks like this:
@@ -293,13 +293,13 @@ I'll choose to treat `tlratio` and its logarithm as non-Normal, but otherwise, u
 print(bb.att1, nonnormal = c("tlratio", "logTL"))
 ```
 
-Or, we can get an Excel-readable version, using
+Or, we can get an Excel-readable version placed in a `data` subfolder, using
 
 ```{r build_excel_version_of_bb_table1}
 bb.t1 <- print(bb.att1, nonnormal = c("tlratio", "logTL"), quote = FALSE,
                noSpaces = TRUE, printToggle = FALSE)
 
-write.csv(bb.t1, file = "bb-table1.csv")
+write.csv(bb.t1, file = "data/bb-table1.csv")
 ```
 
 which, when dropped into Excel, will look like this:
