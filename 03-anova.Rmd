@@ -1,4 +1,4 @@
-# Two-Factor Analysis of Variance and Interactions
+# Analysis of Variance and Analysis of Covariance
 
 ## The `bonding` data: A Designed Dental Experiment
 
@@ -10,9 +10,60 @@ The experiment involved making measurements of bonding strength under a total of
 bonding
 ```
 
-### Looking at the Data
+## A One-Factor Analysis of Variance
 
-We can look at the distribution of the `strength` values at the combinations of `light` and `resin`, with a plot like this one...
+Suppose we are interested in the distribution of the `strength` values for the four different types of `resin`. 
+
+```{r}
+bonding %>% group_by(resin) %>% summarize(n = n(), mean(strength), median(strength))
+```
+
+I'd begin serious work with a plot.
+
+### Look at the Data!
+
+```{r c3_oneway_bonding_resin_boxplot}
+ggplot(bonding, aes(x = resin, y = strength)) +
+    geom_boxplot()
+```
+
+Another good plot for this purpose is a ridgeline plot.
+
+```{r c3_oneway_bonding_resin_ridgelineplot}
+ggplot(bonding, aes(x = strength, y = resin, fill = resin)) +
+    geom_density_ridges2() +
+    guides(fill = FALSE)
+```
+
+### Table of Summary Statistics
+
+With the small size of this experiment (*n* = 20 for each `resin` type), graphical summaries may not perform as well as they often do. We'll also produce a quick table of summary statistics for `strength` within each `resin` type, with the `skim()` function.
+
+```{r}
+bonding %>% group_by(resin) %>% skim(strength)
+```
+
+Since the means and medians are fairly close, and the distributions (with the possible exception of `resin` D) are reasonably well approximated by the Normal, I'll fit an ANOVA model.
+
+```{r}
+anova(lm(strength ~ resin, data = bonding))
+```
+
+It appears that the `resin` types have a significant association with mean `strength` of the bonds. Can we identify which `resin` types have generally higher or lower `strength`?
+
+```{r}
+TukeyHSD(aov(lm(strength ~ resin, data = bonding)))
+```
+
+Based on these confidence intervals (which have a family-wise 95% confidence level), we see that D is associated with significantly larger mean `strength` than A or B or C, and that C is also associated with significantly larger mean `strength` than A. This may be easier to see in a plot of these confidence intervals.
+
+```{r}
+plot(TukeyHSD(aov(lm(strength ~ resin, data = bonding))))
+```
+
+## A Two-Way ANOVA: Looking at Two Factors
+
+Now, we'll now add consideration of the `light` source into our study. We can look at the distribution of the `strength` values at the combinations of both `light` and `resin`, with a plot like this one...
 
 ```{r c3_bonding_points_plot}
 ggplot(bonding, aes(x = resin, y = strength, color = light)) +
@@ -215,7 +266,7 @@ Variable  | Description
 cortisol
 ```
 
-### Creating a factor combining sex and waist
+## Creating a factor combining sex and waist
 
 Next, we'll put the `waist` and `sex` data in the `cortisol` example together. We want to build a second categorical variable (called `fat_est`) combining this information, to indicate "healthy" vs. "unhealthy" levels of fat around the waist. 
 
@@ -319,4 +370,131 @@ TukeyHSD(aov(cort_diff ~ interv + fat_est, data = cortisol))
 ```
 
 What conclusions can we draw, at a 5% significance level?
+
+## An Emphysema Study: Analysis of Covariance
+
+My source for this example is @Riffenburgh2006, section 18.4. Serum theophylline levels (in mg/dl) were measured in 16 patients with emphysema at baseline, then 5 days later (at the end of a course of antibiotics) and then at 10 days after baseline. Clinicians anticipate that the antibiotic will increase the theophylline level. The data are stored in the `emphysema.csv` data file, and note that the age for patient 5 is not available. 
+
+### Codebook
+
+Variable  | Description
+--------: | --------------------------------------------------------
+`patient` | ID code
+`age`     | patient's age in years
+`sex`     | patient's sex (F or M)
+`st_base` | patient's serum theophylline at baseline (mg/dl)
+`st_day5` | patient's serum theophylline at day 5 (mg/dl)
+`st_day10` | patient's serum theophylline at day 10 (mg/dl)
+
+We're going to look at the change from baseline to day 5 as our outcome of interest, since the clinical expectation is that the antibiotic (azithromycin) will increase theophylline levels.
+
+```{r}
+emphysema <- emphysema %>% 
+    mutate(st_delta = st_day5 - st_base)
+
+emphysema
+```
+
+### Does `sex` affect the mean change in theophylline? 
+
+```{r}
+emphysema %>% skim(st_delta)
+```
+
+```{r}
+emphysema %>% group_by(sex) %>% skim(st_delta)
+```
+
+Overall, the mean change in theophylline during the course of the antibiotic is -0.99, but this is -3.33 for female patients and 0.41 for male patients.
+
+A one-way ANOVA model looks like this:
+
+```{r}
+anova(lm(st_delta ~ sex, data = emphysema))
+```
+
+The ANOVA F test finds a statistically significant difference between the mean `st_delta` among males and the mean `st_delta` among females. But is there more to the story?
+
+### Is there an association between `age` and `sex` in this study?
+
+```{r}
+emphysema %>% group_by(sex) %>% skim(age)
+```
+
+But we note that the male patients are also older than the female patients, on average (mean age for males is 66.4, for females 63.3) 
+
+- Does the fact that male patients are older affect change in theophylline level? 
+- And how should we deal with the one missing `age` value (in a male patient)?
+
+### Adding a quantitative covariate, `age`, to the model
+
+We could fit an ANOVA model to predict `st_delta` using `sex` and `age` directly, but only if we categorized `age` into two or more groups. Because `age` is not categorical, we cannot include it in an ANOVA. But if age is an influence, and we don't adjust for it, it may well bias the outcome of our initial ANOVA. With a quantitative variable like `age`, we will need a method called ANCOVA, for **analysis of covariance**.
+
+#### The ANCOVA model
+
+ANCOVA in this case is just an ANOVA model with our outcome (`st_delta`) adjusted for a continuous covariate, called `age`. For the moment, we'll ignore the one subject with missing `age` and simply fit the regression model with `sex` and `age`.
+
+```{r}
+summary(lm(st_delta ~ sex + age, data = emphysema))
+```
+
+This model assumes that the slope of the regression line between `st_delta` and `age` is the same for both sexes. 
+
+Note that the model yields `st_delta` = -6.9 + 3.52 (`sex` = male) + 0.056 `age`, or 
+
+- `st_delta` = -3.38 + 0.056 `age` for female patients, and
+- `st_delta` = -6.9 + 0.056 `age` for male patients.
+
+Note that we can test this assumption of equal slopes by fitting an alternative model (with a product term between `sex` and `age`) that doesn't require the assumption, and we'll do that later. 
+
+#### The ANCOVA Table 
+
+First, though, we'll look at the ANCOVA table.
+
+```{r}
+anova(lm(st_delta ~ sex + age, data = emphysema))
+```
+
+When we tested `sex` without accounting for `age`, we found a *p* value of 0.032, which is less than our usual cutpoint of 0.05. But when we adjusted for `age`, we find that `sex` loses significance, even though `age` is not a significant influence on `st_delta` by itself, according to the ANCOVA table.
+
+### Rerunning the ANCOVA model after simple imputation
+
+We could have *imputed* the missing `age` value for patient 5, rather than just deleting that patient. Suppose we do the simplest potentially reasonable thing to do: insert the mean `age` in where the NA value currently exists.
+
+```{r}
+emph_imp <- replace_na(emphysema, list(age = mean(emphysema$age, na.rm = TRUE)))
+
+emph_imp
+```
+
+More on simple imputation and missing data is coming soon.
+
+For now, we can rerun the ANCOVA model on this new data set, after imputation...
+
+```{r}
+anova(lm(st_delta ~ sex + age, data = emph_imp))
+```
+
+When we do this, we see that now the `sex` variable returns to a *p* value below 0.05. Our complete case analysis (which omitted patient 5) gives us a different result than the ANCOVA based on the data after mean imputation.
+
+### Looking at a factor-covariate interaction
+
+Let's run a model including the interaction (product) term between `age` and `sex`, which implies that the slope of `age` on our outcome (`st_delta`) depends on the patient's sex. We'll use the imputed data again. Here is the new ANCOVA table, which suggests that the interaction of `age` and `sex` is small (because it accounts for only a small amount of the total Sum of Squares) and not significant (p = 0.91).
+
+```{r}
+anova(lm(st_delta ~ sex * age, data = emph_imp))
+```
+
+Since the interaction term is neither substantial nor significant, we probably don't need it here. But let's look at its interpretation anyway, just to fix ideas. To do that, we'll need the coefficients from the underlying regression model.
+
+```{r}
+tidy(lm(st_delta ~ sex * age, data = emph_imp))
+```
+
+Our ANCOVA model for `st_delta` incorporating the `age` x `sex` product term is -5.65 + 1.72 (sex = M) + 0.037 age + 0.029 (sex = M)(age). So that means:
+
+- our model for females is `st_delta` = -5.65 + 0.037 `age`
+- our model for males is `st_delta` = (-5.65 + 1.72) + (0.037 + 0.029) `age`, or -3.93 + 0.066 `age`
+
+but, again, our conclusion from the ANCOVA table is that this increase in complexity (letting both the slope and intercept vary by `sex`) doesn't add much in the way of predictive value for our `st_delta` outcome.
 

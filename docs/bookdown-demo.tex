@@ -124,7 +124,7 @@
   \postauthor{\par}
   \predate{\centering\large\emph}
   \postdate{\par}
-  \date{Built 2018-01-21 13:27:13}
+  \date{Built 2018-01-21 15:16:39}
 
 \usepackage{booktabs}
 \usepackage{amsthm}
@@ -214,6 +214,7 @@ Here, we'll load in the packages used in these notes.
 \begin{Highlighting}[]
 \KeywordTok{library}\NormalTok{(tableone)}
 \KeywordTok{library}\NormalTok{(skimr)}
+\KeywordTok{library}\NormalTok{(ggridges)}
 \KeywordTok{library}\NormalTok{(simputation)}
 \KeywordTok{library}\NormalTok{(magrittr)}
 \KeywordTok{library}\NormalTok{(modelr)}
@@ -234,6 +235,7 @@ Here, we'll load in the data sets used in these notes.
 \NormalTok{smartcle1 <-}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(}\StringTok{"data/smartcle1.csv"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }\NormalTok{tbl_df}
 \NormalTok{bonding <-}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(}\StringTok{"data/bonding.csv"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }\NormalTok{tbl_df}
 \NormalTok{cortisol <-}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(}\StringTok{"data/cortisol.csv"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }\NormalTok{tbl_df}
+\NormalTok{emphysema <-}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(}\StringTok{"data/emphysema.csv"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }\NormalTok{tbl_df}
 \end{Highlighting}
 \end{Shaded}
 
@@ -3563,8 +3565,8 @@ modeling approach makes.
   evaluate regression models?
 \end{enumerate}
 
-\chapter{Two-Factor Analysis of Variance and
-Interactions}\label{two-factor-analysis-of-variance-and-interactions}
+\chapter{Analysis of Variance and Analysis of
+Covariance}\label{analysis-of-variance-and-analysis-of-covariance}
 
 \section{\texorpdfstring{The \texttt{bonding} data: A Designed Dental
 Experiment}{The bonding data: A Designed Dental Experiment}}\label{the-bonding-data-a-designed-dental-experiment}
@@ -3605,11 +3607,159 @@ are gathered in the \texttt{bonding.csv} file.
 # ... with 70 more rows
 \end{verbatim}
 
-\subsection{Looking at the Data}\label{looking-at-the-data}
+\section{A One-Factor Analysis of
+Variance}\label{a-one-factor-analysis-of-variance}
 
-We can look at the distribution of the \texttt{strength} values at the
-combinations of \texttt{light} and \texttt{resin}, with a plot like this
-one\ldots{}
+Suppose we are interested in the distribution of the \texttt{strength}
+values for the four different types of \texttt{resin}.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{bonding }\OperatorTok{%>%}\StringTok{ }\KeywordTok{group_by}\NormalTok{(resin) }\OperatorTok{%>%}\StringTok{ }\KeywordTok{summarize}\NormalTok{(}\DataTypeTok{n =} \KeywordTok{n}\NormalTok{(), }\KeywordTok{mean}\NormalTok{(strength), }\KeywordTok{median}\NormalTok{(strength))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+# A tibble: 4 x 4
+  resin     n `mean(strength)` `median(strength)`
+  <fct> <int>            <dbl>              <dbl>
+1 A        20             18.4               18.0
+2 B        20             22.2               22.7
+3 C        20             25.2               25.7
+4 D        20             32.1               35.3
+\end{verbatim}
+
+I'd begin serious work with a plot.
+
+\subsection{Look at the Data!}\label{look-at-the-data}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{ggplot}\NormalTok{(bonding, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ resin, }\DataTypeTok{y =}\NormalTok{ strength)) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_boxplot}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/c3_oneway_bonding_resin_boxplot-1.pdf}
+
+Another good plot for this purpose is a ridgeline plot.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{ggplot}\NormalTok{(bonding, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ strength, }\DataTypeTok{y =}\NormalTok{ resin, }\DataTypeTok{fill =}\NormalTok{ resin)) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_density_ridges2}\NormalTok{() }\OperatorTok{+}
+\StringTok{    }\KeywordTok{guides}\NormalTok{(}\DataTypeTok{fill =} \OtherTok{FALSE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Picking joint bandwidth of 3.09
+\end{verbatim}
+
+\includegraphics{bookdown-demo_files/figure-latex/c3_oneway_bonding_resin_ridgelineplot-1.pdf}
+
+\subsection{Table of Summary
+Statistics}\label{table-of-summary-statistics}
+
+With the small size of this experiment (\emph{n} = 20 for each
+\texttt{resin} type), graphical summaries may not perform as well as
+they often do. We'll also produce a quick table of summary statistics
+for \texttt{strength} within each \texttt{resin} type, with the
+\texttt{skim()} function.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{bonding }\OperatorTok{%>%}\StringTok{ }\KeywordTok{group_by}\NormalTok{(resin) }\OperatorTok{%>%}\StringTok{ }\KeywordTok{skim}\NormalTok{(strength)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Skim summary statistics
+ n obs: 80 
+ n variables: 4 
+ group variables: resin 
+
+Variable type: numeric 
+ resin variable missing complete  n  mean   sd   p0   p25 median   p75
+     A strength       0       20 20 18.41 4.81  9.3 15.73  17.95 20.4 
+     B strength       0       20 20 22.23 6.75 11.8 18.45  22.7  25.75
+     C strength       0       20 20 25.16 6.33 14.5 20.65  25.7  30.7 
+     D strength       0       20 20 32.08 9.74 17.3 21.82  35.3  40.15
+ p100
+ 28  
+ 35.2
+ 34.5
+ 47.2
+\end{verbatim}
+
+Since the means and medians are fairly close, and the distributions
+(with the possible exception of \texttt{resin} D) are reasonably well
+approximated by the Normal, I'll fit an ANOVA model.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{anova}\NormalTok{(}\KeywordTok{lm}\NormalTok{(strength }\OperatorTok{~}\StringTok{ }\NormalTok{resin, }\DataTypeTok{data =}\NormalTok{ bonding))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Analysis of Variance Table
+
+Response: strength
+          Df Sum Sq Mean Sq F value   Pr(>F)    
+resin      3 1999.7  666.57  13.107 5.52e-07 ***
+Residuals 76 3865.2   50.86                     
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+\end{verbatim}
+
+It appears that the \texttt{resin} types have a significant association
+with mean \texttt{strength} of the bonds. Can we identify which
+\texttt{resin} types have generally higher or lower \texttt{strength}?
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{TukeyHSD}\NormalTok{(}\KeywordTok{aov}\NormalTok{(}\KeywordTok{lm}\NormalTok{(strength }\OperatorTok{~}\StringTok{ }\NormalTok{resin, }\DataTypeTok{data =}\NormalTok{ bonding)))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+  Tukey multiple comparisons of means
+    95% family-wise confidence level
+
+Fit: aov(formula = lm(strength ~ resin, data = bonding))
+
+$resin
+      diff        lwr       upr     p adj
+B-A  3.815 -2.1088676  9.738868 0.3351635
+C-A  6.740  0.8161324 12.663868 0.0193344
+D-A 13.660  7.7361324 19.583868 0.0000003
+C-B  2.925 -2.9988676  8.848868 0.5676635
+D-B  9.845  3.9211324 15.768868 0.0002276
+D-C  6.920  0.9961324 12.843868 0.0154615
+\end{verbatim}
+
+Based on these confidence intervals (which have a family-wise 95\%
+confidence level), we see that D is associated with significantly larger
+mean \texttt{strength} than A or B or C, and that C is also associated
+with significantly larger mean \texttt{strength} than A. This may be
+easier to see in a plot of these confidence intervals.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plot}\NormalTok{(}\KeywordTok{TukeyHSD}\NormalTok{(}\KeywordTok{aov}\NormalTok{(}\KeywordTok{lm}\NormalTok{(strength }\OperatorTok{~}\StringTok{ }\NormalTok{resin, }\DataTypeTok{data =}\NormalTok{ bonding))))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-11-1.pdf}
+
+\section{A Two-Way ANOVA: Looking at Two
+Factors}\label{a-two-way-anova-looking-at-two-factors}
+
+Now, we'll now add consideration of the \texttt{light} source into our
+study. We can look at the distribution of the \texttt{strength} values
+at the combinations of both \texttt{light} and \texttt{resin}, with a
+plot like this one\ldots{}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -4137,7 +4287,7 @@ inches)\tabularnewline
 # ... with 146 more rows
 \end{verbatim}
 
-\subsection{Creating a factor combining sex and
+\section{Creating a factor combining sex and
 waist}\label{creating-a-factor-combining-sex-and-waist}
 
 Next, we'll put the \texttt{waist} and \texttt{sex} data in the
@@ -4405,6 +4555,402 @@ unhealthy-healthy -0.3582443 -0.6662455 -0.05024305 0.0229266
 \end{verbatim}
 
 What conclusions can we draw, at a 5\% significance level?
+
+\section{An Emphysema Study: Analysis of
+Covariance}\label{an-emphysema-study-analysis-of-covariance}
+
+My source for this example is \citet{Riffenburgh2006}, section 18.4.
+Serum theophylline levels (in mg/dl) were measured in 16 patients with
+emphysema at baseline, then 5 days later (at the end of a course of
+antibiotics) and then at 10 days after baseline. Clinicians anticipate
+that the antibiotic will increase the theophylline level. The data are
+stored in the \texttt{emphysema.csv} data file, and note that the age
+for patient 5 is not available.
+
+\subsection{Codebook}\label{codebook}
+
+\begin{longtable}[]{@{}rl@{}}
+\toprule
+Variable & Description\tabularnewline
+\midrule
+\endhead
+\texttt{patient} & ID code\tabularnewline
+\texttt{age} & patient's age in years\tabularnewline
+\texttt{sex} & patient's sex (F or M)\tabularnewline
+\texttt{st\_base} & patient's serum theophylline at baseline
+(mg/dl)\tabularnewline
+\texttt{st\_day5} & patient's serum theophylline at day 5
+(mg/dl)\tabularnewline
+\texttt{st\_day10} & patient's serum theophylline at day 10
+(mg/dl)\tabularnewline
+\bottomrule
+\end{longtable}
+
+We're going to look at the change from baseline to day 5 as our outcome
+of interest, since the clinical expectation is that the antibiotic
+(azithromycin) will increase theophylline levels.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{emphysema <-}\StringTok{ }\NormalTok{emphysema }\OperatorTok{%>%}\StringTok{ }
+\StringTok{    }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{st_delta =}\NormalTok{ st_day5 }\OperatorTok{-}\StringTok{ }\NormalTok{st_base)}
+
+\NormalTok{emphysema}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+# A tibble: 16 x 7
+   patient   age sex   st_base st_day5 st_day10 st_delta
+     <int> <int> <fct>   <dbl>   <dbl>    <dbl>    <dbl>
+ 1       1    61 F       14.1     2.30    10.3   -11.8  
+ 2       2    70 F        7.20    5.40     7.30  - 1.80 
+ 3       3    65 M       14.2    11.9     11.3   - 2.30 
+ 4       4    65 M       10.3    10.7     13.8     0.400
+ 5       5    NA M        9.90   10.7     11.7     0.800
+ 6       6    76 M        5.20    6.80     4.20    1.60 
+ 7       7    72 M       10.4    14.6     14.1     4.20 
+ 8       8    69 F       10.5     7.20     5.40  - 3.30 
+ 9       9    66 M        5.00    5.00     5.10    0    
+10      10    62 M        8.60    8.10     7.40  - 0.500
+11      11    65 F       16.6    14.9     13.0   - 1.70 
+12      12    71 M       16.4    18.6     17.1     2.20 
+13      13    51 F       12.2    11.0     12.3   - 1.20 
+14      14    71 M        6.60    3.70     4.50  - 2.90 
+15      15    64 F       15.4    15.2     13.6   - 0.200
+16      16    50 M       10.2    10.8     11.2     0.600
+\end{verbatim}
+
+\subsection{\texorpdfstring{Does \texttt{sex} affect the mean change in
+theophylline?}{Does sex affect the mean change in theophylline?}}\label{does-sex-affect-the-mean-change-in-theophylline}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{emphysema }\OperatorTok{%>%}\StringTok{ }\KeywordTok{skim}\NormalTok{(st_delta)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Skim summary statistics
+ n obs: 16 
+ n variables: 7 
+
+Variable type: numeric 
+ variable missing complete  n  mean   sd    p0   p25 median  p75 p100
+ st_delta       0       16 16 -0.99 3.48 -11.8 -1.92  -0.35 0.65  4.2
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{emphysema }\OperatorTok{%>%}\StringTok{ }\KeywordTok{group_by}\NormalTok{(sex) }\OperatorTok{%>%}\StringTok{ }\KeywordTok{skim}\NormalTok{(st_delta)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Skim summary statistics
+ n obs: 16 
+ n variables: 7 
+ group variables: sex 
+
+Variable type: numeric 
+ sex variable missing complete  n  mean   sd    p0   p25 median   p75 p100
+   F st_delta       0        6  6 -3.33 4.27 -11.8 -2.92  -1.75 -1.32 -0.2
+   M st_delta       0       10 10  0.41 2.07  -2.9 -0.38   0.5   1.4   4.2
+\end{verbatim}
+
+Overall, the mean change in theophylline during the course of the
+antibiotic is -0.99, but this is -3.33 for female patients and 0.41 for
+male patients.
+
+A one-way ANOVA model looks like this:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{anova}\NormalTok{(}\KeywordTok{lm}\NormalTok{(st_delta }\OperatorTok{~}\StringTok{ }\NormalTok{sex, }\DataTypeTok{data =}\NormalTok{ emphysema))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Analysis of Variance Table
+
+Response: st_delta
+          Df  Sum Sq Mean Sq F value  Pr(>F)  
+sex        1  52.547  52.547  5.6789 0.03189 *
+Residuals 14 129.542   9.253                  
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+\end{verbatim}
+
+The ANOVA F test finds a statistically significant difference between
+the mean \texttt{st\_delta} among males and the mean \texttt{st\_delta}
+among females. But is there more to the story?
+
+\subsection{\texorpdfstring{Is there an association between \texttt{age}
+and \texttt{sex} in this
+study?}{Is there an association between age and sex in this study?}}\label{is-there-an-association-between-age-and-sex-in-this-study}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{emphysema }\OperatorTok{%>%}\StringTok{ }\KeywordTok{group_by}\NormalTok{(sex) }\OperatorTok{%>%}\StringTok{ }\KeywordTok{skim}\NormalTok{(age)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Skim summary statistics
+ n obs: 16 
+ n variables: 7 
+ group variables: sex 
+
+Variable type: integer 
+ sex variable missing complete  n  mean   sd p0   p25 median p75 p100
+   F      age       0        6  6 63.33 6.89 51 61.75   64.5  68   70
+   M      age       1        9 10 66.44 7.57 50 65      66    71   76
+\end{verbatim}
+
+But we note that the male patients are also older than the female
+patients, on average (mean age for males is 66.4, for females 63.3)
+
+\begin{itemize}
+\tightlist
+\item
+  Does the fact that male patients are older affect change in
+  theophylline level?
+\item
+  And how should we deal with the one missing \texttt{age} value (in a
+  male patient)?
+\end{itemize}
+
+\subsection{\texorpdfstring{Adding a quantitative covariate,
+\texttt{age}, to the
+model}{Adding a quantitative covariate, age, to the model}}\label{adding-a-quantitative-covariate-age-to-the-model}
+
+We could fit an ANOVA model to predict \texttt{st\_delta} using
+\texttt{sex} and \texttt{age} directly, but only if we categorized
+\texttt{age} into two or more groups. Because \texttt{age} is not
+categorical, we cannot include it in an ANOVA. But if age is an
+influence, and we don't adjust for it, it may well bias the outcome of
+our initial ANOVA. With a quantitative variable like \texttt{age}, we
+will need a method called ANCOVA, for \textbf{analysis of covariance}.
+
+\subsubsection{The ANCOVA model}\label{the-ancova-model}
+
+ANCOVA in this case is just an ANOVA model with our outcome
+(\texttt{st\_delta}) adjusted for a continuous covariate, called
+\texttt{age}. For the moment, we'll ignore the one subject with missing
+\texttt{age} and simply fit the regression model with \texttt{sex} and
+\texttt{age}.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{summary}\NormalTok{(}\KeywordTok{lm}\NormalTok{(st_delta }\OperatorTok{~}\StringTok{ }\NormalTok{sex }\OperatorTok{+}\StringTok{ }\NormalTok{age, }\DataTypeTok{data =}\NormalTok{ emphysema))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+
+Call:
+lm(formula = st_delta ~ sex + age, data = emphysema)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-8.3352 -0.4789  0.6948  1.5580  3.5202 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)  
+(Intercept) -6.90266    7.92948  -0.871   0.4011  
+sexM         3.52466    1.75815   2.005   0.0681 .
+age          0.05636    0.12343   0.457   0.6561  
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 3.255 on 12 degrees of freedom
+  (1 observation deleted due to missingness)
+Multiple R-squared:  0.2882,    Adjusted R-squared:  0.1696 
+F-statistic:  2.43 on 2 and 12 DF,  p-value: 0.13
+\end{verbatim}
+
+This model assumes that the slope of the regression line between
+\texttt{st\_delta} and \texttt{age} is the same for both sexes.
+
+Note that the model yields \texttt{st\_delta} = -6.9 + 3.52
+(\texttt{sex} = male) + 0.056 \texttt{age}, or
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{st\_delta} = -3.38 + 0.056 \texttt{age} for female patients,
+  and
+\item
+  \texttt{st\_delta} = -6.9 + 0.056 \texttt{age} for male patients.
+\end{itemize}
+
+Note that we can test this assumption of equal slopes by fitting an
+alternative model (with a product term between \texttt{sex} and
+\texttt{age}) that doesn't require the assumption, and we'll do that
+later.
+
+\subsubsection{The ANCOVA Table}\label{the-ancova-table}
+
+First, though, we'll look at the ANCOVA table.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{anova}\NormalTok{(}\KeywordTok{lm}\NormalTok{(st_delta }\OperatorTok{~}\StringTok{ }\NormalTok{sex }\OperatorTok{+}\StringTok{ }\NormalTok{age, }\DataTypeTok{data =}\NormalTok{ emphysema))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Analysis of Variance Table
+
+Response: st_delta
+          Df  Sum Sq Mean Sq F value  Pr(>F)  
+sex        1  49.284  49.284  4.6507 0.05203 .
+age        1   2.209   2.209  0.2085 0.65612  
+Residuals 12 127.164  10.597                  
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+\end{verbatim}
+
+When we tested \texttt{sex} without accounting for \texttt{age}, we
+found a \emph{p} value of 0.032, which is less than our usual cutpoint
+of 0.05. But when we adjusted for \texttt{age}, we find that
+\texttt{sex} loses significance, even though \texttt{age} is not a
+significant influence on \texttt{st\_delta} by itself, according to the
+ANCOVA table.
+
+\subsection{Rerunning the ANCOVA model after simple
+imputation}\label{rerunning-the-ancova-model-after-simple-imputation}
+
+We could have \emph{imputed} the missing \texttt{age} value for patient
+5, rather than just deleting that patient. Suppose we do the simplest
+potentially reasonable thing to do: insert the mean \texttt{age} in
+where the NA value currently exists.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{emph_imp <-}\StringTok{ }\KeywordTok{replace_na}\NormalTok{(emphysema, }\KeywordTok{list}\NormalTok{(}\DataTypeTok{age =} \KeywordTok{mean}\NormalTok{(emphysema}\OperatorTok{$}\NormalTok{age, }\DataTypeTok{na.rm =} \OtherTok{TRUE}\NormalTok{)))}
+
+\NormalTok{emph_imp}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+# A tibble: 16 x 7
+   patient   age sex   st_base st_day5 st_day10 st_delta
+     <int> <dbl> <fct>   <dbl>   <dbl>    <dbl>    <dbl>
+ 1       1  61.0 F       14.1     2.30    10.3   -11.8  
+ 2       2  70.0 F        7.20    5.40     7.30  - 1.80 
+ 3       3  65.0 M       14.2    11.9     11.3   - 2.30 
+ 4       4  65.0 M       10.3    10.7     13.8     0.400
+ 5       5  65.2 M        9.90   10.7     11.7     0.800
+ 6       6  76.0 M        5.20    6.80     4.20    1.60 
+ 7       7  72.0 M       10.4    14.6     14.1     4.20 
+ 8       8  69.0 F       10.5     7.20     5.40  - 3.30 
+ 9       9  66.0 M        5.00    5.00     5.10    0    
+10      10  62.0 M        8.60    8.10     7.40  - 0.500
+11      11  65.0 F       16.6    14.9     13.0   - 1.70 
+12      12  71.0 M       16.4    18.6     17.1     2.20 
+13      13  51.0 F       12.2    11.0     12.3   - 1.20 
+14      14  71.0 M        6.60    3.70     4.50  - 2.90 
+15      15  64.0 F       15.4    15.2     13.6   - 0.200
+16      16  50.0 M       10.2    10.8     11.2     0.600
+\end{verbatim}
+
+More on simple imputation and missing data is coming soon.
+
+For now, we can rerun the ANCOVA model on this new data set, after
+imputation\ldots{}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{anova}\NormalTok{(}\KeywordTok{lm}\NormalTok{(st_delta }\OperatorTok{~}\StringTok{ }\NormalTok{sex }\OperatorTok{+}\StringTok{ }\NormalTok{age, }\DataTypeTok{data =}\NormalTok{ emph_imp))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Analysis of Variance Table
+
+Response: st_delta
+          Df  Sum Sq Mean Sq F value  Pr(>F)  
+sex        1  52.547  52.547  5.3623 0.03755 *
+age        1   2.151   2.151  0.2195 0.64721  
+Residuals 13 127.392   9.799                  
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+\end{verbatim}
+
+When we do this, we see that now the \texttt{sex} variable returns to a
+\emph{p} value below 0.05. Our complete case analysis (which omitted
+patient 5) gives us a different result than the ANCOVA based on the data
+after mean imputation.
+
+\subsection{Looking at a factor-covariate
+interaction}\label{looking-at-a-factor-covariate-interaction}
+
+Let's run a model including the interaction (product) term between
+\texttt{age} and \texttt{sex}, which implies that the slope of
+\texttt{age} on our outcome (\texttt{st\_delta}) depends on the
+patient's sex. We'll use the imputed data again. Here is the new ANCOVA
+table, which suggests that the interaction of \texttt{age} and
+\texttt{sex} is small (because it accounts for only a small amount of
+the total Sum of Squares) and not significant (p = 0.91).
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{anova}\NormalTok{(}\KeywordTok{lm}\NormalTok{(st_delta }\OperatorTok{~}\StringTok{ }\NormalTok{sex }\OperatorTok{*}\StringTok{ }\NormalTok{age, }\DataTypeTok{data =}\NormalTok{ emph_imp))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Analysis of Variance Table
+
+Response: st_delta
+          Df  Sum Sq Mean Sq F value  Pr(>F)  
+sex        1  52.547  52.547  4.9549 0.04594 *
+age        1   2.151   2.151  0.2028 0.66051  
+sex:age    1   0.130   0.130  0.0123 0.91355  
+Residuals 12 127.261  10.605                  
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+\end{verbatim}
+
+Since the interaction term is neither substantial nor significant, we
+probably don't need it here. But let's look at its interpretation
+anyway, just to fix ideas. To do that, we'll need the coefficients from
+the underlying regression model.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{tidy}\NormalTok{(}\KeywordTok{lm}\NormalTok{(st_delta }\OperatorTok{~}\StringTok{ }\NormalTok{sex }\OperatorTok{*}\StringTok{ }\NormalTok{age, }\DataTypeTok{data =}\NormalTok{ emph_imp))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+         term    estimate  std.error  statistic   p.value
+1 (Intercept) -5.64606742 13.4536974 -0.4196666 0.6821446
+2        sexM  1.72031026 16.8389209  0.1021627 0.9203148
+3         age  0.03651685  0.2113871  0.1727488 0.8657284
+4    sexM:age  0.02885946  0.2603044  0.1108681 0.9135536
+\end{verbatim}
+
+Our ANCOVA model for \texttt{st\_delta} incorporating the \texttt{age} x
+\texttt{sex} product term is -5.65 + 1.72 (sex = M) + 0.037 age + 0.029
+(sex = M)(age). So that means:
+
+\begin{itemize}
+\tightlist
+\item
+  our model for females is \texttt{st\_delta} = -5.65 + 0.037
+  \texttt{age}
+\item
+  our model for males is \texttt{st\_delta} = (-5.65 + 1.72) + (0.037 +
+  0.029) \texttt{age}, or -3.93 + 0.066 \texttt{age}
+\end{itemize}
+
+but, again, our conclusion from the ANCOVA table is that this increase
+in complexity (letting both the slope and intercept vary by
+\texttt{sex}) doesn't add much in the way of predictive value for our
+\texttt{st\_delta} outcome.
 
 \chapter{Missing Data Mechanisms and Single
 Imputation}\label{missing-data-mechanisms-and-single-imputation}
