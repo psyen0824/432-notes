@@ -1,0 +1,298 @@
+# A Study of Prostate Cancer
+
+## Data Load and Background
+
+The data in `prost.csv` is derived from @Stamey1989 who examined the relationship between the level of prostate-specific antigen and a number of clinical measures in 97 men who were about to receive a radical prostatectomy. The `prost` data, as I'll name it in R, contains 97 rows and 11 columns.
+
+```{r c5_prost_tibble}
+prost
+```
+
+Note that a related `prost` data frame is also available as part of several R packages, including the `faraway` package, but there is an error in the `lweight` data for subject 32 in those presentations. The value of `lweight` for subject 32 should not be 6.1, corresponding to a prostate that is 449 grams in size, but instead the `lweight` value should be 3.804438, corresponding to a 44.9 gram prostate^[https://statweb.stanford.edu/~tibs/ElemStatLearn/ attributes the correction to Professor Stephen W. Link.]. 
+
+I've also changed the `gleason` and `bph` variables from their presentation in other settings, to let me teach some additional details. 
+
+## Code Book
+
+Variable  | Description
+--------: | ------------------------------
+`subject` | subject number (1 to 97)
+`lpsa` | log(prostate specific antigen in ng/ml), our **outcome**
+`lcavol` | log(cancer volume in cm^3^)
+`lweight` | log(prostate weight, in g)
+`age` | age
+`bph` | benign prostatic hyperplasia amount (Low, Medium, or High)
+`svi` | seminal vesicle invasion (1 = yes, 0 = no)
+`lcp` | log(capsular penetration, in cm)
+`gleason` | combined Gleason score (6, 7, or > 7 here)
+`pgg45` | percentage Gleason scores 4 or 5
+
+Notes:
+
+- in general, higher levels of PSA are stronger indicators of prostate cancer. An old standard (established almost exclusively with testing in white males, and definitely flawed) suggested that values below 4 were normal, and above 4 needed further testing. A PSA of 4 corresponds to an `lpsa` of `r round(log(4),2)`.
+- all logarithms are natural (base *e*) logarithms, obtained in R with the function `log()`
+- all variables other than `subject` and `lpsa` are candidate predictors
+- the `gleason` variable captures the highest combined Gleason score[^Scores range (in these data) from 6 (a well-differentiated, or low-grade cancer) to 9 (a high-grade cancer), although the maximum possible score is 10. 6 is the lowest score used for cancerous prostates. As this combination value increases, the rate at which the cancer grows and spreads should increase. This score refers to the combined Gleason grade, which is based on the sum of two areas (each scored 1-5) that make up most of the cancer.] in a biopsy, and higher scores indicate more aggressive cancer cells. It's stored here as 6, 7, or > 7.
+- the `pgg45` variable captures the percentage of individual Gleason scores[^The 1-5 scale for individual biopsies are defined so that 1 indicates something that looks like normal prostate tissue, and 5 indicates that the cells and their growth patterns look very abnormal. In this study, the percentage of 4s and 5s shown in the data appears to be based on 5-20 individual scores in most subjects.] that are 4 or 5, on a 1-5 scale, where higher scores indicate more abnormal cells. 
+
+## Additions for Later Use
+
+The code below adds to the `prost` tibble:
+
+- a factor version of the `svi` variable, called `svi_f`, with levels No and Yes,
+- a factor version of `gleason` called `gleason_f`, with the levels ordered > 7, 7, and finally 6,
+- a factor version of `bph` called `bph_f`, with levels ordered Low, Medium, High,
+- a centered version of `lcavol` called `lcavol_c`,
+- exponentiated `cavol` and `psa` results derived from the natural logarithms `lcavol` and `lpsa`.
+
+```{r c5_prost_mutations}
+prost <- prost %>%
+    mutate(svi_f = fct_recode(factor(svi), "No" = "0", "Yes" = "1"),
+           gleason_f = fct_relevel(gleason, c("> 7", "7", "6")),
+           bph_f = fct_relevel(bph, c("Low", "Medium", "High")),
+           lcavol_c = lcavol - mean(lcavol),
+           cavol = exp(lcavol),
+           psa = exp(lpsa))
+
+glimpse(prost)
+```
+
+## Fitting and Evaluating a Two-Predictor Model
+
+To begin, let's use two predictors (`lcavol` and `svi`) and their interaction in a linear regression model that predicts `lpsa`. I'll call this model `c5_prost_A`
+
+Earlier, we centered the `lcavol` values to facilitate interpretation of the terms. I'll use that centered version (called `lcavol_c`) of the quantitative predictor, and the 1/0 version of the `svi` variable[^We could certainly use the factor version of `svi` here, but it won't change the model in any meaningful way. There's no distinction in model *fitting* via `lm` between a 0/1 numeric variable and a No/Yes factor variable. The factor version of this information will be useful elsewhere, for instance in plotting the model.].
+
+```{r c5_prost_model_2predictors}
+c5_prost_A <- lm(lpsa ~ lcavol_c * svi, data = prost)
+summary(c5_prost_A)
+```
+
+### Using `tidy` 
+
+It can be very useful to build a data frame of the model's results. We can use the `tidy` function in the `broom` package to do so.
+
+```{r}
+tidy(c5_prost_A)
+```
+
+This makes it much easier to pull out individual elements of the model fit.
+
+For example, to specify the coefficient for `svi`, rounded to three decimal places, I could use `tidy(c5_prost_A) %>% filter(term == "svi") %>% select(estimate) %>% round(., 3)`
+
+- The result is `r tidy(c5_prost_A) %>% filter(term == "svi") %>% select(estimate) %>% round(., 3)`.
+- If you look at the Markdown file, you'll see that the number shown in the bullet point above this one was generated using inline R code, and the function specified above.
+
+### Interpretation
+
+1. The intercept, `r tidy(c5_prost_A) %>% filter(term == "(Intercept)") %>% select(estimate) %>% round(., 2)`, for the model is the predicted value of `lpsa` when `lcavol` is at its average and there is no seminal vesicle invasion (e.g. `svi` = 0).
+2. The coefficient for `lcavol_c`, `r tidy(c5_prost_A) %>% filter(term == "lcavol_c") %>% select(estimate) %>% round(., 2)`, is the predicted change in `lpsa` associated with a one unit increase in `lcavol` (or `lcavol_c`) when there is no seminal vesicle invasion.
+3. The coefficient for `svi`, `r tidy(c5_prost_A) %>% filter(term == "svi") %>% select(estimate) %>% specify_decimal(., 2)`, is the predicted change in `lpsa` associated with having no `svi` to having an `svi` while the `lcavol` remains at its average.
+4. The coefficient for `lcavol_c:svi`, the product term, which is `r tidy(c5_prost_A) %>% filter(term == "lcavol_c:svi") %>% select(estimate) %>% round(., 2)`, is the difference in the slope of `lcavol_c` for a subject with `svi` as compared to one with no `svi`. 
+
+*Note*: If you look at the R Markdown, you'll notice that in bullet point 3, I didn't use `round` to round off the estimate (as I did in the other three bullets), but instead a special function I specified at the start of the R Markdown file called `specify_decimal()` which uses the `format` function. This forces, in this case, the trailing zero in the two decimal representation of the `svi` coefficient to be shown. The special function, again, is:
+
+`specify_decimal <- function(x, k) format(round(x, k), nsmall=k)`
+
+## Exploring Model `c5_prost_A`
+
+The `glance` function from the `broom` package builds a nice one-row summary for the model.
+
+```{r}
+glance(c5_prost_A)
+```
+
+This summary includes, in order,
+
+- the model $R^2$, adjusted $R^2$ and $\hat{\sigma}$, the residual standard deviation,
+- the ANOVA F statistic and associated *p* value,
+- the number of degrees of freedom used by the model, and its log-likelihood ratio
+- the model's AIC (Akaike Information Criterion) and BIC (Bayesian Information Criterion)
+- the model's deviance statistic and residual degrees of freedom
+
+### `summary` for Model `c5_prost_A`
+
+If necessary, we can also run `summary` on this `c5_prost_A` object to pick up some additional summaries. Since the `svi` variable is binary, the interaction term is, too, so the *t* test here and the *F* test in the ANOVA yield the same result.
+
+```{r summary_c5_prost_A}
+summary(c5_prost_A)
+```
+
+If you've forgotten the details of the pieces of this summary, review the Part C Notes from 431.
+
+### Adjusted R^2^
+
+R^2^ is greedy. 
+
+- R^2^ will always suggest that we make our models as big as possible, often including variables of dubious predictive value.
+- As a result, there are various methods for penalizing R^2^ so that we wind up with smaller models. 
+- The **adjusted R^2^** is often a useful way to compare multiple models for the same response. 
+    - $R^2_{adj} = 1 - \frac{(1-R^2)(n - 1)}{n - k}$, where $n$ = the number of observations and $k$ is the number of coefficients estimated by the regression (including the intercept and any slopes).
+    - So, in this case, $R^2_{adj} = 1 - \frac{(1 - 0.5806)(97 - 1)}{97 - 4} = 0.5671$
+    - The adjusted R^2^ value is not, technically, a proportion of anything, but it is comparable across models for the same outcome. 
+    - The adjusted R^2^ will always be less than the (unadjusted) R^2^.
+
+### Coefficient Confidence Intervals
+
+Here are the 90% confidence intervals for the coefficients in Model A. Adjust the `level` to get different intervals.
+
+```{r}
+confint(c5_prost_A, level = 0.90)
+```
+
+What can we conclude from this about the utility of the interaction term?
+
+### ANOVA for Model `c5_prost_A`
+
+The interaction term appears unnecessary. We might wind up fitting the model without it. A complete ANOVA test is available, including a *p* value, if you want it.
+
+```{r}
+anova(c5_prost_A)
+```
+
+Note that the `anova` approach for a `lm` object is sequential. The first row shows the impact of `lcavol_c` as compared to a model with no predictors (just an intercept). The second row shows the impact of adding `svi` to a model that already contains `lcavol_c`. The third row shows the impact of adding the interaction (product) term to the model with the two main effects. So the order in which the variables are added to the regression model matters for this ANOVA. The F tests here describe the incremental impact of each covariate in turn. 
+
+### Residuals, Fitted Values and Standard Errors with `augment`
+
+The `augment` function in the `broom` package builds a data frame including the data used in the model, along with predictions (fitted values), residuals and other useful information.
+
+```{r}
+c5_prost_A_frame <- augment(c5_prost_A) %>% tbl_df
+skim(c5_prost_A_frame)
+```
+
+Elements shown here include:
+
+- `.fitted` Fitted values of model (or predicted values)
+- `.se.fit` Standard errors of fitted values
+- `.resid` Residuals (observed - fitted values)
+- `.hat` Diagonal of the hat matrix (these indicate *leverage* - points with high leverage indicate unusual combinations of predictors - values more than 2-3 times the mean leverage are worth some study - leverage is always between 0 and 1, and measures the amount by which the predicted value would change if the observation's y value was increased by one unit - a point with leverage 1 would cause the line to follow that point perfectly)
+- `.sigma` Estimate of residual standard deviation when corresponding observation is dropped from model
+- `.cooksd` Cook's distance, which helps identify influential points (values of Cook's d > 0.5 may be influential, values > 1.0 almost certainly are - an influential point changes the fit substantially when it is removed from the data)
+- `.std.resid` Standardized residuals (values above 2 in absolute value are worth some study - treat these as normal deviates [Z scores], essentially)
+
+See `?augment.lm` in R for more details.
+
+### Making Predictions with `c5_prost_A`
+
+Suppose we want to predict the `lpsa` for a patient with cancer volume equal to this group's mean, for both a patient with and without seminal vesicle invasion, and in each case, we want to use a 90\% prediction interval?
+
+```{r}
+newdata <- data.frame(lcavol_c = c(0,0), svi = c(0,1))
+predict(c5_prost_A, newdata, interval = "prediction", level = 0.90)
+```
+
+Since the predicted value in `fit` refers to the natural logarithm of PSA, to make the predictions in terms of PSA, we would need to exponentiate. The code below will accomplish that task.
+
+```{r}
+pred <- predict(c5_prost_A, newdata, interval = "prediction", level = 0.90)
+exp(pred)
+```
+
+## Plotting Model `c5_prost_A`
+
+#### Plot logs conventionally
+
+Here, we'll use `ggplot2` to plot the logarithms of the variables as they came to us, on a conventional coordinate scale. Note that the lines are nearly parallel. What does this suggest about our Model A?
+
+```{r}
+ggplot(prost, aes(x = lcavol, y = lpsa, group = svi_f, color = svi_f)) +
+    geom_point() +
+    geom_smooth(method = "lm", se = FALSE) + 
+    scale_color_discrete(name = "Seminal Vesicle Invasion?") +
+    theme_bw() +
+    labs(x = "Log (cancer volume, cc)", 
+         y = "Log (Prostate Specific Antigen, ng/ml)", 
+         title = "Two Predictor Model c5_prost_A, including Interaction")
+```
+
+#### Plot on log-log scale
+
+Another approach (which might be easier in some settings) would be to plot the raw values of Cancer Volume and PSA, but use logarithmic axes, again using the natural (base *e*) logarithm, as follows. If we use the default choice with `trans = "log", we'll find a need to select some useful break points for the grid, as I've done in what follows.
+
+```{r}
+ggplot(prost, aes(x = cavol, y = psa, group = svi_f, color = svi_f)) +
+    geom_point() +
+    geom_smooth(method = "lm", se = FALSE) + 
+    scale_color_discrete(name = "Seminal Vesicle Invasion?") +
+    scale_x_continuous(trans = "log", 
+                       breaks = c(0.5, 1, 2, 5, 10, 25, 50)) +
+    scale_y_continuous(trans = "log", 
+                       breaks = c(1, 2, 4, 10, 25, 50, 100, 200)) +
+    theme_bw() +
+    labs(x = "Cancer volume, in cubic centimeters", 
+         y = "Prostate Specific Antigen, in ng/ml", 
+         title = "Two Predictor Model c5_prost_A, including Interaction")
+```
+
+I've used the break point of 4 on the Y axis because of the old rule suggesting further testing for asymptomatic men with PSA of 4 or higher, but the other break points are arbitrary - they seemed to work for me, and used round numbers.
+
+### Residual Plots of `c5_prost_A`
+
+```{r}
+plot(c5_prost_A, which = 1)
+```
+
+```{r}
+plot(c5_prost_A, which = 5)
+```
+
+## Cross-Validation of Model `c5_prost_A`
+
+Suppose we want to evaluate whether our model `c5_prost_A` predicts effectively in new data. 
+
+One approach (used, for instance, in 431) would be to split our sample into a separate training and test samples, and then:
+
+- 1. fit the model in the training sample,
+- 2. use the resulting model to make predictions for `lpsa` in the test sample, and
+- 3. evaluate the quality of those predictions, perhaps by comparing the results to what we'd get using a different model.
+
+One problem with this approach is that with a small data set like this, we may be reluctant to cut our sample size for the training or the testing down. A potential solution is the idea of cross-validation, 
+
+The rest of this section is built on some material by David Robinson at https://rpubs.com/dgrtwo/cv-modelr. 
+
+This bit of code performs what is called *10-crossfold separation*. In words, this approach splits the 896 observations in our data into 10 exclusive partitions of about 90% into a training sample, and the remaining 10% in a test sample. The next part of the code maps a modeling step to the training data, and then fits the resulting model on the test data using the `broom` package's `augment` function. 
+
+I've selected the variables in this case so that the model we'll fit is the `m2_c7` model we've been looking at, although there are several ways to accomplish this.
+
+```{r validation_c2_m7_first_approach}
+set.seed(4320118)
+
+models <- smartcle2 %>%
+    select(bmi, female, exerany, sleephrs, 
+           internet30, alcdays, genhealth) %>%
+    crossv_kfold(k = 10) %>%
+    mutate(model = map(train, ~ lm(bmi ~ ., data = .)))
+
+predictions <- models %>%
+    unnest(map2(model, test, ~ augment(.x, newdata = .y)))
+
+predictions
+```
+
+The results are a set of predictions based on the splits into training and test groups (remember there are 10 of them, indexed by `.id`) that describe the complete set of 896 respondents again.
+
+What this lets us now do is calculate the root Mean Squared Prediction Error (RMSE) and Mean Absolute Prediction Error (MAE) for this model (the `c2_m7` model) across these observations, and also to compare that error to a model that simply predicts the mean `bmi` across all patients (the `intercept only` model.) In practice, we could consider two distinct models in doing this work.
+
+```{r validation_c2_m7_first_approach_predsummary}
+predictions %>%
+    summarize(RMSE_c2_m7 = sqrt(mean((bmi - .fitted) ^2)),
+              MAE_c2_m7 = mean(abs(bmi - .fitted)),
+              RMSE_interceptonly = sqrt(mean((bmi - mean(bmi))^2)),
+              MAE_interceptonly = mean(abs(bmi - mean(bmi))))
+```
+
+Another thing we could do with this tibble of predictions we have created is to graph the size of the prediction errors (observed `bmi` minus predicted values in `.fitted`) that our modeling approach makes.
+
+```{r validation_c2_m7_first_approach_errorhistogram}
+predictions %>%
+    mutate(errors = bmi - .fitted) %>%
+    ggplot(., aes(x = errors)) +
+    geom_histogram(bins = 30, fill = "darkviolet", col = "yellow") + 
+    labs(title = "Cross-Validated Errors in Prediction of BMI",
+         subtitle = "Using a model (`c2_m7`) including 6 regression inputs",
+         caption = "SMART BRFSS 2016 data for Cleveland-Elyria MMSA, n = 896",
+         x = "Error in predicting BMI")
+```
+
+

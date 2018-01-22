@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.1415926-2.5-0.9999.3 (MiKTeX 2.9) (preloaded format=xelatex 2016.8.27)  22 JAN 2018 07:21
+This is XeTeX, Version 3.1415926-2.5-0.9999.3 (MiKTeX 2.9) (preloaded format=xelatex 2016.8.27)  22 JAN 2018 10:12
 entering extended mode
 **bookdown-demo.tex
 (C:\Users\Thomas\Dropbox\2018-432\432-notes\bookdown-demo.tex
@@ -882,7 +882,7 @@ LaTeX Info: Redefining \nameref on input line 152.
 ] [2
 
 ] (C:\Users\Thomas\Dropbox\2018-432\432-notes\bookdown-demo.toc
-LaTeX Font Info:    Try loading font information for OT1+lmr on input line 5.
+LaTeX Font Info:    Try loading font information for OT1+lmr on input line 6.
 ("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\lm\ot1lmr.fd"
 File: ot1lmr.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
@@ -890,37 +890,38 @@ Package microtype Info: Loading generic settings for font family
 (microtype)             `lmr' (encoding: OT1).
 (microtype)             For optimal results, create family-specific settings.
 (microtype)             See the microtype manual for details.
-LaTeX Font Info:    Try loading font information for OML+lmm on input line 5.
+LaTeX Font Info:    Try loading font information for OML+lmm on input line 6.
 ("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\lm\omllmm.fd"
 File: omllmm.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
-LaTeX Font Info:    Try loading font information for OMS+lmsy on input line 5.
+LaTeX Font Info:    Try loading font information for OMS+lmsy on input line 6.
 ("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\lm\omslmsy.fd"
 File: omslmsy.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
-LaTeX Font Info:    Try loading font information for OMX+lmex on input line 5.
+LaTeX Font Info:    Try loading font information for OMX+lmex on input line 6.
 ("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\lm\omxlmex.fd"
 File: omxlmex.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <10> on input line 5.
+(Font)              <10> on input line 6.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <7> on input line 5.
+(Font)              <7> on input line 6.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <5> on input line 5.
-LaTeX Font Info:    Try loading font information for U+msa on input line 5.
+(Font)              <5> on input line 6.
+LaTeX Font Info:    Try loading font information for U+msa on input line 6.
 ("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\amsfonts\umsa.fd"
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 ) ("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\microtype\mt-msa.cfg"
 File: mt-msa.cfg 2006/02/04 v1.1 microtype config. file: AMS symbols (a) (RS)
 )
-LaTeX Font Info:    Try loading font information for U+msb on input line 5.
+LaTeX Font Info:    Try loading font information for U+msb on input line 6.
 ("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\amsfonts\umsb.fd"
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 ) ("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\microtype\mt-msb.cfg"
 File: mt-msb.cfg 2005/06/01 v1.0 microtype config. file: AMS symbols (b) (RS)
 )
-LaTeX Font Info:    Try loading font information for EU1+lmtt on input line 9.
+LaTeX Font Info:    Try loading font information for EU1+lmtt on input line 10.
+
 ("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\euenc\eu1lmtt.fd"
 File: eu1lmtt.fd 2009/10/30 v1.6 Font defs for Latin Modern
 ) [3])
@@ -936,76 +937,78 @@ LaTeX Font Info:    Font shape `EU1/lmtt/bx/n' in size <10> not available
 
 ] [9] [10
 
+] [11] [12
+
 ]
 Chapter 1.
 File: images/Tolaney-snip1.png Graphic file (type QTm)
 <use  "images/Tolaney-snip1.png" >
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <8> on input line 269.
+(Font)              <8> on input line 283.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <6> on input line 269.
-[11]
+(Font)              <6> on input line 283.
+[13]
 File: images/Roy-snip1.png Graphic file (type QTm)
-<use  "images/Roy-snip1.png" > [12]
+<use  "images/Roy-snip1.png" > [14]
 File: images/Berkhemer-snip4complete.png Graphic file (type QTm)
 <use  "images/Berkhemer-snip4complete.png" >
 File: images/Berkhemer-snip4notes.png Graphic file (type QTm)
 <use  "images/Berkhemer-snip4notes.png" >
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-[13]
+[15]
 LaTeX Font Info:    Font shape `EU1/lmtt/bx/n' in size <14.4> not available
-(Font)              Font shape `EU1/lmtt/b/n' tried instead on input line 323.
-[14]
-Overfull \hbox (8.15593pt too wide) in paragraph at lines 498--503
+(Font)              Font shape `EU1/lmtt/b/n' tried instead on input line 337.
+[16]
+Overfull \hbox (8.15593pt too wide) in paragraph at lines 512--517
 []\EU1/lmr/m/n/10 A useful trick here is to use the \EU1/lmtt/m/n/10 dput \EU1/
 lmr/m/n/10 function, specifically something like \EU1/lmtt/m/n/10 dput(names(fa
 kestroke))
  []
 
-[15]
+[17]
 LaTeX Font Info:    Font shape `EU1/lmtt/bx/n' in size <12> not available
-(Font)              Font shape `EU1/lmtt/b/n' tried instead on input line 591.
-[16] [17] [18] [19]
+(Font)              Font shape `EU1/lmtt/b/n' tried instead on input line 605.
+[18] [19] [20] [21]
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-[20]
+[22]
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-[21]
+[23]
 File: images/fs-table1inExcel.png Graphic file (type QTm)
 <use  "images/fs-table1inExcel.png" >
 Underfull \vbox (badness 4686) has occurred while \output is active []
 
-[22] [23] [24] [25]
+[24] [25] [26] [27]
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-[26] [27]
+[28] [29]
 File: images/bb-table1inExcel.png Graphic file (type QTm)
 <use  "images/bb-table1inExcel.png" >
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-[28]
+[30]
 File: images/bb-table1inWord.png Graphic file (type QTm)
 <use  "images/bb-table1inWord.png" >
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-[29] [30]
+[31] [32]
 Chapter 2.
-[31
+[33
 
-] [32] [33] [34] [35]
+] [34] [35] [36] [37]
 File: bookdown-demo_files/figure-latex/c2_histogram_sleephrs_smartcle2-1.pdf Gr
 aphic file (type QTm)
 
 <use  "bookdown-demo_files/figure-latex/c2_histogram_sleephrs_smartcle2-1.pdf" 
-> [36]
+> [38]
 File: bookdown-demo_files/figure-latex/c2_histogram_bmi_smartcle2-1.pdf Graphic
  file (type QTm)
 <use  "bookdown-demo_files/figure-latex/c2_histogram_bmi_smartcle2-1.pdf" >
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-[37] [38] [39]
+[39] [40] [41]
 File: bookdown-demo_files/figure-latex/scatter_physhealth_bmi_1-1.pdf Graphic f
 ile (type QTm)
 <use  "bookdown-demo_files/figure-latex/scatter_physhealth_bmi_1-1.pdf" >
@@ -1014,7 +1017,7 @@ c file (type QTm)
 <use  "bookdown-demo_files/figure-latex/c2_scatter_physhealth_bmi_2-1.pdf" >
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-[40] [41] [42] [43] [44]
+[42] [43] [44] [45] [46]
 File: bookdown-demo_files/figure-latex/chapter2_first_resid_plot_model_A-1.pdf 
 Graphic file (type QTm)
 
@@ -1022,7 +1025,7 @@ Graphic file (type QTm)
 " >
 Underfull \vbox (badness 7326) has occurred while \output is active []
 
-[45]
+[47]
 File: bookdown-demo_files/figure-latex/chapter2_ggplot_first_resid_plot_model_A
 -1.pdf Graphic file (type QTm)
 
@@ -1030,7 +1033,7 @@ File: bookdown-demo_files/figure-latex/chapter2_ggplot_first_resid_plot_model_A
 A-1.pdf" >
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-[46]
+[48]
 File: bookdown-demo_files/figure-latex/histogram_of_physhealth_smartcle2-1.pdf 
 Graphic file (type QTm)
 
@@ -1038,7 +1041,7 @@ Graphic file (type QTm)
 " >
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-[47]
+[49]
 File: bookdown-demo_files/figure-latex/chapter2_second_resid_plot_model_A-1.pdf
  Graphic file (type QTm)
 
@@ -1046,21 +1049,21 @@ File: bookdown-demo_files/figure-latex/chapter2_second_resid_plot_model_A-1.pdf
 f" >
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-[48]
+[50]
 File: bookdown-demo_files/figure-latex/c2_sex_bmi_plot1-1.pdf Graphic file (typ
 e QTm)
-<use  "bookdown-demo_files/figure-latex/c2_sex_bmi_plot1-1.pdf" > [49]
+<use  "bookdown-demo_files/figure-latex/c2_sex_bmi_plot1-1.pdf" > [51]
 File: bookdown-demo_files/figure-latex/c2_sex_bmi_plot2-1.pdf Graphic file (typ
 e QTm)
 <use  "bookdown-demo_files/figure-latex/c2_sex_bmi_plot2-1.pdf" >
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-[50] [51]
+[52] [53]
 File: bookdown-demo_files/figure-latex/c2_smartcle2_plot_bmi_hist_by_female_exe
 rany-1.pdf Graphic file (type QTm)
 
 <use  "bookdown-demo_files/figure-latex/c2_smartcle2_plot_bmi_hist_by_female_ex
-erany-1.pdf" > [52]
+erany-1.pdf" > [54]
 File: bookdown-demo_files/figure-latex/c2_smartcle2_plot_bmi_box_by_female_exer
 any-1.pdf Graphic file (type QTm)
 
@@ -1068,7 +1071,7 @@ any-1.pdf Graphic file (type QTm)
 rany-1.pdf" >
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-[53]
+[55]
 File: bookdown-demo_files/figure-latex/c2_smartcle2_plot_bmi_points_by_female_e
 xerany-1.pdf Graphic file (type QTm)
 
@@ -1076,47 +1079,47 @@ xerany-1.pdf Graphic file (type QTm)
 exerany-1.pdf" >
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-[54] [55] [56] [57]
+[56] [57] [58] [59]
 File: bookdown-demo_files/figure-latex/graph_to_set_up_c2_m4-1.pdf Graphic file
  (type QTm)
-<use  "bookdown-demo_files/figure-latex/graph_to_set_up_c2_m4-1.pdf" > [58] [59
-] [60] [61]
+<use  "bookdown-demo_files/figure-latex/graph_to_set_up_c2_m4-1.pdf" > [60] [61
+] [62] [63]
 File: bookdown-demo_files/figure-latex/unnamed-chunk-10-1.pdf Graphic file (typ
 e QTm)
-<use  "bookdown-demo_files/figure-latex/unnamed-chunk-10-1.pdf" > [62] [63]
+<use  "bookdown-demo_files/figure-latex/unnamed-chunk-10-1.pdf" > [64] [65]
 File: bookdown-demo_files/figure-latex/unnamed-chunk-12-1.pdf Graphic file (typ
 e QTm)
 <use  "bookdown-demo_files/figure-latex/unnamed-chunk-12-1.pdf" >
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-[64]
+[66]
 Overfull \hbox (55.34293pt too wide) has occurred while \output is active
 \EU1/lmr/m/sl/10 2.14.  RESCALING AN INPUT BY SUBTRACTING THE MEAN AND DIVIDING
- BY 2 STANDARD DEVIATIONS \EU1/lmr/m/n/10 65
+ BY 2 STANDARD DEVIATIONS \EU1/lmr/m/n/10 67
  []
 
-[65]
+[67]
 File: bookdown-demo_files/figure-latex/unnamed-chunk-14-1.pdf Graphic file (typ
 e QTm)
-<use  "bookdown-demo_files/figure-latex/unnamed-chunk-14-1.pdf" > [66] [67] [68
+<use  "bookdown-demo_files/figure-latex/unnamed-chunk-14-1.pdf" > [68] [69] [70
 ]
 File: bookdown-demo_files/figure-latex/c2_m6_residuals_normality-1.pdf Graphic 
 file (type QTm)
-<use  "bookdown-demo_files/figure-latex/c2_m6_residuals_normality-1.pdf" > [69]
+<use  "bookdown-demo_files/figure-latex/c2_m6_residuals_normality-1.pdf" > [71]
 File: bookdown-demo_files/figure-latex/residual_plot1_c2_m7-1.pdf Graphic file 
 (type QTm)
 <use  "bookdown-demo_files/figure-latex/residual_plot1_c2_m7-1.pdf" >
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-[70]
+[72]
 File: bookdown-demo_files/figure-latex/residual_plot5_c2_m7-1.pdf Graphic file 
 (type QTm)
 <use  "bookdown-demo_files/figure-latex/residual_plot5_c2_m7-1.pdf" >
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-[71] [72]
+[73] [74]
 Chapter 3.
-[73
+[75
 
 ]
 File: bookdown-demo_files/figure-latex/c3_oneway_bonding_resin_boxplot-1.pdf Gr
@@ -1131,29 +1134,29 @@ pdf Graphic file (type QTm)
 .pdf" >
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-[74]
+[76]
 Underfull \vbox (badness 1365) has occurred while \output is active []
 
-[75]
+[77]
 File: bookdown-demo_files/figure-latex/unnamed-chunk-19-1.pdf Graphic file (typ
 e QTm)
 <use  "bookdown-demo_files/figure-latex/unnamed-chunk-19-1.pdf" >
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-[76]
+[78]
 File: bookdown-demo_files/figure-latex/c3_bonding_points_plot-1.pdf Graphic fil
 e (type QTm)
 <use  "bookdown-demo_files/figure-latex/c3_bonding_points_plot-1.pdf" >
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-[77] [78]
+[79] [80]
 File: bookdown-demo_files/figure-latex/c3_ggplot_means_plot_bonding-1.pdf Graph
 ic file (type QTm)
 <use  "bookdown-demo_files/figure-latex/c3_ggplot_means_plot_bonding-1.pdf" >
 Underfull \vbox (badness 6808) has occurred while \output is active []
 
-[79] [80] [81]
-Overfull \hbox (176.78111pt too wide) detected at line 4414
+[81] [82] [83]
+Overfull \hbox (176.78111pt too wide) detected at line 4428
 \OML/lmm/m/it/10 strength \OT1/lmr/m/n/10 = 17\OML/lmm/m/it/10 :\OT1/lmr/m/n/10
  77 + 2\OML/lmm/m/it/10 :\OT1/lmr/m/n/10 13\OML/lmm/m/it/10 resinB \OT1/lmr/m/n
 /10 + 4\OML/lmm/m/it/10 :\OT1/lmr/m/n/10 77\OML/lmm/m/it/10 resinC \OT1/lmr/m/n
@@ -1166,19 +1169,19 @@ msy/m/n/10 ^^C \OML/lmm/m/it/10 lightLED[]  \OT1/lmr/m/n/10 + 3\OML/lmm/m/it/10
 /n/10 74\OML/lmm/m/it/10 resinD \OMS/lmsy/m/n/10 ^^C \OML/lmm/m/it/10 lightLED
  []
 
-[82] [83] [84]
+[84] [85] [86]
 File: bookdown-demo_files/figure-latex/boxplots_c3_bonding_without_interaction-
 1.pdf Graphic file (type QTm)
 
 <use  "bookdown-demo_files/figure-latex/boxplots_c3_bonding_without_interaction
--1.pdf" > [85] [86]
+-1.pdf" > [87] [88]
 File: bookdown-demo_files/figure-latex/c3_ggplot_means_plot_cortisol-1.pdf Grap
 hic file (type QTm)
 
 <use  "bookdown-demo_files/figure-latex/c3_ggplot_means_plot_cortisol-1.pdf" >
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-[87] [88]
+[89] [90]
 File: bookdown-demo_files/figure-latex/boxplots_c3_cortisol_without_interaction
 -1.pdf Graphic file (type QTm)
 
@@ -1186,44 +1189,89 @@ File: bookdown-demo_files/figure-latex/boxplots_c3_cortisol_without_interaction
 n-1.pdf" >
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-[89] [90] [91] [92] [93] [94] [95] [96] [97] [98
+[91] [92] [93] [94] [95] [96] [97] [98] [99] [100
 
 ]
 Chapter 4.
-[99] [100] [101] [102]
-Underfull \hbox (badness 1122) in paragraph at lines 5856--5859
+[101] [102] [103] [104]
+Underfull \hbox (badness 1122) in paragraph at lines 5870--5873
 []\EU1/lmr/m/n/10 The \EU1/lmtt/m/n/10 simputation \EU1/lmr/m/n/10 vignette is 
 available at []$[][][][][] [] [] [] [][][][] [] [][][][][][][][][][] [] [][][] 
 [] [][][] [] [][][][][][][][] [] [][][][][][][][][][][] []
  []
 
-[103]
-Underfull \hbox (badness 4353) in paragraph at lines 5859--5861
+[105]
+Underfull \hbox (badness 4353) in paragraph at lines 5873--5875
 []\EU1/lmr/m/n/10 The \EU1/lmtt/m/n/10 simputation \EU1/lmr/m/n/10 reference ma
 nual is available at []$[][][][][] [] [] [] [][][][] [] [][][][][][][][][][] []
  [][][] [] [][][] [] [][][][][][][][] []
  []
 
-[104] (C:\Users\Thomas\Dropbox\2018-432\432-notes\bookdown-demo.bbl [105] [106
+[106] [107] [108
+
+]
+Chapter 5.
+[109] [110]
+Underfull \vbox (badness 5475) has occurred while \output is active []
+
+[111] [112]
+LaTeX Font Info:    External font `lmex10' loaded for size
+(Font)              <12> on input line 6362.
+[113] [114] [115]
+File: bookdown-demo_files/figure-latex/unnamed-chunk-53-1.pdf Graphic file (typ
+e QTm)
+<use  "bookdown-demo_files/figure-latex/unnamed-chunk-53-1.pdf" > [116]
+File: bookdown-demo_files/figure-latex/unnamed-chunk-54-1.pdf Graphic file (typ
+e QTm)
+<use  "bookdown-demo_files/figure-latex/unnamed-chunk-54-1.pdf" >
+File: bookdown-demo_files/figure-latex/unnamed-chunk-55-1.pdf Graphic file (typ
+e QTm)
+<use  "bookdown-demo_files/figure-latex/unnamed-chunk-55-1.pdf" >
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+[117]
+File: bookdown-demo_files/figure-latex/unnamed-chunk-56-1.pdf Graphic file (typ
+e QTm)
+<use  "bookdown-demo_files/figure-latex/unnamed-chunk-56-1.pdf" >
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+[118] [119]
+Overfull \vbox (0.11993pt too high) detected at line 6787
+ []
+
+[120]
+File: bookdown-demo_files/figure-latex/validation_c2_m7_first_approach_errorhis
+togram-1.pdf Graphic file (type QTm)
+
+<use  "bookdown-demo_files/figure-latex/validation_c2_m7_first_approach_errorhi
+stogram-1.pdf" > [121] [122
+
+]
+Chapter 6.
+[123] [124] [125] [126]
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+[127] [128] [129] [130] (C:\Users\Thomas\Dropbox\2018-432\432-notes\bookdown-de
+mo.bbl [131] [132
 
 ])
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 5987.
-[107]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 5987.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 7505.
+[133]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 7505.
 (C:\Users\Thomas\Dropbox\2018-432\432-notes\bookdown-demo.aux)
-Package atveryend Info: Empty hook `AtVeryEndDocument' on input line 5987.
-Package atveryend Info: Empty hook `AtEndAfterFileList' on input line 5987.
+Package atveryend Info: Empty hook `AtVeryEndDocument' on input line 7505.
+Package atveryend Info: Empty hook `AtEndAfterFileList' on input line 7505.
 
 LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
 
  ) 
 Here is how much of TeX's memory you used:
- 25346 strings out of 428790
- 456823 string characters out of 3163802
- 562482 words of memory out of 3000000
- 28348 multiletter control sequences out of 15000+200000
- 24474 words of font info for 66 fonts, out of 3000000 for 9000
+ 25425 strings out of 428790
+ 459033 string characters out of 3163802
+ 567074 words of memory out of 3000000
+ 28416 multiletter control sequences out of 15000+200000
+ 28507 words of font info for 73 fonts, out of 3000000 for 9000
  1096 hyphenation exceptions out of 8191
  52i,11n,68p,10422b,473s stack positions out of 5000i,500n,10000p,200000b,50000s
 
-Output written on bookdown-demo.pdf (107 pages).
+Output written on bookdown-demo.pdf (133 pages).

@@ -1,0 +1,235 @@
+# Stepwise Variable Selection
+
+## Strategy for Model Selection
+
+@RamseySchafer2002 suggest a strategy for dealing with many potential explanatory variables should include the following elements:
+
+1.	Identify the key objectives.
+2.	Screen the available variables, deciding on a list that is sensitive to the objectives and excludes obvious redundancies.
+3.	Perform exploratory analysis, examining graphical displays and correlation coefficients.
+4.	Perform transformations, as necessary.
+5.	Examine a residual plot after fitting a rich model, performing further transformations and considering outliers.
+6.	Find a suitable subset of the predictors, exerting enough control over any semi-automated selection procedure to be sensitive to the questions of interest.
+7.	Proceed with the analysis, using the selected explanatory variables.
+
+The Two Key Aspects of Model Selection are:
+
+1.	Evaluating each potential subset of predictor variables
+2.	Deciding on the collection of potential subsets
+
+### How Do We Choose Potential Subsets of Predictors?
+
+Choosing potential subsets of predictor variables usually involves either:
+
+1. Stepwise approaches
+2. All possible subset (or best possible subset) searches
+
+Note that the use of any variable selection procedure changes the properties of ...
+
+- the estimated coefficients, which are biased, and
+- the associated tests and confidence intervals, which are overly optimistic.
+
+@Leeb2005 summarize the key issues:
+
+1.	Regardless of sample size, the model selection step typically has a dramatic effect on the sampling properties of the estimators that cannot be ignored. In particular, the sampling properties of post-model-selection estimators are typically significantly different from the nominal distributions that arise if a fixed model is supposed.
+2.	As a consequence, use of inference procedures that do not take into account the model selection step (e.g. using standard t-intervals as if the selected model has been given prior to the statistical analysis) can be highly misleading.
+
+## A "Kitchen Sink" Model (Model `c5_prost_ks`)
+
+Suppose that we now consider a model for the `prost` data we have been working with, which includes main effects (and, in this case, only the main effects) of all eight candidate predictors for `lpsa`, as follows.
+
+```{r build_c5_prost_ks}
+c5_prost_ks <- lm(lpsa ~ lcavol + lweight + age + bph_f + svi_f + 
+                lcp + gleason_f + pgg45, data = prost)
+
+tidy(c5_prost_ks)
+
+glance(c5_prost_ks)
+```
+
+We'll often refer to this (all predictors on board) approach as a "kitchen sink" model[This refers to the English idiom "... everything but the kitchen sink" which describes, essentially, everything imaginable. A "kitchen sink regression" is often used as a pejorative term, since no special skill or insight is required to identify it, given a list of potential predictors. For more, yes, there is a [Wikipedia page](https://en.wikipedia.org/wiki/Kitchen_sink_regression).].
+
+## Sequential Variable Selection: Stepwise Approaches
+
+- Forward Selection
+    + We begin with a constant mean and then add potential predictors one at a time according to some criterion (R defaults to minimizing the Akaike Information Criterion) until no further addition significantly improves the fit. 
+    + Each categorical factor variable is represented in the regression model as a set of indicator variables. In the absence of a good reason to do something else, the set is added to the model as a single unit, and R does this automatically.
+- Backwards Elimination
+    + Start with the "kitchen sink" model and then delete potential predictors one at a time.
+    + Backwards Elimination is less likely than Forward Selection, to omit negatively confounded sets of variables, though all stepwise procedures have problems.
+- Stepwise Regression can also be done by combining these methods.
+
+### The Big Problems with Stepwise Regression
+
+There is no reason to assume that a single best model can be found.
+
+- The use of forward selection, or backwards elimination, or stepwise regression including both procedures, will NOT always find the same model. 
+- It also appears to be essentially useless to try different stepwise methods to look for agreement.
+
+Users of stepwise regression frequently place all of their attention on the particular explanatory variables included in the resulting model, when there's **no reason** (in most cases) to assume that model is in any way optimal.
+
+Despite all of its problems, let's use stepwise regression to help predict `lpsa` given a subset of the eight predictors in `c5_prost_ks`.
+
+## Forward Selection with the `step` function
+
+1. Specify the null model (intercept only)
+2. Specify the variables R should consider as predictors (in the scope element of the step function)
+3. Specify forward selection only
+4. R defaults to using AIC as its stepwise criterion
+
+```{r}
+with(prost, 
+     step(lm(lpsa ~ 1), 
+     scope=(~ lcavol + lweight + age + bph_f + svi_f + 
+                lcp + gleason_f + pgg45), 
+     direction="forward"))
+```
+
+The resulting model, arrived at after three forward selection steps, includes `lcavol`, `lweight` and `svi_f`. 
+
+```{r}
+model.fs <- lm(lpsa ~ lcavol + lweight + svi_f, 
+               data=prost)
+summary(model.fs)$adj.r.squared
+extractAIC(model.fs)
+```
+
+The adjusted R^2^ value for this model is 0.624, and the AIC value used by the stepwise procedure is -63.18, on 4 effective degrees of freedom.
+
+
+## Backward Elimination using the `step` function
+
+In this case, the backward elimination approach, using reduction in AIC for a criterion, comes to the same conclusion about the "best" model.
+
+```{r}
+with(prost, 
+     step(lm(lpsa ~ lcavol + lweight + age + bph_f + 
+                 svi_f + lcp + gleason_f + pgg45), 
+          direction="backward"))
+```
+
+The backwards elimination approach in this case lands on a model with five inputs (one of which includes two `bph` indicators,) eliminating only `gleason_f`, `pgg45` and `lcp`.
+
+## Allen-Cady Modified Backward Elimination
+
+Ranking candidate predictors by importance in advance of backwards elimination can help avoid false-positives, while reducing model size. See @Vittinghoff2012, Section 10.3 for more details.
+
+1. First, force into the model any predictors of primary interest, and any confounders necessary for face validity of the final model.
+    + "Some variables in the hypothesized causal model may be such well-established causal antecedents of the outcome that it makes sense to include them, essentially to establish the face validity of the model and without regard to the strength or statistical significance of their associations with the primary predictor and outcome ..." 
+2. Rank the remaining candidate predictors in order of importance.
+3. Starting from an initial model with all candidate predictors included, delete predictors in order of ascending importance until the first variable meeting a criterion to stay in the model hits. Then stop.
+
+Only the remaining variable hypothesized to be least important is eligible for removal at each step. When we are willing to do this sorting before collecting (or analyzing) the data, then we can do Allen-Cady backwards elimination using the `drop1` command in R.
+
+### Demonstration of the Allen-Cady approach
+
+Suppose, for the moment that we decided to fit a model for the log of `psa` and we decided (before we saw the data) that we would:
+
+lcavol + lweight + svi_f + 
+              age + bph_f + gleason_f + lcp + pgg45
+
+- force the `gleason_f` variable to be in the model, due to prior information about its importance,
+- and then rated the importance of the other variables as `lcavol` (most important), then `svi_f` then `age`, and then `bph_f`, then `lweight` and `lcp` followed by `pgg45` (least important)
+
+When we are willing to do this sorting before collecting (or analyzing) the data, then we can do Allen-Cady backwards elimination using the `drop1` command in R.
+
+**Step 1.** Fit the full model, then see if removing `lweight` improves AIC...
+
+```{r}
+with(prost, drop1(lm(lpsa ~ gleason_f + lcavol + svi_f + 
+              age + bph_f + lweight + lcp + pgg45),
+              scope = (~ pgg45)))
+```
+
+Since -62.3 is smaller (i.e. more negative) than -61.4, we delete `pgg45` and move on to assess whether we can remove the variable we deemed next least important (`lcp`)
+
+**Step 2.** Let's see if removing `lcp` from this model improves AIC...
+
+```{r}
+with(prost, drop1(lm(lpsa ~ gleason_f + lcavol + svi_f + 
+              age + bph_f + lweight  + lcp),
+              scope = (~ lcp)))
+```
+
+Again, since -63.0 is smaller than -62.4, we delete `lcp` and next assess whether we should delete `lweight`.
+
+**Step 3.** Does removing `lweight` from this model improves AIC...
+
+```{r}
+with(prost, drop1(lm(lpsa ~ gleason_f + lcavol + svi_f + 
+              age + bph_f + lweight),
+              scope = (~ lweight)))
+```
+
+Since the AIC for the model after the removal of `lweight` is larger (i.e. less negative), we stop, and declare our final model by the Allen-Cady approach to include `gleason_f`, `lcavol`, `svi_f`, `age`, `bph_f` and `lweight`. 
+
+## Summarizing the Results
+
+Method | Suggested Predictors
+--------------------: | ----------------------------------------------
+Forward selection     | `lcavol`, `lweight`, `svi_f`
+Backwards elimination | `lcavol`, `lweight`, `svi_f`, `age`, `bph_f`
+Allen-Cady approach   | `lcavol`, `lweight`, `svi_f`, `age`, `bph_f`, `gleason_f`
+
+### In-Sample Testing and Summaries
+
+Since these models are nested in each other, let's look at the summary statistics (like R^2^, and AIC) and also run an ANOVA-based comparison of these nested models to each other and to the model with the intercept alone, and the kitchen sink model with all available predictors.
+
+```{r}
+prost_m_int <- lm(lpsa ~ 1, data = prost)
+prost_m_fw <- lm(lpsa ~ lcavol + lweight + svi_f, data = prost)
+prost_m_bw <- lm(lpsa ~ lcavol + lweight + svi_f + 
+              age + bph_f + gleason_f, data = prost)
+prost_m_ac <- lm(lpsa ~ lcavol + lweight + svi_f + 
+              age + bph_f + gleason_f + lcp, data = prost)
+prost_m_ks <- lm(lpsa ~ lcavol + lweight + svi_f + 
+              age + bph_f + gleason_f + lcp + pgg45, data = prost)
+```
+
+#### Model Fit Summaries (in-sample) from `glance`
+
+Here are the models, at a `glance` from the `broom` package.
+
+```{r}
+prost_sum <- bind_rows(glance(prost_m_int), glance(prost_m_fw),
+                       glance(prost_m_bw), glance(prost_m_ac), 
+                       glance(prost_m_ks)) %>% round(., 3)
+prost_sum$names <- c("intercept", "lcavol + lweight + svi", 
+                      "... + age + bhp + gleason", "... + lcp", "... + pgg45")
+prost_sum <- prost_sum %>%
+    select(names, r.squared, adj.r.squared, AIC, BIC, sigma, df, df.residual)
+
+prost_sum
+```
+
+From these summaries, it looks like:
+
+- the adjusted R^2^ is essentially indistinguishable between the three largest models, but a bit less strong with the three-predictor (4 df) model, and
+- the AIC and BIC are (slightly) better (lower) with the three-predictor model (4 df) than any other.
+
+So we might be motivated by these summaries to select any of the three models we're studying closely here.
+
+#### Model Testing via ANOVA (in-sample)
+
+To obtain ANOVA-based test results, we'll run...
+
+```{r}
+anova(prost_m_int, prost_m_fw, prost_m_bw, prost_m_ac, prost_m_ks)
+```
+
+What conclusions can we draw on the basis of these ANOVA tests?
+
+- There is a statistically significant improvement in predictive value for Model 2 (the forward selection approach) as compared to Model 1 (the intercept only.) 
+- The ANOVA test comparing Model 5 (kitchen sink) to Model 4 (Allen-Cady result) shows no statistically significant improvement in predictive value.
+- Neither does the ANOVA test comparing Model 3 to Model 2 or Model 4 to Model 3.
+
+This suggests that, **if we are willing to let the ANOVA test decide our best model** than that would be the model produced by forward selection, with predictors `lcavol`, `lweight` and `svi_f`. But...
+
+1. If the purpose of the model is to predict new data, some sort of out-of-sample or cross-validation approach will be necessary, and
+2. Even if our goal isn't prediction but merely description of the current data, we would still want to build diagnostic plots to regression assumptions in each model, and
+3. There is no reason to assume in advance that any of these models is in fact correct, or that any one of these stepwise approaches is necessarily better than any other, and
+4. The mere act of running a stepwise regression model, as we'll see, can increase the bias in our findings if we accept the results at face value.
+
+So we'll need some additional methods for selecting variables, and for then validating the results once we complete the selection process. 
+
+

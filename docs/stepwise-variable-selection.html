@@ -31,8 +31,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   
   
-<link rel="prev" href="analysis-of-variance-and-analysis-of-covariance.html">
-<link rel="next" href="a-study-of-prostate-cancer.html">
+<link rel="prev" href="a-study-of-prostate-cancer.html">
+<link rel="next" href="references.html">
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
@@ -303,280 +303,417 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="missing-data-mechanisms-and-single-imputation" class="section level1">
-<h1><span class="header-section-number">Chapter 4</span> Missing Data Mechanisms and Single Imputation</h1>
-<p>Almost all serious statistical analyses have to deal with missing data. Data values that are missing are indicated in R, and to R, by the symbol <code>NA</code>.</p>
-<div id="a-toy-example" class="section level2">
-<h2><span class="header-section-number">4.1</span> A Toy Example</h2>
-<p>In the following tiny data set called <code>sbp_example</code>, we have four variables for a set of 15 subjects. In addition to a subject id, we have:</p>
-<ul>
-<li>the treatment this subject received (A, B or C are the treatments),</li>
-<li>an indicator (1 = yes, 0 = no) of whether the subject has diabetes,</li>
-<li>the subject’s systolic blood pressure at baseline</li>
-<li>the subject’s systolic blood pressure after the application of the treatment</li>
-</ul>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># create some temporary variables</span>
-
-subject &lt;-<span class="st"> </span><span class="dv">101</span><span class="op">:</span><span class="dv">115</span>
-x1 &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;A&quot;</span>, <span class="st">&quot;B&quot;</span>, <span class="st">&quot;C&quot;</span>, <span class="st">&quot;A&quot;</span>, <span class="st">&quot;C&quot;</span>, <span class="st">&quot;A&quot;</span>, <span class="st">&quot;A&quot;</span>, <span class="ot">NA</span>, <span class="st">&quot;B&quot;</span>, <span class="st">&quot;C&quot;</span>, <span class="st">&quot;A&quot;</span>, <span class="st">&quot;B&quot;</span>, <span class="st">&quot;C&quot;</span>, <span class="st">&quot;A&quot;</span>, <span class="st">&quot;B&quot;</span>)
-x2 &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="ot">NA</span>, <span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="ot">NA</span>, <span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="ot">NA</span>)
-x3 &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">120</span>, <span class="dv">145</span>, <span class="dv">150</span>, <span class="ot">NA</span>, <span class="dv">155</span>, <span class="ot">NA</span>, <span class="dv">135</span>, <span class="ot">NA</span>, <span class="dv">115</span>, <span class="dv">170</span>, <span class="dv">150</span>, <span class="dv">145</span>, <span class="dv">140</span>, <span class="dv">160</span>, <span class="dv">135</span>)
-x4 &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">105</span>, <span class="dv">135</span>, <span class="dv">150</span>, <span class="dv">120</span>, <span class="dv">135</span>, <span class="dv">115</span>, <span class="dv">160</span>, <span class="dv">150</span>, <span class="dv">130</span>, <span class="dv">155</span>, <span class="dv">140</span>, <span class="dv">140</span>, <span class="dv">150</span>, <span class="dv">135</span>, <span class="dv">120</span>)
-
-sbp_example &lt;-<span class="st"> </span>
-<span class="st">  </span><span class="kw">data.frame</span>(subject, <span class="dt">treat =</span> x1, <span class="dt">diabetes =</span> x2, 
-             <span class="dt">sbp.before =</span> x3, <span class="dt">sbp.after =</span> x4) <span class="op">%&gt;%</span>
-<span class="st">  </span>tbl_df
-
-<span class="kw">rm</span>(subject, x1, x2, x3, x4) <span class="co"># just cleaning up</span>
-
-sbp_example</code></pre></div>
-<pre><code># A tibble: 15 x 5
-   subject treat diabetes sbp.before sbp.after
-     &lt;int&gt; &lt;fct&gt;    &lt;dbl&gt;      &lt;dbl&gt;     &lt;dbl&gt;
- 1     101 A         1.00        120       105
- 2     102 B         0           145       135
- 3     103 C         0           150       150
- 4     104 A         1.00         NA       120
- 5     105 C        NA           155       135
- 6     106 A         1.00         NA       115
- 7     107 A         0           135       160
- 8     108 &lt;NA&gt;      1.00         NA       150
- 9     109 B        NA           115       130
-10     110 C         1.00        170       155
-11     111 A         0           150       140
-12     112 B         0           145       140
-13     113 C         1.00        140       150
-14     114 A         1.00        160       135
-15     115 B        NA           135       120</code></pre>
-<div id="how-many-missing-values-do-we-have-in-each-column" class="section level3">
-<h3><span class="header-section-number">4.1.1</span> How many missing values do we have in each column?</h3>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">colSums</span>(<span class="kw">is.na</span>(sbp_example))</code></pre></div>
-<pre><code>   subject      treat   diabetes sbp.before  sbp.after 
-         0          1          3          3          0 </code></pre>
-<p>We are missing one <code>treat</code>, 3 <code>diabetes</code> and 3 <code>sbp.before</code> values.</p>
-</div>
-<div id="what-is-the-pattern-of-missing-data" class="section level3">
-<h3><span class="header-section-number">4.1.2</span> What is the pattern of missing data?</h3>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">mice<span class="op">::</span><span class="kw">md.pattern</span>(sbp_example)</code></pre></div>
-<pre><code>  subject sbp.after treat diabetes sbp.before  
-9       1         1     1        1          1 0
-3       1         1     1        0          1 1
-2       1         1     1        1          0 1
-1       1         1     0        1          0 2
-        0         0     1        3          3 7</code></pre>
-<p>We have nine subjects with complete data, three subjects with missing <code>diabetes</code> (only), two subjects with missing <code>sbp.before</code> (only), and 1 subject with missing <code>treat</code> and <code>sbp.before</code>.</p>
-</div>
-<div id="how-can-we-identify-the-subjects-with-missing-data" class="section level3">
-<h3><span class="header-section-number">4.1.3</span> How can we identify the subjects with missing data?</h3>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">sbp_example <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">filter</span>(<span class="op">!</span><span class="kw">complete.cases</span>(.))</code></pre></div>
-<pre><code># A tibble: 6 x 5
-  subject treat diabetes sbp.before sbp.after
-    &lt;int&gt; &lt;fct&gt;    &lt;dbl&gt;      &lt;dbl&gt;     &lt;dbl&gt;
-1     104 A         1.00         NA       120
-2     105 C        NA           155       135
-3     106 A         1.00         NA       115
-4     108 &lt;NA&gt;      1.00         NA       150
-5     109 B        NA           115       130
-6     115 B        NA           135       120</code></pre>
-</div>
-</div>
-<div id="missing-data-mechanisms" class="section level2">
-<h2><span class="header-section-number">4.2</span> Missing-data mechanisms</h2>
-<p>My source for this description of mechanisms is Chapter 25 of <span class="citation">Gelman and Hill (<a href="#ref-GelmanHill2007">2007</a>)</span>, and that chapter is <a href="http://www.stat.columbia.edu/~gelman/arm/missing.pdf">available at this link</a>.</p>
+<div id="stepwise-variable-selection" class="section level1">
+<h1><span class="header-section-number">Chapter 6</span> Stepwise Variable Selection</h1>
+<div id="strategy-for-model-selection" class="section level2">
+<h2><span class="header-section-number">6.1</span> Strategy for Model Selection</h2>
+<p><span class="citation">F. L. Ramsey and Schafer (<a href="#ref-RamseySchafer2002">2002</a>)</span> suggest a strategy for dealing with many potential explanatory variables should include the following elements:</p>
 <ol style="list-style-type: decimal">
-<li><strong>MCAR = Missingness completely at random</strong>. A variable is missing completely at random if the probability of missingness is the same for all units, for example, if for each subject, we decide whether to collect the <code>diabetes</code> status by rolling a die and refusing to answer if a “6” shows up. If data are missing completely at random, then throwing out cases with missing data does not bias your inferences.</li>
-<li><strong>Missingness that depends only on observed predictors</strong>. A more general assumption, called <strong>missing at random</strong> or <strong>MAR</strong>, is that the probability a variable is missing depends only on available information. Here, we would have to be willing to assume that the probability of nonresponse to <code>diabetes</code> depends only on the other, fully recorded variables in the data. It is often reasonable to model this process as a logistic regression, where the outcome variable equals 1 for observed cases and 0 for missing. When an outcome variable is missing at random, it is acceptable to exclude the missing cases (that is, to treat them as NA), as long as the regression controls for all the variables that affect the probability of missingness.</li>
-<li><strong>Missingness that depends on unobserved predictors</strong>. Missingness is no longer “at random” if it depends on information that has not been recorded and this information also predicts the missing values. If a particular treatment causes discomfort, a patient is more likely to drop out of the study. This missingness is not at random (unless “discomfort” is measured and observed for all patients). If missingness is not at random, it must be explicitly modeled, or else you must accept some bias in your inferences.</li>
-<li><strong>Missingness that depends on the missing value itself.</strong> Finally, a particularly difficult situation arises when the probability of missingness depends on the (potentially missing) variable itself. For example, suppose that people with higher earnings are less likely to reveal them.</li>
+<li>Identify the key objectives.</li>
+<li>Screen the available variables, deciding on a list that is sensitive to the objectives and excludes obvious redundancies.</li>
+<li>Perform exploratory analysis, examining graphical displays and correlation coefficients.</li>
+<li>Perform transformations, as necessary.</li>
+<li>Examine a residual plot after fitting a rich model, performing further transformations and considering outliers.</li>
+<li>Find a suitable subset of the predictors, exerting enough control over any semi-automated selection procedure to be sensitive to the questions of interest.</li>
+<li>Proceed with the analysis, using the selected explanatory variables.</li>
 </ol>
-<p>Essentially, situations 3 and 4 are referred to collectively as <strong>non-random missingness</strong>, and cause more trouble for us than 1 and 2.</p>
-</div>
-<div id="options-for-dealing-with-missingness" class="section level2">
-<h2><span class="header-section-number">4.3</span> Options for Dealing with Missingness</h2>
-<p>There are several available methods for dealing with missing data that are MCAR or MAR, but they basically boil down to:</p>
-<ul>
-<li>Complete Case (or Available Case) analyses</li>
-<li>Single Imputation</li>
-<li>Multiple Imputation</li>
-</ul>
-</div>
-<div id="complete-case-and-available-case-analyses" class="section level2">
-<h2><span class="header-section-number">4.4</span> Complete Case (and Available Case) analyses</h2>
-<p>In <strong>Complete Case</strong> analyses, rows containing NA values are omitted from the data before analyses commence. This is the default approach for many statistical software packages, and may introduce unpredictable bias and fail to include some useful, often hard-won information.</p>
-<ul>
-<li>A complete case analysis can be appropriate when the number of missing observations is not large, and the missing pattern is either MCAR (missing completely at random) or MAR (missing at random.)</li>
-<li>Two problems arise with complete-case analysis:
+<p>The Two Key Aspects of Model Selection are:</p>
 <ol style="list-style-type: decimal">
-<li>If the units with missing values differ systematically from the completely observed cases, this could bias the complete-case analysis.</li>
-<li>If many variables are included in a model, there may be very few complete cases, so that most of the data would be discarded for the sake of a straightforward analysis.</li>
-</ol></li>
-<li>A related approach is <em>available-case</em> analysis where different aspects of a problem are studied with different subsets of the data, perhaps identified on the basis of what is missing in them.</li>
-</ul>
-</div>
-<div id="single-imputation" class="section level2">
-<h2><span class="header-section-number">4.5</span> Single Imputation</h2>
-<p>In <strong>single imputation</strong> analyses, NA values are estimated/replaced <em>one time</em> with <em>one particular data value</em> for the purpose of obtaining more complete samples, at the expense of creating some potential bias in the eventual conclusions or obtaining slightly <em>less</em> accurate estimates than would be available if there were no missing values in the data.</p>
+<li>Evaluating each potential subset of predictor variables</li>
+<li>Deciding on the collection of potential subsets</li>
+</ol>
+<div id="how-do-we-choose-potential-subsets-of-predictors" class="section level3">
+<h3><span class="header-section-number">6.1.1</span> How Do We Choose Potential Subsets of Predictors?</h3>
+<p>Choosing potential subsets of predictor variables usually involves either:</p>
+<ol style="list-style-type: decimal">
+<li>Stepwise approaches</li>
+<li>All possible subset (or best possible subset) searches</li>
+</ol>
+<p>Note that the use of any variable selection procedure changes the properties of …</p>
 <ul>
-<li>A single imputation can be just a replacement with the mean or median (for a quantity) or the mode (for a categorical variable.) However, such an approach, though easy to understand, underestimates variance and ignores the relationship of missing values to other variables.</li>
-<li>Single imputation can also be done using a variety of models to try to capture information about the NA values that are available in other variables within the data set.</li>
-<li>The <code>simputation</code> package can help us execute single imputations using a wide variety of techniques, within the pipe approach used by the <code>tidyverse</code>. Another approach I have used in the past is the <code>mice</code> package, which can also perform single imputations.</li>
+<li>the estimated coefficients, which are biased, and</li>
+<li>the associated tests and confidence intervals, which are overly optimistic.</li>
 </ul>
+<p><span class="citation">Leeb and Potscher (<a href="#ref-Leeb2005">2005</a>)</span> summarize the key issues:</p>
+<ol style="list-style-type: decimal">
+<li>Regardless of sample size, the model selection step typically has a dramatic effect on the sampling properties of the estimators that cannot be ignored. In particular, the sampling properties of post-model-selection estimators are typically significantly different from the nominal distributions that arise if a fixed model is supposed.</li>
+<li>As a consequence, use of inference procedures that do not take into account the model selection step (e.g. using standard t-intervals as if the selected model has been given prior to the statistical analysis) can be highly misleading.</li>
+</ol>
 </div>
-<div id="multiple-imputation" class="section level2">
-<h2><span class="header-section-number">4.6</span> Multiple Imputation</h2>
-<p><strong>Multiple imputation</strong>, where NA values are repeatedly estimated/replaced with multiple data values, for the purpose of obtaining mode complete samples <em>and</em> capturing details of the variation inherent in the fact that the data have missingness, so as to obtain <em>more</em> accurate estimates than are possible with single imputation.</p>
-<ul>
-<li>We’ll postpone the discussion of multiple imputation for a while.</li>
-</ul>
 </div>
-<div id="building-a-complete-case-analysis" class="section level2">
-<h2><span class="header-section-number">4.7</span> Building a Complete Case Analysis</h2>
-<p>We can drop all of the missing values from a data set with <code>drop_na</code> or with <code>na.omit</code> or by filtering for <code>complete.cases</code>. Any of these approaches produces the same result - a new data set with 9 rows (after dropping the six subjects with any NA values) and 5 columns.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">cc.<span class="dv">1</span> &lt;-<span class="st"> </span><span class="kw">na.omit</span>(sbp_example)
-cc.<span class="dv">2</span> &lt;-<span class="st"> </span>sbp_example <span class="op">%&gt;%</span><span class="st"> </span>drop_na
-cc.<span class="dv">3</span> &lt;-<span class="st"> </span>sbp_example <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">filter</span>(<span class="kw">complete.cases</span>(.))</code></pre></div>
+<div id="a-kitchen-sink-model-model-c5_prost_ks" class="section level2">
+<h2><span class="header-section-number">6.2</span> A “Kitchen Sink” Model (Model <code>c5_prost_ks</code>)</h2>
+<p>Suppose that we now consider a model for the <code>prost</code> data we have been working with, which includes main effects (and, in this case, only the main effects) of all eight candidate predictors for <code>lpsa</code>, as follows.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">c5_prost_ks &lt;-<span class="st"> </span><span class="kw">lm</span>(lpsa <span class="op">~</span><span class="st"> </span>lcavol <span class="op">+</span><span class="st"> </span>lweight <span class="op">+</span><span class="st"> </span>age <span class="op">+</span><span class="st"> </span>bph_f <span class="op">+</span><span class="st"> </span>svi_f <span class="op">+</span><span class="st"> </span>
+<span class="st">                </span>lcp <span class="op">+</span><span class="st"> </span>gleason_f <span class="op">+</span><span class="st"> </span>pgg45, <span class="dt">data =</span> prost)
+
+<span class="kw">tidy</span>(c5_prost_ks)</code></pre></div>
+<pre><code>          term     estimate   std.error  statistic      p.value
+1  (Intercept)  0.169937821 0.931332512  0.1824674 8.556454e-01
+2       lcavol  0.544313829 0.087979210  6.1868461 2.010505e-08
+3      lweight  0.702237531 0.203013089  3.4590751 8.455164e-04
+4          age -0.023857982 0.011081414 -2.1529727 3.412099e-02
+5  bph_fMedium  0.364036274 0.182575941  1.9938896 4.933267e-02
+6    bph_fHigh  0.248789989 0.195975792  1.2694935 2.076898e-01
+7     svi_fYes  0.710949408 0.241990241  2.9379259 4.240326e-03
+8          lcp -0.119311781 0.089458946 -1.3337043 1.858223e-01
+9   gleason_f7  0.220746268 0.343065609  0.6434520 5.216430e-01
+10  gleason_f6 -0.053096704 0.430098039 -0.1234526 9.020368e-01
+11       pgg45  0.003984574 0.004146495  0.9609499 3.392714e-01</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">glance</span>(c5_prost_ks)</code></pre></div>
+<pre><code>  r.squared adj.r.squared     sigma statistic      p.value df    logLik
+1 0.6790343     0.6417127 0.6909479  18.19414 2.373796e-17 11 -95.93939
+       AIC      BIC deviance df.residual
+1 215.8788 246.7753 41.05718          86</code></pre>
+<p>We’ll often refer to this (all predictors on board) approach as a “kitchen sink” model[This refers to the English idiom “… everything but the kitchen sink” which describes, essentially, everything imaginable. A “kitchen sink regression” is often used as a pejorative term, since no special skill or insight is required to identify it, given a list of potential predictors. For more, yes, there is a <a href="https://en.wikipedia.org/wiki/Kitchen_sink_regression">Wikipedia page</a>.].</p>
 </div>
-<div id="single-imputation-with-the-mean-or-mode" class="section level2">
-<h2><span class="header-section-number">4.8</span> Single Imputation with the Mean or Mode</h2>
-<p>The most straightforward approach to single imputation is to impute a single summary of the variable, such as the mean, median or mode.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">skim</span>(sbp_example)</code></pre></div>
-<pre><code>Skim summary statistics
- n obs: 15 
- n variables: 5 
-
-Variable type: factor 
- variable missing complete  n n_unique              top_counts ordered
-    treat       1       14 15        3 A: 6, B: 4, C: 4, NA: 1   FALSE
-
-Variable type: integer 
- variable missing complete  n mean   sd  p0   p25 median   p75 p100
-  subject       0       15 15  108 4.47 101 104.5    108 111.5  115
-
-Variable type: numeric 
-   variable missing complete  n   mean    sd  p0 p25 median    p75 p100
-   diabetes       3       12 15   0.58  0.51   0   0      1   1       1
-  sbp.after       0       15 15 136    15.83 105 125    135 150     160
- sbp.before       3       12 15 143.33 15.72 115 135    145 151.25  170</code></pre>
-<p>Here, suppose we decide to impute</p>
+<div id="sequential-variable-selection-stepwise-approaches" class="section level2">
+<h2><span class="header-section-number">6.3</span> Sequential Variable Selection: Stepwise Approaches</h2>
 <ul>
-<li><code>sbp.before</code> with the mean (143.33) among non-missing values,</li>
-<li><code>diabetes</code> with its median (1) among non-missing values, and</li>
-<li><code>treat</code> with its most common value, or mode (A)</li>
+<li>Forward Selection
+<ul>
+<li>We begin with a constant mean and then add potential predictors one at a time according to some criterion (R defaults to minimizing the Akaike Information Criterion) until no further addition significantly improves the fit.</li>
+<li>Each categorical factor variable is represented in the regression model as a set of indicator variables. In the absence of a good reason to do something else, the set is added to the model as a single unit, and R does this automatically.</li>
+</ul></li>
+<li>Backwards Elimination
+<ul>
+<li>Start with the “kitchen sink” model and then delete potential predictors one at a time.</li>
+<li>Backwards Elimination is less likely than Forward Selection, to omit negatively confounded sets of variables, though all stepwise procedures have problems.</li>
+</ul></li>
+<li>Stepwise Regression can also be done by combining these methods.</li>
 </ul>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">si.<span class="dv">1</span> &lt;-<span class="st"> </span>sbp_example <span class="op">%&gt;%</span>
-<span class="st">    </span><span class="kw">replace_na</span>(<span class="kw">list</span>(<span class="dt">sbp.before =</span> <span class="fl">143.33</span>,
-                    <span class="dt">diabetes =</span> <span class="dv">1</span>,
-                    <span class="dt">treat =</span> <span class="st">&quot;A&quot;</span>))
-si.<span class="dv">1</span></code></pre></div>
-<pre><code># A tibble: 15 x 5
-   subject treat diabetes sbp.before sbp.after
-     &lt;int&gt; &lt;fct&gt;    &lt;dbl&gt;      &lt;dbl&gt;     &lt;dbl&gt;
- 1     101 A         1.00        120       105
- 2     102 B         0           145       135
- 3     103 C         0           150       150
- 4     104 A         1.00        143       120
- 5     105 C         1.00        155       135
- 6     106 A         1.00        143       115
- 7     107 A         0           135       160
- 8     108 A         1.00        143       150
- 9     109 B         1.00        115       130
-10     110 C         1.00        170       155
-11     111 A         0           150       140
-12     112 B         0           145       140
-13     113 C         1.00        140       150
-14     114 A         1.00        160       135
-15     115 B         1.00        135       120</code></pre>
-<p>We could accomplish the same thing with, for example:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">si.<span class="dv">2</span> &lt;-<span class="st"> </span>sbp_example <span class="op">%&gt;%</span>
-<span class="st">    </span><span class="kw">replace_na</span>(<span class="kw">list</span>(<span class="dt">sbp.before =</span> <span class="kw">mean</span>(sbp_example<span class="op">$</span>sbp.before, <span class="dt">na.rm =</span> <span class="ot">TRUE</span>),
-                    <span class="dt">diabetes =</span> <span class="kw">median</span>(sbp_example<span class="op">$</span>diabetes, <span class="dt">na.rm =</span> <span class="ot">TRUE</span>),
-                    <span class="dt">treat =</span> <span class="st">&quot;A&quot;</span>))</code></pre></div>
+<div id="the-big-problems-with-stepwise-regression" class="section level3">
+<h3><span class="header-section-number">6.3.1</span> The Big Problems with Stepwise Regression</h3>
+<p>There is no reason to assume that a single best model can be found.</p>
+<ul>
+<li>The use of forward selection, or backwards elimination, or stepwise regression including both procedures, will NOT always find the same model.</li>
+<li>It also appears to be essentially useless to try different stepwise methods to look for agreement.</li>
+</ul>
+<p>Users of stepwise regression frequently place all of their attention on the particular explanatory variables included in the resulting model, when there’s <strong>no reason</strong> (in most cases) to assume that model is in any way optimal.</p>
+<p>Despite all of its problems, let’s use stepwise regression to help predict <code>lpsa</code> given a subset of the eight predictors in <code>c5_prost_ks</code>.</p>
 </div>
-<div id="doing-single-imputation-with-simputation" class="section level2">
-<h2><span class="header-section-number">4.9</span> Doing Single Imputation with <code>simputation</code></h2>
-<p>Single imputation is a potentially appropriate method when missingness can be assumed to be either completely at random (MCAR) or dependent only on observed predictors (MAR). We’ll use the <code>simputation</code> package to accomplish it.</p>
-<ul>
-<li>The <code>simputation</code> vignette is available at <a href="https://cran.r-project.org/web/packages/simputation/vignettes/intro.html" class="uri">https://cran.r-project.org/web/packages/simputation/vignettes/intro.html</a></li>
-<li>The <code>simputation</code> reference manual is available at <a href="https://cran.r-project.org/web/packages/simputation/simputation.pdf" class="uri">https://cran.r-project.org/web/packages/simputation/simputation.pdf</a></li>
-</ul>
-<div id="mirroring-our-prior-approach-imputing-meansmediansmodes" class="section level3">
-<h3><span class="header-section-number">4.9.1</span> Mirroring Our Prior Approach (imputing means/medians/modes)</h3>
-<p>Suppose we want to mirror what we did above, simply impute the mean for <code>sbp.before</code> and the median for <code>diabetes</code> again.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">si.<span class="dv">3</span> &lt;-<span class="st"> </span>sbp_example <span class="op">%&gt;%</span>
-<span class="st">    </span><span class="kw">impute_lm</span>(sbp.before <span class="op">~</span><span class="st"> </span><span class="dv">1</span>) <span class="op">%&gt;%</span>
-<span class="st">    </span><span class="kw">impute_median</span>(diabetes <span class="op">~</span><span class="st"> </span><span class="dv">1</span>) <span class="op">%&gt;%</span>
-<span class="st">    </span><span class="kw">replace_na</span>(<span class="kw">list</span>(<span class="dt">treat =</span> <span class="st">&quot;A&quot;</span>))
-
-si.<span class="dv">3</span></code></pre></div>
-<pre><code># A tibble: 15 x 5
-   subject treat diabetes sbp.before sbp.after
- *   &lt;int&gt; &lt;fct&gt;    &lt;dbl&gt;      &lt;dbl&gt;     &lt;dbl&gt;
- 1     101 A         1.00        120       105
- 2     102 B         0           145       135
- 3     103 C         0           150       150
- 4     104 A         1.00        143       120
- 5     105 C         1.00        155       135
- 6     106 A         1.00        143       115
- 7     107 A         0           135       160
- 8     108 A         1.00        143       150
- 9     109 B         1.00        115       130
-10     110 C         1.00        170       155
-11     111 A         0           150       140
-12     112 B         0           145       140
-13     113 C         1.00        140       150
-14     114 A         1.00        160       135
-15     115 B         1.00        135       120</code></pre>
 </div>
-<div id="using-a-model-to-impute-sbp.before-and-diabetes" class="section level3">
-<h3><span class="header-section-number">4.9.2</span> Using a model to impute <code>sbp.before</code> and <code>diabetes</code></h3>
-<p>Suppose we wanted to use:</p>
+<div id="forward-selection-with-the-step-function" class="section level2">
+<h2><span class="header-section-number">6.4</span> Forward Selection with the <code>step</code> function</h2>
+<ol style="list-style-type: decimal">
+<li>Specify the null model (intercept only)</li>
+<li>Specify the variables R should consider as predictors (in the scope element of the step function)</li>
+<li>Specify forward selection only</li>
+<li>R defaults to using AIC as its stepwise criterion</li>
+</ol>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">with</span>(prost, 
+     <span class="kw">step</span>(<span class="kw">lm</span>(lpsa <span class="op">~</span><span class="st"> </span><span class="dv">1</span>), 
+     <span class="dt">scope=</span>(<span class="op">~</span><span class="st"> </span>lcavol <span class="op">+</span><span class="st"> </span>lweight <span class="op">+</span><span class="st"> </span>age <span class="op">+</span><span class="st"> </span>bph_f <span class="op">+</span><span class="st"> </span>svi_f <span class="op">+</span><span class="st"> </span>
+<span class="st">                </span>lcp <span class="op">+</span><span class="st"> </span>gleason_f <span class="op">+</span><span class="st"> </span>pgg45), 
+     <span class="dt">direction=</span><span class="st">&quot;forward&quot;</span>))</code></pre></div>
+<pre><code>Start:  AIC=28.84
+lpsa ~ 1
+
+            Df Sum of Sq     RSS     AIC
++ lcavol     1    69.003  58.915 -44.366
++ svi_f      1    41.011  86.907  -6.658
++ lcp        1    38.528  89.389  -3.926
++ gleason_f  2    30.121  97.796   6.793
++ lweight    1    24.019 103.899  10.665
++ pgg45      1    22.814 105.103  11.783
++ age        1     3.679 124.239  28.007
+&lt;none&gt;                   127.918  28.838
++ bph_f      2     4.681 123.237  29.221
+
+Step:  AIC=-44.37
+lpsa ~ lcavol
+
+            Df Sum of Sq    RSS     AIC
++ lweight    1    7.1726 51.742 -54.958
++ svi_f      1    5.2375 53.677 -51.397
++ bph_f      2    3.2994 55.615 -45.956
++ pgg45      1    1.6980 57.217 -45.203
++ gleason_f  2    2.7834 56.131 -45.061
+&lt;none&gt;                   58.915 -44.366
++ lcp        1    0.6562 58.259 -43.452
++ age        1    0.0025 58.912 -42.370
+
+Step:  AIC=-54.96
+lpsa ~ lcavol + lweight
+
+            Df Sum of Sq    RSS     AIC
++ svi_f      1    5.1737 46.568 -63.177
++ pgg45      1    1.8158 49.926 -56.424
++ gleason_f  2    2.6770 49.065 -56.111
+&lt;none&gt;                   51.742 -54.958
++ lcp        1    0.8187 50.923 -54.506
++ age        1    0.6456 51.097 -54.176
++ bph_f      2    1.4583 50.284 -53.731
+
+Step:  AIC=-63.18
+lpsa ~ lcavol + lweight + svi_f
+
+            Df Sum of Sq    RSS     AIC
+&lt;none&gt;                   46.568 -63.177
++ gleason_f  2   1.60467 44.964 -62.579
++ age        1   0.62301 45.945 -62.484
++ bph_f      2   1.50046 45.068 -62.354
++ pgg45      1   0.50069 46.068 -62.226
++ lcp        1   0.06937 46.499 -61.322</code></pre>
+<pre><code>
+Call:
+lm(formula = lpsa ~ lcavol + lweight + svi_f)
+
+Coefficients:
+(Intercept)       lcavol      lweight     svi_fYes  
+    -0.7772       0.5259       0.6618       0.6657  </code></pre>
+<p>The resulting model, arrived at after three forward selection steps, includes <code>lcavol</code>, <code>lweight</code> and <code>svi_f</code>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">model.fs &lt;-<span class="st"> </span><span class="kw">lm</span>(lpsa <span class="op">~</span><span class="st"> </span>lcavol <span class="op">+</span><span class="st"> </span>lweight <span class="op">+</span><span class="st"> </span>svi_f, 
+               <span class="dt">data=</span>prost)
+<span class="kw">summary</span>(model.fs)<span class="op">$</span>adj.r.squared</code></pre></div>
+<pre><code>[1] 0.6242063</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">extractAIC</span>(model.fs)</code></pre></div>
+<pre><code>[1]   4.00000 -63.17744</code></pre>
+<p>The adjusted R<sup>2</sup> value for this model is 0.624, and the AIC value used by the stepwise procedure is -63.18, on 4 effective degrees of freedom.</p>
+</div>
+<div id="backward-elimination-using-the-step-function" class="section level2">
+<h2><span class="header-section-number">6.5</span> Backward Elimination using the <code>step</code> function</h2>
+<p>In this case, the backward elimination approach, using reduction in AIC for a criterion, comes to the same conclusion about the “best” model.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">with</span>(prost, 
+     <span class="kw">step</span>(<span class="kw">lm</span>(lpsa <span class="op">~</span><span class="st"> </span>lcavol <span class="op">+</span><span class="st"> </span>lweight <span class="op">+</span><span class="st"> </span>age <span class="op">+</span><span class="st"> </span>bph_f <span class="op">+</span><span class="st"> </span>
+<span class="st">                 </span>svi_f <span class="op">+</span><span class="st"> </span>lcp <span class="op">+</span><span class="st"> </span>gleason_f <span class="op">+</span><span class="st"> </span>pgg45), 
+          <span class="dt">direction=</span><span class="st">&quot;backward&quot;</span>))</code></pre></div>
+<pre><code>Start:  AIC=-61.4
+lpsa ~ lcavol + lweight + age + bph_f + svi_f + lcp + gleason_f + 
+    pgg45
+
+            Df Sum of Sq    RSS     AIC
+- gleason_f  2    1.1832 42.240 -62.639
+- pgg45      1    0.4409 41.498 -62.359
+- lcp        1    0.8492 41.906 -61.409
+&lt;none&gt;                   41.057 -61.395
+- bph_f      2    2.0299 43.087 -60.714
+- age        1    2.2129 43.270 -58.303
+- svi_f      1    4.1207 45.178 -54.118
+- lweight    1    5.7123 46.769 -50.760
+- lcavol     1   18.2738 59.331 -27.683
+
+Step:  AIC=-62.64
+lpsa ~ lcavol + lweight + age + bph_f + svi_f + lcp + pgg45
+
+          Df Sum of Sq    RSS     AIC
+- lcp      1    0.8470 43.087 -62.713
+&lt;none&gt;                 42.240 -62.639
+- pgg45    1    1.2029 43.443 -61.916
+- bph_f    2    2.2515 44.492 -61.602
+- age      1    2.0730 44.313 -59.992
+- svi_f    1    4.6431 46.884 -54.523
+- lweight  1    5.5988 47.839 -52.566
+- lcavol   1   21.4956 63.736 -24.736
+
+Step:  AIC=-62.71
+lpsa ~ lcavol + lweight + age + bph_f + svi_f + pgg45
+
+          Df Sum of Sq    RSS     AIC
+- pgg45    1    0.5860 43.673 -63.403
+&lt;none&gt;                 43.087 -62.713
+- bph_f    2    2.0214 45.109 -62.266
+- age      1    1.7101 44.798 -60.938
+- svi_f    1    3.7964 46.884 -56.523
+- lweight  1    5.6462 48.734 -52.769
+- lcavol   1   22.5152 65.603 -23.936
+
+Step:  AIC=-63.4
+lpsa ~ lcavol + lweight + age + bph_f + svi_f
+
+          Df Sum of Sq    RSS     AIC
+&lt;none&gt;                 43.673 -63.403
+- bph_f    2    2.2720 45.945 -62.484
+- age      1    1.3945 45.068 -62.354
+- svi_f    1    5.2747 48.948 -54.343
+- lweight  1    5.3319 49.005 -54.230
+- lcavol   1   25.5538 69.227 -20.720</code></pre>
+<pre><code>
+Call:
+lm(formula = lpsa ~ lcavol + lweight + age + bph_f + svi_f)
+
+Coefficients:
+(Intercept)       lcavol      lweight          age  bph_fMedium  
+    0.14329      0.54022      0.67283     -0.01819      0.37607  
+  bph_fHigh     svi_fYes  
+    0.27216      0.68174  </code></pre>
+<p>The backwards elimination approach in this case lands on a model with five inputs (one of which includes two <code>bph</code> indicators,) eliminating only <code>gleason_f</code>, <code>pgg45</code> and <code>lcp</code>.</p>
+</div>
+<div id="allen-cady-modified-backward-elimination" class="section level2">
+<h2><span class="header-section-number">6.6</span> Allen-Cady Modified Backward Elimination</h2>
+<p>Ranking candidate predictors by importance in advance of backwards elimination can help avoid false-positives, while reducing model size. See <span class="citation">Vittinghoff et al. (<a href="#ref-Vittinghoff2012">2012</a>)</span>, Section 10.3 for more details.</p>
+<ol style="list-style-type: decimal">
+<li>First, force into the model any predictors of primary interest, and any confounders necessary for face validity of the final model.
 <ul>
-<li>a robust linear model to predict <code>sbp.before</code> missing values, on the basis of <code>sbp.after</code> and <code>diabetes</code> status, and</li>
-<li>a predictive mean matching approach to predict <code>diabetes</code> status, on the basis of <code>sbp.after</code>, and</li>
-<li>a decision tree approach to predict <code>treat</code> status, using all other variables in the data</li>
-</ul>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">set.seed</span>(<span class="dv">50001</span>)
-
-imp.<span class="dv">4</span> &lt;-<span class="st"> </span>sbp_example <span class="op">%&gt;%</span>
-<span class="st">    </span><span class="kw">impute_rlm</span>(sbp.before <span class="op">~</span><span class="st"> </span>sbp.after <span class="op">+</span><span class="st"> </span>diabetes) <span class="op">%&gt;%</span>
-<span class="st">    </span><span class="kw">impute_pmm</span>(diabetes <span class="op">~</span><span class="st"> </span>sbp.after) <span class="op">%&gt;%</span>
-<span class="st">    </span><span class="kw">impute_cart</span>(treat <span class="op">~</span><span class="st"> </span>.)
-
-imp.<span class="dv">4</span></code></pre></div>
-<pre><code># A tibble: 15 x 5
-   subject treat diabetes sbp.before sbp.after
- *   &lt;int&gt; &lt;fct&gt;    &lt;dbl&gt;      &lt;dbl&gt;     &lt;dbl&gt;
- 1     101 A         1.00        120       105
- 2     102 B         0           145       135
- 3     103 C         0           150       150
- 4     104 A         1.00        139       120
- 5     105 C         1.00        155       135
- 6     106 A         1.00        136       115
- 7     107 A         0           135       160
- 8     108 A         1.00        155       150
- 9     109 B         1.00        115       130
-10     110 C         1.00        170       155
-11     111 A         0           150       140
-12     112 B         0           145       140
-13     113 C         1.00        140       150
-14     114 A         1.00        160       135
-15     115 B         1.00        135       120</code></pre>
-<p>Details on the many available methods in <code>simputation</code> are provided <a href="https://cran.r-project.org/web/packages/simputation/simputation.pdf">in its manual</a>. These include:</p>
+<li>“Some variables in the hypothesized causal model may be such well-established causal antecedents of the outcome that it makes sense to include them, essentially to establish the face validity of the model and without regard to the strength or statistical significance of their associations with the primary predictor and outcome …”</li>
+</ul></li>
+<li>Rank the remaining candidate predictors in order of importance.</li>
+<li>Starting from an initial model with all candidate predictors included, delete predictors in order of ascending importance until the first variable meeting a criterion to stay in the model hits. Then stop.</li>
+</ol>
+<p>Only the remaining variable hypothesized to be least important is eligible for removal at each step. When we are willing to do this sorting before collecting (or analyzing) the data, then we can do Allen-Cady backwards elimination using the <code>drop1</code> command in R.</p>
+<div id="demonstration-of-the-allen-cady-approach" class="section level3">
+<h3><span class="header-section-number">6.6.1</span> Demonstration of the Allen-Cady approach</h3>
+<p>Suppose, for the moment that we decided to fit a model for the log of <code>psa</code> and we decided (before we saw the data) that we would:</p>
+<p>lcavol + lweight + svi_f + age + bph_f + gleason_f + lcp + pgg45</p>
 <ul>
-<li><code>impute_cart</code> uses a Classification and Regression Tree approach for numerical or categorical data. There is also an <code>impute_rf</code> command which uses Random Forests for imputation.</li>
-<li><code>impute_pmm</code> is one of several “hot deck” options for imputation, this one is predictive mean matching, which can be used with numeric data (only). Missing values are first imputed using a predictive model. Next, these predictions are replaced with the observed values which are nearest to the prediction. Other imputation options in this group include random hot deck, sequential hot deck and k-nearest neighbor imputation.</li>
-<li><code>impute_rlm</code> is one of several regression imputation methods, including linear models, robust linear models (which use what is called M-estimation to impute numerical variables) and lasso/elastic net/ridge regression models.</li>
+<li>force the <code>gleason_f</code> variable to be in the model, due to prior information about its importance,</li>
+<li>and then rated the importance of the other variables as <code>lcavol</code> (most important), then <code>svi_f</code> then <code>age</code>, and then <code>bph_f</code>, then <code>lweight</code> and <code>lcp</code> followed by <code>pgg45</code> (least important)</li>
 </ul>
-<p><code>simputation</code> can also do EM-based multivariate imputation, and multivariate random forest imputation, as well as many other sorts of approaches.</p>
+<p>When we are willing to do this sorting before collecting (or analyzing) the data, then we can do Allen-Cady backwards elimination using the <code>drop1</code> command in R.</p>
+<p><strong>Step 1.</strong> Fit the full model, then see if removing <code>lweight</code> improves AIC…</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">with</span>(prost, <span class="kw">drop1</span>(<span class="kw">lm</span>(lpsa <span class="op">~</span><span class="st"> </span>gleason_f <span class="op">+</span><span class="st"> </span>lcavol <span class="op">+</span><span class="st"> </span>svi_f <span class="op">+</span><span class="st"> </span>
+<span class="st">              </span>age <span class="op">+</span><span class="st"> </span>bph_f <span class="op">+</span><span class="st"> </span>lweight <span class="op">+</span><span class="st"> </span>lcp <span class="op">+</span><span class="st"> </span>pgg45),
+              <span class="dt">scope =</span> (<span class="op">~</span><span class="st"> </span>pgg45)))</code></pre></div>
+<pre><code>Single term deletions
 
+Model:
+lpsa ~ gleason_f + lcavol + svi_f + age + bph_f + lweight + lcp + 
+    pgg45
+       Df Sum of Sq    RSS     AIC
+&lt;none&gt;              41.057 -61.395
+pgg45   1   0.44085 41.498 -62.359</code></pre>
+<p>Since -62.3 is smaller (i.e. more negative) than -61.4, we delete <code>pgg45</code> and move on to assess whether we can remove the variable we deemed next least important (<code>lcp</code>)</p>
+<p><strong>Step 2.</strong> Let’s see if removing <code>lcp</code> from this model improves AIC…</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">with</span>(prost, <span class="kw">drop1</span>(<span class="kw">lm</span>(lpsa <span class="op">~</span><span class="st"> </span>gleason_f <span class="op">+</span><span class="st"> </span>lcavol <span class="op">+</span><span class="st"> </span>svi_f <span class="op">+</span><span class="st"> </span>
+<span class="st">              </span>age <span class="op">+</span><span class="st"> </span>bph_f <span class="op">+</span><span class="st"> </span>lweight  <span class="op">+</span><span class="st"> </span>lcp),
+              <span class="dt">scope =</span> (<span class="op">~</span><span class="st"> </span>lcp)))</code></pre></div>
+<pre><code>Single term deletions
+
+Model:
+lpsa ~ gleason_f + lcavol + svi_f + age + bph_f + lweight + lcp
+       Df Sum of Sq    RSS     AIC
+&lt;none&gt;              41.498 -62.359
+lcp     1   0.56767 42.066 -63.041</code></pre>
+<p>Again, since -63.0 is smaller than -62.4, we delete <code>lcp</code> and next assess whether we should delete <code>lweight</code>.</p>
+<p><strong>Step 3.</strong> Does removing <code>lweight</code> from this model improves AIC…</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">with</span>(prost, <span class="kw">drop1</span>(<span class="kw">lm</span>(lpsa <span class="op">~</span><span class="st"> </span>gleason_f <span class="op">+</span><span class="st"> </span>lcavol <span class="op">+</span><span class="st"> </span>svi_f <span class="op">+</span><span class="st"> </span>
+<span class="st">              </span>age <span class="op">+</span><span class="st"> </span>bph_f <span class="op">+</span><span class="st"> </span>lweight),
+              <span class="dt">scope =</span> (<span class="op">~</span><span class="st"> </span>lweight)))</code></pre></div>
+<pre><code>Single term deletions
+
+Model:
+lpsa ~ gleason_f + lcavol + svi_f + age + bph_f + lweight
+        Df Sum of Sq    RSS     AIC
+&lt;none&gt;               42.066 -63.041
+lweight  1     5.678 47.744 -52.760</code></pre>
+<p>Since the AIC for the model after the removal of <code>lweight</code> is larger (i.e. less negative), we stop, and declare our final model by the Allen-Cady approach to include <code>gleason_f</code>, <code>lcavol</code>, <code>svi_f</code>, <code>age</code>, <code>bph_f</code> and <code>lweight</code>.</p>
+</div>
+</div>
+<div id="summarizing-the-results" class="section level2">
+<h2><span class="header-section-number">6.7</span> Summarizing the Results</h2>
+<table>
+<thead>
+<tr class="header">
+<th align="right">Method</th>
+<th>Suggested Predictors</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">Forward selection</td>
+<td><code>lcavol</code>, <code>lweight</code>, <code>svi_f</code></td>
+</tr>
+<tr class="even">
+<td align="right">Backwards elimination</td>
+<td><code>lcavol</code>, <code>lweight</code>, <code>svi_f</code>, <code>age</code>, <code>bph_f</code></td>
+</tr>
+<tr class="odd">
+<td align="right">Allen-Cady approach</td>
+<td><code>lcavol</code>, <code>lweight</code>, <code>svi_f</code>, <code>age</code>, <code>bph_f</code>, <code>gleason_f</code></td>
+</tr>
+</tbody>
+</table>
+<div id="in-sample-testing-and-summaries" class="section level3">
+<h3><span class="header-section-number">6.7.1</span> In-Sample Testing and Summaries</h3>
+<p>Since these models are nested in each other, let’s look at the summary statistics (like R<sup>2</sup>, and AIC) and also run an ANOVA-based comparison of these nested models to each other and to the model with the intercept alone, and the kitchen sink model with all available predictors.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">prost_m_int &lt;-<span class="st"> </span><span class="kw">lm</span>(lpsa <span class="op">~</span><span class="st"> </span><span class="dv">1</span>, <span class="dt">data =</span> prost)
+prost_m_fw &lt;-<span class="st"> </span><span class="kw">lm</span>(lpsa <span class="op">~</span><span class="st"> </span>lcavol <span class="op">+</span><span class="st"> </span>lweight <span class="op">+</span><span class="st"> </span>svi_f, <span class="dt">data =</span> prost)
+prost_m_bw &lt;-<span class="st"> </span><span class="kw">lm</span>(lpsa <span class="op">~</span><span class="st"> </span>lcavol <span class="op">+</span><span class="st"> </span>lweight <span class="op">+</span><span class="st"> </span>svi_f <span class="op">+</span><span class="st"> </span>
+<span class="st">              </span>age <span class="op">+</span><span class="st"> </span>bph_f <span class="op">+</span><span class="st"> </span>gleason_f, <span class="dt">data =</span> prost)
+prost_m_ac &lt;-<span class="st"> </span><span class="kw">lm</span>(lpsa <span class="op">~</span><span class="st"> </span>lcavol <span class="op">+</span><span class="st"> </span>lweight <span class="op">+</span><span class="st"> </span>svi_f <span class="op">+</span><span class="st"> </span>
+<span class="st">              </span>age <span class="op">+</span><span class="st"> </span>bph_f <span class="op">+</span><span class="st"> </span>gleason_f <span class="op">+</span><span class="st"> </span>lcp, <span class="dt">data =</span> prost)
+prost_m_ks &lt;-<span class="st"> </span><span class="kw">lm</span>(lpsa <span class="op">~</span><span class="st"> </span>lcavol <span class="op">+</span><span class="st"> </span>lweight <span class="op">+</span><span class="st"> </span>svi_f <span class="op">+</span><span class="st"> </span>
+<span class="st">              </span>age <span class="op">+</span><span class="st"> </span>bph_f <span class="op">+</span><span class="st"> </span>gleason_f <span class="op">+</span><span class="st"> </span>lcp <span class="op">+</span><span class="st"> </span>pgg45, <span class="dt">data =</span> prost)</code></pre></div>
+<div id="model-fit-summaries-in-sample-from-glance" class="section level4">
+<h4><span class="header-section-number">6.7.1.1</span> Model Fit Summaries (in-sample) from <code>glance</code></h4>
+<p>Here are the models, at a <code>glance</code> from the <code>broom</code> package.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">prost_sum &lt;-<span class="st"> </span><span class="kw">bind_rows</span>(<span class="kw">glance</span>(prost_m_int), <span class="kw">glance</span>(prost_m_fw),
+                       <span class="kw">glance</span>(prost_m_bw), <span class="kw">glance</span>(prost_m_ac), 
+                       <span class="kw">glance</span>(prost_m_ks)) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">round</span>(., <span class="dv">3</span>)
+prost_sum<span class="op">$</span>names &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;intercept&quot;</span>, <span class="st">&quot;lcavol + lweight + svi&quot;</span>, 
+                      <span class="st">&quot;... + age + bhp + gleason&quot;</span>, <span class="st">&quot;... + lcp&quot;</span>, <span class="st">&quot;... + pgg45&quot;</span>)
+prost_sum &lt;-<span class="st"> </span>prost_sum <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">select</span>(names, r.squared, adj.r.squared, AIC, BIC, sigma, df, df.residual)
+
+prost_sum</code></pre></div>
+<pre><code>                      names r.squared adj.r.squared     AIC     BIC sigma
+1                 intercept     0.000         0.000 306.112 311.261 1.154
+2    lcavol + lweight + svi     0.636         0.624 214.097 226.970 0.708
+3 ... + age + bhp + gleason     0.671         0.641 214.233 239.980 0.691
+4                 ... + lcp     0.676         0.642 214.915 243.237 0.691
+5               ... + pgg45     0.679         0.642 215.879 246.775 0.691
+  df df.residual
+1  1          96
+2  4          93
+3  9          88
+4 10          87
+5 11          86</code></pre>
+<p>From these summaries, it looks like:</p>
+<ul>
+<li>the adjusted R<sup>2</sup> is essentially indistinguishable between the three largest models, but a bit less strong with the three-predictor (4 df) model, and</li>
+<li>the AIC and BIC are (slightly) better (lower) with the three-predictor model (4 df) than any other.</li>
+</ul>
+<p>So we might be motivated by these summaries to select any of the three models we’re studying closely here.</p>
+</div>
+<div id="model-testing-via-anova-in-sample" class="section level4">
+<h4><span class="header-section-number">6.7.1.2</span> Model Testing via ANOVA (in-sample)</h4>
+<p>To obtain ANOVA-based test results, we’ll run…</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">anova</span>(prost_m_int, prost_m_fw, prost_m_bw, prost_m_ac, prost_m_ks)</code></pre></div>
+<pre><code>Analysis of Variance Table
+
+Model 1: lpsa ~ 1
+Model 2: lpsa ~ lcavol + lweight + svi_f
+Model 3: lpsa ~ lcavol + lweight + svi_f + age + bph_f + gleason_f
+Model 4: lpsa ~ lcavol + lweight + svi_f + age + bph_f + gleason_f + lcp
+Model 5: lpsa ~ lcavol + lweight + svi_f + age + bph_f + gleason_f + lcp + 
+    pgg45
+  Res.Df     RSS Df Sum of Sq       F Pr(&gt;F)    
+1     96 127.918                                
+2     93  46.568  3    81.349 56.7991 &lt;2e-16 ***
+3     88  42.066  5     4.503  1.8863 0.1050    
+4     87  41.498  1     0.568  1.1891 0.2786    
+5     86  41.057  1     0.441  0.9234 0.3393    
+---
+Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<p>What conclusions can we draw on the basis of these ANOVA tests?</p>
+<ul>
+<li>There is a statistically significant improvement in predictive value for Model 2 (the forward selection approach) as compared to Model 1 (the intercept only.)</li>
+<li>The ANOVA test comparing Model 5 (kitchen sink) to Model 4 (Allen-Cady result) shows no statistically significant improvement in predictive value.</li>
+<li>Neither does the ANOVA test comparing Model 3 to Model 2 or Model 4 to Model 3.</li>
+</ul>
+<p>This suggests that, <strong>if we are willing to let the ANOVA test decide our best model</strong> than that would be the model produced by forward selection, with predictors <code>lcavol</code>, <code>lweight</code> and <code>svi_f</code>. But…</p>
+<ol style="list-style-type: decimal">
+<li>If the purpose of the model is to predict new data, some sort of out-of-sample or cross-validation approach will be necessary, and</li>
+<li>Even if our goal isn’t prediction but merely description of the current data, we would still want to build diagnostic plots to regression assumptions in each model, and</li>
+<li>There is no reason to assume in advance that any of these models is in fact correct, or that any one of these stepwise approaches is necessarily better than any other, and</li>
+<li>The mere act of running a stepwise regression model, as we’ll see, can increase the bias in our findings if we accept the results at face value.</li>
+</ol>
+<p>So we’ll need some additional methods for selecting variables, and for then validating the results once we complete the selection process.</p>
+
+</div>
 </div>
 </div>
 </div>
 <h3>References</h3>
 <div id="refs" class="references">
-<div id="ref-GelmanHill2007">
-<p>Gelman, Andrew, and Jennifer Hill. 2007. <em>Data Analysis Using Regression and Multilevel/Hierarchical Models</em>. New York: Cambridge University Press.</p>
+<div id="ref-RamseySchafer2002">
+<p>Ramsey, Fred L., and Daniel W. Schafer. 2002. <em>The Statistical Sleuth: A Course in Methods of Data Analysis</em>. Second. Pacific Grove, CA: Duxbury.</p>
+</div>
+<div id="ref-Leeb2005">
+<p>Leeb, Hannes, and Benedikt M. Potscher. 2005. “Model Selection and Inference: Facts and Fiction.” <em>Econometric Theory</em> 21(1): 21–59. <a href="https://www.jstor.org/stable/3533623" class="uri">https://www.jstor.org/stable/3533623</a>.</p>
+</div>
+<div id="ref-Vittinghoff2012">
+<p>Vittinghoff, Eric, David V. Glidden, Stephen C. Shiboski, and Charles E. McCulloch. 2012. <em>Regression Methods in Biostatistics: Linear, Logistic, Survival, and Repeated Measures Models</em>. Second. Springer-Verlag, Inc. <a href="http://www.biostat.ucsf.edu/vgsm/" class="uri">http://www.biostat.ucsf.edu/vgsm/</a>.</p>
 </div>
 </div>
             </section>
@@ -584,8 +721,8 @@ imp.<span class="dv">4</span></code></pre></div>
           </div>
         </div>
       </div>
-<a href="analysis-of-variance-and-analysis-of-covariance.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-<a href="a-study-of-prostate-cancer.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="a-study-of-prostate-cancer.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="references.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
@@ -614,7 +751,7 @@ gitbook.start({
 "size": 2
 },
 "edit": {
-"link": "https://github.com/rstudio/bookdown-demo/edit/master/04-missingdata1.Rmd",
+"link": "https://github.com/rstudio/bookdown-demo/edit/master/06_stepwise.Rmd",
 "text": "Edit"
 },
 "download": ["bookdown-demo.pdf", "bookdown-demo.epub"],

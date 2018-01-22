@@ -1,0 +1,177 @@
+# Validation of a Linear Regression Model (DRAFT)
+
+## An Example
+
+To come.
+
+## What We've Done Until Now
+
+To come.
+
+## What We Can Do Now
+
+Here's some early code for that issue, which is built on some material by David Robinson at https://rpubs.com/dgrtwo/cv-modelr
+
+This bit of code performs what is called *10-crossfold separation*. In words, this approach splits the 896 observations in our data into 10 exclusive partitions of about 90% into a training sample, and the remaining 10% in a test sample. The next part of the code maps a modeling step to the training data, and then fits the resulting model on the test data using the `broom` package's `augment` function. 
+
+I've selected the variables in this case so that the model we'll fit is the `m2_c7` model we've been looking at, although there are several ways to accomplish this.
+
+```{r validation_c2_m7_first_approach}
+set.seed(4320118)
+
+models <- smartcle2 %>%
+    select(bmi, female, exerany, sleephrs, 
+           internet30, alcdays, genhealth) %>%
+    crossv_kfold(k = 10) %>%
+    mutate(model = map(train, ~ lm(bmi ~ ., data = .)))
+
+predictions <- models %>%
+    unnest(map2(model, test, ~ augment(.x, newdata = .y)))
+
+predictions
+```
+
+The results are a set of predictions based on the splits into training and test groups (remember there are 10 of them, indexed by `.id`) that describe the complete set of 896 respondents again.
+
+What this lets us now do is calculate the root Mean Squared Prediction Error (RMSE) and Mean Absolute Prediction Error (MAE) for this model (the `c2_m7` model) across these observations, and also to compare that error to a model that simply predicts the mean `bmi` across all patients (the `intercept only` model.) In practice, we could consider two distinct models in doing this work.
+
+```{r validation_c2_m7_first_approach_predsummary}
+predictions %>%
+    summarize(RMSE_c2_m7 = sqrt(mean((bmi - .fitted) ^2)),
+              MAE_c2_m7 = mean(abs(bmi - .fitted)),
+              RMSE_interceptonly = sqrt(mean((bmi - mean(bmi))^2)),
+              MAE_interceptonly = mean(abs(bmi - mean(bmi))))
+```
+
+Another thing we could do with this tibble of predictions we have created is to graph the size of the prediction errors (observed `bmi` minus predicted values in `.fitted`) that our modeling approach makes.
+
+```{r validation_c2_m7_first_approach_errorhistogram}
+predictions %>%
+    mutate(errors = bmi - .fitted) %>%
+    ggplot(., aes(x = errors)) +
+    geom_histogram(bins = 30, fill = "darkviolet", col = "yellow") + 
+    labs(title = "Cross-Validated Errors in Prediction of BMI",
+         subtitle = "Using a model (`c2_m7`) including 6 regression inputs",
+         caption = "SMART BRFSS 2016 data for Cleveland-Elyria MMSA, n = 896",
+         x = "Error in predicting BMI")
+```
+
+## Coming Soon ...
+
+1. Would stepwise regression help us build a better model for `bmi`?
+    - Is there a better approach for variable selection? What's this I hear about "best subsets", for example?
+2. How should we think about potential transformations of these predictors?
+    - What's a Spearman rho-squared plot, and how might it help us decide how to spend degrees of freedom on non-linear terms better?
+3. How do we deal with missing data in fitting and evaluating a linear regression model if we don't actually want to drop all of the incomplete cases?
+4. How can we use the `ols` tool in the `rms` package to fit regression models?
+5. How can we use the tools in the `arm` package to fit and evaluate regression models?
+
+## Model Validation
+
+### For the four parameter model (`m04`)
+
+**Materials to come**
+
+### For the seven parameter model (`m07`)
+
+**Materials to come**
+
+## Making Decisions about Predictor Complexity Safely
+
+There are two kinds of Multivariate Regression Models
+
+1. [Prediction] Those that are built so that we can make accurate predictions.
+2. [Explanatory] Those that are built to help understand underlying phenomena.
+
+While those two notions overlap considerably, they do imply different things about how we strategize about model-building and model assessment. Harrell's primary concern is effective use of the available data for **prediction** - this implies some things that will be different from what we've seen in the past.
+
+Harrell refers to multivariable regression modeling strategy as the process of **spending degrees of freedom**. 
+The main job in strategizing about multivariate modeling is to
+
+1.	Decide the number of degrees of freedom that can be spent
+2.	Decide where to spend them
+3.	Spend them, wisely.
+
+What this means is essentially linked to making decisions about predictor complexity, both in terms of how many predictors will be included in the regression model, and about how we'll include those predictors.
+
+## "Spending" Degrees of Freedom
+
+- "Spending" df includes 
+    + fitting parameter estimates in models, or 
+    + examining figures built using the outcome variable Y that tell you how to model the predictors. 
+
+If you use a scatterplot of Y vs. X or the residuals of the Y-X regression model vs. X to decide whether a linear model is appropriate, then how many degrees of freedom have you actually spent? 
+
+Grambsch and O'Brien conclude that if you wish to preserve the key statistical properties of the various estimation and fitting procedures used in building a model, you can't retrieve these degrees of freedom once they have been spent.
+
+## A First Idea: Overfitting and Limits on the \# of Predictors
+
+Suppose you have a total sample size of $n$ observations, then you really shouldn't be thinking about estimating more than $n / 15$ regression coefficients, at the most. 
+
+- If $k$ is the number of parameters in a full model containing all candidate predictors for a stepwise analysis, then $k$ should be no greater than $n / 15$.
+- $k$ should include all variables screened for association with the response, including interaction terms.
+
+So if you have 97 observations in your data, then you can probably just barely justify the use of a stepwise analysis using the main effects alone of 5 candidate variables (with one additional DF for the intercept term.) 
+
+Harrell also mentions that if you have a **narrowly distributed** predictor, without a lot of variation to work with, then an even larger sample size $n$ should be required[^1].
+
+## The Importance of Collinearity
+
+> Collinearity denotes correlation between predictors high enough to degrade the precision of the regression coefficient estimates substantially for some or all of the correlated predictors (Vittinghoff et al section 10.4.1)
+
+- Can one predictor in a model be predicted well using the other predictors in the model?
+    + Strong correlations (for instance, $r \geq 0.8$) are especially troublesome.
+- Effects of collinearity
+    + decreases precision, in the sense of increasing the standard errors of the parameter estimates
+    + decreases power
+    + increases the difficulty of interpreting individual predictor effects
+    + overall F test is significant, but individual t tests may not be
+    
+## Variance Inflation Factor (VIF): Quantifying Collinearity
+
+Suppose we want to assess whether variable $X_j$ is collinear with the other predictors in a model. We run a regression predicting $X_j$ using the other predictors, and obtain the R^2^. The VIF is defined as 1 / (1 - this R^2^), and we usually interpret VIFs above 5 as indicating a serious multicollinearity problem (i.e. R^2^ values for this predictor of 0.8 and above would thus concern us.)
+
+Occasionally, you'll see the inverse of VIF reported, and this is called *tolerance*. 
+
+- tolerance = 1 / VIF
+
+### VIF in the `prost` study
+
+```{r}
+vif(m.full)
+```
+
+## Collinearity in an Explanatory Model
+
+- When we are attempting to **identify multiple independent predictors** (the explanatory model approach), then we will need to choose between collinear variables
+    + options suggested by Vittinghoff et al. (p. 422) include choosing on the basis of plausibility as a causal factor, 
+    + choosing the variable that has higher data quality (is measured more accurately or has fewer missing values.) 
+    + Often, we choose to include a variable that is statistically significant as a predictor, and drop others, should we be so lucky.
+
+- Larger effects, especially if they are associated with predictors that have minimal correlation with the other predictors under study, cause less trouble in terms of potential violation of the $n/15$ rule for what constitutes a reasonable number of predictors.
+
+
+## Collinearity in a Prediction Model
+
+- If we are primarily building a **prediction model** for which inference on the individual predictors is not of interest, then it is totally reasonable to use both predictors in the model, if doing so reduces prediction error. 
+    + Collinearity doesn't affect predictions in our model development sample.
+    + Collinearity doesn't affect predictions on new data so long as the new data have similar relationships between predictors.
+    + If our key predictor is correlated strongly with a confounder, then if the predictor remains significant after adjustment for the confounder, then this suggests a meaningful independent effect. 
+        + If the effects of the predictor are clearly confounded by the adjustment variable, we again have a clear result. 
+        + If neither is statistically significant after adjustment, the data may be inadequate.
+    + If the collinearity is between adjustment variables, but doesn't involve the key predictor, then inclusion of the collinear variables is unlikely to cause substantial problems.
+
+## Spearman's $\rho^2$ plot
+
+We'll talk about the Spearman $\rho^2$ plot and spending degrees of freedom wisely as a strategy for model selection later, but right now, I just want to show you how to build the plot, and a related table.
+
+```{r}
+spearman2(psa ~ lcavol + lweight + svi_f + age + bph_f + gleason_f + lcp + 
+    pgg45, data = prostate)
+plot(spearman2(psa ~ lcavol + lweight + svi_f + age + bph_f + gleason_f + lcp + 
+    pgg45, data = prostate))
+```
+
+The plot focuses our attention on `lcavol` and perhaps `svi_f`, `lcp`, `pgg45`, `gleason_f` and `lweight` and away from `age` and `bph_f` when considering what predictors we might want to spend degrees of freedom on (perhaps by building non-linear terms.)
+
+[^1]: Note that a commonly used guideline, for instance, see @Vittinghoff2012, section 10.4.2, requires at least **ten** (rather than 15) observations for each predictor (rather than regression coefficient) to obtain adequately precise estimates of parameters.

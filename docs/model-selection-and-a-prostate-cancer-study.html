@@ -1,0 +1,1547 @@
+<!DOCTYPE html>
+<html >
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Data Science for Biological, Medical and Health Research: Notes for 432</title>
+  <meta name="description" content="These are the Course Notes for 432.">
+  <meta name="generator" content="bookdown 0.5 and GitBook 2.6.7">
+
+  <meta property="og:title" content="Data Science for Biological, Medical and Health Research: Notes for 432" />
+  <meta property="og:type" content="book" />
+  
+  
+  <meta property="og:description" content="These are the Course Notes for 432." />
+  <meta name="github-repo" content="thomaselove/432-notes" />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Data Science for Biological, Medical and Health Research: Notes for 432" />
+  
+  <meta name="twitter:description" content="These are the Course Notes for 432." />
+  
+
+<meta name="author" content="Thomas E. Love, Ph.D.">
+
+
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  
+  
+<link rel="prev" href="missing-data-mechanisms-and-single-imputation.html">
+<link rel="next" href="references.html">
+<script src="libs/jquery-2.2.3/jquery.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">432 Course Notes</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Introduction</a></li>
+<li class="chapter" data-level="" data-path="r-packages-used-in-these-notes.html"><a href="r-packages-used-in-these-notes.html"><i class="fa fa-check"></i>R Packages used in these notes</a></li>
+<li class="chapter" data-level="" data-path="data-used-in-these-notes.html"><a href="data-used-in-these-notes.html"><i class="fa fa-check"></i>Data used in these notes</a></li>
+<li class="chapter" data-level="" data-path="special-functions-used-in-these-notes.html"><a href="special-functions-used-in-these-notes.html"><i class="fa fa-check"></i>Special Functions used in these notes</a></li>
+<li class="chapter" data-level="1" data-path="building-table-1.html"><a href="building-table-1.html"><i class="fa fa-check"></i><b>1</b> Building Table 1</a><ul>
+<li class="chapter" data-level="1.1" data-path="building-table-1.html"><a href="building-table-1.html#two-examples-from-the-new-england-journal-of-medicine"><i class="fa fa-check"></i><b>1.1</b> Two examples from the <em>New England Journal of Medicine</em></a><ul>
+<li class="chapter" data-level="1.1.1" data-path="building-table-1.html"><a href="building-table-1.html#a-simple-table-1"><i class="fa fa-check"></i><b>1.1.1</b> A simple Table 1</a></li>
+<li class="chapter" data-level="1.1.2" data-path="building-table-1.html"><a href="building-table-1.html#a-group-comparison"><i class="fa fa-check"></i><b>1.1.2</b> A group comparison</a></li>
+</ul></li>
+<li class="chapter" data-level="1.2" data-path="building-table-1.html"><a href="building-table-1.html#the-mr-clean-trial"><i class="fa fa-check"></i><b>1.2</b> The MR CLEAN trial</a></li>
+<li class="chapter" data-level="1.3" data-path="building-table-1.html"><a href="building-table-1.html#simulated-fakestroke-data"><i class="fa fa-check"></i><b>1.3</b> Simulated <code>fakestroke</code> data</a></li>
+<li class="chapter" data-level="1.4" data-path="building-table-1.html"><a href="building-table-1.html#building-table-1-for-fakestroke-attempt-1"><i class="fa fa-check"></i><b>1.4</b> Building Table 1 for <code>fakestroke</code>: Attempt 1</a><ul>
+<li class="chapter" data-level="1.4.1" data-path="building-table-1.html"><a href="building-table-1.html#some-of-this-is-very-useful-and-other-parts-need-to-be-fixed."><i class="fa fa-check"></i><b>1.4.1</b> Some of this is very useful, and other parts need to be fixed.</a></li>
+<li class="chapter" data-level="1.4.2" data-path="building-table-1.html"><a href="building-table-1.html#fakestroke-cleaning-up-categorical-variables"><i class="fa fa-check"></i><b>1.4.2</b> <code>fakestroke</code> Cleaning Up Categorical Variables</a></li>
+</ul></li>
+<li class="chapter" data-level="1.5" data-path="building-table-1.html"><a href="building-table-1.html#fakestroke-table-1-attempt-2"><i class="fa fa-check"></i><b>1.5</b> <code>fakestroke</code> Table 1: Attempt 2</a><ul>
+<li class="chapter" data-level="1.5.1" data-path="building-table-1.html"><a href="building-table-1.html#what-summaries-should-we-show"><i class="fa fa-check"></i><b>1.5.1</b> What summaries should we show?</a></li>
+</ul></li>
+<li class="chapter" data-level="1.6" data-path="building-table-1.html"><a href="building-table-1.html#obtaining-a-more-detailed-summary"><i class="fa fa-check"></i><b>1.6</b> Obtaining a more detailed Summary</a></li>
+<li class="chapter" data-level="1.7" data-path="building-table-1.html"><a href="building-table-1.html#exporting-the-completed-table-1-from-r-to-excel-or-word"><i class="fa fa-check"></i><b>1.7</b> Exporting the Completed Table 1 from R to Excel or Word</a><ul>
+<li class="chapter" data-level="1.7.1" data-path="building-table-1.html"><a href="building-table-1.html#approach-a-save-and-open-in-excel"><i class="fa fa-check"></i><b>1.7.1</b> Approach A: Save and open in Excel</a></li>
+<li class="chapter" data-level="1.7.2" data-path="building-table-1.html"><a href="building-table-1.html#approach-b-produce-the-table-so-you-can-cut-and-paste-it"><i class="fa fa-check"></i><b>1.7.2</b> Approach B: Produce the Table so you can cut and paste it</a></li>
+</ul></li>
+<li class="chapter" data-level="1.8" data-path="building-table-1.html"><a href="building-table-1.html#a-controlled-biological-experiment---the-blood-brain-barrier"><i class="fa fa-check"></i><b>1.8</b> A Controlled Biological Experiment - The Blood-Brain Barrier</a></li>
+<li class="chapter" data-level="1.9" data-path="building-table-1.html"><a href="building-table-1.html#the-bloodbrain.csv-file"><i class="fa fa-check"></i><b>1.9</b> The <code>bloodbrain.csv</code> file</a></li>
+<li class="chapter" data-level="1.10" data-path="building-table-1.html"><a href="building-table-1.html#a-table-1-for-bloodbrain"><i class="fa fa-check"></i><b>1.10</b> A Table 1 for <code>bloodbrain</code></a><ul>
+<li class="chapter" data-level="1.10.1" data-path="building-table-1.html"><a href="building-table-1.html#generate-final-table-1-for-bloodbrain"><i class="fa fa-check"></i><b>1.10.1</b> Generate final Table 1 for <code>bloodbrain</code></a></li>
+<li class="chapter" data-level="1.10.2" data-path="building-table-1.html"><a href="building-table-1.html#a-more-finished-version-after-cleanup-in-word"><i class="fa fa-check"></i><b>1.10.2</b> A More Finished Version (after Cleanup in Word)</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html"><i class="fa fa-check"></i><b>2</b> Linear Regression on a small SMART data set</a><ul>
+<li class="chapter" data-level="2.1" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#brfss-and-smart"><i class="fa fa-check"></i><b>2.1</b> BRFSS and SMART</a><ul>
+<li class="chapter" data-level="2.1.1" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#key-resources"><i class="fa fa-check"></i><b>2.1.1</b> Key resources</a></li>
+</ul></li>
+<li class="chapter" data-level="2.2" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#the-smartcle1-data-cookbook"><i class="fa fa-check"></i><b>2.2</b> The <code>smartcle1</code> data: Cookbook</a></li>
+<li class="chapter" data-level="2.3" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#smartcle2-omitting-missing-observations-complete-case-analyses"><i class="fa fa-check"></i><b>2.3</b> <code>smartcle2</code>: Omitting Missing Observations: Complete-Case Analyses</a></li>
+<li class="chapter" data-level="2.4" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#summarizing-the-smartcle2-data-numerically"><i class="fa fa-check"></i><b>2.4</b> Summarizing the <code>smartcle2</code> data numerically</a><ul>
+<li class="chapter" data-level="2.4.1" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#the-new-toy-the-skim-function"><i class="fa fa-check"></i><b>2.4.1</b> The New Toy: The <code>skim</code> function</a></li>
+<li class="chapter" data-level="2.4.2" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#the-usual-summary-for-a-data-frame"><i class="fa fa-check"></i><b>2.4.2</b> The usual <code>summary</code> for a data frame</a></li>
+<li class="chapter" data-level="2.4.3" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#the-describe-function-in-hmisc"><i class="fa fa-check"></i><b>2.4.3</b> The <code>describe</code> function in <code>Hmisc</code></a></li>
+</ul></li>
+<li class="chapter" data-level="2.5" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#counting-as-exploratory-data-analysis"><i class="fa fa-check"></i><b>2.5</b> Counting as exploratory data analysis</a><ul>
+<li class="chapter" data-level="2.5.1" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#how-many-respondents-had-exercised-in-the-past-30-days-did-this-vary-by-sex"><i class="fa fa-check"></i><b>2.5.1</b> How many respondents had exercised in the past 30 days? Did this vary by sex?</a></li>
+<li class="chapter" data-level="2.5.2" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#whats-the-distribution-of-sleephrs"><i class="fa fa-check"></i><b>2.5.2</b> What’s the distribution of <code>sleephrs</code>?</a></li>
+<li class="chapter" data-level="2.5.3" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#whats-the-distribution-of-bmi"><i class="fa fa-check"></i><b>2.5.3</b> What’s the distribution of <code>BMI</code>?</a></li>
+<li class="chapter" data-level="2.5.4" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#how-many-of-the-respondents-have-a-bmi-below-30"><i class="fa fa-check"></i><b>2.5.4</b> How many of the respondents have a BMI below 30?</a></li>
+<li class="chapter" data-level="2.5.5" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#how-many-of-the-respondents-who-have-a-bmi-30-exercised"><i class="fa fa-check"></i><b>2.5.5</b> How many of the respondents who have a BMI &lt; 30 exercised?</a></li>
+<li class="chapter" data-level="2.5.6" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#is-obesity-associated-with-sex-in-these-data"><i class="fa fa-check"></i><b>2.5.6</b> Is obesity associated with sex, in these data?</a></li>
+<li class="chapter" data-level="2.5.7" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#comparing-sleephrs-summaries-by-obesity-status"><i class="fa fa-check"></i><b>2.5.7</b> Comparing <code>sleephrs</code> summaries by obesity status</a></li>
+<li class="chapter" data-level="2.5.8" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#the-skim-function-within-a-pipe"><i class="fa fa-check"></i><b>2.5.8</b> The <code>skim</code> function within a pipe</a></li>
+</ul></li>
+<li class="chapter" data-level="2.6" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#first-modeling-attempt-can-bmi-predict-physhealth"><i class="fa fa-check"></i><b>2.6</b> First Modeling Attempt: Can <code>bmi</code> predict <code>physhealth</code>?</a><ul>
+<li class="chapter" data-level="2.6.1" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#fitting-a-simple-regression-model"><i class="fa fa-check"></i><b>2.6.1</b> Fitting a Simple Regression Model</a></li>
+<li class="chapter" data-level="2.6.2" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#model-summary-for-a-simple-one-predictor-regression"><i class="fa fa-check"></i><b>2.6.2</b> Model Summary for a Simple (One-Predictor) Regression</a></li>
+<li class="chapter" data-level="2.6.3" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#using-the-broom-package"><i class="fa fa-check"></i><b>2.6.3</b> Using the <code>broom</code> package</a></li>
+<li class="chapter" data-level="2.6.4" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#how-does-the-model-do-residuals-vs.fitted-values"><i class="fa fa-check"></i><b>2.6.4</b> How does the model do? (Residuals vs. Fitted Values)</a></li>
+</ul></li>
+<li class="chapter" data-level="2.7" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#a-new-small-study-predicting-bmi"><i class="fa fa-check"></i><b>2.7</b> A New Small Study: Predicting BMI</a><ul>
+<li class="chapter" data-level="2.7.1" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#does-female-predict-bmi-well"><i class="fa fa-check"></i><b>2.7.1</b> Does <code>female</code> predict <code>bmi</code> well?</a></li>
+</ul></li>
+<li class="chapter" data-level="2.8" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#c2_m1-a-simple-t-test-model"><i class="fa fa-check"></i><b>2.8</b> <code>c2_m1</code>: A simple t-test model</a></li>
+<li class="chapter" data-level="2.9" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#c2_m2-adding-another-predictor-two-way-anova-without-interaction"><i class="fa fa-check"></i><b>2.9</b> <code>c2_m2</code>: Adding another predictor (two-way ANOVA without interaction)</a></li>
+<li class="chapter" data-level="2.10" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#c2_m3-adding-the-interaction-term-two-way-anova-with-interaction"><i class="fa fa-check"></i><b>2.10</b> <code>c2_m3</code>: Adding the interaction term (Two-way ANOVA with interaction)</a></li>
+<li class="chapter" data-level="2.11" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#c2_m4-using-female-and-sleephrs-in-a-model-for-bmi"><i class="fa fa-check"></i><b>2.11</b> <code>c2_m4</code>: Using <code>female</code> and <code>sleephrs</code> in a model for <code>bmi</code></a></li>
+<li class="chapter" data-level="2.12" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#making-predictions-with-a-linear-regression-model"><i class="fa fa-check"></i><b>2.12</b> Making Predictions with a Linear Regression Model</a><ul>
+<li class="chapter" data-level="2.12.1" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#fitting-an-individual-prediction-and-95-prediction-interval"><i class="fa fa-check"></i><b>2.12.1</b> Fitting an Individual Prediction and 95% Prediction Interval</a></li>
+<li class="chapter" data-level="2.12.2" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#confidence-interval-for-an-average-prediction"><i class="fa fa-check"></i><b>2.12.2</b> Confidence Interval for an Average Prediction</a></li>
+<li class="chapter" data-level="2.12.3" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#fitting-multiple-individual-predictions-to-new-data"><i class="fa fa-check"></i><b>2.12.3</b> Fitting Multiple Individual Predictions to New Data</a></li>
+<li class="chapter" data-level="2.12.4" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#simulation-to-represent-predictive-uncertainty-in-model-4"><i class="fa fa-check"></i><b>2.12.4</b> Simulation to represent predictive uncertainty in Model 4</a></li>
+</ul></li>
+<li class="chapter" data-level="2.13" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#centering-the-model"><i class="fa fa-check"></i><b>2.13</b> Centering the model</a><ul>
+<li class="chapter" data-level="2.13.1" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#plot-of-model-4-on-centered-sleephrs-c2_m4_c"><i class="fa fa-check"></i><b>2.13.1</b> Plot of Model 4 on Centered <code>sleephrs</code>: <code>c2_m4_c</code></a></li>
+</ul></li>
+<li class="chapter" data-level="2.14" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#rescaling-an-input-by-subtracting-the-mean-and-dividing-by-2-standard-deviations"><i class="fa fa-check"></i><b>2.14</b> Rescaling an input by subtracting the mean and dividing by 2 standard deviations</a><ul>
+<li class="chapter" data-level="2.14.1" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#refitting-model-c2_m4-to-the-rescaled-data"><i class="fa fa-check"></i><b>2.14.1</b> Refitting model <code>c2_m4</code> to the rescaled data</a></li>
+<li class="chapter" data-level="2.14.2" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#interpreting-the-model-on-rescaled-data"><i class="fa fa-check"></i><b>2.14.2</b> Interpreting the model on rescaled data</a></li>
+<li class="chapter" data-level="2.14.3" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#plot-of-model-on-rescaled-data"><i class="fa fa-check"></i><b>2.14.3</b> Plot of model on rescaled data</a></li>
+</ul></li>
+<li class="chapter" data-level="2.15" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#c2_m5-what-if-we-add-more-variables"><i class="fa fa-check"></i><b>2.15</b> <code>c2_m5</code>: What if we add more variables?</a></li>
+<li class="chapter" data-level="2.16" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#c2_m6-would-adding-self-reported-health-help"><i class="fa fa-check"></i><b>2.16</b> <code>c2_m6</code>: Would adding self-reported health help?</a></li>
+<li class="chapter" data-level="2.17" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#c2_m7-what-if-we-added-days-of-work-missed"><i class="fa fa-check"></i><b>2.17</b> <code>c2_m7</code>: What if we added days of work missed?</a></li>
+<li class="chapter" data-level="2.18" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#key-regression-assumptions-for-building-effective-prediction-models"><i class="fa fa-check"></i><b>2.18</b> Key Regression Assumptions for Building Effective Prediction Models</a><ul>
+<li class="chapter" data-level="2.18.1" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#checking-assumptions-in-model-c2_m7"><i class="fa fa-check"></i><b>2.18.1</b> Checking Assumptions in model <code>c2_m7</code></a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="analysis-of-variance-and-analysis-of-covariance.html"><a href="analysis-of-variance-and-analysis-of-covariance.html"><i class="fa fa-check"></i><b>3</b> Analysis of Variance and Analysis of Covariance</a><ul>
+<li class="chapter" data-level="3.1" data-path="analysis-of-variance-and-analysis-of-covariance.html"><a href="analysis-of-variance-and-analysis-of-covariance.html#the-bonding-data-a-designed-dental-experiment"><i class="fa fa-check"></i><b>3.1</b> The <code>bonding</code> data: A Designed Dental Experiment</a></li>
+<li class="chapter" data-level="3.2" data-path="analysis-of-variance-and-analysis-of-covariance.html"><a href="analysis-of-variance-and-analysis-of-covariance.html#a-one-factor-analysis-of-variance"><i class="fa fa-check"></i><b>3.2</b> A One-Factor Analysis of Variance</a><ul>
+<li class="chapter" data-level="3.2.1" data-path="analysis-of-variance-and-analysis-of-covariance.html"><a href="analysis-of-variance-and-analysis-of-covariance.html#look-at-the-data"><i class="fa fa-check"></i><b>3.2.1</b> Look at the Data!</a></li>
+<li class="chapter" data-level="3.2.2" data-path="analysis-of-variance-and-analysis-of-covariance.html"><a href="analysis-of-variance-and-analysis-of-covariance.html#table-of-summary-statistics"><i class="fa fa-check"></i><b>3.2.2</b> Table of Summary Statistics</a></li>
+</ul></li>
+<li class="chapter" data-level="3.3" data-path="analysis-of-variance-and-analysis-of-covariance.html"><a href="analysis-of-variance-and-analysis-of-covariance.html#a-two-way-anova-looking-at-two-factors"><i class="fa fa-check"></i><b>3.3</b> A Two-Way ANOVA: Looking at Two Factors</a></li>
+<li class="chapter" data-level="3.4" data-path="analysis-of-variance-and-analysis-of-covariance.html"><a href="analysis-of-variance-and-analysis-of-covariance.html#a-means-plot-with-standard-deviations-to-check-for-interaction"><i class="fa fa-check"></i><b>3.4</b> A Means Plot (with standard deviations) to check for interaction</a><ul>
+<li class="chapter" data-level="3.4.1" data-path="analysis-of-variance-and-analysis-of-covariance.html"><a href="analysis-of-variance-and-analysis-of-covariance.html#skimming-the-data-after-grouping-by-resin-and-light"><i class="fa fa-check"></i><b>3.4.1</b> Skimming the data after grouping by <code>resin</code> and <code>light</code></a></li>
+</ul></li>
+<li class="chapter" data-level="3.5" data-path="analysis-of-variance-and-analysis-of-covariance.html"><a href="analysis-of-variance-and-analysis-of-covariance.html#fitting-the-two-way-anova-model-with-interaction"><i class="fa fa-check"></i><b>3.5</b> Fitting the Two-Way ANOVA model with Interaction</a><ul>
+<li class="chapter" data-level="3.5.1" data-path="analysis-of-variance-and-analysis-of-covariance.html"><a href="analysis-of-variance-and-analysis-of-covariance.html#the-anova-table-for-our-model"><i class="fa fa-check"></i><b>3.5.1</b> The ANOVA table for our model</a></li>
+<li class="chapter" data-level="3.5.2" data-path="analysis-of-variance-and-analysis-of-covariance.html"><a href="analysis-of-variance-and-analysis-of-covariance.html#is-the-interaction-important"><i class="fa fa-check"></i><b>3.5.2</b> Is the interaction important?</a></li>
+<li class="chapter" data-level="3.5.3" data-path="analysis-of-variance-and-analysis-of-covariance.html"><a href="analysis-of-variance-and-analysis-of-covariance.html#interpreting-the-interaction"><i class="fa fa-check"></i><b>3.5.3</b> Interpreting the Interaction</a></li>
+</ul></li>
+<li class="chapter" data-level="3.6" data-path="analysis-of-variance-and-analysis-of-covariance.html"><a href="analysis-of-variance-and-analysis-of-covariance.html#comparing-individual-combinations-of-resin-and-light"><i class="fa fa-check"></i><b>3.6</b> Comparing Individual Combinations of <code>resin</code> and <code>light</code></a></li>
+<li class="chapter" data-level="3.7" data-path="analysis-of-variance-and-analysis-of-covariance.html"><a href="analysis-of-variance-and-analysis-of-covariance.html#the-bonding-model-without-interaction"><i class="fa fa-check"></i><b>3.7</b> The <code>bonding</code> model without Interaction</a></li>
+<li class="chapter" data-level="3.8" data-path="analysis-of-variance-and-analysis-of-covariance.html"><a href="analysis-of-variance-and-analysis-of-covariance.html#cortisol-a-hypothetical-clinical-trial"><i class="fa fa-check"></i><b>3.8</b> <code>cortisol</code>: A Hypothetical Clinical Trial</a><ul>
+<li class="chapter" data-level="3.8.1" data-path="analysis-of-variance-and-analysis-of-covariance.html"><a href="analysis-of-variance-and-analysis-of-covariance.html#codebook-and-raw-data-for-cortisol"><i class="fa fa-check"></i><b>3.8.1</b> Codebook and Raw Data for <code>cortisol</code></a></li>
+</ul></li>
+<li class="chapter" data-level="3.9" data-path="analysis-of-variance-and-analysis-of-covariance.html"><a href="analysis-of-variance-and-analysis-of-covariance.html#creating-a-factor-combining-sex-and-waist"><i class="fa fa-check"></i><b>3.9</b> Creating a factor combining sex and waist</a></li>
+<li class="chapter" data-level="3.10" data-path="analysis-of-variance-and-analysis-of-covariance.html"><a href="analysis-of-variance-and-analysis-of-covariance.html#a-means-plot-for-the-cortisol-trial-with-standard-errors"><i class="fa fa-check"></i><b>3.10</b> A Means Plot for the <code>cortisol</code> trial (with standard errors)</a></li>
+<li class="chapter" data-level="3.11" data-path="analysis-of-variance-and-analysis-of-covariance.html"><a href="analysis-of-variance-and-analysis-of-covariance.html#a-two-way-anova-model-for-cortisol-with-interaction"><i class="fa fa-check"></i><b>3.11</b> A Two-Way ANOVA model for <code>cortisol</code> with Interaction</a></li>
+<li class="chapter" data-level="3.12" data-path="analysis-of-variance-and-analysis-of-covariance.html"><a href="analysis-of-variance-and-analysis-of-covariance.html#a-two-way-anova-model-for-cortisol-without-interaction"><i class="fa fa-check"></i><b>3.12</b> A Two-Way ANOVA model for <code>cortisol</code> without Interaction</a><ul>
+<li class="chapter" data-level="3.12.1" data-path="analysis-of-variance-and-analysis-of-covariance.html"><a href="analysis-of-variance-and-analysis-of-covariance.html#the-graph"><i class="fa fa-check"></i><b>3.12.1</b> The Graph</a></li>
+<li class="chapter" data-level="3.12.2" data-path="analysis-of-variance-and-analysis-of-covariance.html"><a href="analysis-of-variance-and-analysis-of-covariance.html#the-anova-model"><i class="fa fa-check"></i><b>3.12.2</b> The ANOVA Model</a></li>
+<li class="chapter" data-level="3.12.3" data-path="analysis-of-variance-and-analysis-of-covariance.html"><a href="analysis-of-variance-and-analysis-of-covariance.html#the-regression-summary"><i class="fa fa-check"></i><b>3.12.3</b> The Regression Summary</a></li>
+<li class="chapter" data-level="3.12.4" data-path="analysis-of-variance-and-analysis-of-covariance.html"><a href="analysis-of-variance-and-analysis-of-covariance.html#tukey-hsd-comparisons"><i class="fa fa-check"></i><b>3.12.4</b> Tukey HSD Comparisons</a></li>
+</ul></li>
+<li class="chapter" data-level="3.13" data-path="analysis-of-variance-and-analysis-of-covariance.html"><a href="analysis-of-variance-and-analysis-of-covariance.html#an-emphysema-study-analysis-of-covariance"><i class="fa fa-check"></i><b>3.13</b> An Emphysema Study: Analysis of Covariance</a><ul>
+<li class="chapter" data-level="3.13.1" data-path="analysis-of-variance-and-analysis-of-covariance.html"><a href="analysis-of-variance-and-analysis-of-covariance.html#codebook"><i class="fa fa-check"></i><b>3.13.1</b> Codebook</a></li>
+<li class="chapter" data-level="3.13.2" data-path="analysis-of-variance-and-analysis-of-covariance.html"><a href="analysis-of-variance-and-analysis-of-covariance.html#does-sex-affect-the-mean-change-in-theophylline"><i class="fa fa-check"></i><b>3.13.2</b> Does <code>sex</code> affect the mean change in theophylline?</a></li>
+<li class="chapter" data-level="3.13.3" data-path="analysis-of-variance-and-analysis-of-covariance.html"><a href="analysis-of-variance-and-analysis-of-covariance.html#is-there-an-association-between-age-and-sex-in-this-study"><i class="fa fa-check"></i><b>3.13.3</b> Is there an association between <code>age</code> and <code>sex</code> in this study?</a></li>
+<li class="chapter" data-level="3.13.4" data-path="analysis-of-variance-and-analysis-of-covariance.html"><a href="analysis-of-variance-and-analysis-of-covariance.html#adding-a-quantitative-covariate-age-to-the-model"><i class="fa fa-check"></i><b>3.13.4</b> Adding a quantitative covariate, <code>age</code>, to the model</a></li>
+<li class="chapter" data-level="3.13.5" data-path="analysis-of-variance-and-analysis-of-covariance.html"><a href="analysis-of-variance-and-analysis-of-covariance.html#rerunning-the-ancova-model-after-simple-imputation"><i class="fa fa-check"></i><b>3.13.5</b> Rerunning the ANCOVA model after simple imputation</a></li>
+<li class="chapter" data-level="3.13.6" data-path="analysis-of-variance-and-analysis-of-covariance.html"><a href="analysis-of-variance-and-analysis-of-covariance.html#looking-at-a-factor-covariate-interaction"><i class="fa fa-check"></i><b>3.13.6</b> Looking at a factor-covariate interaction</a></li>
+<li class="chapter" data-level="3.13.7" data-path="analysis-of-variance-and-analysis-of-covariance.html"><a href="analysis-of-variance-and-analysis-of-covariance.html#centering-the-covariate-to-facilitate-anova-interpretation"><i class="fa fa-check"></i><b>3.13.7</b> Centering the Covariate to Facilitate ANOVA Interpretation</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="missing-data-mechanisms-and-single-imputation.html"><a href="missing-data-mechanisms-and-single-imputation.html"><i class="fa fa-check"></i><b>4</b> Missing Data Mechanisms and Single Imputation</a><ul>
+<li class="chapter" data-level="4.1" data-path="missing-data-mechanisms-and-single-imputation.html"><a href="missing-data-mechanisms-and-single-imputation.html#a-toy-example"><i class="fa fa-check"></i><b>4.1</b> A Toy Example</a><ul>
+<li class="chapter" data-level="4.1.1" data-path="missing-data-mechanisms-and-single-imputation.html"><a href="missing-data-mechanisms-and-single-imputation.html#how-many-missing-values-do-we-have-in-each-column"><i class="fa fa-check"></i><b>4.1.1</b> How many missing values do we have in each column?</a></li>
+<li class="chapter" data-level="4.1.2" data-path="missing-data-mechanisms-and-single-imputation.html"><a href="missing-data-mechanisms-and-single-imputation.html#what-is-the-pattern-of-missing-data"><i class="fa fa-check"></i><b>4.1.2</b> What is the pattern of missing data?</a></li>
+<li class="chapter" data-level="4.1.3" data-path="missing-data-mechanisms-and-single-imputation.html"><a href="missing-data-mechanisms-and-single-imputation.html#how-can-we-identify-the-subjects-with-missing-data"><i class="fa fa-check"></i><b>4.1.3</b> How can we identify the subjects with missing data?</a></li>
+</ul></li>
+<li class="chapter" data-level="4.2" data-path="missing-data-mechanisms-and-single-imputation.html"><a href="missing-data-mechanisms-and-single-imputation.html#missing-data-mechanisms"><i class="fa fa-check"></i><b>4.2</b> Missing-data mechanisms</a></li>
+<li class="chapter" data-level="4.3" data-path="missing-data-mechanisms-and-single-imputation.html"><a href="missing-data-mechanisms-and-single-imputation.html#options-for-dealing-with-missingness"><i class="fa fa-check"></i><b>4.3</b> Options for Dealing with Missingness</a></li>
+<li class="chapter" data-level="4.4" data-path="missing-data-mechanisms-and-single-imputation.html"><a href="missing-data-mechanisms-and-single-imputation.html#complete-case-and-available-case-analyses"><i class="fa fa-check"></i><b>4.4</b> Complete Case (and Available Case) analyses</a></li>
+<li class="chapter" data-level="4.5" data-path="missing-data-mechanisms-and-single-imputation.html"><a href="missing-data-mechanisms-and-single-imputation.html#single-imputation"><i class="fa fa-check"></i><b>4.5</b> Single Imputation</a></li>
+<li class="chapter" data-level="4.6" data-path="missing-data-mechanisms-and-single-imputation.html"><a href="missing-data-mechanisms-and-single-imputation.html#multiple-imputation"><i class="fa fa-check"></i><b>4.6</b> Multiple Imputation</a></li>
+<li class="chapter" data-level="4.7" data-path="missing-data-mechanisms-and-single-imputation.html"><a href="missing-data-mechanisms-and-single-imputation.html#building-a-complete-case-analysis"><i class="fa fa-check"></i><b>4.7</b> Building a Complete Case Analysis</a></li>
+<li class="chapter" data-level="4.8" data-path="missing-data-mechanisms-and-single-imputation.html"><a href="missing-data-mechanisms-and-single-imputation.html#single-imputation-with-the-mean-or-mode"><i class="fa fa-check"></i><b>4.8</b> Single Imputation with the Mean or Mode</a></li>
+<li class="chapter" data-level="4.9" data-path="missing-data-mechanisms-and-single-imputation.html"><a href="missing-data-mechanisms-and-single-imputation.html#doing-single-imputation-with-simputation"><i class="fa fa-check"></i><b>4.9</b> Doing Single Imputation with <code>simputation</code></a><ul>
+<li class="chapter" data-level="4.9.1" data-path="missing-data-mechanisms-and-single-imputation.html"><a href="missing-data-mechanisms-and-single-imputation.html#mirroring-our-prior-approach-imputing-meansmediansmodes"><i class="fa fa-check"></i><b>4.9.1</b> Mirroring Our Prior Approach (imputing means/medians/modes)</a></li>
+<li class="chapter" data-level="4.9.2" data-path="missing-data-mechanisms-and-single-imputation.html"><a href="missing-data-mechanisms-and-single-imputation.html#using-a-model-to-impute-sbp.before-and-diabetes"><i class="fa fa-check"></i><b>4.9.2</b> Using a model to impute <code>sbp.before</code> and <code>diabetes</code></a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="model-selection-and-a-prostate-cancer-study.html"><a href="model-selection-and-a-prostate-cancer-study.html"><i class="fa fa-check"></i><b>5</b> Model Selection and a Prostate Cancer Study</a><ul>
+<li class="chapter" data-level="5.1" data-path="model-selection-and-a-prostate-cancer-study.html"><a href="model-selection-and-a-prostate-cancer-study.html#data-load-and-background"><i class="fa fa-check"></i><b>5.1</b> Data Load and Background</a></li>
+<li class="chapter" data-level="5.2" data-path="model-selection-and-a-prostate-cancer-study.html"><a href="model-selection-and-a-prostate-cancer-study.html#code-book"><i class="fa fa-check"></i><b>5.2</b> Code Book</a></li>
+<li class="chapter" data-level="5.3" data-path="model-selection-and-a-prostate-cancer-study.html"><a href="model-selection-and-a-prostate-cancer-study.html#additions-for-later-use"><i class="fa fa-check"></i><b>5.3</b> Additions for Later Use</a></li>
+<li class="chapter" data-level="5.4" data-path="model-selection-and-a-prostate-cancer-study.html"><a href="model-selection-and-a-prostate-cancer-study.html#fit-model-a-two-predictors"><i class="fa fa-check"></i><b>5.4</b> Fit Model A: Two Predictors</a><ul>
+<li class="chapter" data-level="5.4.1" data-path="model-selection-and-a-prostate-cancer-study.html"><a href="model-selection-and-a-prostate-cancer-study.html#using-tidy"><i class="fa fa-check"></i><b>5.4.1</b> Using <code>tidy</code></a></li>
+<li class="chapter" data-level="5.4.2" data-path="model-selection-and-a-prostate-cancer-study.html"><a href="model-selection-and-a-prostate-cancer-study.html#interpretation"><i class="fa fa-check"></i><b>5.4.2</b> Interpretation</a></li>
+</ul></li>
+<li class="chapter" data-level="5.5" data-path="model-selection-and-a-prostate-cancer-study.html"><a href="model-selection-and-a-prostate-cancer-study.html#exploring-model-c5_prost_a"><i class="fa fa-check"></i><b>5.5</b> Exploring Model <code>c5_prost_A</code></a><ul>
+<li class="chapter" data-level="5.5.1" data-path="model-selection-and-a-prostate-cancer-study.html"><a href="model-selection-and-a-prostate-cancer-study.html#summary-for-model-c5_prost_a"><i class="fa fa-check"></i><b>5.5.1</b> <code>summary</code> for Model <code>c5_prost_A</code></a></li>
+<li class="chapter" data-level="5.5.2" data-path="model-selection-and-a-prostate-cancer-study.html"><a href="model-selection-and-a-prostate-cancer-study.html#adjusted-r2"><i class="fa fa-check"></i><b>5.5.2</b> Adjusted R<sup>2</sup></a></li>
+<li class="chapter" data-level="5.5.3" data-path="model-selection-and-a-prostate-cancer-study.html"><a href="model-selection-and-a-prostate-cancer-study.html#coefficient-confidence-intervals"><i class="fa fa-check"></i><b>5.5.3</b> Coefficient Confidence Intervals</a></li>
+<li class="chapter" data-level="5.5.4" data-path="model-selection-and-a-prostate-cancer-study.html"><a href="model-selection-and-a-prostate-cancer-study.html#anova-for-model-c5_prost_a"><i class="fa fa-check"></i><b>5.5.4</b> ANOVA for Model <code>c5_prost_A</code></a></li>
+<li class="chapter" data-level="5.5.5" data-path="model-selection-and-a-prostate-cancer-study.html"><a href="model-selection-and-a-prostate-cancer-study.html#residuals-fitted-values-and-standard-errors-with-augment"><i class="fa fa-check"></i><b>5.5.5</b> Residuals, Fitted Values and Standard Errors with <code>augment</code></a></li>
+<li class="chapter" data-level="5.5.6" data-path="model-selection-and-a-prostate-cancer-study.html"><a href="model-selection-and-a-prostate-cancer-study.html#making-predictions-with-c5_prost_a"><i class="fa fa-check"></i><b>5.5.6</b> Making Predictions with <code>c5_prost_A</code></a></li>
+</ul></li>
+<li class="chapter" data-level="5.6" data-path="model-selection-and-a-prostate-cancer-study.html"><a href="model-selection-and-a-prostate-cancer-study.html#plotting-model-c5_prost_a"><i class="fa fa-check"></i><b>5.6</b> Plotting Model <code>c5_prost_A</code></a><ul>
+<li class="chapter" data-level="5.6.1" data-path="model-selection-and-a-prostate-cancer-study.html"><a href="model-selection-and-a-prostate-cancer-study.html#residual-plots-of-c5_prost_a"><i class="fa fa-check"></i><b>5.6.1</b> Residual Plots of <code>c5_prost_A</code></a></li>
+</ul></li>
+<li class="chapter" data-level="5.7" data-path="model-selection-and-a-prostate-cancer-study.html"><a href="model-selection-and-a-prostate-cancer-study.html#strategy-for-model-selection"><i class="fa fa-check"></i><b>5.7</b> Strategy for Model Selection</a><ul>
+<li class="chapter" data-level="5.7.1" data-path="model-selection-and-a-prostate-cancer-study.html"><a href="model-selection-and-a-prostate-cancer-study.html#how-do-we-choose-potential-subsets-of-predictors"><i class="fa fa-check"></i><b>5.7.1</b> How Do We Choose Potential Subsets of Predictors?</a></li>
+</ul></li>
+<li class="chapter" data-level="5.8" data-path="model-selection-and-a-prostate-cancer-study.html"><a href="model-selection-and-a-prostate-cancer-study.html#a-kitchen-sink-model-model-c5_prost_ks"><i class="fa fa-check"></i><b>5.8</b> A “Kitchen Sink” Model (Model <code>c5_prost_ks</code>)</a></li>
+<li class="chapter" data-level="5.9" data-path="model-selection-and-a-prostate-cancer-study.html"><a href="model-selection-and-a-prostate-cancer-study.html#sequential-variable-selection-stepwise-approaches"><i class="fa fa-check"></i><b>5.9</b> Sequential Variable Selection: Stepwise Approaches</a><ul>
+<li class="chapter" data-level="5.9.1" data-path="model-selection-and-a-prostate-cancer-study.html"><a href="model-selection-and-a-prostate-cancer-study.html#the-big-problems-with-stepwise-regression"><i class="fa fa-check"></i><b>5.9.1</b> The Big Problems with Stepwise Regression</a></li>
+<li class="chapter" data-level="5.9.2" data-path="model-selection-and-a-prostate-cancer-study.html"><a href="model-selection-and-a-prostate-cancer-study.html#forward-selection-with-the-step-function"><i class="fa fa-check"></i><b>5.9.2</b> Forward Selection with the <code>step</code> function</a></li>
+</ul></li>
+<li class="chapter" data-level="5.10" data-path="model-selection-and-a-prostate-cancer-study.html"><a href="model-selection-and-a-prostate-cancer-study.html#backward-elimination-using-the-step-function"><i class="fa fa-check"></i><b>5.10</b> Backward Elimination using the <code>step</code> function</a></li>
+<li class="chapter" data-level="5.11" data-path="model-selection-and-a-prostate-cancer-study.html"><a href="model-selection-and-a-prostate-cancer-study.html#allen-cady-modified-backward-elimination"><i class="fa fa-check"></i><b>5.11</b> Allen-Cady Modified Backward Elimination</a><ul>
+<li class="chapter" data-level="5.11.1" data-path="model-selection-and-a-prostate-cancer-study.html"><a href="model-selection-and-a-prostate-cancer-study.html#demonstration-of-the-allen-cady-approach"><i class="fa fa-check"></i><b>5.11.1</b> Demonstration of the Allen-Cady approach</a></li>
+</ul></li>
+<li class="chapter" data-level="5.12" data-path="model-selection-and-a-prostate-cancer-study.html"><a href="model-selection-and-a-prostate-cancer-study.html#all-subsets-or-best-subsets-approaches-to-model-selection"><i class="fa fa-check"></i><b>5.12</b> “All Subsets” or “Best Subsets” Approaches to Model Selection</a><ul>
+<li class="chapter" data-level="5.12.1" data-path="model-selection-and-a-prostate-cancer-study.html"><a href="model-selection-and-a-prostate-cancer-study.html#four-key-summaries-well-use-to-evaluate-potential-models"><i class="fa fa-check"></i><b>5.12.1</b> Four Key Summaries We’ll Use to Evaluate Potential Models</a></li>
+</ul></li>
+<li class="chapter" data-level="5.13" data-path="model-selection-and-a-prostate-cancer-study.html"><a href="model-selection-and-a-prostate-cancer-study.html#using-regsubsets-in-the-leaps-package"><i class="fa fa-check"></i><b>5.13</b> Using <code>regsubsets</code> in the <code>leaps</code> package</a><ul>
+<li class="chapter" data-level="5.13.1" data-path="model-selection-and-a-prostate-cancer-study.html"><a href="model-selection-and-a-prostate-cancer-study.html#summaries-of-winning-models"><i class="fa fa-check"></i><b>5.13.1</b> Summaries of “Winning” Models</a></li>
+</ul></li>
+<li class="chapter" data-level="5.14" data-path="model-selection-and-a-prostate-cancer-study.html"><a href="model-selection-and-a-prostate-cancer-study.html#plotting-the-best-subsets-results"><i class="fa fa-check"></i><b>5.14</b> Plotting the Best Subsets Results</a><ul>
+<li class="chapter" data-level="5.14.1" data-path="model-selection-and-a-prostate-cancer-study.html"><a href="model-selection-and-a-prostate-cancer-study.html#the-adjusted-r2-plot"><i class="fa fa-check"></i><b>5.14.1</b> The Adjusted R<sup>2</sup> Plot</a></li>
+<li class="chapter" data-level="5.14.2" data-path="model-selection-and-a-prostate-cancer-study.html"><a href="model-selection-and-a-prostate-cancer-study.html#a-fancier-version-identifying-the-largest-adjusted-r2"><i class="fa fa-check"></i><b>5.14.2</b> A Fancier Version (identifying the largest adjusted R<sup>2</sup>)</a></li>
+</ul></li>
+<li class="chapter" data-level="5.15" data-path="model-selection-and-a-prostate-cancer-study.html"><a href="model-selection-and-a-prostate-cancer-study.html#mallows-c_p"><i class="fa fa-check"></i><b>5.15</b> Mallows’ <span class="math inline">\(C_p\)</span></a><ul>
+<li class="chapter" data-level="5.15.1" data-path="model-selection-and-a-prostate-cancer-study.html"><a href="model-selection-and-a-prostate-cancer-study.html#the-c_p-plot"><i class="fa fa-check"></i><b>5.15.1</b> The <span class="math inline">\(C_p\)</span> Plot</a></li>
+</ul></li>
+<li class="chapter" data-level="5.16" data-path="model-selection-and-a-prostate-cancer-study.html"><a href="model-selection-and-a-prostate-cancer-study.html#all-subsets-regression-and-information-criteria"><i class="fa fa-check"></i><b>5.16</b> “All Subsets” Regression and Information Criteria</a><ul>
+<li class="chapter" data-level="5.16.1" data-path="model-selection-and-a-prostate-cancer-study.html"><a href="model-selection-and-a-prostate-cancer-study.html#the-bic-plot"><i class="fa fa-check"></i><b>5.16.1</b> The BIC Plot</a></li>
+<li class="chapter" data-level="5.16.2" data-path="model-selection-and-a-prostate-cancer-study.html"><a href="model-selection-and-a-prostate-cancer-study.html#aic-with-all-subsets"><i class="fa fa-check"></i><b>5.16.2</b> AIC with “All Subsets”</a></li>
+<li class="chapter" data-level="5.16.3" data-path="model-selection-and-a-prostate-cancer-study.html"><a href="model-selection-and-a-prostate-cancer-study.html#the-bias-corrected-aic-hurwitz-tsai"><i class="fa fa-check"></i><b>5.16.3</b> The Bias-Corrected AIC (Hurwitz &amp; Tsai)</a></li>
+</ul></li>
+<li class="chapter" data-level="5.17" data-path="model-selection-and-a-prostate-cancer-study.html"><a href="model-selection-and-a-prostate-cancer-study.html#table-of-key-results"><i class="fa fa-check"></i><b>5.17</b> Table of Key Results</a></li>
+<li class="chapter" data-level="5.18" data-path="model-selection-and-a-prostate-cancer-study.html"><a href="model-selection-and-a-prostate-cancer-study.html#all-four-plots-together"><i class="fa fa-check"></i><b>5.18</b> All Four Plots, Together</a></li>
+<li class="chapter" data-level="5.19" data-path="model-selection-and-a-prostate-cancer-study.html"><a href="model-selection-and-a-prostate-cancer-study.html#labelled-best-subsets-adjusted-r2-plot"><i class="fa fa-check"></i><b>5.19</b> Labelled “Best Subsets” Adjusted R<sup>2</sup> Plot</a></li>
+<li class="chapter" data-level="5.20" data-path="model-selection-and-a-prostate-cancer-study.html"><a href="model-selection-and-a-prostate-cancer-study.html#labelled-best-subsets-c_p-plot"><i class="fa fa-check"></i><b>5.20</b> Labelled “Best Subsets” <span class="math inline">\(C_p\)</span> Plot</a></li>
+<li class="chapter" data-level="5.21" data-path="model-selection-and-a-prostate-cancer-study.html"><a href="model-selection-and-a-prostate-cancer-study.html#labelled-best-subsets-bic-plot"><i class="fa fa-check"></i><b>5.21</b> Labelled “Best Subsets” BIC Plot</a></li>
+<li class="chapter" data-level="5.22" data-path="model-selection-and-a-prostate-cancer-study.html"><a href="model-selection-and-a-prostate-cancer-study.html#models-worth-considering"><i class="fa fa-check"></i><b>5.22</b> Models Worth Considering?</a></li>
+<li class="chapter" data-level="5.23" data-path="model-selection-and-a-prostate-cancer-study.html"><a href="model-selection-and-a-prostate-cancer-study.html#anova-testing-to-compare-these-three-models"><i class="fa fa-check"></i><b>5.23</b> ANOVA Testing to compare these three models?</a></li>
+<li class="chapter" data-level="5.24" data-path="model-selection-and-a-prostate-cancer-study.html"><a href="model-selection-and-a-prostate-cancer-study.html#displaying-the-models-using-the-arm-package"><i class="fa fa-check"></i><b>5.24</b> Displaying the Models, using the <code>arm</code> package</a></li>
+<li class="chapter" data-level="5.25" data-path="model-selection-and-a-prostate-cancer-study.html"><a href="model-selection-and-a-prostate-cancer-study.html#residual-plots-for-model-m04"><i class="fa fa-check"></i><b>5.25</b> Residual Plots for model <code>m04</code></a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>References</a></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Data Science for Biological, Medical and Health Research: Notes for 432</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="model-selection-and-a-prostate-cancer-study" class="section level1">
+<h1><span class="header-section-number">Chapter 5</span> Model Selection and a Prostate Cancer Study</h1>
+<div id="data-load-and-background" class="section level2">
+<h2><span class="header-section-number">5.1</span> Data Load and Background</h2>
+<p>The data in <code>prost.csv</code> is derived from <span class="citation">Stamey and others (<a href="#ref-Stamey1989">1989</a>)</span> who examined the relationship between the level of prostate-specific antigen and a number of clinical measures in 97 men who were about to receive a radical prostatectomy. The <code>prost</code> data, as I’ll name it in R, contains 97 rows and 11 columns.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">prost</code></pre></div>
+<pre><code># A tibble: 97 x 10
+   subject   lpsa lcavol lweight   age bph      svi   lcp gleason pgg45
+     &lt;int&gt;  &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt; &lt;int&gt; &lt;fct&gt;  &lt;int&gt; &lt;dbl&gt; &lt;fct&gt;   &lt;int&gt;
+ 1       1 -0.431 -0.580    2.77    50 Low        0 -1.39 6           0
+ 2       2 -0.163 -0.994    3.32    58 Low        0 -1.39 6           0
+ 3       3 -0.163 -0.511    2.69    74 Low        0 -1.39 7          20
+ 4       4 -0.163 -1.20     3.28    58 Low        0 -1.39 6           0
+ 5       5  0.372  0.751    3.43    62 Low        0 -1.39 6           0
+ 6       6  0.765 -1.05     3.23    50 Low        0 -1.39 6           0
+ 7       7  0.765  0.737    3.47    64 Medium     0 -1.39 6           0
+ 8       8  0.854  0.693    3.54    58 High       0 -1.39 6           0
+ 9       9  1.05  -0.777    3.54    47 Low        0 -1.39 6           0
+10      10  1.05   0.223    3.24    63 Low        0 -1.39 6           0
+# ... with 87 more rows</code></pre>
+<p>Note that a related <code>prost</code> data frame is also available as part of several R packages, including the <code>faraway</code> package, but there is an error in the <code>lweight</code> data for subject 32 in those presentations. The value of <code>lweight</code> for subject 32 should not be 6.1, corresponding to a prostate that is 449 grams in size, but instead the <code>lweight</code> value should be 3.804438, corresponding to a 44.9 gram prostate<a href="#fn6" class="footnoteRef" id="fnref6"><sup>6</sup></a>.</p>
+<p>I’ve also changed the <code>gleason</code> and <code>bph</code> variables from their presentation in other settings, to let me teach some additional details.</p>
+</div>
+<div id="code-book" class="section level2">
+<h2><span class="header-section-number">5.2</span> Code Book</h2>
+<table>
+<thead>
+<tr class="header">
+<th align="right">Variable</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right"><code>subject</code></td>
+<td>subject number (1 to 97)</td>
+</tr>
+<tr class="even">
+<td align="right"><code>lpsa</code></td>
+<td>log(prostate specific antigen in ng/ml), our <strong>outcome</strong></td>
+</tr>
+<tr class="odd">
+<td align="right"><code>lcavol</code></td>
+<td>log(cancer volume in cm<sup>3</sup>)</td>
+</tr>
+<tr class="even">
+<td align="right"><code>lweight</code></td>
+<td>log(prostate weight, in g)</td>
+</tr>
+<tr class="odd">
+<td align="right"><code>age</code></td>
+<td>age</td>
+</tr>
+<tr class="even">
+<td align="right"><code>bph</code></td>
+<td>benign prostatic hyperplasia amount (Low, Medium, or High)</td>
+</tr>
+<tr class="odd">
+<td align="right"><code>svi</code></td>
+<td>seminal vesicle invasion (1 = yes, 0 = no)</td>
+</tr>
+<tr class="even">
+<td align="right"><code>lcp</code></td>
+<td>log(capsular penetration, in cm)</td>
+</tr>
+<tr class="odd">
+<td align="right"><code>gleason</code></td>
+<td>combined Gleason score (6, 7, or &gt; 7 here)</td>
+</tr>
+<tr class="even">
+<td align="right"><code>pgg45</code></td>
+<td>percentage Gleason scores 4 or 5</td>
+</tr>
+</tbody>
+</table>
+<p>Notes:</p>
+<ul>
+<li>in general, higher levels of PSA are stronger indicators of prostate cancer. An old standard (established almost exclusively with testing in white males, and definitely flawed) suggested that values below 4 were normal, and above 4 needed further testing. A PSA of 4 corresponds to an <code>lpsa</code> of 1.39.</li>
+<li>all logarithms are natural (base <em>e</em>) logarithms, obtained in R with the function <code>log()</code></li>
+<li>all variables other than <code>subject</code> and <code>lpsa</code> are candidate predictors</li>
+<li>the <code>gleason</code> variable captures the highest combined Gleason score<a href="#fn7" class="footnoteRef" id="fnref7"><sup>7</sup></a> in a biopsy, and higher scores indicate more aggressive cancer cells. It’s stored here as 6, 7, or &gt; 7.</li>
+<li>the <code>pgg45</code> variable captures the percentage of individual Gleason scores<a href="#fn8" class="footnoteRef" id="fnref8"><sup>8</sup></a> that are 4 or 5, on a 1-5 scale, where higher scores indicate more abnormal cells.</li>
+</ul>
+</div>
+<div id="additions-for-later-use" class="section level2">
+<h2><span class="header-section-number">5.3</span> Additions for Later Use</h2>
+<p>The code below adds to the <code>prost</code> tibble:</p>
+<ul>
+<li>a factor version of the <code>svi</code> variable, called <code>svi_f</code>, with levels No and Yes,</li>
+<li>a factor version of <code>gleason</code> called <code>gleason_f</code>, with the levels ordered &gt; 7, 7, and finally 6,</li>
+<li>a factor version of <code>bph</code> called <code>bph_f</code>, with levels ordered Low, Medium, High,</li>
+<li>a centered version of <code>lcavol</code> called <code>lcavol_c</code>,</li>
+<li>exponentiated <code>cavol</code> and <code>psa</code> results derived from the natural logarithms <code>lcavol</code> and <code>lpsa</code>.</li>
+</ul>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">prost &lt;-<span class="st"> </span>prost <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">mutate</span>(<span class="dt">svi_f =</span> <span class="kw">fct_recode</span>(<span class="kw">factor</span>(svi), <span class="st">&quot;No&quot;</span> =<span class="st"> &quot;0&quot;</span>, <span class="st">&quot;Yes&quot;</span> =<span class="st"> &quot;1&quot;</span>),
+           <span class="dt">gleason_f =</span> <span class="kw">fct_relevel</span>(gleason, <span class="kw">c</span>(<span class="st">&quot;&gt; 7&quot;</span>, <span class="st">&quot;7&quot;</span>, <span class="st">&quot;6&quot;</span>)),
+           <span class="dt">bph_f =</span> <span class="kw">fct_relevel</span>(bph, <span class="kw">c</span>(<span class="st">&quot;Low&quot;</span>, <span class="st">&quot;Medium&quot;</span>, <span class="st">&quot;High&quot;</span>)),
+           <span class="dt">lcavol_c =</span> lcavol <span class="op">-</span><span class="st"> </span><span class="kw">mean</span>(lcavol),
+           <span class="dt">cavol =</span> <span class="kw">exp</span>(lcavol),
+           <span class="dt">psa =</span> <span class="kw">exp</span>(lpsa))
+
+<span class="kw">glimpse</span>(prost)</code></pre></div>
+<pre><code>Observations: 97
+Variables: 16
+$ subject   &lt;int&gt; 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 1...
+$ lpsa      &lt;dbl&gt; -0.4307829, -0.1625189, -0.1625189, -0.1625189, 0.37...
+$ lcavol    &lt;dbl&gt; -0.5798185, -0.9942523, -0.5108256, -1.2039728, 0.75...
+$ lweight   &lt;dbl&gt; 2.769459, 3.319626, 2.691243, 3.282789, 3.432373, 3....
+$ age       &lt;int&gt; 50, 58, 74, 58, 62, 50, 64, 58, 47, 63, 65, 63, 63, ...
+$ bph       &lt;fct&gt; Low, Low, Low, Low, Low, Low, Medium, High, Low, Low...
+$ svi       &lt;int&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0...
+$ lcp       &lt;dbl&gt; -1.3862944, -1.3862944, -1.3862944, -1.3862944, -1.3...
+$ gleason   &lt;fct&gt; 6, 6, 7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 7, 7, 6, 7, 6...
+$ pgg45     &lt;int&gt; 0, 0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30, 5, 5, 0, 30...
+$ svi_f     &lt;fct&gt; No, No, No, No, No, No, No, No, No, No, No, No, No, ...
+$ gleason_f &lt;fct&gt; 6, 6, 7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 7, 7, 6, 7, 6...
+$ bph_f     &lt;fct&gt; Low, Low, Low, Low, Low, Low, Medium, High, Low, Low...
+$ lcavol_c  &lt;dbl&gt; -1.9298281, -2.3442619, -1.8608352, -2.5539824, -0.5...
+$ cavol     &lt;dbl&gt; 0.56, 0.37, 0.60, 0.30, 2.12, 0.35, 2.09, 2.00, 0.46...
+$ psa       &lt;dbl&gt; 0.65, 0.85, 0.85, 0.85, 1.45, 2.15, 2.15, 2.35, 2.85...</code></pre>
+</div>
+<div id="fit-model-a-two-predictors" class="section level2">
+<h2><span class="header-section-number">5.4</span> Fit Model A: Two Predictors</h2>
+<p>To begin, let’s use two predictors (<code>lcavol</code> and <code>svi</code>) and their interaction in a linear regression model that predicts <code>lpsa</code>. I’ll call this model <code>c5_prost_A</code></p>
+<p>Earlier, we centered the <code>lcavol</code> values to facilitate interpretation of the terms. I’ll use that centered version (called <code>lcavol_c</code>) of the quantitative predictor, and the 1/0 version of the <code>svi</code> variable<a href="#fn9" class="footnoteRef" id="fnref9"><sup>9</sup></a>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">c5_prost_A &lt;-<span class="st"> </span><span class="kw">lm</span>(lpsa <span class="op">~</span><span class="st"> </span>lcavol_c <span class="op">*</span><span class="st"> </span>svi, <span class="dt">data =</span> prost)
+<span class="kw">summary</span>(c5_prost_A)</code></pre></div>
+<pre><code>
+Call:
+lm(formula = lpsa ~ lcavol_c * svi, data = prost)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-1.6305 -0.5007  0.1266  0.4886  1.6847 
+
+Coefficients:
+             Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)   2.33134    0.09128  25.540  &lt; 2e-16 ***
+lcavol_c      0.58640    0.08207   7.145 1.98e-10 ***
+svi           0.60132    0.35833   1.678   0.0967 .  
+lcavol_c:svi  0.06479    0.26614   0.243   0.8082    
+---
+Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+
+Residual standard error: 0.7595 on 93 degrees of freedom
+Multiple R-squared:  0.5806,    Adjusted R-squared:  0.5671 
+F-statistic: 42.92 on 3 and 93 DF,  p-value: &lt; 2.2e-16</code></pre>
+<div id="using-tidy" class="section level3">
+<h3><span class="header-section-number">5.4.1</span> Using <code>tidy</code></h3>
+<p>It can be very useful to build a data frame of the model’s results. We can use the <code>tidy</code> function in the <code>broom</code> package to do so.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">tidy</span>(c5_prost_A)</code></pre></div>
+<pre><code>          term   estimate  std.error  statistic      p.value
+1  (Intercept) 2.33134409 0.09128253 25.5398727 8.246849e-44
+2     lcavol_c 0.58639599 0.08206929  7.1451331 1.981492e-10
+3          svi 0.60131973 0.35832695  1.6781314 9.667899e-02
+4 lcavol_c:svi 0.06479298 0.26614194  0.2434527 8.081909e-01</code></pre>
+<p>This makes it much easier to pull out individual elements of the model fit.</p>
+<p>For example, to specify the coefficient for <code>svi</code>, rounded to three decimal places, I could use <code>tidy(c5_prost_A) %&gt;% filter(term == &quot;svi&quot;) %&gt;% select(estimate) %&gt;% round(., 3)</code></p>
+<ul>
+<li>The result is 0.601.</li>
+<li>If you look at the Markdown file, you’ll see that the number shown in the bullet point above this one was generated using inline R code, and the function specified above.</li>
+</ul>
+</div>
+<div id="interpretation" class="section level3">
+<h3><span class="header-section-number">5.4.2</span> Interpretation</h3>
+<ol style="list-style-type: decimal">
+<li>The intercept, 2.33, for the model is the predicted value of <code>lpsa</code> when <code>lcavol</code> is at its average and there is no seminal vesicle invasion (e.g. <code>svi</code> = 0).</li>
+<li>The coefficient for <code>lcavol_c</code>, 0.59, is the predicted change in <code>lpsa</code> associated with a one unit increase in <code>lcavol</code> (or <code>lcavol_c</code>) when there is no seminal vesicle invasion.</li>
+<li>The coefficient for <code>svi</code>, 0.60, is the predicted change in <code>lpsa</code> associated with having no <code>svi</code> to having an <code>svi</code> while the <code>lcavol</code> remains at its average.</li>
+<li>The coefficient for <code>lcavol_c:svi</code>, the product term, which is 0.06, is the difference in the slope of <code>lcavol_c</code> for a subject with <code>svi</code> as compared to one with no <code>svi</code>.</li>
+</ol>
+<p><em>Note</em>: If you look at the R Markdown, you’ll notice that in bullet point 3, I didn’t use <code>round</code> to round off the estimate (as I did in the other three bullets), but instead a special function I specified at the start of the R Markdown file called <code>specify_decimal()</code> which uses the <code>format</code> function. This forces, in this case, the trailing zero in the two decimal representation of the <code>svi</code> coefficient to be shown. The special function, again, is:</p>
+<p><code>specify_decimal &lt;- function(x, k) format(round(x, k), nsmall=k)</code></p>
+</div>
+</div>
+<div id="exploring-model-c5_prost_a" class="section level2">
+<h2><span class="header-section-number">5.5</span> Exploring Model <code>c5_prost_A</code></h2>
+<p>The <code>glance</code> function from the <code>broom</code> package builds a nice one-row summary for the model.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">glance</span>(c5_prost_A)</code></pre></div>
+<pre><code>  r.squared adj.r.squared     sigma statistic      p.value df    logLik
+1 0.5806435     0.5671158 0.7594785  42.92278 1.678836e-17  4 -108.9077
+       AIC      BIC deviance df.residual
+1 227.8153 240.6889 53.64311          93</code></pre>
+<p>This summary includes, in order,</p>
+<ul>
+<li>the model <span class="math inline">\(R^2\)</span>, adjusted <span class="math inline">\(R^2\)</span> and <span class="math inline">\(\hat{\sigma}\)</span>, the residual standard deviation,</li>
+<li>the ANOVA F statistic and associated <em>p</em> value,</li>
+<li>the number of degrees of freedom used by the model, and its log-likelihood ratio</li>
+<li>the model’s AIC (Akaike Information Criterion) and BIC (Bayesian Information Criterion)</li>
+<li>the model’s deviance statistic and residual degrees of freedom</li>
+</ul>
+<div id="summary-for-model-c5_prost_a" class="section level3">
+<h3><span class="header-section-number">5.5.1</span> <code>summary</code> for Model <code>c5_prost_A</code></h3>
+<p>If necessary, we can also run <code>summary</code> on this <code>c5_prost_A</code> object to pick up some additional summaries. Since the <code>svi</code> variable is binary, the interaction term is, too, so the <em>t</em> test here and the <em>F</em> test in the ANOVA yield the same result.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(c5_prost_A)</code></pre></div>
+<pre><code>
+Call:
+lm(formula = lpsa ~ lcavol_c * svi, data = prost)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-1.6305 -0.5007  0.1266  0.4886  1.6847 
+
+Coefficients:
+             Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)   2.33134    0.09128  25.540  &lt; 2e-16 ***
+lcavol_c      0.58640    0.08207   7.145 1.98e-10 ***
+svi           0.60132    0.35833   1.678   0.0967 .  
+lcavol_c:svi  0.06479    0.26614   0.243   0.8082    
+---
+Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+
+Residual standard error: 0.7595 on 93 degrees of freedom
+Multiple R-squared:  0.5806,    Adjusted R-squared:  0.5671 
+F-statistic: 42.92 on 3 and 93 DF,  p-value: &lt; 2.2e-16</code></pre>
+<p>If you’ve forgotten the details of the pieces of this summary, review the Part C Notes from 431.</p>
+</div>
+<div id="adjusted-r2" class="section level3">
+<h3><span class="header-section-number">5.5.2</span> Adjusted R<sup>2</sup></h3>
+<p>R<sup>2</sup> is greedy.</p>
+<ul>
+<li>R<sup>2</sup> will always suggest that we make our models as big as possible, often including variables of dubious predictive value.</li>
+<li>As a result, there are various methods for penalizing R<sup>2</sup> so that we wind up with smaller models.</li>
+<li>The <strong>adjusted R<sup>2</sup></strong> is often a useful way to compare multiple models for the same response.
+<ul>
+<li><span class="math inline">\(R^2_{adj} = 1 - \frac{(1-R^2)(n - 1)}{n - k}\)</span>, where <span class="math inline">\(n\)</span> = the number of observations and <span class="math inline">\(k\)</span> is the number of coefficients estimated by the regression (including the intercept and any slopes).</li>
+<li>So, in this case, <span class="math inline">\(R^2_{adj} = 1 - \frac{(1 - 0.5806)(97 - 1)}{97 - 4} = 0.5671\)</span></li>
+<li>The adjusted R<sup>2</sup> value is not, technically, a proportion of anything, but it is comparable across models for the same outcome.</li>
+<li>The adjusted R<sup>2</sup> will always be less than the (unadjusted) R<sup>2</sup>.</li>
+</ul></li>
+</ul>
+</div>
+<div id="coefficient-confidence-intervals" class="section level3">
+<h3><span class="header-section-number">5.5.3</span> Coefficient Confidence Intervals</h3>
+<p>Here are the 90% confidence intervals for the coefficients in Model A. Adjust the <code>level</code> to get different intervals.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">confint</span>(c5_prost_A, <span class="dt">level =</span> <span class="fl">0.90</span>)</code></pre></div>
+<pre><code>                     5 %      95 %
+(Intercept)   2.17968697 2.4830012
+lcavol_c      0.45004577 0.7227462
+svi           0.00599401 1.1966454
+lcavol_c:svi -0.37737623 0.5069622</code></pre>
+<p>What can we conclude from this about the utility of the interaction term?</p>
+</div>
+<div id="anova-for-model-c5_prost_a" class="section level3">
+<h3><span class="header-section-number">5.5.4</span> ANOVA for Model <code>c5_prost_A</code></h3>
+<p>The interaction term appears unnecessary. We might wind up fitting the model without it. A complete ANOVA test is available, including a <em>p</em> value, if you want it.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">anova</span>(c5_prost_A)</code></pre></div>
+<pre><code>Analysis of Variance Table
+
+Response: lpsa
+             Df Sum Sq Mean Sq  F value    Pr(&gt;F)    
+lcavol_c      1 69.003  69.003 119.6289 &lt; 2.2e-16 ***
+svi           1  5.237   5.237   9.0801  0.003329 ** 
+lcavol_c:svi  1  0.034   0.034   0.0593  0.808191    
+Residuals    93 53.643   0.577                       
+---
+Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<p>Note that the <code>anova</code> approach for a <code>lm</code> object is sequential. The first row shows the impact of <code>lcavol_c</code> as compared to a model with no predictors (just an intercept). The second row shows the impact of adding <code>svi</code> to a model that already contains <code>lcavol_c</code>. The third row shows the impact of adding the interaction (product) term to the model with the two main effects. So the order in which the variables are added to the regression model matters for this ANOVA. The F tests here describe the incremental impact of each covariate in turn.</p>
+</div>
+<div id="residuals-fitted-values-and-standard-errors-with-augment" class="section level3">
+<h3><span class="header-section-number">5.5.5</span> Residuals, Fitted Values and Standard Errors with <code>augment</code></h3>
+<p>The <code>augment</code> function in the <code>broom</code> package builds a data frame including the data used in the model, along with predictions (fitted values), residuals and other useful information.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">c5_prost_A_frame &lt;-<span class="st"> </span><span class="kw">augment</span>(c5_prost_A) <span class="op">%&gt;%</span><span class="st"> </span>tbl_df
+<span class="kw">skim</span>(c5_prost_A_frame)</code></pre></div>
+<pre><code>Skim summary statistics
+ n obs: 97 
+ n variables: 10 
+
+Variable type: integer 
+ variable missing complete  n mean   sd p0 p25 median p75 p100
+      svi       0       97 97 0.22 0.41  0   0      0   0    1
+
+Variable type: numeric 
+   variable missing complete  n     mean     sd       p0      p25 median
+    .cooksd       0       97 97  0.011   0.02    6.9e-06  0.00078 0.0035
+    .fitted       0       97 97  2.48    0.88    0.75     1.84    2.4   
+       .hat       0       97 97  0.041   0.041   0.013    0.016   0.025 
+     .resid       0       97 97 -6.9e-17 0.75   -1.63    -0.5     0.13  
+    .se.fit       0       97 97  0.14    0.061   0.087    0.095   0.12  
+     .sigma       0       97 97  0.76    0.0052  0.74     0.76    0.76  
+ .std.resid       0       97 97  0.0012  1.01   -2.19    -0.69    0.17  
+   lcavol_c       0       97 97  5.4e-17 1.18   -2.7     -0.84    0.097 
+       lpsa       0       97 97  2.48    1.15   -0.43     1.73    2.59  
+   p75 p100
+ 0.01  0.13
+ 3.07  4.54
+ 0.049 0.25
+ 0.49  1.68
+ 0.17  0.38
+ 0.76  0.76
+ 0.65  2.26
+ 0.78  2.47
+ 3.06  5.58</code></pre>
+<p>Elements shown here include:</p>
+<ul>
+<li><code>.fitted</code> Fitted values of model (or predicted values)</li>
+<li><code>.se.fit</code> Standard errors of fitted values</li>
+<li><code>.resid</code> Residuals (observed - fitted values)</li>
+<li><code>.hat</code> Diagonal of the hat matrix (these indicate <em>leverage</em> - points with high leverage indicate unusual combinations of predictors - values more than 2-3 times the mean leverage are worth some study - leverage is always between 0 and 1, and measures the amount by which the predicted value would change if the observation’s y value was increased by one unit - a point with leverage 1 would cause the line to follow that point perfectly)</li>
+<li><code>.sigma</code> Estimate of residual standard deviation when corresponding observation is dropped from model</li>
+<li><code>.cooksd</code> Cook’s distance, which helps identify influential points (values of Cook’s d &gt; 0.5 may be influential, values &gt; 1.0 almost certainly are - an influential point changes the fit substantially when it is removed from the data)</li>
+<li><code>.std.resid</code> Standardized residuals (values above 2 in absolute value are worth some study - treat these as normal deviates [Z scores], essentially)</li>
+</ul>
+<p>See <code>?augment.lm</code> in R for more details.</p>
+</div>
+<div id="making-predictions-with-c5_prost_a" class="section level3">
+<h3><span class="header-section-number">5.5.6</span> Making Predictions with <code>c5_prost_A</code></h3>
+<p>Suppose we want to predict the <code>lpsa</code> for a patient with cancer volume equal to this group’s mean, for both a patient with and without seminal vesicle invasion, and in each case, we want to use a 90% prediction interval?</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">newdata &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">lcavol_c =</span> <span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">0</span>), <span class="dt">svi =</span> <span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">1</span>))
+<span class="kw">predict</span>(c5_prost_A, newdata, <span class="dt">interval =</span> <span class="st">&quot;prediction&quot;</span>, <span class="dt">level =</span> <span class="fl">0.90</span>)</code></pre></div>
+<pre><code>       fit      lwr      upr
+1 2.331344 1.060462 3.602226
+2 2.932664 1.545742 4.319586</code></pre>
+<p>Since the predicted value in <code>fit</code> refers to the natural logarithm of PSA, to make the predictions in terms of PSA, we would need to exponentiate. The code below will accomplish that task.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">pred &lt;-<span class="st"> </span><span class="kw">predict</span>(c5_prost_A, newdata, <span class="dt">interval =</span> <span class="st">&quot;prediction&quot;</span>, <span class="dt">level =</span> <span class="fl">0.90</span>)
+<span class="kw">exp</span>(pred)</code></pre></div>
+<pre><code>       fit      lwr      upr
+1 10.29177 2.887706 36.67978
+2 18.77758 4.691450 75.15750</code></pre>
+</div>
+</div>
+<div id="plotting-model-c5_prost_a" class="section level2">
+<h2><span class="header-section-number">5.6</span> Plotting Model <code>c5_prost_A</code></h2>
+<div id="plot-logs-conventionally" class="section level4">
+<h4><span class="header-section-number">5.6.0.1</span> Plot logs conventionally</h4>
+<p>Here, we’ll use <code>ggplot2</code> to plot the logarithms of the variables as they came to us, on a conventional coordinate scale. Note that the lines are nearly parallel. What does this suggest about our Model A?</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">ggplot</span>(prost, <span class="kw">aes</span>(<span class="dt">x =</span> lcavol, <span class="dt">y =</span> lpsa, <span class="dt">group =</span> svi_f, <span class="dt">color =</span> svi_f)) <span class="op">+</span>
+<span class="st">    </span><span class="kw">geom_point</span>() <span class="op">+</span>
+<span class="st">    </span><span class="kw">geom_smooth</span>(<span class="dt">method =</span> <span class="st">&quot;lm&quot;</span>, <span class="dt">se =</span> <span class="ot">FALSE</span>) <span class="op">+</span><span class="st"> </span>
+<span class="st">    </span><span class="kw">scale_color_discrete</span>(<span class="dt">name =</span> <span class="st">&quot;Seminal Vesicle Invasion?&quot;</span>) <span class="op">+</span>
+<span class="st">    </span><span class="kw">theme_bw</span>() <span class="op">+</span>
+<span class="st">    </span><span class="kw">labs</span>(<span class="dt">x =</span> <span class="st">&quot;Log (cancer volume, cc)&quot;</span>, 
+         <span class="dt">y =</span> <span class="st">&quot;Log (Prostate Specific Antigen, ng/ml)&quot;</span>, 
+         <span class="dt">title =</span> <span class="st">&quot;Two Predictor Model c5_prost_A, including Interaction&quot;</span>)</code></pre></div>
+<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-53-1.png" width="672" /></p>
+</div>
+<div id="plot-on-log-log-scale" class="section level4">
+<h4><span class="header-section-number">5.6.0.2</span> Plot on log-log scale</h4>
+<p>Another approach (which might be easier in some settings) would be to plot the raw values of Cancer Volume and PSA, but use logarithmic axes, again using the natural (base <em>e</em>) logarithm, as follows. If we use the default choice with `trans = “log”, we’ll find a need to select some useful break points for the grid, as I’ve done in what follows.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">ggplot</span>(prost, <span class="kw">aes</span>(<span class="dt">x =</span> cavol, <span class="dt">y =</span> psa, <span class="dt">group =</span> svi_f, <span class="dt">color =</span> svi_f)) <span class="op">+</span>
+<span class="st">    </span><span class="kw">geom_point</span>() <span class="op">+</span>
+<span class="st">    </span><span class="kw">geom_smooth</span>(<span class="dt">method =</span> <span class="st">&quot;lm&quot;</span>, <span class="dt">se =</span> <span class="ot">FALSE</span>) <span class="op">+</span><span class="st"> </span>
+<span class="st">    </span><span class="kw">scale_color_discrete</span>(<span class="dt">name =</span> <span class="st">&quot;Seminal Vesicle Invasion?&quot;</span>) <span class="op">+</span>
+<span class="st">    </span><span class="kw">scale_x_continuous</span>(<span class="dt">trans =</span> <span class="st">&quot;log&quot;</span>, 
+                       <span class="dt">breaks =</span> <span class="kw">c</span>(<span class="fl">0.5</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">5</span>, <span class="dv">10</span>, <span class="dv">25</span>, <span class="dv">50</span>)) <span class="op">+</span>
+<span class="st">    </span><span class="kw">scale_y_continuous</span>(<span class="dt">trans =</span> <span class="st">&quot;log&quot;</span>, 
+                       <span class="dt">breaks =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">10</span>, <span class="dv">25</span>, <span class="dv">50</span>, <span class="dv">100</span>, <span class="dv">200</span>)) <span class="op">+</span>
+<span class="st">    </span><span class="kw">theme_bw</span>() <span class="op">+</span>
+<span class="st">    </span><span class="kw">labs</span>(<span class="dt">x =</span> <span class="st">&quot;Cancer volume, in cubic centimeters&quot;</span>, 
+         <span class="dt">y =</span> <span class="st">&quot;Prostate Specific Antigen, in ng/ml&quot;</span>, 
+         <span class="dt">title =</span> <span class="st">&quot;Two Predictor Model c5_prost_A, including Interaction&quot;</span>)</code></pre></div>
+<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-54-1.png" width="672" /></p>
+<p>I’ve used the break point of 4 on the Y axis because of the old rule suggesting further testing for asymptomatic men with PSA of 4 or higher, but the other break points are arbitrary - they seemed to work for me, and used round numbers.</p>
+</div>
+<div id="residual-plots-of-c5_prost_a" class="section level3">
+<h3><span class="header-section-number">5.6.1</span> Residual Plots of <code>c5_prost_A</code></h3>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(c5_prost_A, <span class="dt">which =</span> <span class="dv">1</span>)</code></pre></div>
+<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-55-1.png" width="672" /></p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(c5_prost_A, <span class="dt">which =</span> <span class="dv">5</span>)</code></pre></div>
+<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-56-1.png" width="672" /></p>
+</div>
+</div>
+<div id="strategy-for-model-selection" class="section level2">
+<h2><span class="header-section-number">5.7</span> Strategy for Model Selection</h2>
+<p><span class="citation">F. L. Ramsey and Schafer (<a href="#ref-RamseySchafer2002">2002</a>)</span> suggest a strategy for dealing with many potential explanatory variables should include the following elements:</p>
+<ol style="list-style-type: decimal">
+<li>Identify the key objectives.</li>
+<li>Screen the available variables, deciding on a list that is sensitive to the objectives and excludes obvious redundancies.</li>
+<li>Perform exploratory analysis, examining graphical displays and correlation coefficients.</li>
+<li>Perform transformations, as necessary.</li>
+<li>Examine a residual plot after fitting a rich model, performing further transformations and considering outliers.</li>
+<li>Find a suitable subset of the predictors, exerting enough control over any semi-automated selection procedure to be sensitive to the questions of interest.</li>
+<li>Proceed with the analysis, using the selected explanatory variables.</li>
+</ol>
+<p>The Two Key Aspects of Model Selection are:</p>
+<ol style="list-style-type: decimal">
+<li>Evaluating each potential subset of predictor variables</li>
+<li>Deciding on the collection of potential subsets</li>
+</ol>
+<div id="how-do-we-choose-potential-subsets-of-predictors" class="section level3">
+<h3><span class="header-section-number">5.7.1</span> How Do We Choose Potential Subsets of Predictors?</h3>
+<p>Choosing potential subsets of predictor variables usually involves either:</p>
+<ol style="list-style-type: decimal">
+<li>Stepwise approaches</li>
+<li>All possible subset (or best possible subset) searches</li>
+</ol>
+<p>Note that the use of any variable selection procedure changes the properties of …</p>
+<ul>
+<li>the estimated coefficients, which are biased, and</li>
+<li>the associated tests and confidence intervals, which are overly optimistic.</li>
+</ul>
+<p><span class="citation">Leeb and Potscher (<a href="#ref-Leeb2005">2005</a>)</span> summarize the key issues:</p>
+<ol style="list-style-type: decimal">
+<li>Regardless of sample size, the model selection step typically has a dramatic effect on the sampling properties of the estimators that cannot be ignored. In particular, the sampling properties of post-model-selection estimators are typically significantly different from the nominal distributions that arise if a fixed model is supposed.</li>
+<li>As a consequence, use of inference procedures that do not take into account the model selection step (e.g. using standard t-intervals as if the selected model has been given prior to the statistical analysis) can be highly misleading.</li>
+</ol>
+</div>
+</div>
+<div id="a-kitchen-sink-model-model-c5_prost_ks" class="section level2">
+<h2><span class="header-section-number">5.8</span> A “Kitchen Sink” Model (Model <code>c5_prost_ks</code>)</h2>
+<p>Suppose that we now consider a model which includes main effects (and, in this case, only the main effects) of all eight candidate predictors for <code>lpsa</code>, as follows.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">c5_prost_ks &lt;-<span class="st"> </span><span class="kw">lm</span>(lpsa <span class="op">~</span><span class="st"> </span>lcavol <span class="op">+</span><span class="st"> </span>lweight <span class="op">+</span><span class="st"> </span>age <span class="op">+</span><span class="st"> </span>bph_f <span class="op">+</span><span class="st"> </span>svi_f <span class="op">+</span><span class="st"> </span>
+<span class="st">                </span>lcp <span class="op">+</span><span class="st"> </span>gleason_f <span class="op">+</span><span class="st"> </span>pgg45, <span class="dt">data =</span> prost)
+
+<span class="kw">tidy</span>(c5_prost_ks)</code></pre></div>
+<pre><code>          term     estimate   std.error  statistic      p.value
+1  (Intercept)  0.169937821 0.931332512  0.1824674 8.556454e-01
+2       lcavol  0.544313829 0.087979210  6.1868461 2.010505e-08
+3      lweight  0.702237531 0.203013089  3.4590751 8.455164e-04
+4          age -0.023857982 0.011081414 -2.1529727 3.412099e-02
+5  bph_fMedium  0.364036274 0.182575941  1.9938896 4.933267e-02
+6    bph_fHigh  0.248789989 0.195975792  1.2694935 2.076898e-01
+7     svi_fYes  0.710949408 0.241990241  2.9379259 4.240326e-03
+8          lcp -0.119311781 0.089458946 -1.3337043 1.858223e-01
+9   gleason_f7  0.220746268 0.343065609  0.6434520 5.216430e-01
+10  gleason_f6 -0.053096704 0.430098039 -0.1234526 9.020368e-01
+11       pgg45  0.003984574 0.004146495  0.9609499 3.392714e-01</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">glance</span>(c5_prost_ks)</code></pre></div>
+<pre><code>  r.squared adj.r.squared     sigma statistic      p.value df    logLik
+1 0.6790343     0.6417127 0.6909479  18.19414 2.373796e-17 11 -95.93939
+       AIC      BIC deviance df.residual
+1 215.8788 246.7753 41.05718          86</code></pre>
+<p>We’ll often refer to this (all predictors on board) approach as a “kitchen sink” model<a href="#fn10" class="footnoteRef" id="fnref10"><sup>10</sup></a>.</p>
+</div>
+<div id="sequential-variable-selection-stepwise-approaches" class="section level2">
+<h2><span class="header-section-number">5.9</span> Sequential Variable Selection: Stepwise Approaches</h2>
+<ul>
+<li>Forward Selection
+<ul>
+<li>We begin with a constant mean and then add potential predictors one at a time according to some criterion (R defaults to minimizing the Akaike Information Criterion) until no further addition significantly improves the fit.</li>
+<li>Each categorical factor variable is represented in the regression model as a set of indicator variables. In the absence of a good reason to do something else, the set is added to the model as a single unit, and R does this automatically.</li>
+</ul></li>
+<li>Backwards Elimination
+<ul>
+<li>Start with the “kitchen sink” model and then delete potential predictors one at a time.</li>
+<li>Backwards Elimination is less likely than Forward Selection, to omit negatively confounded sets of variables, though all stepwise procedures have problems.</li>
+</ul></li>
+<li>Stepwise Regression can also be done by combining these methods.</li>
+</ul>
+<div id="the-big-problems-with-stepwise-regression" class="section level3">
+<h3><span class="header-section-number">5.9.1</span> The Big Problems with Stepwise Regression</h3>
+<p>There is no reason to assume that a single best model can be found.</p>
+<ul>
+<li>The use of forward selection, or backwards elimination, or stepwise regression including both procedures, will NOT always find the same model.</li>
+<li>It also appears to be essentially useless to try different stepwise methods to look for agreement.</li>
+</ul>
+<p>Users of stepwise regression frequently place all of their attention on the particular explanatory variables included in the resulting model, when there’s <strong>no reason</strong> (in most cases) to assume that model is in any way optimal.</p>
+<p>Despite all of its problems, let’s use stepwise regression to help predict <code>lpsa</code> given a subset of the eight predictors in <code>c5_prost_ks</code>.</p>
+</div>
+<div id="forward-selection-with-the-step-function" class="section level3">
+<h3><span class="header-section-number">5.9.2</span> Forward Selection with the <code>step</code> function</h3>
+<ol style="list-style-type: decimal">
+<li>Specify the null model (intercept only)</li>
+<li>Specify the variables R should consider as predictors (in the scope element of the step function)</li>
+<li>Specify forward selection only</li>
+<li>R defaults to using AIC as its stepwise criterion</li>
+</ol>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">with</span>(prost, 
+     <span class="kw">step</span>(<span class="kw">lm</span>(lpsa <span class="op">~</span><span class="st"> </span><span class="dv">1</span>), 
+     <span class="dt">scope=</span>(<span class="op">~</span><span class="st"> </span>lcavol <span class="op">+</span><span class="st"> </span>lweight <span class="op">+</span><span class="st"> </span>age <span class="op">+</span><span class="st"> </span>bph_f <span class="op">+</span><span class="st"> </span>svi_f <span class="op">+</span><span class="st"> </span>
+<span class="st">                </span>lcp <span class="op">+</span><span class="st"> </span>gleason_f <span class="op">+</span><span class="st"> </span>pgg45), 
+     <span class="dt">direction=</span><span class="st">&quot;forward&quot;</span>))</code></pre></div>
+<pre><code>Start:  AIC=28.84
+lpsa ~ 1
+
+            Df Sum of Sq     RSS     AIC
++ lcavol     1    69.003  58.915 -44.366
++ svi_f      1    41.011  86.907  -6.658
++ lcp        1    38.528  89.389  -3.926
++ gleason_f  2    30.121  97.796   6.793
++ lweight    1    24.019 103.899  10.665
++ pgg45      1    22.814 105.103  11.783
++ age        1     3.679 124.239  28.007
+&lt;none&gt;                   127.918  28.838
++ bph_f      2     4.681 123.237  29.221
+
+Step:  AIC=-44.37
+lpsa ~ lcavol
+
+            Df Sum of Sq    RSS     AIC
++ lweight    1    7.1726 51.742 -54.958
++ svi_f      1    5.2375 53.677 -51.397
++ bph_f      2    3.2994 55.615 -45.956
++ pgg45      1    1.6980 57.217 -45.203
++ gleason_f  2    2.7834 56.131 -45.061
+&lt;none&gt;                   58.915 -44.366
++ lcp        1    0.6562 58.259 -43.452
++ age        1    0.0025 58.912 -42.370
+
+Step:  AIC=-54.96
+lpsa ~ lcavol + lweight
+
+            Df Sum of Sq    RSS     AIC
++ svi_f      1    5.1737 46.568 -63.177
++ pgg45      1    1.8158 49.926 -56.424
++ gleason_f  2    2.6770 49.065 -56.111
+&lt;none&gt;                   51.742 -54.958
++ lcp        1    0.8187 50.923 -54.506
++ age        1    0.6456 51.097 -54.176
++ bph_f      2    1.4583 50.284 -53.731
+
+Step:  AIC=-63.18
+lpsa ~ lcavol + lweight + svi_f
+
+            Df Sum of Sq    RSS     AIC
+&lt;none&gt;                   46.568 -63.177
++ gleason_f  2   1.60467 44.964 -62.579
++ age        1   0.62301 45.945 -62.484
++ bph_f      2   1.50046 45.068 -62.354
++ pgg45      1   0.50069 46.068 -62.226
++ lcp        1   0.06937 46.499 -61.322</code></pre>
+<pre><code>
+Call:
+lm(formula = lpsa ~ lcavol + lweight + svi_f)
+
+Coefficients:
+(Intercept)       lcavol      lweight     svi_fYes  
+    -0.7772       0.5259       0.6618       0.6657  </code></pre>
+<p>The resulting model, arrived at after three forward selection steps, includes <code>lcavol</code>, <code>lweight</code> and <code>svi_f</code>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">model.fs &lt;-<span class="st"> </span><span class="kw">lm</span>(lpsa <span class="op">~</span><span class="st"> </span>lcavol <span class="op">+</span><span class="st"> </span>lweight <span class="op">+</span><span class="st"> </span>svi_f, 
+               <span class="dt">data=</span>prost)
+<span class="kw">summary</span>(model.fs)<span class="op">$</span>adj.r.squared</code></pre></div>
+<pre><code>[1] 0.6242063</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">extractAIC</span>(model.fs)</code></pre></div>
+<pre><code>[1]   4.00000 -63.17744</code></pre>
+<p>The adjusted R<sup>2</sup> value for this model is 0.624, and the AIC value used by the stepwise procedure is -63.18, on 4 effective degrees of freedom.</p>
+</div>
+</div>
+<div id="backward-elimination-using-the-step-function" class="section level2">
+<h2><span class="header-section-number">5.10</span> Backward Elimination using the <code>step</code> function</h2>
+<p>In this case, the backward elimination approach, using reduction in AIC for a criterion, comes to the same conclusion about the “best” model.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">with</span>(prost, 
+     <span class="kw">step</span>(<span class="kw">lm</span>(lpsa <span class="op">~</span><span class="st"> </span>lcavol <span class="op">+</span><span class="st"> </span>lweight <span class="op">+</span><span class="st"> </span>age <span class="op">+</span><span class="st"> </span>bph_f <span class="op">+</span><span class="st"> </span>
+<span class="st">                 </span>svi_f <span class="op">+</span><span class="st"> </span>lcp <span class="op">+</span><span class="st"> </span>gleason_f <span class="op">+</span><span class="st"> </span>pgg45), 
+          <span class="dt">direction=</span><span class="st">&quot;backward&quot;</span>))</code></pre></div>
+<pre><code>Start:  AIC=-61.4
+lpsa ~ lcavol + lweight + age + bph_f + svi_f + lcp + gleason_f + 
+    pgg45
+
+            Df Sum of Sq    RSS     AIC
+- gleason_f  2    1.1832 42.240 -62.639
+- pgg45      1    0.4409 41.498 -62.359
+- lcp        1    0.8492 41.906 -61.409
+&lt;none&gt;                   41.057 -61.395
+- bph_f      2    2.0299 43.087 -60.714
+- age        1    2.2129 43.270 -58.303
+- svi_f      1    4.1207 45.178 -54.118
+- lweight    1    5.7123 46.769 -50.760
+- lcavol     1   18.2738 59.331 -27.683
+
+Step:  AIC=-62.64
+lpsa ~ lcavol + lweight + age + bph_f + svi_f + lcp + pgg45
+
+          Df Sum of Sq    RSS     AIC
+- lcp      1    0.8470 43.087 -62.713
+&lt;none&gt;                 42.240 -62.639
+- pgg45    1    1.2029 43.443 -61.916
+- bph_f    2    2.2515 44.492 -61.602
+- age      1    2.0730 44.313 -59.992
+- svi_f    1    4.6431 46.884 -54.523
+- lweight  1    5.5988 47.839 -52.566
+- lcavol   1   21.4956 63.736 -24.736
+
+Step:  AIC=-62.71
+lpsa ~ lcavol + lweight + age + bph_f + svi_f + pgg45
+
+          Df Sum of Sq    RSS     AIC
+- pgg45    1    0.5860 43.673 -63.403
+&lt;none&gt;                 43.087 -62.713
+- bph_f    2    2.0214 45.109 -62.266
+- age      1    1.7101 44.798 -60.938
+- svi_f    1    3.7964 46.884 -56.523
+- lweight  1    5.6462 48.734 -52.769
+- lcavol   1   22.5152 65.603 -23.936
+
+Step:  AIC=-63.4
+lpsa ~ lcavol + lweight + age + bph_f + svi_f
+
+          Df Sum of Sq    RSS     AIC
+&lt;none&gt;                 43.673 -63.403
+- bph_f    2    2.2720 45.945 -62.484
+- age      1    1.3945 45.068 -62.354
+- svi_f    1    5.2747 48.948 -54.343
+- lweight  1    5.3319 49.005 -54.230
+- lcavol   1   25.5538 69.227 -20.720</code></pre>
+<pre><code>
+Call:
+lm(formula = lpsa ~ lcavol + lweight + age + bph_f + svi_f)
+
+Coefficients:
+(Intercept)       lcavol      lweight          age  bph_fMedium  
+    0.14329      0.54022      0.67283     -0.01819      0.37607  
+  bph_fHigh     svi_fYes  
+    0.27216      0.68174  </code></pre>
+<p>The backwards elimination approach in this case lands on a model with five inputs (one of which includes two <code>bph</code> indicators,) eliminating only <code>gleason_f</code>, <code>pgg45</code> and <code>lcp</code>.</p>
+</div>
+<div id="allen-cady-modified-backward-elimination" class="section level2">
+<h2><span class="header-section-number">5.11</span> Allen-Cady Modified Backward Elimination</h2>
+<p>Ranking candidate predictors by importance in advance of backwards elimination can help avoid false-positives, while reducing model size. See <span class="citation">Vittinghoff et al. (<a href="#ref-Vittinghoff2012">2012</a>)</span>, Section 10.3 for more details.</p>
+<ol style="list-style-type: decimal">
+<li>First, force into the model any predictors of primary interest, and any confounders necessary for face validity of the final model.
+<ul>
+<li>“Some variables in the hypothesized causal model may be such well-established causal antecedents of the outcome that it makes sense to include them, essentially to establish the face validity of the model and without regard to the strength or statistical significance of their associations with the primary predictor and outcome …”</li>
+</ul></li>
+<li>Rank the remaining candidate predictors in order of importance.</li>
+<li>Starting from an initial model with all candidate predictors included, delete predictors in order of ascending importance until the first variable meeting a criterion to stay in the model hits. Then stop.</li>
+</ol>
+<p>Only the remaining variable hypothesized to be least important is eligible for removal at each step. When we are willing to do this sorting before collecting (or analyzing) the data, then we can do Allen-Cady backwards elimination using the <code>drop1</code> command in R.</p>
+<div id="demonstration-of-the-allen-cady-approach" class="section level3">
+<h3><span class="header-section-number">5.11.1</span> Demonstration of the Allen-Cady approach</h3>
+<p>Suppose, for the moment that we decided to fit a model for the log of <code>psa</code> and we decided (before we saw the data) that we would:</p>
+<p>lcavol + lweight + svi_f + age + bph_f + gleason_f + lcp + pgg45</p>
+<ul>
+<li>force the <code>gleason_f</code> variable to be in the model, due to prior information about its importance,</li>
+<li>and then rated the importance of the other variables as <code>lcavol</code> (most important), then <code>svi_f</code> then <code>age</code>, and then <code>bph_f</code>, then <code>lweight</code> and <code>lcp</code> followed by <code>pgg45</code> (least important)</li>
+</ul>
+<p>When we are willing to do this sorting before collecting (or analyzing) the data, then we can do Allen-Cady backwards elimination using the <code>drop1</code> command in R.</p>
+<p><strong>Step 1.</strong> Fit the full model, then see if removing <code>lweight</code> improves AIC…</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">with</span>(prost, <span class="kw">drop1</span>(<span class="kw">lm</span>(lpsa <span class="op">~</span><span class="st"> </span>gleason_f <span class="op">+</span><span class="st"> </span>lcavol <span class="op">+</span><span class="st"> </span>svi_f <span class="op">+</span><span class="st"> </span>
+<span class="st">              </span>age <span class="op">+</span><span class="st"> </span>bph_f <span class="op">+</span><span class="st"> </span>lweight <span class="op">+</span><span class="st"> </span>lcp <span class="op">+</span><span class="st"> </span>pgg45),
+              <span class="dt">scope =</span> (<span class="op">~</span><span class="st"> </span>pgg45)))</code></pre></div>
+<pre><code>Single term deletions
+
+Model:
+lpsa ~ gleason_f + lcavol + svi_f + age + bph_f + lweight + lcp + 
+    pgg45
+       Df Sum of Sq    RSS     AIC
+&lt;none&gt;              41.057 -61.395
+pgg45   1   0.44085 41.498 -62.359</code></pre>
+<p>Since -62.3 is smaller (i.e. more negative) than -61.4, we delete <code>pgg45</code> and move on to assess whether we can remove the variable we deemed next least important (<code>lcp</code>)</p>
+<p><strong>Step 2.</strong> Let’s see if removing <code>lcp</code> from this model improves AIC…</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">with</span>(prost, <span class="kw">drop1</span>(<span class="kw">lm</span>(lpsa <span class="op">~</span><span class="st"> </span>gleason_f <span class="op">+</span><span class="st"> </span>lcavol <span class="op">+</span><span class="st"> </span>svi_f <span class="op">+</span><span class="st"> </span>
+<span class="st">              </span>age <span class="op">+</span><span class="st"> </span>bph_f <span class="op">+</span><span class="st"> </span>lweight  <span class="op">+</span><span class="st"> </span>lcp),
+              <span class="dt">scope =</span> (<span class="op">~</span><span class="st"> </span>lcp)))</code></pre></div>
+<pre><code>Single term deletions
+
+Model:
+lpsa ~ gleason_f + lcavol + svi_f + age + bph_f + lweight + lcp
+       Df Sum of Sq    RSS     AIC
+&lt;none&gt;              41.498 -62.359
+lcp     1   0.56767 42.066 -63.041</code></pre>
+<p>Again, since -63.0 is smaller than -62.4, we delete <code>lcp</code> and next assess whether we should delete <code>lweight</code>.</p>
+<p><strong>Step 3.</strong> Does removing <code>lweight</code> from this model improves AIC…</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">with</span>(prost, <span class="kw">drop1</span>(<span class="kw">lm</span>(lpsa <span class="op">~</span><span class="st"> </span>gleason_f <span class="op">+</span><span class="st"> </span>lcavol <span class="op">+</span><span class="st"> </span>svi_f <span class="op">+</span><span class="st"> </span>
+<span class="st">              </span>age <span class="op">+</span><span class="st"> </span>bph_f <span class="op">+</span><span class="st"> </span>lweight),
+              <span class="dt">scope =</span> (<span class="op">~</span><span class="st"> </span>lweight)))</code></pre></div>
+<pre><code>Single term deletions
+
+Model:
+lpsa ~ gleason_f + lcavol + svi_f + age + bph_f + lweight
+        Df Sum of Sq    RSS     AIC
+&lt;none&gt;               42.066 -63.041
+lweight  1     5.678 47.744 -52.760</code></pre>
+<p>Since the AIC for the model after the removal of <code>lweight</code> is larger (i.e. less negative), we stop, and declare our final model by the Allen-Cady approach to include <code>gleason_f</code>, <code>lcavol</code>, <code>svi_f</code>, <code>age</code>, <code>bph_f</code> and <code>lweight</code>.</p>
+</div>
+</div>
+<div id="all-subsets-or-best-subsets-approaches-to-model-selection" class="section level2">
+<h2><span class="header-section-number">5.12</span> “All Subsets” or “Best Subsets” Approaches to Model Selection</h2>
+<p>A second approach to model selection involved fitting all possible subset models and identifying the ones that look best according to some meaningful criterion and ideally one that includes enough variables to model the response appropriately without including lots of redundant or unnecessary terms.</p>
+<p>Several useful tools for running “all subsets” or “best subsets” regression comparisons are developed in R’s <code>leaps</code> package.</p>
+<div id="four-key-summaries-well-use-to-evaluate-potential-models" class="section level3">
+<h3><span class="header-section-number">5.12.1</span> Four Key Summaries We’ll Use to Evaluate Potential Models</h3>
+<ol style="list-style-type: decimal">
+<li>Adjusted R<sup>2</sup>, which we try to maximize.</li>
+<li>Akaike’s Information Criterion (AIC), which we try to minimize, and a Bias-Corrected version of AIC due to Hurwitz and Tsai, which we use when the sample size is small, specifically when the sample size <span class="math inline">\(n\)</span> and the number of predictors being studied <span class="math inline">\(k\)</span> are such that <span class="math inline">\(n/k \leq 40\)</span>. We also try to minimize this bias-corrected AIC.</li>
+<li>Bayesian Information Criterion (BIC), which we also try to minimize.</li>
+<li>Mallows’ C<sub>p</sub> statistic, which we (essentially) try to minimize.</li>
+</ol>
+<p>Choosing between AIC and BIC can be challenging.</p>
+<blockquote>
+<p>For model selection purposes, there is no clear choice between AIC and BIC. Given a family of models, including the true model, the probability that BIC will select the correct model approaches one as the sample size n approaches infinity - thus BIC is asymptotically consistent, which AIC is not. [But, for practical purposes,] BIC often chooses models that are too simple [relative to AIC] because of its heavy penalty on complexity.</p>
+</blockquote>
+<ul>
+<li>Source: <span class="citation">Hastie, Tibshriani, and Frideman (<a href="#ref-Hastie2001">2001</a>)</span>, page 208.</li>
+</ul>
+</div>
+</div>
+<div id="using-regsubsets-in-the-leaps-package" class="section level2">
+<h2><span class="header-section-number">5.13</span> Using <code>regsubsets</code> in the <code>leaps</code> package</h2>
+<p>We will use the <code>leaps</code> package in R as follows to obtain results in the <code>prost</code> study from looking at all possible subsets of the candidate predictors. To start, we’ll ask R to find the one best subset (with 1 input [in addition to the intercept], then with 2 inputs, and then with each of 3, 4, … 8 regression inputs) according to an exhaustive search without forcing any of the variables to be in or out. We’d use the <code>nvmax</code> command within the <code>regsubsets</code> function to limit the number of regression inputs to a maximum.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## requires leaps package
+preds &lt;-<span class="st"> </span><span class="kw">with</span>(prost, 
+   <span class="kw">cbind</span>(lcavol, lweight, age, bph_f, svi_f, lcp, gleason_f, pgg45))
+x1 &lt;-<span class="st"> </span><span class="kw">regsubsets</span>(preds, <span class="dt">y=</span>prost<span class="op">$</span>lpsa)
+rs &lt;-<span class="st"> </span><span class="kw">summary</span>(x1)
+rs</code></pre></div>
+<pre><code>Subset selection object
+8 Variables  (and intercept)
+          Forced in Forced out
+lcavol        FALSE      FALSE
+lweight       FALSE      FALSE
+age           FALSE      FALSE
+bph_f         FALSE      FALSE
+svi_f         FALSE      FALSE
+lcp           FALSE      FALSE
+gleason_f     FALSE      FALSE
+pgg45         FALSE      FALSE
+1 subsets of each size up to 8
+Selection Algorithm: exhaustive
+         lcavol lweight age bph_f svi_f lcp gleason_f pgg45
+1  ( 1 ) &quot;*&quot;    &quot; &quot;     &quot; &quot; &quot; &quot;   &quot; &quot;   &quot; &quot; &quot; &quot;       &quot; &quot;  
+2  ( 1 ) &quot;*&quot;    &quot;*&quot;     &quot; &quot; &quot; &quot;   &quot; &quot;   &quot; &quot; &quot; &quot;       &quot; &quot;  
+3  ( 1 ) &quot;*&quot;    &quot;*&quot;     &quot; &quot; &quot; &quot;   &quot;*&quot;   &quot; &quot; &quot; &quot;       &quot; &quot;  
+4  ( 1 ) &quot;*&quot;    &quot;*&quot;     &quot; &quot; &quot;*&quot;   &quot;*&quot;   &quot; &quot; &quot; &quot;       &quot; &quot;  
+5  ( 1 ) &quot;*&quot;    &quot;*&quot;     &quot;*&quot; &quot;*&quot;   &quot;*&quot;   &quot; &quot; &quot; &quot;       &quot; &quot;  
+6  ( 1 ) &quot;*&quot;    &quot;*&quot;     &quot;*&quot; &quot;*&quot;   &quot;*&quot;   &quot; &quot; &quot;*&quot;       &quot; &quot;  
+7  ( 1 ) &quot;*&quot;    &quot;*&quot;     &quot;*&quot; &quot;*&quot;   &quot;*&quot;   &quot;*&quot; &quot;*&quot;       &quot; &quot;  
+8  ( 1 ) &quot;*&quot;    &quot;*&quot;     &quot;*&quot; &quot;*&quot;   &quot;*&quot;   &quot;*&quot; &quot;*&quot;       &quot;*&quot;  </code></pre>
+<p>So…</p>
+<ul>
+<li>the best one-predictor model used <code>lcavol</code></li>
+<li>the best two-predictor model used <code>lcavol</code> and <code>lweight</code></li>
+<li>the best three-predictor model used <code>lcavol</code>, <code>lweight</code> and <code>svi_f</code></li>
+<li>the best four-predictor model added <code>bph_f</code>, and</li>
+<li>the best five-predictor model added <code>age</code></li>
+<li>the best six-input model added <code>gleason_f</code>,</li>
+<li>the best seven-input model added <code>lcp</code>,</li>
+<li>and the eight-input model adds <code>pgg45</code>.</li>
+</ul>
+<div id="summaries-of-winning-models" class="section level3">
+<h3><span class="header-section-number">5.13.1</span> Summaries of “Winning” Models</h3>
+<p>We can easily pull out R<sup>2</sup>, adjusted R<sup>2</sup>, C<sub>p</sub>, and BIC results for the “winning” models of each size.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">winners &lt;-<span class="st"> </span><span class="kw">tbl_df</span>(rs<span class="op">$</span>which)
+winners<span class="op">$</span>k &lt;-<span class="st"> </span><span class="dv">2</span><span class="op">:</span><span class="dv">9</span>
+winners<span class="op">$</span>r2 &lt;-<span class="st"> </span>rs<span class="op">$</span>rsq
+winners<span class="op">$</span>adjr2 &lt;-<span class="st"> </span>rs<span class="op">$</span>adjr2
+winners<span class="op">$</span>cp &lt;-<span class="st"> </span>rs<span class="op">$</span>cp
+winners<span class="op">$</span>bic &lt;-<span class="st"> </span>rs<span class="op">$</span>bic</code></pre></div>
+<p>And here is a table of those results…</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">winners</code></pre></div>
+<pre><code># A tibble: 8 x 14
+  `(Intercept)` lcavol lweight age   bph_f svi_f lcp   gleason_f pgg45
+  &lt;lgl&gt;         &lt;lgl&gt;  &lt;lgl&gt;   &lt;lgl&gt; &lt;lgl&gt; &lt;lgl&gt; &lt;lgl&gt; &lt;lgl&gt;     &lt;lgl&gt;
+1 T             T      F       F     F     F     F     F         F    
+2 T             T      T       F     F     F     F     F         F    
+3 T             T      T       F     F     T     F     F         F    
+4 T             T      T       F     T     T     F     F         F    
+5 T             T      T       T     T     T     F     F         F    
+6 T             T      T       T     T     T     F     T         F    
+7 T             T      T       T     T     T     T     T         F    
+8 T             T      T       T     T     T     T     T         T    
+# ... with 5 more variables: k &lt;int&gt;, r2 &lt;dbl&gt;, adjr2 &lt;dbl&gt;, cp &lt;dbl&gt;, bic
+#   &lt;dbl&gt;</code></pre>
+<ul>
+<li>All of these “best subsets” are hierarchical, in that each model is a subset of the one below it. This isn’t inevitably true.</li>
+<li>By adjusted R<sup>2</sup>, which we want to maximize, the best model appears to be the model with <span class="math inline">\(k\)</span> = 8.</li>
+<li>By <em>C<sub>p</sub></em>, which we want to minimize (within reason), the best choice appears to be the <span class="math inline">\(k\)</span> = 4, 6 or 7 model.</li>
+<li>By BIC, the best model has <span class="math inline">\(k\)</span> = 4.</li>
+</ul>
+</div>
+</div>
+<div id="plotting-the-best-subsets-results" class="section level2">
+<h2><span class="header-section-number">5.14</span> Plotting the Best Subsets Results</h2>
+<div id="the-adjusted-r2-plot" class="section level3">
+<h3><span class="header-section-number">5.14.1</span> The Adjusted R<sup>2</sup> Plot</h3>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(rs<span class="op">$</span>adjr2 <span class="op">~</span><span class="st"> </span><span class="kw">I</span>(<span class="dv">2</span><span class="op">:</span><span class="dv">9</span>), <span class="dt">ylab=</span><span class="st">&quot;Adjusted R-squared&quot;</span>,
+     <span class="dt">xlab=</span><span class="st">&quot;# of Inputs, including intercept&quot;</span>)
+<span class="kw">lines</span>(<span class="kw">spline</span>(rs<span class="op">$</span>adjr2 <span class="op">~</span><span class="st"> </span><span class="kw">I</span>(<span class="dv">2</span><span class="op">:</span><span class="dv">9</span>)))</code></pre></div>
+<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-66-1.png" width="672" /></p>
+<p>Models 4-9 all look like reasonable choices here.</p>
+</div>
+<div id="a-fancier-version-identifying-the-largest-adjusted-r2" class="section level3">
+<h3><span class="header-section-number">5.14.2</span> A Fancier Version (identifying the largest adjusted R<sup>2</sup>)</h3>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m2 &lt;-<span class="st"> </span><span class="kw">max</span>(rs<span class="op">$</span>adjr2) 
+m1 &lt;-<span class="st"> </span><span class="kw">which.max</span>(rs<span class="op">$</span>adjr2) <span class="op">+</span><span class="st"> </span><span class="dv">1</span>
+<span class="kw">plot</span>(rs<span class="op">$</span>adjr2 <span class="op">~</span><span class="st"> </span><span class="kw">I</span>(<span class="dv">2</span><span class="op">:</span><span class="dv">9</span>), <span class="dt">ylab=</span><span class="st">&quot;Adjusted R-squared&quot;</span>,
+     <span class="dt">xlab=</span><span class="st">&quot;# of Inputs, including intercept&quot;</span>)
+<span class="kw">lines</span>(<span class="kw">spline</span>(rs<span class="op">$</span>adjr2 <span class="op">~</span><span class="st"> </span><span class="kw">I</span>(<span class="dv">2</span><span class="op">:</span><span class="dv">9</span>)))
+<span class="kw">arrows</span>(m1, m2<span class="op">-</span><span class="fl">0.02</span>, m1, m2)
+<span class="kw">text</span>(m1, m2<span class="op">-</span><span class="fl">0.03</span>, <span class="kw">paste</span>(<span class="st">&quot;max =&quot;</span>, <span class="kw">format</span>(m2, <span class="dt">digits=</span><span class="dv">3</span>)))
+<span class="kw">text</span>(m1, m2<span class="op">-</span><span class="fl">0.045</span>, <span class="kw">paste</span>(<span class="st">&quot;with&quot;</span>, <span class="kw">format</span>(m1, <span class="dt">digits=</span><span class="dv">1</span>),
+                        <span class="st">&quot;inputs&quot;</span>), <span class="dt">pos=</span><span class="dv">3</span>)</code></pre></div>
+<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-67-1.png" width="672" /></p>
+</div>
+</div>
+<div id="mallows-c_p" class="section level2">
+<h2><span class="header-section-number">5.15</span> Mallows’ <span class="math inline">\(C_p\)</span></h2>
+<p>The <span class="math inline">\(C_p\)</span> statistic focuses directly on the tradeoff between <strong>bias</strong> (due to excluding important predictors from the model) and extra <strong>variance</strong> (due to including too many unimportant predictors in the model.)</p>
+<p>If N is the sample size, and we select <span class="math inline">\(p\)</span> regression predictors from a set of <span class="math inline">\(K\)</span> (where <span class="math inline">\(p &lt; K\)</span>), then the <span class="math inline">\(C_p\)</span> statistic is</p>
+<p><span class="math inline">\(C_p = \frac{SSE_p}{MSE_K} - N + 2p\)</span></p>
+<p>where:</p>
+<ul>
+<li><span class="math inline">\(SSE_p\)</span> is the sum of squares for error (residual) in the model with <span class="math inline">\(p\)</span> predictors</li>
+<li><span class="math inline">\(MSE_K\)</span> is the residual mean square after regression in the model with all <span class="math inline">\(K\)</span> predictors</li>
+</ul>
+<p>As it turns out, this is just measuring the particular model’s lack of fit, and then adding a penalty for the number of terms in the model (specifically <span class="math inline">\(2p - N\)</span> is the penalty since the lack of fit is measured as <span class="math inline">\((N-p) \frac{SSE_p}{MSE_K}\)</span>.</p>
+<p>If a model has no meaningful lack of fit (i.e. no substantial bias) then the expected value of <span class="math inline">\(C_p\)</span> is roughly <span class="math inline">\(p\)</span>.</p>
+<p>Otherwise, the expectation is <span class="math inline">\(p\)</span> plus a positive bias term.</p>
+<p>In general, we want to see <em>smaller</em> values of <span class="math inline">\(C_p\)</span>.</p>
+<p>Often, we do this by choosing a subset of predictors that have <span class="math inline">\(C_p\)</span> near the value of <span class="math inline">\(p\)</span>.</p>
+<div id="the-c_p-plot" class="section level3">
+<h3><span class="header-section-number">5.15.1</span> The <span class="math inline">\(C_p\)</span> Plot</h3>
+<p>The <span class="math inline">\(C_p\)</span> plot is just a scatterplot of <span class="math inline">\(C_p\)</span> on the Y-axis, and <span class="math inline">\(p\)</span> on the X-axis.</p>
+<p>Each of the various predictor subsets we will study is represented in a single point. A model without bias should have <span class="math inline">\(C_p\)</span> roughly equal to <span class="math inline">\(p\)</span>, so we’ll frequently draw a line at <span class="math inline">\(C_p = p\)</span> to make that clear. We then select our model from among all models with small <span class="math inline">\(C_p\)</span> statistics.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(rs<span class="op">$</span>cp <span class="op">~</span><span class="st"> </span><span class="kw">I</span>(<span class="dv">2</span><span class="op">:</span><span class="dv">9</span>),
+     <span class="dt">ylab=</span><span class="st">&quot;Cp Statistic&quot;</span>,
+     <span class="dt">xlab=</span><span class="st">&quot;# of Regression Inputs, including Intercept&quot;</span>,
+     <span class="dt">pch=</span><span class="dv">16</span>, <span class="dt">main=</span><span class="st">&quot;Cp Plot&quot;</span>)
+<span class="kw">abline</span>(<span class="dv">0</span>,<span class="dv">1</span>, <span class="dt">col =</span> <span class="st">&quot;purple&quot;</span>)</code></pre></div>
+<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-68-1.png" width="672" /></p>
+<p>Model 4 has the smallest value of <span class="math inline">\(C_p\)</span> (and is the leftmost of the largely comparable models 4-9) while 6 is close to and 7 is right on the <span class="math inline">\(C_p = p\)</span> line, so those are the likeliest candidates.</p>
+</div>
+</div>
+<div id="all-subsets-regression-and-information-criteria" class="section level2">
+<h2><span class="header-section-number">5.16</span> “All Subsets” Regression and Information Criteria</h2>
+<p>We will have three main information criteria:</p>
+<ul>
+<li>the Bayesian Information Criterion, called BIC</li>
+<li>the Akaike Information Criterion (used by R’s default stepwise approaches,) called AIC</li>
+<li>a corrected version of AIC due to Hurwitz and Tsai, called AIC<sub>c</sub></li>
+</ul>
+<p>Each of these indicates better models by getting smaller.</p>
+<div id="the-bic-plot" class="section level3">
+<h3><span class="header-section-number">5.16.1</span> The BIC Plot</h3>
+<p>R provides the BIC directly as part of the result of running <code>regsubsets</code>, as we’ve seen.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(rs<span class="op">$</span>bic <span class="op">~</span><span class="st"> </span><span class="kw">I</span>(<span class="dv">2</span><span class="op">:</span><span class="dv">9</span>), <span class="dt">ylab=</span><span class="st">&quot;BIC&quot;</span>, <span class="dt">xlab=</span><span class="st">&quot;# of Fitted Inputs&quot;</span>,
+     <span class="dt">pch=</span><span class="dv">16</span>, <span class="dt">cex=</span><span class="fl">1.5</span>, <span class="dt">col=</span><span class="st">&quot;slateblue&quot;</span>, <span class="dt">main=</span><span class="st">&quot;BIC Plot&quot;</span>)</code></pre></div>
+<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-69-1.png" width="672" /></p>
+<p>We want to minimize BIC, which argues strongly for the model with 4 inputs, including the intercept.</p>
+</div>
+<div id="aic-with-all-subsets" class="section level3">
+<h3><span class="header-section-number">5.16.2</span> AIC with “All Subsets”</h3>
+<p>To get the AIC, we can use the formula</p>
+<p><span class="math display">\[
+AIC = n log(RSS/n) + 2p
+\]</span></p>
+<p>where <em>n</em> is the sample size, <em>p</em> = # of regression inputs to be fit in the model (including the intercept) and the RSS can be found in the <code>regsubsets</code> output:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">rs<span class="op">$</span>rss</code></pre></div>
+<pre><code>[1] 58.91478 51.74218 46.56844 45.72444 44.64364 43.69047 43.04471 42.77150</code></pre>
+<p>So, in our case, we have n = 97 subjects, and models being fit with 2 to 9 regression inputs (including the intercept), so we have:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">rs<span class="op">$</span>aic &lt;-<span class="st"> </span><span class="dv">97</span><span class="op">*</span><span class="kw">log</span>(rs<span class="op">$</span>rss <span class="op">/</span><span class="st"> </span><span class="dv">97</span>) <span class="op">+</span><span class="st"> </span><span class="dv">2</span><span class="op">*</span>(<span class="dv">2</span><span class="op">:</span><span class="dv">9</span>)
+rs<span class="op">$</span>aic</code></pre></div>
+<pre><code>[1] -44.36603 -54.95846 -63.17744 -62.95157 -63.27191 -63.36534 -62.80974
+[8] -61.42738</code></pre>
+</div>
+<div id="the-bias-corrected-aic-hurwitz-tsai" class="section level3">
+<h3><span class="header-section-number">5.16.3</span> The Bias-Corrected AIC (Hurwitz &amp; Tsai)</h3>
+<p>The bias-corrected AIC formula due to Hurwitz and Tsai is:</p>
+<p><span class="math inline">\(AIC_c\)</span> = n log(RSS/n) + 2p + [2p (p+1) / (n-p-1)] = AIC + [2p (p+1) / (n-p-1)]</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">rs<span class="op">$</span>aic.corr &lt;-<span class="st"> </span><span class="dv">97</span><span class="op">*</span><span class="kw">log</span>(rs<span class="op">$</span>rss <span class="op">/</span><span class="st"> </span><span class="dv">97</span>) <span class="op">+</span><span class="st"> </span><span class="dv">2</span><span class="op">*</span>(<span class="dv">2</span><span class="op">:</span><span class="dv">9</span>) <span class="op">+</span>
+<span class="st">               </span>(<span class="dv">2</span> <span class="op">*</span><span class="st"> </span>(<span class="dv">2</span><span class="op">:</span><span class="dv">9</span>) <span class="op">*</span><span class="st"> </span>((<span class="dv">2</span><span class="op">:</span><span class="dv">9</span>)<span class="op">+</span><span class="dv">1</span>) <span class="op">/</span><span class="st"> </span>(<span class="dv">97</span> <span class="op">-</span><span class="st"> </span>(<span class="dv">2</span><span class="op">:</span><span class="dv">9</span>) <span class="op">-</span><span class="st"> </span><span class="dv">1</span>))
+
+<span class="kw">round</span>(rs<span class="op">$</span>aic,<span class="dv">2</span>) <span class="co"># uncorrected </span></code></pre></div>
+<pre><code>[1] -44.37 -54.96 -63.18 -62.95 -63.27 -63.37 -62.81 -61.43</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">round</span>(rs<span class="op">$</span>aic.corr,<span class="dv">2</span>) <span class="co"># bias-corrected</span></code></pre></div>
+<pre><code>[1] -44.24 -54.70 -62.74 -62.29 -62.34 -62.11 -61.17 -59.36</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(rs<span class="op">$</span>aic.corr <span class="op">~</span><span class="st"> </span><span class="kw">I</span>(<span class="dv">2</span><span class="op">:</span><span class="dv">9</span>), <span class="dt">ylab=</span><span class="st">&quot;AIC, corrected&quot;</span>, <span class="dt">xlab=</span><span class="st">&quot;# of Fitted Inputs&quot;</span>,
+     <span class="dt">pch=</span><span class="dv">16</span>, <span class="dt">cex=</span><span class="fl">1.5</span>, <span class="dt">col=</span><span class="st">&quot;tomato&quot;</span>, <span class="dt">main=</span><span class="st">&quot;AIC (corrected) Plot&quot;</span>)</code></pre></div>
+<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-73-1.png" width="672" /></p>
+<p>The smallest AIC<sub>c</sub> values occur in models 4 and later, especially model 4 itself.</p>
+</div>
+</div>
+<div id="table-of-key-results" class="section level2">
+<h2><span class="header-section-number">5.17</span> Table of Key Results</h2>
+<p>We can build a big table, like this:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">winners &lt;-<span class="st"> </span><span class="kw">data_frame</span>(<span class="dt">inputs =</span> <span class="dv">2</span><span class="op">:</span><span class="dv">9</span>)
+winners<span class="op">$</span>r2 &lt;-<span class="st"> </span>rs<span class="op">$</span>rsq
+winners<span class="op">$</span>adjr2 &lt;-<span class="st"> </span>rs<span class="op">$</span>adjr2
+winners<span class="op">$</span>cp &lt;-<span class="st"> </span>rs<span class="op">$</span>cp
+winners<span class="op">$</span>bic &lt;-<span class="st"> </span>rs<span class="op">$</span>bic
+winners<span class="op">$</span>aic &lt;-<span class="st"> </span>rs<span class="op">$</span>aic
+winners<span class="op">$</span>aic.corr &lt;-<span class="st"> </span>rs<span class="op">$</span>aic.corr
+<span class="kw">pander</span>(<span class="kw">round</span>(winners, <span class="dv">3</span>))</code></pre></div>
+<table style="width:85%;">
+<colgroup>
+<col width="12%" />
+<col width="11%" />
+<col width="11%" />
+<col width="11%" />
+<col width="12%" />
+<col width="12%" />
+<col width="13%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">inputs</th>
+<th align="center">r2</th>
+<th align="center">adjr2</th>
+<th align="center">cp</th>
+<th align="center">bic</th>
+<th align="center">aic</th>
+<th align="center">aic.corr</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">2</td>
+<td align="center">0.539</td>
+<td align="center">0.535</td>
+<td align="center">28.21</td>
+<td align="center">-66.05</td>
+<td align="center">-44.37</td>
+<td align="center">-44.24</td>
+</tr>
+<tr class="even">
+<td align="center">3</td>
+<td align="center">0.596</td>
+<td align="center">0.587</td>
+<td align="center">15.46</td>
+<td align="center">-74.07</td>
+<td align="center">-54.96</td>
+<td align="center">-54.7</td>
+</tr>
+<tr class="odd">
+<td align="center">4</td>
+<td align="center">0.636</td>
+<td align="center">0.624</td>
+<td align="center">6.812</td>
+<td align="center">-79.72</td>
+<td align="center">-63.18</td>
+<td align="center">-62.74</td>
+</tr>
+<tr class="even">
+<td align="center">5</td>
+<td align="center">0.643</td>
+<td align="center">0.627</td>
+<td align="center">7.076</td>
+<td align="center">-76.92</td>
+<td align="center">-62.95</td>
+<td align="center">-62.29</td>
+</tr>
+<tr class="odd">
+<td align="center">6</td>
+<td align="center">0.651</td>
+<td align="center">0.632</td>
+<td align="center">6.852</td>
+<td align="center">-74.66</td>
+<td align="center">-63.27</td>
+<td align="center">-62.34</td>
+</tr>
+<tr class="even">
+<td align="center">7</td>
+<td align="center">0.658</td>
+<td align="center">0.636</td>
+<td align="center">6.891</td>
+<td align="center">-72.18</td>
+<td align="center">-63.37</td>
+<td align="center">-62.11</td>
+</tr>
+<tr class="odd">
+<td align="center">8</td>
+<td align="center">0.663</td>
+<td align="center">0.637</td>
+<td align="center">7.562</td>
+<td align="center">-69.05</td>
+<td align="center">-62.81</td>
+<td align="center">-61.17</td>
+</tr>
+<tr class="even">
+<td align="center">9</td>
+<td align="center">0.666</td>
+<td align="center">0.635</td>
+<td align="center">9</td>
+<td align="center">-65.09</td>
+<td align="center">-61.43</td>
+<td align="center">-59.36</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="all-four-plots-together" class="section level2">
+<h2><span class="header-section-number">5.18</span> All Four Plots, Together</h2>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>,<span class="dv">2</span>))
+m2 &lt;-<span class="st"> </span><span class="kw">max</span>(rs<span class="op">$</span>adjr2) 
+m1 &lt;-<span class="st"> </span><span class="kw">which.max</span>(rs<span class="op">$</span>adjr2) <span class="op">+</span><span class="st"> </span><span class="dv">1</span>
+<span class="kw">plot</span>(rs<span class="op">$</span>adjr2 <span class="op">~</span><span class="st"> </span><span class="kw">I</span>(<span class="dv">2</span><span class="op">:</span><span class="dv">9</span>), <span class="dt">ylab=</span><span class="st">&quot;Adjusted R-squared&quot;</span>,
+     <span class="dt">xlab=</span><span class="st">&quot;# of Inputs, including intercept&quot;</span>,
+     <span class="dt">main =</span> <span class="st">&quot;Adjusted R-squared&quot;</span>)
+<span class="kw">lines</span>(<span class="kw">spline</span>(rs<span class="op">$</span>adjr2 <span class="op">~</span><span class="st"> </span><span class="kw">I</span>(<span class="dv">2</span><span class="op">:</span><span class="dv">9</span>)))
+<span class="kw">arrows</span>(m1, m2<span class="op">-</span><span class="fl">0.02</span>, m1, m2)
+<span class="kw">text</span>(m1, m2<span class="op">-</span><span class="fl">0.03</span>, <span class="kw">paste</span>(<span class="st">&quot;max =&quot;</span>, <span class="kw">format</span>(m2, <span class="dt">digits=</span><span class="dv">3</span>)))
+<span class="kw">text</span>(m1, m2<span class="op">-</span><span class="fl">0.045</span>, <span class="kw">paste</span>(<span class="st">&quot;with&quot;</span>, <span class="kw">format</span>(m1, <span class="dt">digits=</span><span class="dv">1</span>),
+                        <span class="st">&quot;inputs&quot;</span>), <span class="dt">pos=</span><span class="dv">3</span>)
+
+<span class="kw">plot</span>(rs<span class="op">$</span>cp <span class="op">~</span><span class="st"> </span><span class="kw">I</span>(<span class="dv">2</span><span class="op">:</span><span class="dv">9</span>),
+     <span class="dt">ylab=</span><span class="st">&quot;Cp Statistic&quot;</span>,
+     <span class="dt">xlab=</span><span class="st">&quot;# of Regression Inputs, including Intercept&quot;</span>,
+     <span class="dt">pch=</span><span class="dv">16</span>, <span class="dt">main=</span><span class="st">&quot;Cp Plot&quot;</span>)
+<span class="kw">abline</span>(<span class="dv">0</span>,<span class="dv">1</span>, <span class="dt">col =</span> <span class="st">&quot;purple&quot;</span>)
+
+rs<span class="op">$</span>aic.corr &lt;-<span class="st"> </span><span class="dv">97</span><span class="op">*</span><span class="kw">log</span>(rs<span class="op">$</span>rss <span class="op">/</span><span class="st"> </span><span class="dv">97</span>) <span class="op">+</span><span class="st"> </span><span class="dv">2</span><span class="op">*</span>(<span class="dv">2</span><span class="op">:</span><span class="dv">9</span>) <span class="op">+</span>
+<span class="st">               </span>(<span class="dv">2</span> <span class="op">*</span><span class="st"> </span>(<span class="dv">2</span><span class="op">:</span><span class="dv">9</span>) <span class="op">*</span><span class="st"> </span>((<span class="dv">2</span><span class="op">:</span><span class="dv">9</span>)<span class="op">+</span><span class="dv">1</span>) <span class="op">/</span><span class="st"> </span>(<span class="dv">97</span> <span class="op">-</span><span class="st"> </span>(<span class="dv">2</span><span class="op">:</span><span class="dv">9</span>) <span class="op">-</span><span class="st"> </span><span class="dv">1</span>))
+<span class="kw">plot</span>(rs<span class="op">$</span>aic.corr <span class="op">~</span><span class="st"> </span><span class="kw">I</span>(<span class="dv">2</span><span class="op">:</span><span class="dv">9</span>), <span class="dt">ylab=</span><span class="st">&quot;AIC, corrected&quot;</span>, <span class="dt">xlab=</span><span class="st">&quot;# of Fitted Inputs&quot;</span>,
+     <span class="dt">pch=</span><span class="dv">16</span>, <span class="dt">cex=</span><span class="fl">1.5</span>, <span class="dt">col=</span><span class="st">&quot;tomato&quot;</span>, <span class="dt">main=</span><span class="st">&quot;AIC (corrected) Plot&quot;</span>)
+
+<span class="kw">plot</span>(rs<span class="op">$</span>bic <span class="op">~</span><span class="st"> </span><span class="kw">I</span>(<span class="dv">2</span><span class="op">:</span><span class="dv">9</span>), <span class="dt">ylab=</span><span class="st">&quot;BIC&quot;</span>, <span class="dt">xlab=</span><span class="st">&quot;# of Fitted Inputs&quot;</span>,
+     <span class="dt">pch=</span><span class="dv">16</span>, <span class="dt">cex=</span><span class="fl">1.5</span>, <span class="dt">col=</span><span class="st">&quot;slateblue&quot;</span>, <span class="dt">main=</span><span class="st">&quot;BIC Plot&quot;</span>)</code></pre></div>
+<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-75-1.png" width="672" /></p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">1</span>))</code></pre></div>
+</div>
+<div id="labelled-best-subsets-adjusted-r2-plot" class="section level2">
+<h2><span class="header-section-number">5.19</span> Labelled “Best Subsets” Adjusted R<sup>2</sup> Plot</h2>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## requires leaps package
+preds &lt;-<span class="st"> </span><span class="kw">with</span>(prost, 
+   <span class="kw">cbind</span>(lcavol, lweight, age, bph_f, svi_f, lcp, gleason_f, pgg45))
+x1 &lt;-<span class="st"> </span><span class="kw">regsubsets</span>(preds, <span class="dt">y=</span>prost<span class="op">$</span>lpsa)
+## requires car package
+car<span class="op">::</span><span class="kw">subsets</span>(x1, <span class="dt">statistic=</span><span class="kw">c</span>(<span class="st">&quot;adjr2&quot;</span>), <span class="dt">legend=</span><span class="st">&quot;bottomright&quot;</span>)</code></pre></div>
+<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-76-1.png" width="672" /></p>
+</div>
+<div id="labelled-best-subsets-c_p-plot" class="section level2">
+<h2><span class="header-section-number">5.20</span> Labelled “Best Subsets” <span class="math inline">\(C_p\)</span> Plot</h2>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## requires car package
+car<span class="op">::</span><span class="kw">subsets</span>(x1, <span class="dt">statistic=</span><span class="kw">c</span>(<span class="st">&quot;cp&quot;</span>), <span class="dt">legend=</span><span class="st">&quot;topright&quot;</span>)
+<span class="kw">abline</span>(<span class="dv">0</span>, <span class="dv">1</span>)</code></pre></div>
+<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-77-1.png" width="672" /></p>
+</div>
+<div id="labelled-best-subsets-bic-plot" class="section level2">
+<h2><span class="header-section-number">5.21</span> Labelled “Best Subsets” BIC Plot</h2>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## requires car package
+car<span class="op">::</span><span class="kw">subsets</span>(x1, <span class="dt">statistic=</span><span class="kw">c</span>(<span class="st">&quot;bic&quot;</span>), <span class="dt">legend=</span><span class="st">&quot;bottomright&quot;</span>)</code></pre></div>
+<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-78-1.png" width="672" /></p>
+</div>
+<div id="models-worth-considering" class="section level2">
+<h2><span class="header-section-number">5.22</span> Models Worth Considering?</h2>
+<table>
+<thead>
+<tr class="header">
+<th align="right"><span class="math inline">\(k\)</span></th>
+<th align="right">Size</th>
+<th>Predictors</th>
+<th>Reason</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">4</td>
+<td align="right">3</td>
+<td><code>lcavol lweight svi_f</code></td>
+<td>minimizes BIC</td>
+</tr>
+<tr class="even">
+<td align="right">7</td>
+<td align="right">6</td>
+<td><code>+ age bph_f gleason_f</code></td>
+<td><span class="math inline">\(C_p\)</span> near <em>p</em></td>
+</tr>
+<tr class="odd">
+<td align="right">8</td>
+<td align="right">7</td>
+<td><code>+ lcp</code></td>
+<td>max <span class="math inline">\(R^2_{adj}\)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="anova-testing-to-compare-these-three-models" class="section level2">
+<h2><span class="header-section-number">5.23</span> ANOVA Testing to compare these three models?</h2>
+<p>Let’s run an ANOVA-based comparison of these nested models to each other and to the model with the intercept alone.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m.int &lt;-<span class="st"> </span><span class="kw">lm</span>(lpsa <span class="op">~</span><span class="st"> </span><span class="dv">1</span>, <span class="dt">data =</span> prost)
+m04 &lt;-<span class="st"> </span><span class="kw">lm</span>(lpsa <span class="op">~</span><span class="st"> </span>lcavol <span class="op">+</span><span class="st"> </span>lweight <span class="op">+</span><span class="st"> </span>svi_f, <span class="dt">data =</span> prost)
+m07 &lt;-<span class="st"> </span><span class="kw">lm</span>(lpsa <span class="op">~</span><span class="st"> </span>lcavol <span class="op">+</span><span class="st"> </span>lweight <span class="op">+</span><span class="st"> </span>svi_f <span class="op">+</span><span class="st"> </span>
+<span class="st">              </span>age <span class="op">+</span><span class="st"> </span>bph_f <span class="op">+</span><span class="st"> </span>gleason_f, <span class="dt">data =</span> prost)
+m08 &lt;-<span class="st"> </span><span class="kw">lm</span>(lpsa <span class="op">~</span><span class="st"> </span>lcavol <span class="op">+</span><span class="st"> </span>lweight <span class="op">+</span><span class="st"> </span>svi_f <span class="op">+</span><span class="st"> </span>
+<span class="st">              </span>age <span class="op">+</span><span class="st"> </span>bph_f <span class="op">+</span><span class="st"> </span>gleason_f <span class="op">+</span><span class="st"> </span>lcp, <span class="dt">data =</span> prost)
+m.full &lt;-<span class="st"> </span><span class="kw">lm</span>(lpsa <span class="op">~</span><span class="st"> </span>lcavol <span class="op">+</span><span class="st"> </span>lweight <span class="op">+</span><span class="st"> </span>svi_f <span class="op">+</span><span class="st"> </span>
+<span class="st">              </span>age <span class="op">+</span><span class="st"> </span>bph_f <span class="op">+</span><span class="st"> </span>gleason_f <span class="op">+</span><span class="st"> </span>lcp <span class="op">+</span><span class="st"> </span>pgg45, <span class="dt">data =</span> prost)</code></pre></div>
+<p>Next, we’ll run…</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">anova</span>(m.full, m08, m07, m04, m.int)</code></pre></div>
+<pre><code>Analysis of Variance Table
+
+Model 1: lpsa ~ lcavol + lweight + svi_f + age + bph_f + gleason_f + lcp + 
+    pgg45
+Model 2: lpsa ~ lcavol + lweight + svi_f + age + bph_f + gleason_f + lcp
+Model 3: lpsa ~ lcavol + lweight + svi_f + age + bph_f + gleason_f
+Model 4: lpsa ~ lcavol + lweight + svi_f
+Model 5: lpsa ~ 1
+  Res.Df     RSS Df Sum of Sq       F Pr(&gt;F)    
+1     86  41.057                                
+2     87  41.498 -1    -0.441  0.9234 0.3393    
+3     88  42.066 -1    -0.568  1.1891 0.2786    
+4     93  46.568 -5    -4.503  1.8863 0.1050    
+5     96 127.918 -3   -81.349 56.7991 &lt;2e-16 ***
+---
+Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<p>What conclusions can we draw here, on the basis of these ANOVA tests?</p>
+</div>
+<div id="displaying-the-models-using-the-arm-package" class="section level2">
+<h2><span class="header-section-number">5.24</span> Displaying the Models, using the <code>arm</code> package</h2>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">display</span>(m04)</code></pre></div>
+<pre><code>lm(formula = lpsa ~ lcavol + lweight + svi_f, data = prost)
+            coef.est coef.se
+(Intercept) -0.78     0.62  
+lcavol       0.53     0.07  
+lweight      0.66     0.18  
+svi_fYes     0.67     0.21  
+---
+n = 97, k = 4
+residual sd = 0.71, R-Squared = 0.64</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">display</span>(m07)</code></pre></div>
+<pre><code>lm(formula = lpsa ~ lcavol + lweight + svi_f + age + bph_f + 
+    gleason_f, data = prost)
+            coef.est coef.se
+(Intercept)  0.27     0.90  
+lcavol       0.49     0.08  
+lweight      0.70     0.20  
+svi_fYes     0.61     0.21  
+age         -0.02     0.01  
+bph_fMedium  0.35     0.18  
+bph_fHigh    0.24     0.20  
+gleason_f7   0.17     0.30  
+gleason_f6  -0.15     0.33  
+---
+n = 97, k = 9
+residual sd = 0.69, R-Squared = 0.67</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">display</span>(m08)</code></pre></div>
+<pre><code>lm(formula = lpsa ~ lcavol + lweight + svi_f + age + bph_f + 
+    gleason_f + lcp, data = prost)
+            coef.est coef.se
+(Intercept)  0.38     0.91  
+lcavol       0.53     0.09  
+lweight      0.70     0.20  
+svi_fYes     0.74     0.24  
+age         -0.02     0.01  
+bph_fMedium  0.36     0.18  
+bph_fHigh    0.26     0.20  
+gleason_f7   0.08     0.31  
+gleason_f6  -0.29     0.36  
+lcp         -0.09     0.09  
+---
+n = 97, k = 10
+residual sd = 0.69, R-Squared = 0.68</code></pre>
+</div>
+<div id="residual-plots-for-model-m04" class="section level2">
+<h2><span class="header-section-number">5.25</span> Residual Plots for model <code>m04</code></h2>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow=</span><span class="kw">c</span>(<span class="dv">2</span>,<span class="dv">2</span>))
+<span class="kw">plot</span>(m04)</code></pre></div>
+<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-82-1.png" width="672" /></p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">1</span>))</code></pre></div>
+
+</div>
+</div>
+<h3>References</h3>
+<div id="refs" class="references">
+<div id="ref-Stamey1989">
+<p>Stamey, J.N. Kabalin, T.A., and others. 1989. “Prostate Specific Antigen in the Diagnosis and Treatment of Adenocarcinoma of the Prostate: II. Radical Prostatectomy Treated Patients.” <em>Journal of Urology</em> 141(5): 1076–83. <a href="https://www.ncbi.nlm.nih.gov/pubmed/2468795" class="uri">https://www.ncbi.nlm.nih.gov/pubmed/2468795</a>.</p>
+</div>
+<div id="ref-RamseySchafer2002">
+<p>Ramsey, Fred L., and Daniel W. Schafer. 2002. <em>The Statistical Sleuth: A Course in Methods of Data Analysis</em>. Second. Pacific Grove, CA: Duxbury.</p>
+</div>
+<div id="ref-Leeb2005">
+<p>Leeb, Hannes, and Benedikt M. Potscher. 2005. “Model Selection and Inference: Facts and Fiction.” <em>Econometric Theory</em> 21(1): 21–59. <a href="https://www.jstor.org/stable/3533623" class="uri">https://www.jstor.org/stable/3533623</a>.</p>
+</div>
+<div id="ref-Vittinghoff2012">
+<p>Vittinghoff, Eric, David V. Glidden, Stephen C. Shiboski, and Charles E. McCulloch. 2012. <em>Regression Methods in Biostatistics: Linear, Logistic, Survival, and Repeated Measures Models</em>. Second. Springer-Verlag, Inc. <a href="http://www.biostat.ucsf.edu/vgsm/" class="uri">http://www.biostat.ucsf.edu/vgsm/</a>.</p>
+</div>
+<div id="ref-Hastie2001">
+<p>Hastie, Trevor, Robert Tibshriani, and Jerome H. Frideman. 2001. <em>The Elements of Statistical Learning</em>. First. New York: Springer.</p>
+</div>
+</div>
+<div class="footnotes">
+<hr />
+<ol start="6">
+<li id="fn6"><p><a href="https://statweb.stanford.edu/~tibs/ElemStatLearn/" class="uri">https://statweb.stanford.edu/~tibs/ElemStatLearn/</a> attributes the correction to Professor Stephen W. Link.<a href="model-selection-and-a-prostate-cancer-study.html#fnref6">↩</a></p></li>
+<li id="fn7"><p>Scores range (in these data) from 6 (a well-differentiated, or low-grade cancer) to 9 (a high-grade cancer), although the maximum possible score is 10. 6 is the lowest score used for cancerous prostates. As this combination value increases, the rate at which the cancer grows and spreads should increase. This score refers to the combined Gleason grade, which is based on the sum of two areas (each scored 1-5) that make up most of the cancer.<a href="model-selection-and-a-prostate-cancer-study.html#fnref7">↩</a></p></li>
+<li id="fn8"><p>The 1-5 scale for individual biopsies are defined so that 1 indicates something that looks like normal prostate tissue, and 5 indicates that the cells and their growth patterns look very abnormal. In this study, the percentage of 4s and 5s shown in the data appears to be based on 5-20 individual scores in most subjects.<a href="model-selection-and-a-prostate-cancer-study.html#fnref8">↩</a></p></li>
+<li id="fn9"><p>We could certainly use the factor version of <code>svi</code> here, but it won’t change the model in any meaningful way. There’s no distinction in model <em>fitting</em> via <code>lm</code> between a 0/1 numeric variable and a No/Yes factor variable. The factor version of this information will be useful elsewhere, for instance in plotting the model.<a href="model-selection-and-a-prostate-cancer-study.html#fnref9">↩</a></p></li>
+<li id="fn10"><p>This refers to the English idiom “… everything but the kitchen sink” which describes, essentially, everything imaginable. A “kitchen sink regression” is often used as a pejorative term, since no special skill or insight is required to identify it, given a list of potential predictors. For more, yes, there is a <a href="https://en.wikipedia.org/wiki/Kitchen_sink_regression">Wikipedia page</a>.<a href="model-selection-and-a-prostate-cancer-study.html#fnref10">↩</a></p></li>
+</ol>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="missing-data-mechanisms-and-single-imputation.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="references.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"google": false,
+"weibo": false,
+"instapper": false,
+"vk": false,
+"all": ["facebook", "google", "twitter", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": "https://github.com/rstudio/bookdown-demo/edit/master/05_modelselection_prostate.Rmd",
+"text": "Edit"
+},
+"download": ["bookdown-demo.pdf", "bookdown-demo.epub"],
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:" && /^https?:/.test(script.src))
+      script.src  = script.src.replace(/^https?:/, '');
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>

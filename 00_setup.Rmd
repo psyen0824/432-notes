@@ -6,8 +6,11 @@ Here, we'll load in the packages used in these notes.
 library(tableone)
 library(skimr)
 library(ggridges)
-library(simputation)
 library(magrittr)
+library(arm)
+library(rms)
+library(leaps)
+library(simputation)
 library(modelr)
 library(broom)
 library(tidyverse)
@@ -24,4 +27,12 @@ smartcle1 <- read.csv("data/smartcle1.csv") %>% tbl_df
 bonding <- read.csv("data/bonding.csv") %>% tbl_df
 cortisol <- read.csv("data/cortisol.csv") %>% tbl_df
 emphysema <- read.csv("data/emphysema.csv") %>% tbl_df
+prost <- read.csv("data/prost.csv") %>% tbl_df
 ```
+
+# Special Functions used in these notes {-}
+
+```{r special_functions}
+specify_decimal <- function(x, k) format(round(x, k), nsmall=k)
+```
+
