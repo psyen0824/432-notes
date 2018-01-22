@@ -647,61 +647,191 @@ plot(c2_m7, which = 1)
 plot(c2_m7, which = 5)
 ```
 
-## (DRAFT material) How might we validate this model? 
+## Key Regression Assumptions for Building Effective Prediction Models
 
-Here's some early code for that issue, which is built on some material by David Robinson at https://rpubs.com/dgrtwo/cv-modelr
+1. Validity - the data you are analyzing should map to the research question you are trying to answer.
+    + The outcome should accurately reflect the phenomenon of interest.
+    + The model should include all relevant predictors. (It can be difficult to decide which predictors are necessary, and what to do with predictors that have large standard errors.)
+    + The model should generalize to all of the cases to which it will be applied.
+    + Can the available data answer our question reliably?
+2. Additivity and linearity - most important assumption of a regression model is that its deterministic component is a linear function of the predictors. We often think about transformations in this setting.
+3. Independence of errors - errors from the prediction line are independent of each other
+4. Equal variance of errors - if this is violated, we can more efficiently estimate paramaters using *weighted least squares* approaches, where each point is weighted inversely proportional to its variance, but this doesn't affect the coefficients much, if at all.
+5. Normality of errors - not generally important for estimating the regression line
 
-This bit of code performs what is called *10-crossfold separation*. In words, this approach splits the 896 observations in our data into 10 exclusive partitions of about 90% into a training sample, and the remaining 10% in a test sample. The next part of the code maps a modeling step to the training data, and then fits the resulting model on the test data using the `broom` package's `augment` function. 
+## Making Predictions with a Linear Regression Model
 
-I've selected the variables in this case so that the model we'll fit is the `m2_c7` model we've been looking at, although there are several ways to accomplish this.
+Recall model 4, which yields predictions for body mass index on the basis of the main effects of sex (`female`) and hours of sleep (`sleephrs`) and their interaction. 
 
-```{r validation_c2_m7_first_approach}
-set.seed(4320118)
-
-models <- smartcle2 %>%
-    select(bmi, female, exerany, sleephrs, 
-           internet30, alcdays, genhealth) %>%
-    crossv_kfold(k = 10) %>%
-    mutate(model = map(train, ~ lm(bmi ~ ., data = .)))
-
-predictions <- models %>%
-    unnest(map2(model, test, ~ augment(.x, newdata = .y)))
-
-predictions
+```{r}
+c2_m4
 ```
 
-The results are a set of predictions based on the splits into training and test groups (remember there are 10 of them, indexed by `.id`) that describe the complete set of 896 respondents again.
+### Fitting an Individual Prediction and 95% Prediction Interval
 
-What this lets us now do is calculate the root Mean Squared Prediction Error (RMSE) and Mean Absolute Prediction Error (MAE) for this model (the `c2_m7` model) across these observations, and also to compare that error to a model that simply predicts the mean `bmi` across all patients (the `intercept only` model.) In practice, we could consider two distinct models in doing this work.
+What do we predict for the `bmi` of a subject who is `female` and gets 8 hours of sleep per night?
 
-```{r validation_c2_m7_first_approach_predsummary}
-predictions %>%
-    summarize(RMSE_c2_m7 = sqrt(mean((bmi - .fitted) ^2)),
-              MAE_c2_m7 = mean(abs(bmi - .fitted)),
-              RMSE_interceptonly = sqrt(mean((bmi - mean(bmi))^2)),
-              MAE_interceptonly = mean(abs(bmi - mean(bmi))))
+```{r}
+c2_new1 <- data_frame(female = 1, sleephrs = 8)
+predict(c2_m4, newdata = c2_new1, interval = "prediction", level = 0.95)
 ```
 
-Another thing we could do with this tibble of predictions we have created is to graph the size of the prediction errors (observed `bmi` minus predicted values in `.fitted`) that our modeling approach makes.
+The predicted `bmi` for this new subject is 27.61. The prediction interval shows the bounds of a 95% uncertainty interval for a predicted `bmi` for an individual female subject who gets 8 hours of sleep on average per evening. From the `predict` function applied to a linear model, we can get the prediction intervals for any new data points in this manner.
 
-```{r validation_c2_m7_first_approach_errorhistogram}
-predictions %>%
-    mutate(errors = bmi - .fitted) %>%
-    ggplot(., aes(x = errors)) +
-    geom_histogram(bins = 30, fill = "darkviolet", col = "yellow") + 
-    labs(title = "Cross-Validated Errors in Prediction of BMI",
-         subtitle = "Using a model (`c2_m7`) including 6 regression inputs",
-         caption = "SMART BRFSS 2016 data for Cleveland-Elyria MMSA, n = 896",
-         x = "Error in predicting BMI")
+### Confidence Interval for an Average Prediction
+
+- What do we predict for the **average body mass index of a population of subjects** who are female and sleep for 8 hours?
+
+```{r predict with ci using m4}
+predict(c2_m4, newdata = c2_new1, interval = "confidence", level = 0.95)
 ```
 
-## Coming Soon ...
+- How does this result compare to the prediction interval?
 
-1. Would stepwise regression help us build a better model for `bmi`?
-    - Is there a better approach for variable selection? What's this I hear about "best subsets", for example?
-2. How should we think about potential transformations of these predictors?
-    - What's a Spearman rho-squared plot, and how might it help us decide how to spend degrees of freedom on non-linear terms better?
-3. How do we deal with missing data in fitting and evaluating a linear regression model if we don't actually want to drop all of the incomplete cases?
-4. How can we use the `ols` tool in the `rms` package to fit regression models?
-5. How can we use the tools in the `arm` package to fit and evaluate regression models?
+### Fitting Multiple Individual Predictions to New Data
+
+- How does our prediction change for a respondent if they instead get 7, or 9 hours of sleep? What if they are male, instead of female?
+
+```{r predict again with pi using m4}
+c2_new2 <- data_frame(subjectid = 1001:1006, female = c(1, 1, 1, 0, 0, 0), sleephrs = c(7, 8, 9, 7, 8, 9))
+pred2 <- predict(c2_m4, newdata = c2_new2, interval = "prediction", level = 0.95) %>% tbl_df
+
+result2 <- bind_cols(c2_new2, pred2)
+result2
+```
+
+The `result2` tibble contains predictions for each scenario. 
+
+- Which has a bigger impact on these predictions and prediction intervals? A one category change in `female` or a one hour change in `sleephrs`?
+
+### Simulation to represent predictive uncertainty in Model 4
+
+Suppose we want to predict the `bmi` of a female subject who sleeps for eight hours per night. As we have seen, we can do this automatically for a linear model like this one, using the `predict` function applied to the linear model, but a simulation prediction can also be done. Recall the detail of `c2_m4`:
+
+```{r tidy_c2_m4_again}
+c2_m4
+glance(c2_m4)
+```
+
+We see that the residual standard error for our `bmi` predictions with this model is 6.31. 
+
+For a female respondent sleeping eight hours, recall that our point estimate (predicted value) of `bmi` is 27.21
+
+```{r}
+predict(c2_m4, newdata = c2_new1, interval = "prediction", level = 0.95)
+```
+
+The standard deviation is 6.31, so we could summarize the predictive distribution with a command that tells R to draw 1000 random numbers from a normal distribution with mean 27.21 and standard deviation 6.31. Let's summarize that and get a quick picture.
+
+```{r}
+set.seed(432094)
+pred.sim <- rnorm(1000, 27.21, 6.31)
+hist(pred.sim, col = "royalblue")
+
+mean(pred.sim)
+quantile(pred.sim, c(0.025, 0.975))
+```
+
+How do these results compare to the prediction interval of (14.81, 39.61) that we generated earlier?
+
+## Centering the model
+
+Our model `c2_m4` has four predictors (the constant, `sleephrs`, `female` and their interaction) but just two inputs (`female` and `sleephrs`.) If we **center** the quantitative input `sleephrs` before building the model, we get a more interpretable interaction term.
+
+```{r}
+smartcle2_c <- smartcle2 %>%
+    mutate(sleephrs_c = sleephrs - mean(sleephrs))
+
+c2_m4_c <- lm(bmi ~ female * sleephrs_c, data = smartcle2_c)
+
+summary(c2_m4_c)
+```
+
+What has changed as compared to the original `c2_m4`?
+
+- Our original model was `bmi` = 27.26 + 2.53 `female` + 0.16 `sleephrs` - 0.48 `female` x `sleephrs`
+- Our new model is `bmi` = 28.37 - 0.84 `female` + 0.16 centered `sleephrs` - 0.48 `female` x centered `sleephrs`.
+
+So our new model on centered data is:
+
+- 28.37 + 0.16 centered `sleephrs_c` for male subjects, and
+- (28.37 - 0.84) + (0.16 - 0.48) centered `sleephrs_c`, or 27.53 - 0.32 centered `sleephrs_c` for female subjects.
+
+In our new (centered `sleephrs_c`) model, 
+
+- the main effect of `female` now corresponds to a predictive difference (female - male) in `bmi` with `sleephrs` at its mean value, 7.02 hours,
+- the intercept term is now the predicted `bmi` for a male respondent who sleeps an average number of hours, and
+- the product term corresponds to the change in the slope of centered `sleephrs_c` on `bmi` for a female rather than a male subject, while
+- the residual standard deviation and the R-squared values remain unchanged from the model before centering.
+
+### Plot of Model 4 on Centered `sleephrs`: `c2_m4_c`
+
+```{r}
+ggplot(smartcle2_c, aes(x = sleephrs_c, y = bmi, group = female, col = factor(female))) +
+    geom_point(alpha = 0.5, size = 2) +
+    geom_smooth(method = "lm", se = FALSE) +
+    guides(color = FALSE) +
+    labs(x = "Sleep Hours, centered", y = "Body Mass Index",
+         title = "Model `c2_m4` on centered data") +
+    facet_wrap(~ female, labeller = label_both)
+```
+
+## Rescaling an input by subtracting the mean and dividing by 2 standard deviations
+
+Centering helped us interpret the main effects in the regression, but it still leaves a scaling problem. 
+
+- The `female` coefficient estimate is much larger than that of `sleephrs`, but this is misleading, considering that we are comparing the complete change in one variable (sex = female or not) to a 1-hour change in average sleep.
+- @GelmanHill2007 recommend all continuous predictors be scaled by dividing by 2 standard deviations, so that:
+    + a 1-unit change in the rescaled predictor corresponds to a change from 1 standard deviation below the mean, to 1 standard deviation above.
+    + an unscaled binary (1/0) predictor with 50% probability of occurring will be exactly comparable to a rescaled continuous predictor done in this way.
+
+```{r c2_rescale_sleephrs_smartcle2}
+smartcle2_rescale <- smartcle2 %>%
+    mutate(sleephrs_z = (sleephrs - mean(sleephrs))/(2*sd(sleephrs)))
+```
+
+### Refitting model `c2_m4` to the rescaled data
+
+```{r}
+c2_m4_z <- lm(bmi ~ female * sleephrs_z, data = smartcle2_rescale)
+
+summary(c2_m4_z)
+```
+
+### Interpreting the model on rescaled data
+
+What has changed as compared to the original `c2_m4`?
+
+- Our original model was `bmi` = 27.26 + 2.53 `female` + 0.16 `sleephrs` - 0.48 `female` x `sleephrs`
+- Our model on centered `sleephrs` was `bmi` = 28.37 - 0.84 `female` + 0.16 centered `sleephrs_c` - 0.48 `female` x centered `sleephrs_c`.
+- Our new model on rescaled `sleephrs` is `bmi` = 28.37 - 0.84 `female` + 0.46 rescaled `sleephrs_z` - 1.42 `female` x rescaled `sleephrs_z`.
+
+So our rescaled model is:
+
+- 28.37 + 0.46 rescaled `sleephrs_z` for male subjects, and
+- (28.37 - 0.84) + (0.46 - 1.42) rescaled `sleephrs_z`, or 27.53 - 0.96 rescaled `sleephrs_z` for female subjects.
+
+In this new rescaled (`sleephrs_z`) model, then,
+
+- the main effect of `female`, -0.84, still corresponds to a predictive difference (female - male) in `bmi` with `sleephrs` at its mean value, 7.02 hours,
+- the intercept term is still the predicted `bmi` for a male respondent who sleeps an average number of hours, and
+- the residual standard deviation and the R-squared values remain unchanged,
+
+as before, but now we also have that:
+
+- the coefficient of `sleephrs_z` indicates the predictive difference in `bmi` associated with a change in `sleephrs` of 2 standard deviations (from one standard deviation below the mean of 7.02 to one standard deviation above 7.02.) 
+    + Since the standard deviation of `sleephrs` is 1.48, this corresponds to a change from 5.54 hours per night to 8.50 hours per night.
+- the coefficient of the product term (-1.42) corresponds to the change in the coefficient of `sleephrs_z` for females as compared to males.
+
+### Plot of model on rescaled data
+
+```{r}
+ggplot(smartcle2_rescale, aes(x = sleephrs_z, y = bmi, 
+                              group = female, col = factor(female))) +
+    geom_point(alpha = 0.5) +
+    geom_smooth(method = "lm", size = 1.5) +
+    scale_color_discrete(name = "Is subject female?") +
+    labs(x = "Sleep Hours, standardized (2 sd)", y = "Body Mass Index",
+         title = "Model `c2_m4_z` on rescaled data")
+```
 

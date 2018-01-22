@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.1415926-2.5-0.9999.3 (MiKTeX 2.9) (preloaded format=xelatex 2016.8.27)  21 JAN 2018 15:17
+This is XeTeX, Version 3.1415926-2.5-0.9999.3 (MiKTeX 2.9) (preloaded format=xelatex 2016.8.27)  22 JAN 2018 06:39
 entering extended mode
 **bookdown-demo.tex
 (C:\Users\Thomas\Dropbox\2018-432\432-notes\bookdown-demo.tex
@@ -1095,19 +1095,32 @@ File: bookdown-demo_files/figure-latex/residual_plot5_c2_m7-1.pdf Graphic file
 <use  "bookdown-demo_files/figure-latex/residual_plot5_c2_m7-1.pdf" >
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-[64] [65]
-File: bookdown-demo_files/figure-latex/validation_c2_m7_first_approach_errorhis
-togram-1.pdf Graphic file (type QTm)
-
-<use  "bookdown-demo_files/figure-latex/validation_c2_m7_first_approach_errorhi
-stogram-1.pdf" >
+[64] [65] [66]
+File: bookdown-demo_files/figure-latex/unnamed-chunk-10-1.pdf Graphic file (typ
+e QTm)
+<use  "bookdown-demo_files/figure-latex/unnamed-chunk-10-1.pdf" >
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-[66] [67] [68
+[67] [68]
+File: bookdown-demo_files/figure-latex/unnamed-chunk-12-1.pdf Graphic file (typ
+e QTm)
+<use  "bookdown-demo_files/figure-latex/unnamed-chunk-12-1.pdf" >
+Underfull \vbox (badness 6428) has occurred while \output is active []
+
+[69] [70]
+Overfull \hbox (55.34293pt too wide) has occurred while \output is active
+\EU1/lmr/m/sl/10 2.18.  RESCALING AN INPUT BY SUBTRACTING THE MEAN AND DIVIDING
+ BY 2 STANDARD DEVIATIONS \EU1/lmr/m/n/10 71
+ []
+
+[71]
+File: bookdown-demo_files/figure-latex/unnamed-chunk-14-1.pdf Graphic file (typ
+e QTm)
+<use  "bookdown-demo_files/figure-latex/unnamed-chunk-14-1.pdf" > [72]
+Chapter 3.
+[73
 
 ]
-Chapter 3.
-[69]
 File: bookdown-demo_files/figure-latex/c3_oneway_bonding_resin_boxplot-1.pdf Gr
 aphic file (type QTm)
 
@@ -1120,29 +1133,29 @@ pdf Graphic file (type QTm)
 .pdf" >
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-[70]
+[74]
 Underfull \vbox (badness 1365) has occurred while \output is active []
 
-[71]
-File: bookdown-demo_files/figure-latex/unnamed-chunk-11-1.pdf Graphic file (typ
+[75]
+File: bookdown-demo_files/figure-latex/unnamed-chunk-19-1.pdf Graphic file (typ
 e QTm)
-<use  "bookdown-demo_files/figure-latex/unnamed-chunk-11-1.pdf" >
+<use  "bookdown-demo_files/figure-latex/unnamed-chunk-19-1.pdf" >
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-[72]
+[76]
 File: bookdown-demo_files/figure-latex/c3_bonding_points_plot-1.pdf Graphic fil
 e (type QTm)
 <use  "bookdown-demo_files/figure-latex/c3_bonding_points_plot-1.pdf" >
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-[73] [74]
+[77] [78]
 File: bookdown-demo_files/figure-latex/c3_ggplot_means_plot_bonding-1.pdf Graph
 ic file (type QTm)
 <use  "bookdown-demo_files/figure-latex/c3_ggplot_means_plot_bonding-1.pdf" >
 Underfull \vbox (badness 6808) has occurred while \output is active []
 
-[75] [76] [77]
-Overfull \hbox (176.78111pt too wide) detected at line 4022
+[79] [80] [81]
+Overfull \hbox (176.78111pt too wide) detected at line 4401
 \OML/lmm/m/it/10 strength \OT1/lmr/m/n/10 = 17\OML/lmm/m/it/10 :\OT1/lmr/m/n/10
  77 + 2\OML/lmm/m/it/10 :\OT1/lmr/m/n/10 13\OML/lmm/m/it/10 resinB \OT1/lmr/m/n
 /10 + 4\OML/lmm/m/it/10 :\OT1/lmr/m/n/10 77\OML/lmm/m/it/10 resinC \OT1/lmr/m/n
@@ -1155,19 +1168,19 @@ msy/m/n/10 ^^C \OML/lmm/m/it/10 lightLED[]  \OT1/lmr/m/n/10 + 3\OML/lmm/m/it/10
 /n/10 74\OML/lmm/m/it/10 resinD \OMS/lmsy/m/n/10 ^^C \OML/lmm/m/it/10 lightLED
  []
 
-[78] [79] [80]
+[82] [83] [84]
 File: bookdown-demo_files/figure-latex/boxplots_c3_bonding_without_interaction-
 1.pdf Graphic file (type QTm)
 
 <use  "bookdown-demo_files/figure-latex/boxplots_c3_bonding_without_interaction
--1.pdf" > [81] [82]
+-1.pdf" > [85] [86]
 File: bookdown-demo_files/figure-latex/c3_ggplot_means_plot_cortisol-1.pdf Grap
 hic file (type QTm)
 
 <use  "bookdown-demo_files/figure-latex/c3_ggplot_means_plot_cortisol-1.pdf" >
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-[83] [84]
+[87] [88]
 File: bookdown-demo_files/figure-latex/boxplots_c3_cortisol_without_interaction
 -1.pdf Graphic file (type QTm)
 
@@ -1175,41 +1188,49 @@ File: bookdown-demo_files/figure-latex/boxplots_c3_cortisol_without_interaction
 n-1.pdf" >
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-[85] [86] [87] [88] [89] [90] [91] [92]
+[89] [90] [91] [92] [93] [94] [95] [96]
 Chapter 4.
-[93
+[97
 
-] [94] [95] [96]
-Underfull \hbox (badness 1122) in paragraph at lines 5345--5348
+] [98] [99] [100]
+Underfull \hbox (badness 1122) in paragraph at lines 5724--5727
 []\EU1/lmr/m/n/10 The \EU1/lmtt/m/n/10 simputation \EU1/lmr/m/n/10 vignette is 
 available at []$[][][][][] [] [] [] [][][][] [] [][][][][][][][][][] [] [][][] 
 [] [][][] [] [][][][][][][][] [] [][][][][][][][][][][] []
  []
 
-[97]
-Underfull \hbox (badness 4353) in paragraph at lines 5348--5350
+[101]
+Underfull \hbox (badness 4353) in paragraph at lines 5727--5729
 []\EU1/lmr/m/n/10 The \EU1/lmtt/m/n/10 simputation \EU1/lmr/m/n/10 reference ma
 nual is available at []$[][][][][] [] [] [] [][][][] [] [][][][][][][][][][] []
  [][][] [] [][][] [] [][][][][][][][] []
  []
 
-[98] (C:\Users\Thomas\Dropbox\2018-432\432-notes\bookdown-demo.bbl [99] [100
+[102] [103]
+File: bookdown-demo_files/figure-latex/validation_c2_m7_first_approach_errorhis
+togram-1.pdf Graphic file (type QTm)
+
+<use  "bookdown-demo_files/figure-latex/validation_c2_m7_first_approach_errorhi
+stogram-1.pdf" >
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+[104] (C:\Users\Thomas\Dropbox\2018-432\432-notes\bookdown-demo.bbl [105] [106
 
 ])
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 5476.
-[101]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 5476.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 5993.
+[107]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 5993.
 (C:\Users\Thomas\Dropbox\2018-432\432-notes\bookdown-demo.aux)
-Package atveryend Info: Empty hook `AtVeryEndDocument' on input line 5476.
-Package atveryend Info: Empty hook `AtEndAfterFileList' on input line 5476.
+Package atveryend Info: Empty hook `AtVeryEndDocument' on input line 5993.
+Package atveryend Info: Empty hook `AtEndAfterFileList' on input line 5993.
  ) 
 Here is how much of TeX's memory you used:
- 25330 strings out of 428790
- 456088 string characters out of 3163802
- 560950 words of memory out of 3000000
- 28334 multiletter control sequences out of 15000+200000
+ 25348 strings out of 428790
+ 456925 string characters out of 3163802
+ 562564 words of memory out of 3000000
+ 28349 multiletter control sequences out of 15000+200000
  24474 words of font info for 66 fonts, out of 3000000 for 9000
  1096 hyphenation exceptions out of 8191
  52i,11n,68p,10422b,473s stack positions out of 5000i,500n,10000p,200000b,50000s
 
-Output written on bookdown-demo.pdf (101 pages).
+Output written on bookdown-demo.pdf (107 pages).
