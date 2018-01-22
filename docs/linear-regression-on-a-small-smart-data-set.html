@@ -182,7 +182,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </ul></li>
 <li class="chapter" data-level="2.15" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#c2_m5-what-if-we-add-more-variables"><i class="fa fa-check"></i><b>2.15</b> <code>c2_m5</code>: What if we add more variables?</a></li>
 <li class="chapter" data-level="2.16" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#c2_m6-would-adding-self-reported-health-help"><i class="fa fa-check"></i><b>2.16</b> <code>c2_m6</code>: Would adding self-reported health help?</a></li>
-<li class="chapter" data-level="2.17" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#c2_m7-what-if-we-added-days-of-work-missed"><i class="fa fa-check"></i><b>2.17</b> <code>c2_m7</code>: What if we added days of work missed?</a></li>
+<li class="chapter" data-level="2.17" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#c2_m7-what-if-we-added-the-menthealth-variable"><i class="fa fa-check"></i><b>2.17</b> <code>c2_m7</code>: What if we added the <code>menthealth</code> variable?</a></li>
 <li class="chapter" data-level="2.18" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#key-regression-assumptions-for-building-effective-prediction-models"><i class="fa fa-check"></i><b>2.18</b> Key Regression Assumptions for Building Effective Prediction Models</a><ul>
 <li class="chapter" data-level="2.18.1" data-path="linear-regression-on-a-small-smart-data-set.html"><a href="linear-regression-on-a-small-smart-data-set.html#checking-assumptions-in-model-c2_m7"><i class="fa fa-check"></i><b>2.18.1</b> Checking Assumptions in model <code>c2_m7</code></a></li>
 </ul></li>
@@ -1580,11 +1580,12 @@ F-statistic: 12.35 on 9 and 886 DF,  p-value: &lt; 2.2e-16</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(c2_m6, <span class="dt">which =</span> <span class="dv">2</span>)</code></pre></div>
 <p><img src="bookdown-demo_files/figure-html/c2_m6_residuals_normality-1.png" width="672" /></p>
 </div>
-<div id="c2_m7-what-if-we-added-days-of-work-missed" class="section level2">
-<h2><span class="header-section-number">2.17</span> <code>c2_m7</code>: What if we added days of work missed?</h2>
+<div id="c2_m7-what-if-we-added-the-menthealth-variable" class="section level2">
+<h2><span class="header-section-number">2.17</span> <code>c2_m7</code>: What if we added the <code>menthealth</code> variable?</h2>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">c2_m7 &lt;-<span class="st"> </span><span class="kw">lm</span>(bmi <span class="op">~</span><span class="st"> </span>female <span class="op">+</span><span class="st"> </span>exerany <span class="op">+</span><span class="st"> </span>sleephrs <span class="op">+</span><span class="st"> </span>internet30 <span class="op">+</span><span class="st"> </span>alcdays <span class="op">+</span><span class="st"> </span>
 <span class="st">                </span>genhealth <span class="op">+</span><span class="st"> </span>physhealth <span class="op">+</span><span class="st"> </span>menthealth,
          <span class="dt">data =</span> smartcle2)
+
 <span class="kw">summary</span>(c2_m7)</code></pre></div>
 <pre><code>
 Call:

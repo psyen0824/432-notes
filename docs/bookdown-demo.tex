@@ -124,7 +124,7 @@
   \postauthor{\par}
   \predate{\centering\large\emph}
   \postdate{\par}
-  \date{Built 2018-01-22 14:38:06}
+  \date{Built 2018-01-22 18:11:46}
 
 \usepackage{booktabs}
 \usepackage{amsthm}
@@ -3844,14 +3844,16 @@ F-statistic: 12.35 on 9 and 886 DF,  p-value: < 2.2e-16
 
 \includegraphics{bookdown-demo_files/figure-latex/c2_m6_residuals_normality-1.pdf}
 
-\section{\texorpdfstring{\texttt{c2\_m7}: What if we added days of work
-missed?}{c2\_m7: What if we added days of work missed?}}\label{c2_m7-what-if-we-added-days-of-work-missed}
+\section{\texorpdfstring{\texttt{c2\_m7}: What if we added the
+\texttt{menthealth}
+variable?}{c2\_m7: What if we added the menthealth variable?}}\label{c2_m7-what-if-we-added-the-menthealth-variable}
 
 \begin{Shaded}
 \begin{Highlighting}[]
 \NormalTok{c2_m7 <-}\StringTok{ }\KeywordTok{lm}\NormalTok{(bmi }\OperatorTok{~}\StringTok{ }\NormalTok{female }\OperatorTok{+}\StringTok{ }\NormalTok{exerany }\OperatorTok{+}\StringTok{ }\NormalTok{sleephrs }\OperatorTok{+}\StringTok{ }\NormalTok{internet30 }\OperatorTok{+}\StringTok{ }\NormalTok{alcdays }\OperatorTok{+}\StringTok{ }
 \StringTok{                }\NormalTok{genhealth }\OperatorTok{+}\StringTok{ }\NormalTok{physhealth }\OperatorTok{+}\StringTok{ }\NormalTok{menthealth,}
          \DataTypeTok{data =}\NormalTok{ smartcle2)}
+
 \KeywordTok{summary}\NormalTok{(c2_m7)}
 \end{Highlighting}
 \end{Shaded}

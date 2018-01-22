@@ -802,12 +802,13 @@ summary(c2_m6)
 plot(c2_m6, which = 2)
 ```
 
-## `c2_m7`: What if we added days of work missed?
+## `c2_m7`: What if we added the `menthealth` variable?
 
 ```{r fit_c2_m7}
 c2_m7 <- lm(bmi ~ female + exerany + sleephrs + internet30 + alcdays + 
                 genhealth + physhealth + menthealth,
          data = smartcle2)
+
 summary(c2_m7)
 ```
 
