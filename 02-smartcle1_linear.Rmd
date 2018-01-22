@@ -574,91 +574,6 @@ anova(c2_m4, c2_m1)
 
 The addition of the `sleephrs` term picked up 143 in the sum of squares column, at a cost of two degrees of freedom, yielding a *p* value of 0.166, suggesting that this isn't a significant improvement over the model that just did a t-test on `female`.
 
-## `c2_m5`: What if we add more variables?
-
-We can boost our R^2^ a bit, to over 5%, by adding in two new variables, related to whether or not the subject (in the past 30 days) used the internet, and on how many days the subject drank alcoholic beverages.
-
-```{r fit_c2_m5}
-c2_m5 <- lm(bmi ~ female + exerany + sleephrs + internet30 + alcdays,
-         data = smartcle2)
-summary(c2_m5)
-```
-
-1. Here's the ANOVA for this model. What can we study with this? 
-
-```{r anova_c2_m5}
-anova(c2_m5)
-```
-
-2. Consider the revised output below. Now what can we study?
-
-```{r anova_c2_m5_reorder}
-anova(lm(bmi ~ exerany + internet30 + alcdays + female + sleephrs,
-         data = smartcle2))
-```
-
-3. What does the output below let us conclude?
-
-```{r anova_compare_c2_m5_to_smaller_model}
-anova(lm(bmi ~ exerany + internet30 + alcdays + female + sleephrs, 
-         data = smartcle2),
-      lm(bmi ~ exerany + female + alcdays, 
-         data = smartcle2))
-```
-
-4. What does it mean for the models to be "nested"?
-
-## `c2_m6`: Would adding self-reported health help?
-
-And we can do even a bit better than that by adding in a multi-categorical measure: self-reported general health.
-
-```{r fit_c2_m6}
-c2_m6 <- lm(bmi ~ female + exerany + sleephrs + internet30 + alcdays + genhealth,
-         data = smartcle2)
-summary(c2_m6)
-```
-
-1. If Harry and Marty have the same values of `female`, `exerany`, `sleephrs`, `internet30` and `alcdays`, but Harry rates his health as Good, and Marty rates his as Fair, then what is the difference in the predictions? Who is predicted to have a larger BMI, and by how much?
-
-2. What does this normal probability plot of the residuals suggest?
-
-```{r c2_m6_residuals_normality}
-plot(c2_m6, which = 2)
-```
-
-## `c2_m7`: What if we added days of work missed?
-
-```{r fit_c2_m7}
-c2_m7 <- lm(bmi ~ female + exerany + sleephrs + internet30 + alcdays + 
-                genhealth + physhealth + menthealth,
-         data = smartcle2)
-summary(c2_m7)
-```
-
-1. How do the assumptions behind this model look?
-
-```{r residual_plot1_c2_m7}
-plot(c2_m7, which = 1)
-```
-
-2. What can we conclude from the plot below?
-
-```{r residual_plot5_c2_m7}
-plot(c2_m7, which = 5)
-```
-
-## Key Regression Assumptions for Building Effective Prediction Models
-
-1. Validity - the data you are analyzing should map to the research question you are trying to answer.
-    + The outcome should accurately reflect the phenomenon of interest.
-    + The model should include all relevant predictors. (It can be difficult to decide which predictors are necessary, and what to do with predictors that have large standard errors.)
-    + The model should generalize to all of the cases to which it will be applied.
-    + Can the available data answer our question reliably?
-2. Additivity and linearity - most important assumption of a regression model is that its deterministic component is a linear function of the predictors. We often think about transformations in this setting.
-3. Independence of errors - errors from the prediction line are independent of each other
-4. Equal variance of errors - if this is violated, we can more efficiently estimate paramaters using *weighted least squares* approaches, where each point is weighted inversely proportional to its variance, but this doesn't affect the coefficients much, if at all.
-5. Normality of errors - not generally important for estimating the regression line
-
 ## Making Predictions with a Linear Regression Model
 
 Recall model 4, which yields predictions for body mass index on the basis of the main effects of sex (`female`) and hours of sleep (`sleephrs`) and their interaction. 
@@ -834,4 +749,95 @@ ggplot(smartcle2_rescale, aes(x = sleephrs_z, y = bmi,
     labs(x = "Sleep Hours, standardized (2 sd)", y = "Body Mass Index",
          title = "Model `c2_m4_z` on rescaled data")
 ```
+
+## `c2_m5`: What if we add more variables?
+
+We can boost our R^2^ a bit, to over 5%, by adding in two new variables, related to whether or not the subject (in the past 30 days) used the internet, and on how many days the subject drank alcoholic beverages.
+
+```{r fit_c2_m5}
+c2_m5 <- lm(bmi ~ female + exerany + sleephrs + internet30 + alcdays,
+         data = smartcle2)
+summary(c2_m5)
+```
+
+1. Here's the ANOVA for this model. What can we study with this? 
+
+```{r anova_c2_m5}
+anova(c2_m5)
+```
+
+2. Consider the revised output below. Now what can we study?
+
+```{r anova_c2_m5_reorder}
+anova(lm(bmi ~ exerany + internet30 + alcdays + female + sleephrs,
+         data = smartcle2))
+```
+
+3. What does the output below let us conclude?
+
+```{r anova_compare_c2_m5_to_smaller_model}
+anova(lm(bmi ~ exerany + internet30 + alcdays + female + sleephrs, 
+         data = smartcle2),
+      lm(bmi ~ exerany + female + alcdays, 
+         data = smartcle2))
+```
+
+4. What does it mean for the models to be "nested"?
+
+## `c2_m6`: Would adding self-reported health help?
+
+And we can do even a bit better than that by adding in a multi-categorical measure: self-reported general health.
+
+```{r fit_c2_m6}
+c2_m6 <- lm(bmi ~ female + exerany + sleephrs + internet30 + alcdays + genhealth,
+         data = smartcle2)
+summary(c2_m6)
+```
+
+1. If Harry and Marty have the same values of `female`, `exerany`, `sleephrs`, `internet30` and `alcdays`, but Harry rates his health as Good, and Marty rates his as Fair, then what is the difference in the predictions? Who is predicted to have a larger BMI, and by how much?
+
+2. What does this normal probability plot of the residuals suggest?
+
+```{r c2_m6_residuals_normality}
+plot(c2_m6, which = 2)
+```
+
+## `c2_m7`: What if we added days of work missed?
+
+```{r fit_c2_m7}
+c2_m7 <- lm(bmi ~ female + exerany + sleephrs + internet30 + alcdays + 
+                genhealth + physhealth + menthealth,
+         data = smartcle2)
+summary(c2_m7)
+```
+
+## Key Regression Assumptions for Building Effective Prediction Models
+
+1. Validity - the data you are analyzing should map to the research question you are trying to answer.
+    + The outcome should accurately reflect the phenomenon of interest.
+    + The model should include all relevant predictors. (It can be difficult to decide which predictors are necessary, and what to do with predictors that have large standard errors.)
+    + The model should generalize to all of the cases to which it will be applied.
+    + Can the available data answer our question reliably?
+2. Additivity and linearity - most important assumption of a regression model is that its deterministic component is a linear function of the predictors. We often think about transformations in this setting.
+3. Independence of errors - errors from the prediction line are independent of each other
+4. Equal variance of errors - if this is violated, we can more efficiently estimate paramaters using *weighted least squares* approaches, where each point is weighted inversely proportional to its variance, but this doesn't affect the coefficients much, if at all.
+5. Normality of errors - not generally important for estimating the regression line
+
+### Checking Assumptions in model `c2_m7`
+
+1. How does the assumption of linearity behind this model look?
+
+```{r residual_plot1_c2_m7}
+plot(c2_m7, which = 1)
+```
+
+We see no strong signs of serious non-linearity here. There's no obvious curve in the plot, for example. 
+
+2. What can we conclude from the plot below?
+
+```{r residual_plot5_c2_m7}
+plot(c2_m7, which = 5)
+```
+
+This plot can help us identify points with large standardized residuals, large leverage values, and large influence on the model (as indicated by large values of Cook's distance.) In this case, I see no signs of any points used in the model with especially large influence, although there are some poorly fitted points (with especially large standardized residuals.)
 

@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.1415926-2.5-0.9999.3 (MiKTeX 2.9) (preloaded format=xelatex 2016.8.27)  22 JAN 2018 06:39
+This is XeTeX, Version 3.1415926-2.5-0.9999.3 (MiKTeX 2.9) (preloaded format=xelatex 2016.8.27)  22 JAN 2018 07:21
 entering extended mode
 **bookdown-demo.tex
 (C:\Users\Thomas\Dropbox\2018-432\432-notes\bookdown-demo.tex
@@ -1081,42 +1081,40 @@ File: bookdown-demo_files/figure-latex/graph_to_set_up_c2_m4-1.pdf Graphic file
  (type QTm)
 <use  "bookdown-demo_files/figure-latex/graph_to_set_up_c2_m4-1.pdf" > [58] [59
 ] [60] [61]
-File: bookdown-demo_files/figure-latex/c2_m6_residuals_normality-1.pdf Graphic 
-file (type QTm)
-<use  "bookdown-demo_files/figure-latex/c2_m6_residuals_normality-1.pdf" >
+File: bookdown-demo_files/figure-latex/unnamed-chunk-10-1.pdf Graphic file (typ
+e QTm)
+<use  "bookdown-demo_files/figure-latex/unnamed-chunk-10-1.pdf" > [62] [63]
+File: bookdown-demo_files/figure-latex/unnamed-chunk-12-1.pdf Graphic file (typ
+e QTm)
+<use  "bookdown-demo_files/figure-latex/unnamed-chunk-12-1.pdf" >
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-[62] [63]
+[64]
+Overfull \hbox (55.34293pt too wide) has occurred while \output is active
+\EU1/lmr/m/sl/10 2.14.  RESCALING AN INPUT BY SUBTRACTING THE MEAN AND DIVIDING
+ BY 2 STANDARD DEVIATIONS \EU1/lmr/m/n/10 65
+ []
+
+[65]
+File: bookdown-demo_files/figure-latex/unnamed-chunk-14-1.pdf Graphic file (typ
+e QTm)
+<use  "bookdown-demo_files/figure-latex/unnamed-chunk-14-1.pdf" > [66] [67] [68
+]
+File: bookdown-demo_files/figure-latex/c2_m6_residuals_normality-1.pdf Graphic 
+file (type QTm)
+<use  "bookdown-demo_files/figure-latex/c2_m6_residuals_normality-1.pdf" > [69]
 File: bookdown-demo_files/figure-latex/residual_plot1_c2_m7-1.pdf Graphic file 
 (type QTm)
 <use  "bookdown-demo_files/figure-latex/residual_plot1_c2_m7-1.pdf" >
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+[70]
 File: bookdown-demo_files/figure-latex/residual_plot5_c2_m7-1.pdf Graphic file 
 (type QTm)
 <use  "bookdown-demo_files/figure-latex/residual_plot5_c2_m7-1.pdf" >
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-[64] [65] [66]
-File: bookdown-demo_files/figure-latex/unnamed-chunk-10-1.pdf Graphic file (typ
-e QTm)
-<use  "bookdown-demo_files/figure-latex/unnamed-chunk-10-1.pdf" >
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-[67] [68]
-File: bookdown-demo_files/figure-latex/unnamed-chunk-12-1.pdf Graphic file (typ
-e QTm)
-<use  "bookdown-demo_files/figure-latex/unnamed-chunk-12-1.pdf" >
-Underfull \vbox (badness 6428) has occurred while \output is active []
-
-[69] [70]
-Overfull \hbox (55.34293pt too wide) has occurred while \output is active
-\EU1/lmr/m/sl/10 2.18.  RESCALING AN INPUT BY SUBTRACTING THE MEAN AND DIVIDING
- BY 2 STANDARD DEVIATIONS \EU1/lmr/m/n/10 71
- []
-
-[71]
-File: bookdown-demo_files/figure-latex/unnamed-chunk-14-1.pdf Graphic file (typ
-e QTm)
-<use  "bookdown-demo_files/figure-latex/unnamed-chunk-14-1.pdf" > [72]
+[71] [72]
 Chapter 3.
 [73
 
@@ -1155,7 +1153,7 @@ ic file (type QTm)
 Underfull \vbox (badness 6808) has occurred while \output is active []
 
 [79] [80] [81]
-Overfull \hbox (176.78111pt too wide) detected at line 4401
+Overfull \hbox (176.78111pt too wide) detected at line 4414
 \OML/lmm/m/it/10 strength \OT1/lmr/m/n/10 = 17\OML/lmm/m/it/10 :\OT1/lmr/m/n/10
  77 + 2\OML/lmm/m/it/10 :\OT1/lmr/m/n/10 13\OML/lmm/m/it/10 resinB \OT1/lmr/m/n
 /10 + 4\OML/lmm/m/it/10 :\OT1/lmr/m/n/10 77\OML/lmm/m/it/10 resinC \OT1/lmr/m/n
@@ -1188,47 +1186,42 @@ File: bookdown-demo_files/figure-latex/boxplots_c3_cortisol_without_interaction
 n-1.pdf" >
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-[89] [90] [91] [92] [93] [94] [95] [96]
-Chapter 4.
-[97
+[89] [90] [91] [92] [93] [94] [95] [96] [97] [98
 
-] [98] [99] [100]
-Underfull \hbox (badness 1122) in paragraph at lines 5724--5727
+]
+Chapter 4.
+[99] [100] [101] [102]
+Underfull \hbox (badness 1122) in paragraph at lines 5856--5859
 []\EU1/lmr/m/n/10 The \EU1/lmtt/m/n/10 simputation \EU1/lmr/m/n/10 vignette is 
 available at []$[][][][][] [] [] [] [][][][] [] [][][][][][][][][][] [] [][][] 
 [] [][][] [] [][][][][][][][] [] [][][][][][][][][][][] []
  []
 
-[101]
-Underfull \hbox (badness 4353) in paragraph at lines 5727--5729
+[103]
+Underfull \hbox (badness 4353) in paragraph at lines 5859--5861
 []\EU1/lmr/m/n/10 The \EU1/lmtt/m/n/10 simputation \EU1/lmr/m/n/10 reference ma
 nual is available at []$[][][][][] [] [] [] [][][][] [] [][][][][][][][][][] []
  [][][] [] [][][] [] [][][][][][][][] []
  []
 
-[102] [103]
-File: bookdown-demo_files/figure-latex/validation_c2_m7_first_approach_errorhis
-togram-1.pdf Graphic file (type QTm)
-
-<use  "bookdown-demo_files/figure-latex/validation_c2_m7_first_approach_errorhi
-stogram-1.pdf" >
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
 [104] (C:\Users\Thomas\Dropbox\2018-432\432-notes\bookdown-demo.bbl [105] [106
 
 ])
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 5993.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 5987.
 [107]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 5993.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 5987.
 (C:\Users\Thomas\Dropbox\2018-432\432-notes\bookdown-demo.aux)
-Package atveryend Info: Empty hook `AtVeryEndDocument' on input line 5993.
-Package atveryend Info: Empty hook `AtEndAfterFileList' on input line 5993.
+Package atveryend Info: Empty hook `AtVeryEndDocument' on input line 5987.
+Package atveryend Info: Empty hook `AtEndAfterFileList' on input line 5987.
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
  ) 
 Here is how much of TeX's memory you used:
- 25348 strings out of 428790
- 456925 string characters out of 3163802
- 562564 words of memory out of 3000000
- 28349 multiletter control sequences out of 15000+200000
+ 25346 strings out of 428790
+ 456823 string characters out of 3163802
+ 562482 words of memory out of 3000000
+ 28348 multiletter control sequences out of 15000+200000
  24474 words of font info for 66 fonts, out of 3000000 for 9000
  1096 hyphenation exceptions out of 8191
  52i,11n,68p,10422b,473s stack positions out of 5000i,500n,10000p,200000b,50000s

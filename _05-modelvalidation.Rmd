@@ -1,4 +1,14 @@
-## (DRAFT material) How might we validate this model? 
+# Validation of a Linear Regression Model (DRAFT)
+
+## An Example
+
+To come.
+
+## What We've Done Until Now
+
+To come.
+
+## What We Can Do Now
 
 Here's some early code for that issue, which is built on some material by David Robinson at https://rpubs.com/dgrtwo/cv-modelr
 

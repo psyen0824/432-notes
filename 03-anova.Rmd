@@ -498,3 +498,43 @@ Our ANCOVA model for `st_delta` incorporating the `age` x `sex` product term is 
 
 but, again, our conclusion from the ANCOVA table is that this increase in complexity (letting both the slope and intercept vary by `sex`) doesn't add much in the way of predictive value for our `st_delta` outcome.
 
+### Centering the Covariate to Facilitate ANOVA Interpretation
+
+When developing an ANCOVA model, we will often **center** or even **center and rescale** the covariate to facilitate interpretation of the product term. In this case, let's center `age` and rescale it by dividing by two standard deviations. 
+
+```{r}
+emph_imp %>% skim(age)
+```
+
+Note that in our imputed data, the mean `age` is `r round(mean(emph_imp$age),1)` and the standard deviation of `age` is `r round(sd(emph_imp$age),1)` years.
+
+So we build the rescaled `age` variable that I'll call `age_z`, and then use it to refit our model.
+
+```{r}
+emph_imp <- emph_imp %>%
+    mutate(age_z = (age - mean(age))/ (2 * sd(age)))
+
+anova(lm(st_delta ~ sex * age_z, data = emph_imp))
+
+tidy(lm(st_delta ~ sex * age_z, data = emph_imp))
+```
+
+Comparing the two models, we have:
+
+- (unscaled): `st_delta` = -5.65 + 1.72 (`sex` = M) + 0.037 `age` + 0.029 (`sex` = M) x (`age`)
+- (rescaled): `st_delta` = -3.27 + 3.60 (`sex` = M) + 0.510 rescaled `age_z` + 0.402 (`sex` = M) x (rescaled `age_z`)
+
+In essence, the rescaled model on `age_z` is:
+
+- `st_delta` = -3.27 + 0.510 `age_z` for female subjects, and
+- `st_delta` = (-3.27 + 3.60) + (0.510 + 0.402) `age_z` = 0.33 + 0.912 `age_z` for male subjects
+
+Interpreting the centered, rescaled model, we have:
+
+- no change in the ANOVA results or R-squared or residual standard deviation compared to the uncentered, unscaled model, but
+- the intercept (-3.27) now represents the `st_delta` for a female of average age,
+- the `sex` slope (3.60) represents the (male - female) difference in predicted `st_delta` for a person of average age,
+- the `age_z` slope (0.510) represents the difference in predicted `st_delta` for a female one standard deviation older than the mean age as compared to a female one standard deviation younger than the mean age, and
+- the product term's slope (0.402) represents the male - female difference in the slope of `age_z`, so that if you add the `age_z` slope (0.510) and the interaction slope (0.402) you see the difference in predicted `st_delta` for a male one standard deviation older than the mean age as compared to a male one standard deviation younger than the mean age.
+
+

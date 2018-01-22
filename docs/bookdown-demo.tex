@@ -124,7 +124,7 @@
   \postauthor{\par}
   \predate{\centering\large\emph}
   \postdate{\par}
-  \date{Built 2018-01-22 06:39:12}
+  \date{Built 2018-01-22 07:21:03}
 
 \usepackage{booktabs}
 \usepackage{amsthm}
@@ -3150,324 +3150,6 @@ squares column, at a cost of two degrees of freedom, yielding a \emph{p}
 value of 0.166, suggesting that this isn't a significant improvement
 over the model that just did a t-test on \texttt{female}.
 
-\section{\texorpdfstring{\texttt{c2\_m5}: What if we add more
-variables?}{c2\_m5: What if we add more variables?}}\label{c2_m5-what-if-we-add-more-variables}
-
-We can boost our R\textsuperscript{2} a bit, to over 5\%, by adding in
-two new variables, related to whether or not the subject (in the past 30
-days) used the internet, and on how many days the subject drank
-alcoholic beverages.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{c2_m5 <-}\StringTok{ }\KeywordTok{lm}\NormalTok{(bmi }\OperatorTok{~}\StringTok{ }\NormalTok{female }\OperatorTok{+}\StringTok{ }\NormalTok{exerany }\OperatorTok{+}\StringTok{ }\NormalTok{sleephrs }\OperatorTok{+}\StringTok{ }\NormalTok{internet30 }\OperatorTok{+}\StringTok{ }\NormalTok{alcdays,}
-         \DataTypeTok{data =}\NormalTok{ smartcle2)}
-\KeywordTok{summary}\NormalTok{(c2_m5)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-
-Call:
-lm(formula = bmi ~ female + exerany + sleephrs + internet30 + 
-    alcdays, data = smartcle2)
-
-Residuals:
-    Min      1Q  Median      3Q     Max 
--16.147  -3.997  -0.856   2.487  35.965 
-
-Coefficients:
-            Estimate Std. Error t value Pr(>|t|)    
-(Intercept) 30.84066    1.18458  26.035  < 2e-16 ***
-female      -1.28801    0.42805  -3.009   0.0027 ** 
-exerany     -2.42161    0.49853  -4.858 1.40e-06 ***
-sleephrs    -0.14118    0.13988  -1.009   0.3131    
-internet30   1.38916    0.54252   2.561   0.0106 *  
-alcdays     -0.10460    0.02595  -4.030 6.04e-05 ***
----
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-
-Residual standard error: 6.174 on 890 degrees of freedom
-Multiple R-squared:  0.05258,   Adjusted R-squared:  0.04726 
-F-statistic: 9.879 on 5 and 890 DF,  p-value: 3.304e-09
-\end{verbatim}
-
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\tightlist
-\item
-  Here's the ANOVA for this model. What can we study with this?
-\end{enumerate}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\KeywordTok{anova}\NormalTok{(c2_m5)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-Analysis of Variance Table
-
-Response: bmi
-            Df Sum Sq Mean Sq F value    Pr(>F)    
-female       1    156  155.61  4.0818   0.04365 *  
-exerany      1    897  896.93 23.5283 1.453e-06 ***
-sleephrs     1     33   32.90  0.8631   0.35313    
-internet30   1    178  178.33  4.6779   0.03082 *  
-alcdays      1    619  619.26 16.2443 6.044e-05 ***
-Residuals  890  33928   38.12                      
----
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-\end{verbatim}
-
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\setcounter{enumi}{1}
-\tightlist
-\item
-  Consider the revised output below. Now what can we study?
-\end{enumerate}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\KeywordTok{anova}\NormalTok{(}\KeywordTok{lm}\NormalTok{(bmi }\OperatorTok{~}\StringTok{ }\NormalTok{exerany }\OperatorTok{+}\StringTok{ }\NormalTok{internet30 }\OperatorTok{+}\StringTok{ }\NormalTok{alcdays }\OperatorTok{+}\StringTok{ }\NormalTok{female }\OperatorTok{+}\StringTok{ }\NormalTok{sleephrs,}
-         \DataTypeTok{data =}\NormalTok{ smartcle2))}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-Analysis of Variance Table
-
-Response: bmi
-            Df Sum Sq Mean Sq F value    Pr(>F)    
-exerany      1    795  795.46 20.8664 5.618e-06 ***
-internet30   1    212  211.95  5.5599 0.0185925 *  
-alcdays      1    486  486.03 12.7496 0.0003752 ***
-female       1    351  350.75  9.2010 0.0024891 ** 
-sleephrs     1     39   38.83  1.0186 0.3131176    
-Residuals  890  33928   38.12                      
----
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-\end{verbatim}
-
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\setcounter{enumi}{2}
-\tightlist
-\item
-  What does the output below let us conclude?
-\end{enumerate}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\KeywordTok{anova}\NormalTok{(}\KeywordTok{lm}\NormalTok{(bmi }\OperatorTok{~}\StringTok{ }\NormalTok{exerany }\OperatorTok{+}\StringTok{ }\NormalTok{internet30 }\OperatorTok{+}\StringTok{ }\NormalTok{alcdays }\OperatorTok{+}\StringTok{ }\NormalTok{female }\OperatorTok{+}\StringTok{ }\NormalTok{sleephrs, }
-         \DataTypeTok{data =}\NormalTok{ smartcle2),}
-      \KeywordTok{lm}\NormalTok{(bmi }\OperatorTok{~}\StringTok{ }\NormalTok{exerany }\OperatorTok{+}\StringTok{ }\NormalTok{female }\OperatorTok{+}\StringTok{ }\NormalTok{alcdays, }
-         \DataTypeTok{data =}\NormalTok{ smartcle2))}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-Analysis of Variance Table
-
-Model 1: bmi ~ exerany + internet30 + alcdays + female + sleephrs
-Model 2: bmi ~ exerany + female + alcdays
-  Res.Df   RSS Df Sum of Sq      F  Pr(>F)  
-1    890 33928                              
-2    892 34221 -2    -293.2 3.8456 0.02173 *
----
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-\end{verbatim}
-
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\setcounter{enumi}{3}
-\tightlist
-\item
-  What does it mean for the models to be ``nested''?
-\end{enumerate}
-
-\section{\texorpdfstring{\texttt{c2\_m6}: Would adding self-reported
-health
-help?}{c2\_m6: Would adding self-reported health help?}}\label{c2_m6-would-adding-self-reported-health-help}
-
-And we can do even a bit better than that by adding in a
-multi-categorical measure: self-reported general health.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{c2_m6 <-}\StringTok{ }\KeywordTok{lm}\NormalTok{(bmi }\OperatorTok{~}\StringTok{ }\NormalTok{female }\OperatorTok{+}\StringTok{ }\NormalTok{exerany }\OperatorTok{+}\StringTok{ }\NormalTok{sleephrs }\OperatorTok{+}\StringTok{ }\NormalTok{internet30 }\OperatorTok{+}\StringTok{ }\NormalTok{alcdays }\OperatorTok{+}\StringTok{ }\NormalTok{genhealth,}
-         \DataTypeTok{data =}\NormalTok{ smartcle2)}
-\KeywordTok{summary}\NormalTok{(c2_m6)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-
-Call:
-lm(formula = bmi ~ female + exerany + sleephrs + internet30 + 
-    alcdays + genhealth, data = smartcle2)
-
-Residuals:
-    Min      1Q  Median      3Q     Max 
--16.331  -3.813  -0.838   2.679  34.166 
-
-Coefficients:
-                    Estimate Std. Error t value Pr(>|t|)    
-(Intercept)         26.49498    1.31121  20.206  < 2e-16 ***
-female              -0.85520    0.41969  -2.038 0.041879 *  
-exerany             -1.61968    0.50541  -3.205 0.001400 ** 
-sleephrs            -0.12719    0.13613  -0.934 0.350368    
-internet30           2.02498    0.53898   3.757 0.000183 ***
-alcdays             -0.08431    0.02537  -3.324 0.000925 ***
-genhealth2_VeryGood  2.10537    0.59408   3.544 0.000415 ***
-genhealth3_Good      4.08245    0.60739   6.721 3.22e-11 ***
-genhealth4_Fair      4.99213    0.80178   6.226 7.37e-10 ***
-genhealth5_Poor      3.11025    1.12614   2.762 0.005866 ** 
----
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-
-Residual standard error: 5.993 on 886 degrees of freedom
-Multiple R-squared:  0.1115,    Adjusted R-squared:  0.1024 
-F-statistic: 12.35 on 9 and 886 DF,  p-value: < 2.2e-16
-\end{verbatim}
-
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\item
-  If Harry and Marty have the same values of \texttt{female},
-  \texttt{exerany}, \texttt{sleephrs}, \texttt{internet30} and
-  \texttt{alcdays}, but Harry rates his health as Good, and Marty rates
-  his as Fair, then what is the difference in the predictions? Who is
-  predicted to have a larger BMI, and by how much?
-\item
-  What does this normal probability plot of the residuals suggest?
-\end{enumerate}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\KeywordTok{plot}\NormalTok{(c2_m6, }\DataTypeTok{which =} \DecValTok{2}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\includegraphics{bookdown-demo_files/figure-latex/c2_m6_residuals_normality-1.pdf}
-
-\section{\texorpdfstring{\texttt{c2\_m7}: What if we added days of work
-missed?}{c2\_m7: What if we added days of work missed?}}\label{c2_m7-what-if-we-added-days-of-work-missed}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{c2_m7 <-}\StringTok{ }\KeywordTok{lm}\NormalTok{(bmi }\OperatorTok{~}\StringTok{ }\NormalTok{female }\OperatorTok{+}\StringTok{ }\NormalTok{exerany }\OperatorTok{+}\StringTok{ }\NormalTok{sleephrs }\OperatorTok{+}\StringTok{ }\NormalTok{internet30 }\OperatorTok{+}\StringTok{ }\NormalTok{alcdays }\OperatorTok{+}\StringTok{ }
-\StringTok{                }\NormalTok{genhealth }\OperatorTok{+}\StringTok{ }\NormalTok{physhealth }\OperatorTok{+}\StringTok{ }\NormalTok{menthealth,}
-         \DataTypeTok{data =}\NormalTok{ smartcle2)}
-\KeywordTok{summary}\NormalTok{(c2_m7)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-
-Call:
-lm(formula = bmi ~ female + exerany + sleephrs + internet30 + 
-    alcdays + genhealth + physhealth + menthealth, data = smartcle2)
-
-Residuals:
-    Min      1Q  Median      3Q     Max 
--16.060  -3.804  -0.890   2.794  33.972 
-
-Coefficients:
-                    Estimate Std. Error t value Pr(>|t|)    
-(Intercept)         25.88208    1.31854  19.629  < 2e-16 ***
-female              -0.96435    0.41908  -2.301 0.021616 *  
-exerany             -1.43171    0.50635  -2.828 0.004797 ** 
-sleephrs            -0.08033    0.13624  -0.590 0.555583    
-internet30           2.00267    0.53759   3.725 0.000207 ***
-alcdays             -0.07997    0.02528  -3.163 0.001614 ** 
-genhealth2_VeryGood  2.09533    0.59238   3.537 0.000425 ***
-genhealth3_Good      3.90949    0.60788   6.431 2.07e-10 ***
-genhealth4_Fair      4.27152    0.83986   5.086 4.47e-07 ***
-genhealth5_Poor      1.26021    1.31556   0.958 0.338361    
-physhealth           0.06088    0.03005   2.026 0.043064 *  
-menthealth           0.06636    0.03177   2.089 0.037021 *  
----
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-
-Residual standard error: 5.964 on 884 degrees of freedom
-Multiple R-squared:  0.1219,    Adjusted R-squared:  0.111 
-F-statistic: 11.16 on 11 and 884 DF,  p-value: < 2.2e-16
-\end{verbatim}
-
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\tightlist
-\item
-  How do the assumptions behind this model look?
-\end{enumerate}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\KeywordTok{plot}\NormalTok{(c2_m7, }\DataTypeTok{which =} \DecValTok{1}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\includegraphics{bookdown-demo_files/figure-latex/residual_plot1_c2_m7-1.pdf}
-
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\setcounter{enumi}{1}
-\tightlist
-\item
-  What can we conclude from the plot below?
-\end{enumerate}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\KeywordTok{plot}\NormalTok{(c2_m7, }\DataTypeTok{which =} \DecValTok{5}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\includegraphics{bookdown-demo_files/figure-latex/residual_plot5_c2_m7-1.pdf}
-
-\section{Key Regression Assumptions for Building Effective Prediction
-Models}\label{key-regression-assumptions-for-building-effective-prediction-models}
-
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\tightlist
-\item
-  Validity - the data you are analyzing should map to the research
-  question you are trying to answer.
-
-  \begin{itemize}
-  \tightlist
-  \item
-    The outcome should accurately reflect the phenomenon of interest.
-  \item
-    The model should include all relevant predictors. (It can be
-    difficult to decide which predictors are necessary, and what to do
-    with predictors that have large standard errors.)
-  \item
-    The model should generalize to all of the cases to which it will be
-    applied.
-  \item
-    Can the available data answer our question reliably?
-  \end{itemize}
-\item
-  Additivity and linearity - most important assumption of a regression
-  model is that its deterministic component is a linear function of the
-  predictors. We often think about transformations in this setting.
-\item
-  Independence of errors - errors from the prediction line are
-  independent of each other
-\item
-  Equal variance of errors - if this is violated, we can more
-  efficiently estimate paramaters using \emph{weighted least squares}
-  approaches, where each point is weighted inversely proportional to its
-  variance, but this doesn't affect the coefficients much, if at all.
-\item
-  Normality of errors - not generally important for estimating the
-  regression line
-\end{enumerate}
-
 \section{Making Predictions with a Linear Regression
 Model}\label{making-predictions-with-a-linear-regression-model}
 
@@ -3943,6 +3625,337 @@ data}\label{plot-of-model-on-rescaled-data}
 \end{Shaded}
 
 \includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-14-1.pdf}
+
+\section{\texorpdfstring{\texttt{c2\_m5}: What if we add more
+variables?}{c2\_m5: What if we add more variables?}}\label{c2_m5-what-if-we-add-more-variables}
+
+We can boost our R\textsuperscript{2} a bit, to over 5\%, by adding in
+two new variables, related to whether or not the subject (in the past 30
+days) used the internet, and on how many days the subject drank
+alcoholic beverages.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{c2_m5 <-}\StringTok{ }\KeywordTok{lm}\NormalTok{(bmi }\OperatorTok{~}\StringTok{ }\NormalTok{female }\OperatorTok{+}\StringTok{ }\NormalTok{exerany }\OperatorTok{+}\StringTok{ }\NormalTok{sleephrs }\OperatorTok{+}\StringTok{ }\NormalTok{internet30 }\OperatorTok{+}\StringTok{ }\NormalTok{alcdays,}
+         \DataTypeTok{data =}\NormalTok{ smartcle2)}
+\KeywordTok{summary}\NormalTok{(c2_m5)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+
+Call:
+lm(formula = bmi ~ female + exerany + sleephrs + internet30 + 
+    alcdays, data = smartcle2)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-16.147  -3.997  -0.856   2.487  35.965 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept) 30.84066    1.18458  26.035  < 2e-16 ***
+female      -1.28801    0.42805  -3.009   0.0027 ** 
+exerany     -2.42161    0.49853  -4.858 1.40e-06 ***
+sleephrs    -0.14118    0.13988  -1.009   0.3131    
+internet30   1.38916    0.54252   2.561   0.0106 *  
+alcdays     -0.10460    0.02595  -4.030 6.04e-05 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 6.174 on 890 degrees of freedom
+Multiple R-squared:  0.05258,   Adjusted R-squared:  0.04726 
+F-statistic: 9.879 on 5 and 890 DF,  p-value: 3.304e-09
+\end{verbatim}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Here's the ANOVA for this model. What can we study with this?
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{anova}\NormalTok{(c2_m5)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Analysis of Variance Table
+
+Response: bmi
+            Df Sum Sq Mean Sq F value    Pr(>F)    
+female       1    156  155.61  4.0818   0.04365 *  
+exerany      1    897  896.93 23.5283 1.453e-06 ***
+sleephrs     1     33   32.90  0.8631   0.35313    
+internet30   1    178  178.33  4.6779   0.03082 *  
+alcdays      1    619  619.26 16.2443 6.044e-05 ***
+Residuals  890  33928   38.12                      
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+\end{verbatim}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{1}
+\tightlist
+\item
+  Consider the revised output below. Now what can we study?
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{anova}\NormalTok{(}\KeywordTok{lm}\NormalTok{(bmi }\OperatorTok{~}\StringTok{ }\NormalTok{exerany }\OperatorTok{+}\StringTok{ }\NormalTok{internet30 }\OperatorTok{+}\StringTok{ }\NormalTok{alcdays }\OperatorTok{+}\StringTok{ }\NormalTok{female }\OperatorTok{+}\StringTok{ }\NormalTok{sleephrs,}
+         \DataTypeTok{data =}\NormalTok{ smartcle2))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Analysis of Variance Table
+
+Response: bmi
+            Df Sum Sq Mean Sq F value    Pr(>F)    
+exerany      1    795  795.46 20.8664 5.618e-06 ***
+internet30   1    212  211.95  5.5599 0.0185925 *  
+alcdays      1    486  486.03 12.7496 0.0003752 ***
+female       1    351  350.75  9.2010 0.0024891 ** 
+sleephrs     1     39   38.83  1.0186 0.3131176    
+Residuals  890  33928   38.12                      
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+\end{verbatim}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{2}
+\tightlist
+\item
+  What does the output below let us conclude?
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{anova}\NormalTok{(}\KeywordTok{lm}\NormalTok{(bmi }\OperatorTok{~}\StringTok{ }\NormalTok{exerany }\OperatorTok{+}\StringTok{ }\NormalTok{internet30 }\OperatorTok{+}\StringTok{ }\NormalTok{alcdays }\OperatorTok{+}\StringTok{ }\NormalTok{female }\OperatorTok{+}\StringTok{ }\NormalTok{sleephrs, }
+         \DataTypeTok{data =}\NormalTok{ smartcle2),}
+      \KeywordTok{lm}\NormalTok{(bmi }\OperatorTok{~}\StringTok{ }\NormalTok{exerany }\OperatorTok{+}\StringTok{ }\NormalTok{female }\OperatorTok{+}\StringTok{ }\NormalTok{alcdays, }
+         \DataTypeTok{data =}\NormalTok{ smartcle2))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Analysis of Variance Table
+
+Model 1: bmi ~ exerany + internet30 + alcdays + female + sleephrs
+Model 2: bmi ~ exerany + female + alcdays
+  Res.Df   RSS Df Sum of Sq      F  Pr(>F)  
+1    890 33928                              
+2    892 34221 -2    -293.2 3.8456 0.02173 *
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+\end{verbatim}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{3}
+\tightlist
+\item
+  What does it mean for the models to be ``nested''?
+\end{enumerate}
+
+\section{\texorpdfstring{\texttt{c2\_m6}: Would adding self-reported
+health
+help?}{c2\_m6: Would adding self-reported health help?}}\label{c2_m6-would-adding-self-reported-health-help}
+
+And we can do even a bit better than that by adding in a
+multi-categorical measure: self-reported general health.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{c2_m6 <-}\StringTok{ }\KeywordTok{lm}\NormalTok{(bmi }\OperatorTok{~}\StringTok{ }\NormalTok{female }\OperatorTok{+}\StringTok{ }\NormalTok{exerany }\OperatorTok{+}\StringTok{ }\NormalTok{sleephrs }\OperatorTok{+}\StringTok{ }\NormalTok{internet30 }\OperatorTok{+}\StringTok{ }\NormalTok{alcdays }\OperatorTok{+}\StringTok{ }\NormalTok{genhealth,}
+         \DataTypeTok{data =}\NormalTok{ smartcle2)}
+\KeywordTok{summary}\NormalTok{(c2_m6)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+
+Call:
+lm(formula = bmi ~ female + exerany + sleephrs + internet30 + 
+    alcdays + genhealth, data = smartcle2)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-16.331  -3.813  -0.838   2.679  34.166 
+
+Coefficients:
+                    Estimate Std. Error t value Pr(>|t|)    
+(Intercept)         26.49498    1.31121  20.206  < 2e-16 ***
+female              -0.85520    0.41969  -2.038 0.041879 *  
+exerany             -1.61968    0.50541  -3.205 0.001400 ** 
+sleephrs            -0.12719    0.13613  -0.934 0.350368    
+internet30           2.02498    0.53898   3.757 0.000183 ***
+alcdays             -0.08431    0.02537  -3.324 0.000925 ***
+genhealth2_VeryGood  2.10537    0.59408   3.544 0.000415 ***
+genhealth3_Good      4.08245    0.60739   6.721 3.22e-11 ***
+genhealth4_Fair      4.99213    0.80178   6.226 7.37e-10 ***
+genhealth5_Poor      3.11025    1.12614   2.762 0.005866 ** 
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 5.993 on 886 degrees of freedom
+Multiple R-squared:  0.1115,    Adjusted R-squared:  0.1024 
+F-statistic: 12.35 on 9 and 886 DF,  p-value: < 2.2e-16
+\end{verbatim}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  If Harry and Marty have the same values of \texttt{female},
+  \texttt{exerany}, \texttt{sleephrs}, \texttt{internet30} and
+  \texttt{alcdays}, but Harry rates his health as Good, and Marty rates
+  his as Fair, then what is the difference in the predictions? Who is
+  predicted to have a larger BMI, and by how much?
+\item
+  What does this normal probability plot of the residuals suggest?
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plot}\NormalTok{(c2_m6, }\DataTypeTok{which =} \DecValTok{2}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/c2_m6_residuals_normality-1.pdf}
+
+\section{\texorpdfstring{\texttt{c2\_m7}: What if we added days of work
+missed?}{c2\_m7: What if we added days of work missed?}}\label{c2_m7-what-if-we-added-days-of-work-missed}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{c2_m7 <-}\StringTok{ }\KeywordTok{lm}\NormalTok{(bmi }\OperatorTok{~}\StringTok{ }\NormalTok{female }\OperatorTok{+}\StringTok{ }\NormalTok{exerany }\OperatorTok{+}\StringTok{ }\NormalTok{sleephrs }\OperatorTok{+}\StringTok{ }\NormalTok{internet30 }\OperatorTok{+}\StringTok{ }\NormalTok{alcdays }\OperatorTok{+}\StringTok{ }
+\StringTok{                }\NormalTok{genhealth }\OperatorTok{+}\StringTok{ }\NormalTok{physhealth }\OperatorTok{+}\StringTok{ }\NormalTok{menthealth,}
+         \DataTypeTok{data =}\NormalTok{ smartcle2)}
+\KeywordTok{summary}\NormalTok{(c2_m7)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+
+Call:
+lm(formula = bmi ~ female + exerany + sleephrs + internet30 + 
+    alcdays + genhealth + physhealth + menthealth, data = smartcle2)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-16.060  -3.804  -0.890   2.794  33.972 
+
+Coefficients:
+                    Estimate Std. Error t value Pr(>|t|)    
+(Intercept)         25.88208    1.31854  19.629  < 2e-16 ***
+female              -0.96435    0.41908  -2.301 0.021616 *  
+exerany             -1.43171    0.50635  -2.828 0.004797 ** 
+sleephrs            -0.08033    0.13624  -0.590 0.555583    
+internet30           2.00267    0.53759   3.725 0.000207 ***
+alcdays             -0.07997    0.02528  -3.163 0.001614 ** 
+genhealth2_VeryGood  2.09533    0.59238   3.537 0.000425 ***
+genhealth3_Good      3.90949    0.60788   6.431 2.07e-10 ***
+genhealth4_Fair      4.27152    0.83986   5.086 4.47e-07 ***
+genhealth5_Poor      1.26021    1.31556   0.958 0.338361    
+physhealth           0.06088    0.03005   2.026 0.043064 *  
+menthealth           0.06636    0.03177   2.089 0.037021 *  
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 5.964 on 884 degrees of freedom
+Multiple R-squared:  0.1219,    Adjusted R-squared:  0.111 
+F-statistic: 11.16 on 11 and 884 DF,  p-value: < 2.2e-16
+\end{verbatim}
+
+\section{Key Regression Assumptions for Building Effective Prediction
+Models}\label{key-regression-assumptions-for-building-effective-prediction-models}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Validity - the data you are analyzing should map to the research
+  question you are trying to answer.
+
+  \begin{itemize}
+  \tightlist
+  \item
+    The outcome should accurately reflect the phenomenon of interest.
+  \item
+    The model should include all relevant predictors. (It can be
+    difficult to decide which predictors are necessary, and what to do
+    with predictors that have large standard errors.)
+  \item
+    The model should generalize to all of the cases to which it will be
+    applied.
+  \item
+    Can the available data answer our question reliably?
+  \end{itemize}
+\item
+  Additivity and linearity - most important assumption of a regression
+  model is that its deterministic component is a linear function of the
+  predictors. We often think about transformations in this setting.
+\item
+  Independence of errors - errors from the prediction line are
+  independent of each other
+\item
+  Equal variance of errors - if this is violated, we can more
+  efficiently estimate paramaters using \emph{weighted least squares}
+  approaches, where each point is weighted inversely proportional to its
+  variance, but this doesn't affect the coefficients much, if at all.
+\item
+  Normality of errors - not generally important for estimating the
+  regression line
+\end{enumerate}
+
+\subsection{\texorpdfstring{Checking Assumptions in model
+\texttt{c2\_m7}}{Checking Assumptions in model c2\_m7}}\label{checking-assumptions-in-model-c2_m7}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  How does the assumption of linearity behind this model look?
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plot}\NormalTok{(c2_m7, }\DataTypeTok{which =} \DecValTok{1}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/residual_plot1_c2_m7-1.pdf}
+
+We see no strong signs of serious non-linearity here. There's no obvious
+curve in the plot, for example.
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{1}
+\tightlist
+\item
+  What can we conclude from the plot below?
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plot}\NormalTok{(c2_m7, }\DataTypeTok{which =} \DecValTok{5}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/residual_plot5_c2_m7-1.pdf}
+
+This plot can help us identify points with large standardized residuals,
+large leverage values, and large influence on the model (as indicated by
+large values of Cook's distance.) In this case, I see no signs of any
+points used in the model with especially large influence, although there
+are some poorly fitted points (with especially large standardized
+residuals.)
 
 \chapter{Analysis of Variance and Analysis of
 Covariance}\label{analysis-of-variance-and-analysis-of-covariance}
@@ -5331,6 +5344,125 @@ in complexity (letting both the slope and intercept vary by
 \texttt{sex}) doesn't add much in the way of predictive value for our
 \texttt{st\_delta} outcome.
 
+\subsection{Centering the Covariate to Facilitate ANOVA
+Interpretation}\label{centering-the-covariate-to-facilitate-anova-interpretation}
+
+When developing an ANCOVA model, we will often \textbf{center} or even
+\textbf{center and rescale} the covariate to facilitate interpretation
+of the product term. In this case, let's center \texttt{age} and rescale
+it by dividing by two standard deviations.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{emph_imp }\OperatorTok{%>%}\StringTok{ }\KeywordTok{skim}\NormalTok{(age)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Skim summary statistics
+ n obs: 16 
+ n variables: 7 
+
+Variable type: numeric 
+ variable missing complete  n mean   sd p0  p25 median   p75 p100
+      age       0       16 16 65.2 6.98 50 63.5   65.1 70.25   76
+\end{verbatim}
+
+Note that in our imputed data, the mean \texttt{age} is 65.2 and the
+standard deviation of \texttt{age} is 7 years.
+
+So we build the rescaled \texttt{age} variable that I'll call
+\texttt{age\_z}, and then use it to refit our model.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{emph_imp <-}\StringTok{ }\NormalTok{emph_imp }\OperatorTok{%>%}
+\StringTok{    }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{age_z =}\NormalTok{ (age }\OperatorTok{-}\StringTok{ }\KeywordTok{mean}\NormalTok{(age))}\OperatorTok{/}\StringTok{ }\NormalTok{(}\DecValTok{2} \OperatorTok{*}\StringTok{ }\KeywordTok{sd}\NormalTok{(age)))}
+
+\KeywordTok{anova}\NormalTok{(}\KeywordTok{lm}\NormalTok{(st_delta }\OperatorTok{~}\StringTok{ }\NormalTok{sex }\OperatorTok{*}\StringTok{ }\NormalTok{age_z, }\DataTypeTok{data =}\NormalTok{ emph_imp))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Analysis of Variance Table
+
+Response: st_delta
+          Df  Sum Sq Mean Sq F value  Pr(>F)  
+sex        1  52.547  52.547  4.9549 0.04594 *
+age_z      1   2.151   2.151  0.2028 0.66051  
+sex:age_z  1   0.130   0.130  0.0123 0.91355  
+Residuals 12 127.261  10.605                  
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{tidy}\NormalTok{(}\KeywordTok{lm}\NormalTok{(st_delta }\OperatorTok{~}\StringTok{ }\NormalTok{sex }\OperatorTok{*}\StringTok{ }\NormalTok{age_z, }\DataTypeTok{data =}\NormalTok{ emph_imp))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+         term   estimate std.error  statistic    p.value
+1 (Intercept) -3.2651685  1.386802 -2.3544587 0.03641637
+2        sexM  3.6019471  1.735706  2.0752055 0.06013138
+3       age_z  0.5096337  2.950144  0.1727488 0.86572835
+4  sexM:age_z  0.4027661  3.632839  0.1108681 0.91355364
+\end{verbatim}
+
+Comparing the two models, we have:
+
+\begin{itemize}
+\tightlist
+\item
+  (unscaled): \texttt{st\_delta} = -5.65 + 1.72 (\texttt{sex} = M) +
+  0.037 \texttt{age} + 0.029 (\texttt{sex} = M) x (\texttt{age})
+\item
+  (rescaled): \texttt{st\_delta} = -3.27 + 3.60 (\texttt{sex} = M) +
+  0.510 rescaled \texttt{age\_z} + 0.402 (\texttt{sex} = M) x (rescaled
+  \texttt{age\_z})
+\end{itemize}
+
+In essence, the rescaled model on \texttt{age\_z} is:
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{st\_delta} = -3.27 + 0.510 \texttt{age\_z} for female
+  subjects, and
+\item
+  \texttt{st\_delta} = (-3.27 + 3.60) + (0.510 + 0.402) \texttt{age\_z}
+  = 0.33 + 0.912 \texttt{age\_z} for male subjects
+\end{itemize}
+
+Interpreting the centered, rescaled model, we have:
+
+\begin{itemize}
+\tightlist
+\item
+  no change in the ANOVA results or R-squared or residual standard
+  deviation compared to the uncentered, unscaled model, but
+\item
+  the intercept (-3.27) now represents the \texttt{st\_delta} for a
+  female of average age,
+\item
+  the \texttt{sex} slope (3.60) represents the (male - female)
+  difference in predicted \texttt{st\_delta} for a person of average
+  age,
+\item
+  the \texttt{age\_z} slope (0.510) represents the difference in
+  predicted \texttt{st\_delta} for a female one standard deviation older
+  than the mean age as compared to a female one standard deviation
+  younger than the mean age, and
+\item
+  the product term's slope (0.402) represents the male - female
+  difference in the slope of \texttt{age\_z}, so that if you add the
+  \texttt{age\_z} slope (0.510) and the interaction slope (0.402) you
+  see the difference in predicted \texttt{st\_delta} for a male one
+  standard deviation older than the mean age as compared to a male one
+  standard deviation younger than the mean age.
+\end{itemize}
+
 \chapter{Missing Data Mechanisms and Single
 Imputation}\label{missing-data-mechanisms-and-single-imputation}
 
@@ -5848,144 +5980,6 @@ its manual}. These include:
 \texttt{simputation} can also do EM-based multivariate imputation, and
 multivariate random forest imputation, as well as many other sorts of
 approaches.
-
-\section{(DRAFT material) How might we validate this
-model?}\label{draft-material-how-might-we-validate-this-model}
-
-Here's some early code for that issue, which is built on some material
-by David Robinson at \url{https://rpubs.com/dgrtwo/cv-modelr}
-
-This bit of code performs what is called \emph{10-crossfold separation}.
-In words, this approach splits the 896 observations in our data into 10
-exclusive partitions of about 90\% into a training sample, and the
-remaining 10\% in a test sample. The next part of the code maps a
-modeling step to the training data, and then fits the resulting model on
-the test data using the \texttt{broom} package's \texttt{augment}
-function.
-
-I've selected the variables in this case so that the model we'll fit is
-the \texttt{m2\_c7} model we've been looking at, although there are
-several ways to accomplish this.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\KeywordTok{set.seed}\NormalTok{(}\DecValTok{4320118}\NormalTok{)}
-
-\NormalTok{models <-}\StringTok{ }\NormalTok{smartcle2 }\OperatorTok{%>%}
-\StringTok{    }\KeywordTok{select}\NormalTok{(bmi, female, exerany, sleephrs, }
-\NormalTok{           internet30, alcdays, genhealth) }\OperatorTok{%>%}
-\StringTok{    }\KeywordTok{crossv_kfold}\NormalTok{(}\DataTypeTok{k =} \DecValTok{10}\NormalTok{) }\OperatorTok{%>%}
-\StringTok{    }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{model =} \KeywordTok{map}\NormalTok{(train, }\OperatorTok{~}\StringTok{ }\KeywordTok{lm}\NormalTok{(bmi }\OperatorTok{~}\StringTok{ }\NormalTok{., }\DataTypeTok{data =}\NormalTok{ .)))}
-
-\NormalTok{predictions <-}\StringTok{ }\NormalTok{models }\OperatorTok{%>%}
-\StringTok{    }\KeywordTok{unnest}\NormalTok{(}\KeywordTok{map2}\NormalTok{(model, test, }\OperatorTok{~}\StringTok{ }\KeywordTok{augment}\NormalTok{(.x, }\DataTypeTok{newdata =}\NormalTok{ .y)))}
-
-\NormalTok{predictions}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-# A tibble: 896 x 10
-   .id     bmi female exerany sleephrs internet30 alcdays genhealth  
-   <chr> <dbl>  <int>   <int>    <int>      <int>   <int> <fct>      
- 1 01     24.1      0       1        7          1       2 1_Excellent
- 2 01     36.4      0       1        8          1       0 4_Fair     
- 3 01     32.1      1       0        4          1       5 2_VeryGood 
- 4 01     27.3      0       1        8          1       0 1_Excellent
- 5 01     28.0      0       1        7          1       4 2_VeryGood 
- 6 01     22.5      1       1        7          1       3 2_VeryGood 
- 7 01     26.3      0       1        7          1       1 1_Excellent
- 8 01     22.4      0       1        8          1       4 1_Excellent
- 9 01     19.3      1       0        6          1       0 3_Good     
-10 01     24.2      1       0        6          0       0 3_Good     
-# ... with 886 more rows, and 2 more variables: .fitted <dbl>, .se.fit
-#   <dbl>
-\end{verbatim}
-
-The results are a set of predictions based on the splits into training
-and test groups (remember there are 10 of them, indexed by \texttt{.id})
-that describe the complete set of 896 respondents again.
-
-What this lets us now do is calculate the root Mean Squared Prediction
-Error (RMSE) and Mean Absolute Prediction Error (MAE) for this model
-(the \texttt{c2\_m7} model) across these observations, and also to
-compare that error to a model that simply predicts the mean \texttt{bmi}
-across all patients (the \texttt{intercept\ only} model.) In practice,
-we could consider two distinct models in doing this work.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{predictions }\OperatorTok{%>%}
-\StringTok{    }\KeywordTok{summarize}\NormalTok{(}\DataTypeTok{RMSE_c2_m7 =} \KeywordTok{sqrt}\NormalTok{(}\KeywordTok{mean}\NormalTok{((bmi }\OperatorTok{-}\StringTok{ }\NormalTok{.fitted) }\OperatorTok{^}\DecValTok{2}\NormalTok{)),}
-              \DataTypeTok{MAE_c2_m7 =} \KeywordTok{mean}\NormalTok{(}\KeywordTok{abs}\NormalTok{(bmi }\OperatorTok{-}\StringTok{ }\NormalTok{.fitted)),}
-              \DataTypeTok{RMSE_interceptonly =} \KeywordTok{sqrt}\NormalTok{(}\KeywordTok{mean}\NormalTok{((bmi }\OperatorTok{-}\StringTok{ }\KeywordTok{mean}\NormalTok{(bmi))}\OperatorTok{^}\DecValTok{2}\NormalTok{)),}
-              \DataTypeTok{MAE_interceptonly =} \KeywordTok{mean}\NormalTok{(}\KeywordTok{abs}\NormalTok{(bmi }\OperatorTok{-}\StringTok{ }\KeywordTok{mean}\NormalTok{(bmi))))}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-# A tibble: 1 x 4
-  RMSE_c2_m7 MAE_c2_m7 RMSE_interceptonly MAE_interceptonly
-       <dbl>     <dbl>              <dbl>             <dbl>
-1       6.03      4.40               6.32              4.59
-\end{verbatim}
-
-Another thing we could do with this tibble of predictions we have
-created is to graph the size of the prediction errors (observed
-\texttt{bmi} minus predicted values in \texttt{.fitted}) that our
-modeling approach makes.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{predictions }\OperatorTok{%>%}
-\StringTok{    }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{errors =}\NormalTok{ bmi }\OperatorTok{-}\StringTok{ }\NormalTok{.fitted) }\OperatorTok{%>%}
-\StringTok{    }\KeywordTok{ggplot}\NormalTok{(., }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ errors)) }\OperatorTok{+}
-\StringTok{    }\KeywordTok{geom_histogram}\NormalTok{(}\DataTypeTok{bins =} \DecValTok{30}\NormalTok{, }\DataTypeTok{fill =} \StringTok{"darkviolet"}\NormalTok{, }\DataTypeTok{col =} \StringTok{"yellow"}\NormalTok{) }\OperatorTok{+}\StringTok{ }
-\StringTok{    }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \StringTok{"Cross-Validated Errors in Prediction of BMI"}\NormalTok{,}
-         \DataTypeTok{subtitle =} \StringTok{"Using a model (`c2_m7`) including 6 regression inputs"}\NormalTok{,}
-         \DataTypeTok{caption =} \StringTok{"SMART BRFSS 2016 data for Cleveland-Elyria MMSA, n = 896"}\NormalTok{,}
-         \DataTypeTok{x =} \StringTok{"Error in predicting BMI"}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\includegraphics{bookdown-demo_files/figure-latex/validation_c2_m7_first_approach_errorhistogram-1.pdf}
-
-\section{Coming Soon \ldots{}}\label{coming-soon}
-
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\tightlist
-\item
-  Would stepwise regression help us build a better model for
-  \texttt{bmi}?
-
-  \begin{itemize}
-  \tightlist
-  \item
-    Is there a better approach for variable selection? What's this I
-    hear about ``best subsets'', for example?
-  \end{itemize}
-\item
-  How should we think about potential transformations of these
-  predictors?
-
-  \begin{itemize}
-  \tightlist
-  \item
-    What's a Spearman rho-squared plot, and how might it help us decide
-    how to spend degrees of freedom on non-linear terms better?
-  \end{itemize}
-\item
-  How do we deal with missing data in fitting and evaluating a linear
-  regression model if we don't actually want to drop all of the
-  incomplete cases?
-\item
-  How can we use the \texttt{ols} tool in the \texttt{rms} package to
-  fit regression models?
-\item
-  How can we use the tools in the \texttt{arm} package to fit and
-  evaluate regression models?
-\end{enumerate}
 
 \bibliography{text.bib}
 
