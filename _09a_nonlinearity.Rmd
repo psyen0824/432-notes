@@ -1,0 +1,381 @@
+# Representing Non-Linear Relationships (DRAFT)
+
+We rarely expect a linear relationship to hold, really. The most common setting where it's thoroughly reasonable is predicting an outcome on the basis of its prior value. 
+
+But, as Harrell suggests, we can't always use graphs or other devices to choose our potential re-expression or re-modeling of the data. 
+
+The primary reason for this is that if we select from among many transformations, as the Box-Cox approach does, our results will be biased, at least in the context of predictive modeling.
+
+That said, I'll spend a few moments demonstrating some commonly used tools using a new, simulated data set.
+
+## The `simdata` example
+
+```{r build simdata}
+set.seed(1); x1 <- runif(200); x2 <- sample(0:3, 200, TRUE)
+distance <- (x1 + x2/3 + rnorm(200))^2
+simdata <- data.frame(x1, x2, distance)
+summary(simdata)
+```
+
+We want to predict `distance`, on the basis of the continuous variable `x1` and the ordered categorical variable `x2` (whose categories are 0-3.) 
+
+Note that we know the nature of the relationship precisely in this case.
+
+### Relationship of `distance` to `x1`
+
+Here's a lowess smooth. Is this a linear association?
+
+```{r simdata plot1}
+plot(simdata$distance ~ simdata$x1)
+lines(lowess(simdata$distance ~ simdata$x1),
+             col="slateblue", lwd=2)
+```
+
+## Box-Cox to study potential power transformations
+
+```{r box-cox plot}
+boxCox(simdata$distance ~ simdata$x1 + simdata$x2)
+```
+
+For continuous Y, continuous X, we have the Box-Cox ladder of power transformations to consider...
+
+Power ($\lambda$) | Transformation
+:---------------: | :------------:
+-2 | $1 / x^2$
+-1 | $1 / x$ 
+$-\frac{1}{2}$ | $1 / \sqrt{x}$ 
+0 | log $x$ 
+$\frac{1}{2}$ | $\sqrt{x}$ 
+1 | $x$
+2 | $x^2$
+
+1. These methods work reasonably well with unimodal data, especially data that are skewed. They don't work well with multi-modal data.
+2. Some of these transformations require the data to be positive. We can add a constant to every observation in a data set without changing its shape.
+3. Sometimes, the resulting re-expressions don't lead to easily interpretable results. 
+
+In this case, we have a log-likelihood which is maximized at a transformation of about 0.26, which is close to either 0 or $\frac{1}{2}$, so we might consider either a logarithm or square root of our outcome, `distance`.
+
+
+```{r box-cox}
+# requires car library
+powerTransform(simdata$distance ~ simdata$x1 + simdata$x2)
+```
+
+## Potential Transformations
+
+Are either of these particularly satisfactory?
+
+```{r comparing transformations of simdata}
+par(mfrow=c(1,2))
+plot(sqrt(simdata$distance) ~ simdata$x1,
+     main="Square Root")
+lines(lowess(sqrt(simdata$distance) ~ simdata$x1), 
+      col="tomato", lwd=2)
+plot(log(simdata$distance) ~ simdata$x1, 
+     main="Logarithm")
+lines(lowess(log(simdata$distance) ~ simdata$x1), 
+      col="tomato", lwd=2)
+par(mfrow=c(1,1))
+```
+
+### Flexibility is the Key Issue
+
+We need a flexible approach to assessing non-linearity and fitting models with non-linear predictors. 
+
+This will lead us to a measure of what Harrell calls **potential predictive punch** which hides the true form of the regression from the analyst so as to preserve statistical properties, but that lets us make sensible decisions about whether a predictor should be included in a model, and the number of parameters (degrees of freedom, essentially) we are willing to devote to it.
+
+The approach we'll find useful in the largest variety of settings is a combination of 
+
+1. a rank correlation assessment of potential predictive punch, followed by 
+2. the application of restricted cubic splines to fit and assess models.
+
+## Relaxing Linearity Assumptions with Restricted Cubic Splines
+
+A restricted cubic spline is a way to build highly complicated curves into a regression equation in a fairly easily structured way. 
+
+- A restricted cubic spline is a series of polynomial functions joined together at what are called **knots**. 
+    + Specifying the number of knots is all you need to do in R to get a reasonable result.  
+- Specifically of interest to us, such a spline gives us a way to flexibly account for non-linearity without over-parametrizing the model. 
+    + O'Brien, Karafa and colleagues (2003) "While the algebra defining RCS(X) is perplexing, its graphical depictions are straightforward and investigators find them intuitive and realistic." 
+    + Restricted cubic splines can fit many different types of non-linearities.
+
+### A Restricted Cubic Spline with 3 Knots
+
+```{r little example 1 for splines, fig.height=5, fig.width=6}
+## Building Restricted Cubic Splines - Example 1
+## requires rms library
+
+set.seed(432) 
+x <- 1:100; y <- ((x - 50)^2 + rnorm(100, 0, 100)) 
+plot(x, y, main="Restricted Cubic Spline with 3 Knots") 
+d <- datadist(x, y)
+options(datadist="d")
+m1 <- ols(y ~ rcs(x,3), x = TRUE, y = TRUE)
+p1 <- Predict(m1)
+lines(p1$yhat ~ p1$x, col="red", lwd=2)
+```
+
+- With 3 Knots, we have 2 degrees of freedom, which allows the curve to "bend" once.
+
+### Restricted Cubic Spline with 4 Knots
+
+- 4 Knots gives 3 degrees of freedom, lets the curve "bend" twice.
+
+```{r little example 2 for splines, fig.height=5, fig.width=6}
+## Building Restricted Cubic Splines - Example 2
+## requires rms library
+
+set.seed(432) 
+x <- 1:100
+y <- ((x - 50)^3 + rnorm(100, 0, 4000))/1000 
+plot(x, y, main="Restricted Cubic Spline with 4 Knots") 
+d <- datadist(x, y)
+options(datadist="d")
+m2 <- ols(y ~ rcs(x,4), x = TRUE, y = TRUE)
+p2 <- Predict(m2)
+lines(p2$yhat ~ p2$x, col="navy", lwd=2)
+```
+
+### Restricted Cubic Spline with 5 Knots
+
+- 5 Knots yields 4 df, curve can "bend" three times.
+
+```{r little example 3 for splines, fig.height=5, fig.width=6}
+## Building Restricted Cubic Splines - Example 3
+## requires rms library
+
+set.seed(432) 
+x <- 1:100
+y <- ((x - 52)^4 + .2*(x+25)^3 + 12*(x-50)^2 + 
+          20000*x + rnorm(100, 0, 290000))/10000 
+plot(x, y, main="Restricted Cubic Spline with 5 Knots") 
+d <- datadist(x, y)
+options(datadist="d")
+m3 <- ols(y ~ rcs(x,5), x = TRUE, y = TRUE)
+p3 <- Predict(m3)
+lines(p3$yhat ~ p3$x, col="navy", lwd=2)
+```
+
+### Restricted Cubic Spline
+
+- 3 Knots, 2 degrees of freedom, allows the curve to "bend" once.
+- 4 Knots, 3 degrees of freedom, lets the curve "bend" twice.
+- 5 Knots, 4 degrees of freedom, lets curve "bend" three times.
+    + For most applications, four or five knots strike a nice balance between complicating the model needlessly and fitting data pleasingly.  
+
+Happily, fitting a restricted cubic spline is pretty simple, in Harrell's `ols` framework, or in `lm` with the `rcs` function from the `rms` package.
+
+## Model A for the `simdata` study
+
+For the `simdata` example, an overly simple model predicting the square root of `distance` as a function of a restricted cubic spline with 3 knots on `x1`, and on the variable `x2` without any transformation, or even dealing with the fact that it's an ordinal categorical variable. We're spending two degrees of freedom in the spline, and the resulting curve "bends" once.
+
+```{r simdata first model}
+d <- datadist(simdata)
+options(datadist="d")
+
+modA <- ols(sqrt(distance) ~ rcs(x1, 3) + x2, x=TRUE, y=TRUE)
+```
+
+What's the story on those `x1` and `x1'` values? We have three knots for our restricted cubic spline, and this means that we have two degrees of freedom accounted for by the spline.
+
+```{r simdata model A as ols}
+modA
+```
+
+### Attributes of the Spline
+
+```{r simdata model A attributes}
+attributes(rcs(x1,3))
+```
+
+### Model A summaries
+
+```{r modelA summaries}
+summary(modA)
+summary.lm(modA)
+```
+
+The `ols` version of ANOVA separates the non-linear part of the fit, which is appealing.
+
+```{r anova modelA}
+anova(modA)
+```
+
+## Validation of our Model A
+
+An exciting option is to run `validate` on the model...
+
+- Resampling validation, with or without backward elimination of variables.
+- Estimates the *optimism* in predictive accuracy measures.
+- Estimates intercept and slope of a calibration model:
+
+\begin{center}
+(observed y) = a + b (predicted y)
+\end{center}
+
+The "corrected" slope is a shrinkage factor that takes overfitting into account.
+
+```{r validate model A}
+validate(modA)
+```
+
+## Picture the Model with a Nomogram
+
+```{r nomogram model A}
+plot(nomogram(modA))
+```
+
+For this simple model, we simply 
+
+1. find our values of x1 and x2, then 
+2. draw vertical lines up to count the points associated with each variable. 
+3. Sum the points, and 
+4. draw a vertical line down from the total points to estimate the square root of distance (linear predictor).
+
+Notice that the non-linearity here is extremely modest, because the `x1'` coefficient is so small and insignificant.
+
+## A More Reasonable Model for the `simdata` example
+
+In Model B, we fit a model 
+- for the square root of distance as a function of 
+- a restricted cubic spline on `x1` again, but now with 4 knots, so we're spending three degrees of freedom, and the resulting curve **bends** twice, and 
+- a "scored" version of the categorical variable `x2`, which accounts for the ordinal nature of the categories  and also (in this case) uses three degrees of freedom to represent the four categories (0, 1, 2, or 3) of `x2`.
+
+```{r model B}
+d <- datadist(simdata)
+options(datadist="d")
+modB <- ols(sqrt(distance) ~ rcs(x1, 4) + scored(x2), 
+            x=TRUE, y=TRUE)
+modB
+summary(modB)
+summary.lm(modB)
+```
+
+## Special Transformation Functions in `rms`
+
+- `scored` is for an ordered categorical variable
+- `catg` is for a nominal categorical variable (when it's not already presented as a factor)
+- `pol` is used for an ordinary (non-orthogonal) polynomial
+    + so `pol(x3,2)` would include both $x3$ and ${x3}^2$ in the model, often after `x3` has been centered.
+- `%ia%` will be used for interactions restricted so that products involving non-linear effects on both variables are not included
+- `rcs` gives us a linear tail-restricted cubic spline function
+- `strat` will (later) be for a stratification factor in a Cox model
+
+### Nomogram for Model B
+
+Note the wrap-around effect in `x2`, and the impact of the cubic spline on the relationship between `x1` and the scale of points.
+
+```{r nomogram for model B}
+plot(nomogram(modB))
+nomogram(modB)
+```
+
+```{r simdata case 1}
+simdata[1,]
+```
+
+For subject 1, we have `x1 = 0.27`, so, interpolating, that's approximately 36 points, and `x2 = 1`, so that's 8 points, for a total of 44 points, which, drawing the vertical line down from total points corresponds to a linear predictor of about `0.85`. 
+
+The actual prediction for subject 1 is...
+
+```{r fit 1}
+fitted(modB)[1] 
+```
+
+### ANOVA via `ols` for Model B
+
+```{r anova B}
+anova(modB)
+```
+
+## Validating Model B
+
+```{r validate B first time}
+validate(modB)
+```
+
+We are using resampling validation to estimate the optimism in the displayed measures of predictive accuracy, and the slope and intercept of an overall calibration curve. By default, this approach uses a bootstrap resampling method, with 40 runs.
+
+- If we want to do **model selection**, too, we can also do validation of an `ols` model using backwards elimination both for the original model fitting and for the bootstrap replications. Here, we’ll use backwards elimination based on the AIC, without forcing any variables into the model\footnote{See the help files in R for validate and for validate.ols to see how to use p values instead of AIC to do the backwards elimination, and also how to force variables into these models.}. 
+
+```{r validation B with model selection}
+set.seed(3); validate(modB, bw=TRUE, B=100)
+```
+
+
+# Non-Linear Predictor Terms and the PTSD study
+
+All of the methods we have seen so far are designed to select predictors (main effects only) for a model based on an assumption that a complete set of relevant predictors is available. What if, as is most often the case, that's not a reasonable assumption?
+
+What if we want to consider where best to spend our degrees of freedom on non-linear predictor terms, like interactions, polynomial functions or curved splines to represent our input data?
+
+## Spearman $\rho^2$ Plot
+
+
+The Spearman $\rho^2$ plot will be our first step.
+
+```{r}
+plot(spearman2(ptsd ~ over2 + over3 + over5 + bond + posit + neg + contr + sup + cons + aff, 
+               data = maleptsd))
+```
+
+Where should we spend our available degrees of freedom? What looks like the most promising set of predictors to study closely?
+
+It looks like the `neg` variable is the most prominent predictor candidate, followed by the `over3` variable, and then the `cons` and `aff` predictors. The other predictors seem to have less influence on the quality of fit by this measure.
+
+## PTSD: Creating Non-Linear Predictor Terms
+
+Let's spend some degrees of freedom on creating a model which includes
+
+- a restricted cubic spline with 4 knots in `neg`
+- a polynomial function of order 2 in `over3`
+- the main effects of `cons` and `aff`
+
+```{r}
+d <- datadist(maleptsd)
+options(datadist = "d")
+mod.new <- ols(ptsd ~ rcs(neg, 4) + pol(over3, 2) + 
+                   cons + aff, data = maleptsd, x = TRUE, y = TRUE)
+```
+
+### Here's the model, and the ANOVA table for it.
+
+```{r}
+mod.new
+anova(mod.new)
+```
+
+### Plot of Effects...
+
+```{r}
+summary(mod.new)
+plot(summary(mod.new))
+```
+
+### Calibration plot ...
+
+```{r}
+plot(calibrate(mod.new))
+```
+
+### Nomogram...
+
+```{r}
+plot(nomogram(mod.new))
+```
+
+### Validation of summary measures
+
+```{r}
+validate(mod.new)
+```
+
+## Fitting a Better Model
+
+Again, the Spearman $\rho^2$ plot will be our first step.
+
+```{r}
+plot(spearman2(ptsd ~ over2 + over3 + over5 + bond + 
+                   posit + neg + contr + sup + cons + aff, 
+               data = maleptsd))
+```
