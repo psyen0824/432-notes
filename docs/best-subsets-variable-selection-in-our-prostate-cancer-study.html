@@ -31,8 +31,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   
   
-<link rel="prev" href="index.html">
-<link rel="next" href="data-used-in-these-notes.html">
+<link rel="prev" href="stepwise-variable-selection.html">
+<link rel="next" href="references.html">
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
@@ -333,82 +333,335 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="r-packages-used-in-these-notes" class="section level1 unnumbered">
-<h1>R Packages used in these notes</h1>
-<p>Here, we’ll load in the packages used in these notes.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(tableone)
-<span class="kw">library</span>(skimr)
-<span class="kw">library</span>(ggridges)</code></pre></div>
-<pre><code>Loading required package: ggplot2</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(magrittr)
-<span class="kw">library</span>(arm)</code></pre></div>
-<pre><code>Loading required package: MASS</code></pre>
-<pre><code>Loading required package: Matrix</code></pre>
-<pre><code>Loading required package: lme4</code></pre>
-<pre><code>
-arm (Version 1.9-3, built: 2016-11-21)</code></pre>
-<pre><code>Working directory is C:/Users/Thomas/Dropbox/2018-432/432-notes</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(rms)</code></pre></div>
-<pre><code>Loading required package: Hmisc</code></pre>
-<pre><code>Loading required package: lattice</code></pre>
-<pre><code>Loading required package: survival</code></pre>
-<pre><code>Loading required package: Formula</code></pre>
-<pre><code>
-Attaching package: &#39;Hmisc&#39;</code></pre>
-<pre><code>The following objects are masked from &#39;package:base&#39;:
+<div id="best-subsets-variable-selection-in-our-prostate-cancer-study" class="section level1">
+<h1><span class="header-section-number">Chapter 8</span> “Best Subsets” Variable Selection in our Prostate Cancer Study</h1>
+<p>A second approach to model selection involved fitting all possible subset models and identifying the ones that look best according to some meaningful criterion and ideally one that includes enough variables to model the response appropriately without including lots of redundant or unnecessary terms.</p>
+<div id="four-key-summaries-well-use-to-evaluate-potential-models" class="section level2">
+<h2><span class="header-section-number">8.1</span> Four Key Summaries We’ll Use to Evaluate Potential Models</h2>
+<ol style="list-style-type: decimal">
+<li>Adjusted R<sup>2</sup>, which we try to maximize.</li>
+<li>Akaike’s Information Criterion (AIC), which we try to minimize, and a Bias-Corrected version of AIC due to Hurwitz and Tsai, which we use when the sample size is small, specifically when the sample size <span class="math inline">\(n\)</span> and the number of predictors being studied <span class="math inline">\(k\)</span> are such that <span class="math inline">\(n/k \leq 40\)</span>. We also try to minimize this bias-corrected AIC.</li>
+<li>Bayesian Information Criterion (BIC), which we also try to minimize.</li>
+<li>Mallows’ C<sub>p</sub> statistic, which we (essentially) try to minimize.</li>
+</ol>
+<p>Choosing between AIC and BIC can be challenging.</p>
+<blockquote>
+<p>For model selection purposes, there is no clear choice between AIC and BIC. Given a family of models, including the true model, the probability that BIC will select the correct model approaches one as the sample size n approaches infinity - thus BIC is asymptotically consistent, which AIC is not. [But, for practical purposes,] BIC often chooses models that are too simple [relative to AIC] because of its heavy penalty on complexity.</p>
+</blockquote>
+<ul>
+<li>Source: <span class="citation">Hastie, Tibshriani, and Frideman (<a href="#ref-Hastie2001">2001</a>)</span>, page 208.</li>
+</ul>
+<p>Several useful tools for running “all subsets” or “best subsets” regression comparisons are developed in R’s <code>leaps</code> package.</p>
+</div>
+<div id="using-regsubsets-in-the-leaps-package" class="section level2">
+<h2><span class="header-section-number">8.2</span> Using <code>regsubsets</code> in the <code>leaps</code> package</h2>
+<p>We can use the <code>leaps</code> package to obtain results in the <code>prost</code> study from looking at all possible subsets of the candidate predictors.</p>
+<p>The <code>leaps</code> package isn’t particularly friendly to the tidyverse, and will require us first to identify a set of candidate predictors using <code>with</code> and <code>cbind</code>, then apply those to a <code>regsubsets</code> function, which identifies the set of models.</p>
+<p>To start, we’ll ask R to find the one best subset (with 1 predictor variable [in addition to the intercept], then with 2 predictors, and then with each of 3, 4, … 8 predictor variables) according to an exhaustive search without forcing any of the variables to be in or out. We’d use the <code>nvmax</code> command within the <code>regsubsets</code> function to limit the number of regression inputs to a maximum.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">preds &lt;-<span class="st"> </span><span class="kw">with</span>(prost, 
+   <span class="kw">cbind</span>(lcavol, lweight, age, bph_f, svi_f, lcp, gleason_f, pgg45))
 
-    format.pval, units</code></pre>
-<pre><code>Loading required package: SparseM</code></pre>
-<pre><code>
-Attaching package: &#39;SparseM&#39;</code></pre>
-<pre><code>The following object is masked from &#39;package:base&#39;:
+x1 &lt;-<span class="st"> </span><span class="kw">regsubsets</span>(preds, <span class="dt">y=</span>prost<span class="op">$</span>lpsa)
+rs &lt;-<span class="st"> </span><span class="kw">summary</span>(x1)
+rs</code></pre></div>
+<pre><code>Subset selection object
+8 Variables  (and intercept)
+          Forced in Forced out
+lcavol        FALSE      FALSE
+lweight       FALSE      FALSE
+age           FALSE      FALSE
+bph_f         FALSE      FALSE
+svi_f         FALSE      FALSE
+lcp           FALSE      FALSE
+gleason_f     FALSE      FALSE
+pgg45         FALSE      FALSE
+1 subsets of each size up to 8
+Selection Algorithm: exhaustive
+         lcavol lweight age bph_f svi_f lcp gleason_f pgg45
+1  ( 1 ) &quot;*&quot;    &quot; &quot;     &quot; &quot; &quot; &quot;   &quot; &quot;   &quot; &quot; &quot; &quot;       &quot; &quot;  
+2  ( 1 ) &quot;*&quot;    &quot;*&quot;     &quot; &quot; &quot; &quot;   &quot; &quot;   &quot; &quot; &quot; &quot;       &quot; &quot;  
+3  ( 1 ) &quot;*&quot;    &quot;*&quot;     &quot; &quot; &quot; &quot;   &quot;*&quot;   &quot; &quot; &quot; &quot;       &quot; &quot;  
+4  ( 1 ) &quot;*&quot;    &quot;*&quot;     &quot; &quot; &quot;*&quot;   &quot;*&quot;   &quot; &quot; &quot; &quot;       &quot; &quot;  
+5  ( 1 ) &quot;*&quot;    &quot;*&quot;     &quot;*&quot; &quot;*&quot;   &quot;*&quot;   &quot; &quot; &quot; &quot;       &quot; &quot;  
+6  ( 1 ) &quot;*&quot;    &quot;*&quot;     &quot;*&quot; &quot;*&quot;   &quot;*&quot;   &quot; &quot; &quot;*&quot;       &quot; &quot;  
+7  ( 1 ) &quot;*&quot;    &quot;*&quot;     &quot;*&quot; &quot;*&quot;   &quot;*&quot;   &quot;*&quot; &quot;*&quot;       &quot; &quot;  
+8  ( 1 ) &quot;*&quot;    &quot;*&quot;     &quot;*&quot; &quot;*&quot;   &quot;*&quot;   &quot;*&quot; &quot;*&quot;       &quot;*&quot;  </code></pre>
+<p>So…</p>
+<ul>
+<li>the best one-predictor model used <code>lcavol</code></li>
+<li>the best two-predictor model used <code>lcavol</code> and <code>lweight</code></li>
+<li>the best three-predictor model used <code>lcavol</code>, <code>lweight</code> and <code>svi_f</code></li>
+<li>the best four-predictor model added <code>bph_f</code>, and</li>
+<li>the best five-predictor model added <code>age</code></li>
+<li>the best six-input model added <code>gleason_f</code>,</li>
+<li>the best seven-input model added <code>lcp</code>,</li>
+<li>and the eight-input model adds <code>pgg45</code>.</li>
+</ul>
+<div id="summaries-of-winning-models" class="section level3">
+<h3><span class="header-section-number">8.2.1</span> Summaries of “Winning” Models</h3>
+<p>We can easily pull out R<sup>2</sup>, adjusted R<sup>2</sup>, C<sub>p</sub>, and BIC results for the “winning” models of each size.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">winners &lt;-<span class="st"> </span><span class="kw">tbl_df</span>(rs<span class="op">$</span>which)
+winners<span class="op">$</span>k &lt;-<span class="st"> </span><span class="dv">2</span><span class="op">:</span><span class="dv">9</span>
+winners<span class="op">$</span>r2 &lt;-<span class="st"> </span>rs<span class="op">$</span>rsq
+winners<span class="op">$</span>adjr2 &lt;-<span class="st"> </span>rs<span class="op">$</span>adjr2
+winners<span class="op">$</span>cp &lt;-<span class="st"> </span>rs<span class="op">$</span>cp
+winners<span class="op">$</span>bic &lt;-<span class="st"> </span>rs<span class="op">$</span>bic</code></pre></div>
+<p>And here is a table of those results…</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">winners</code></pre></div>
+<pre><code># A tibble: 8 x 14
+  `(Intercept)` lcavol lweight age   bph_f svi_f lcp   gleason_f pgg45
+  &lt;lgl&gt;         &lt;lgl&gt;  &lt;lgl&gt;   &lt;lgl&gt; &lt;lgl&gt; &lt;lgl&gt; &lt;lgl&gt; &lt;lgl&gt;     &lt;lgl&gt;
+1 T             T      F       F     F     F     F     F         F    
+2 T             T      T       F     F     F     F     F         F    
+3 T             T      T       F     F     T     F     F         F    
+4 T             T      T       F     T     T     F     F         F    
+5 T             T      T       T     T     T     F     F         F    
+6 T             T      T       T     T     T     F     T         F    
+7 T             T      T       T     T     T     T     T         F    
+8 T             T      T       T     T     T     T     T         T    
+# ... with 5 more variables: k &lt;int&gt;, r2 &lt;dbl&gt;, adjr2 &lt;dbl&gt;, cp &lt;dbl&gt;, bic
+#   &lt;dbl&gt;</code></pre>
+<ul>
+<li>All of these “best subsets” are hierarchical, in that each model is a subset of the one below it. This isn’t inevitably true.</li>
+<li>By adjusted R<sup>2</sup>, which we want to maximize, the best model appears to be the model with <span class="math inline">\(k\)</span> = 8.</li>
+<li>By <em>C<sub>p</sub></em>, which we want to minimize (within reason), the best choice appears to be the <span class="math inline">\(k\)</span> = 4, 6 or 7 model.</li>
+<li>By BIC, the best model has <span class="math inline">\(k\)</span> = 4.</li>
+</ul>
+</div>
+</div>
+<div id="plotting-the-best-subsets-results" class="section level2">
+<h2><span class="header-section-number">8.3</span> Plotting the Best Subsets Results</h2>
+<div id="the-adjusted-r2-plot" class="section level3">
+<h3><span class="header-section-number">8.3.1</span> The Adjusted R<sup>2</sup> Plot</h3>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(rs<span class="op">$</span>adjr2 <span class="op">~</span><span class="st"> </span><span class="kw">I</span>(<span class="dv">2</span><span class="op">:</span><span class="dv">9</span>), <span class="dt">ylab=</span><span class="st">&quot;Adjusted R-squared&quot;</span>,
+     <span class="dt">xlab=</span><span class="st">&quot;# of Inputs, including intercept&quot;</span>)
+<span class="kw">lines</span>(<span class="kw">spline</span>(rs<span class="op">$</span>adjr2 <span class="op">~</span><span class="st"> </span><span class="kw">I</span>(<span class="dv">2</span><span class="op">:</span><span class="dv">9</span>)))</code></pre></div>
+<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-71-1.png" width="672" /></p>
+<p>Models 4-9 all look like reasonable choices here.</p>
+</div>
+<div id="a-fancier-version-identifying-the-largest-adjusted-r2" class="section level3">
+<h3><span class="header-section-number">8.3.2</span> A Fancier Version (identifying the largest adjusted R<sup>2</sup>)</h3>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m2 &lt;-<span class="st"> </span><span class="kw">max</span>(rs<span class="op">$</span>adjr2) 
+m1 &lt;-<span class="st"> </span><span class="kw">which.max</span>(rs<span class="op">$</span>adjr2) <span class="op">+</span><span class="st"> </span><span class="dv">1</span>
+<span class="kw">plot</span>(rs<span class="op">$</span>adjr2 <span class="op">~</span><span class="st"> </span><span class="kw">I</span>(<span class="dv">2</span><span class="op">:</span><span class="dv">9</span>), <span class="dt">ylab=</span><span class="st">&quot;Adjusted R-squared&quot;</span>,
+     <span class="dt">xlab=</span><span class="st">&quot;# of Inputs, including intercept&quot;</span>)
+<span class="kw">lines</span>(<span class="kw">spline</span>(rs<span class="op">$</span>adjr2 <span class="op">~</span><span class="st"> </span><span class="kw">I</span>(<span class="dv">2</span><span class="op">:</span><span class="dv">9</span>)))
+<span class="kw">arrows</span>(m1, m2<span class="op">-</span><span class="fl">0.02</span>, m1, m2)
+<span class="kw">text</span>(m1, m2<span class="op">-</span><span class="fl">0.03</span>, <span class="kw">paste</span>(<span class="st">&quot;max =&quot;</span>, <span class="kw">format</span>(m2, <span class="dt">digits=</span><span class="dv">3</span>)))
+<span class="kw">text</span>(m1, m2<span class="op">-</span><span class="fl">0.045</span>, <span class="kw">paste</span>(<span class="st">&quot;with&quot;</span>, <span class="kw">format</span>(m1, <span class="dt">digits=</span><span class="dv">1</span>),
+                        <span class="st">&quot;inputs&quot;</span>), <span class="dt">pos=</span><span class="dv">3</span>)</code></pre></div>
+<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-72-1.png" width="672" /></p>
+</div>
+</div>
+<div id="mallows-c_p" class="section level2">
+<h2><span class="header-section-number">8.4</span> Mallows’ <span class="math inline">\(C_p\)</span></h2>
+<p>The <span class="math inline">\(C_p\)</span> statistic focuses directly on the tradeoff between <strong>bias</strong> (due to excluding important predictors from the model) and extra <strong>variance</strong> (due to including too many unimportant predictors in the model.)</p>
+<p>If N is the sample size, and we select <span class="math inline">\(p\)</span> regression predictors from a set of <span class="math inline">\(K\)</span> (where <span class="math inline">\(p &lt; K\)</span>), then the <span class="math inline">\(C_p\)</span> statistic is</p>
+<p><span class="math inline">\(C_p = \frac{SSE_p}{MSE_K} - N + 2p\)</span></p>
+<p>where:</p>
+<ul>
+<li><span class="math inline">\(SSE_p\)</span> is the sum of squares for error (residual) in the model with <span class="math inline">\(p\)</span> predictors</li>
+<li><span class="math inline">\(MSE_K\)</span> is the residual mean square after regression in the model with all <span class="math inline">\(K\)</span> predictors</li>
+</ul>
+<p>As it turns out, this is just measuring the particular model’s lack of fit, and then adding a penalty for the number of terms in the model (specifically <span class="math inline">\(2p - N\)</span> is the penalty since the lack of fit is measured as <span class="math inline">\((N-p) \frac{SSE_p}{MSE_K}\)</span>.</p>
+<p>If a model has no meaningful lack of fit (i.e. no substantial bias) then the expected value of <span class="math inline">\(C_p\)</span> is roughly <span class="math inline">\(p\)</span>.</p>
+<p>Otherwise, the expectation is <span class="math inline">\(p\)</span> plus a positive bias term.</p>
+<p>In general, we want to see <em>smaller</em> values of <span class="math inline">\(C_p\)</span>.</p>
+<p>Often, we do this by choosing a subset of predictors that have <span class="math inline">\(C_p\)</span> near the value of <span class="math inline">\(p\)</span>.</p>
+<div id="the-c_p-plot" class="section level3">
+<h3><span class="header-section-number">8.4.1</span> The <span class="math inline">\(C_p\)</span> Plot</h3>
+<p>The <span class="math inline">\(C_p\)</span> plot is just a scatterplot of <span class="math inline">\(C_p\)</span> on the Y-axis, and <span class="math inline">\(p\)</span> on the X-axis.</p>
+<p>Each of the various predictor subsets we will study is represented in a single point. A model without bias should have <span class="math inline">\(C_p\)</span> roughly equal to <span class="math inline">\(p\)</span>, so we’ll frequently draw a line at <span class="math inline">\(C_p = p\)</span> to make that clear. We then select our model from among all models with small <span class="math inline">\(C_p\)</span> statistics.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(rs<span class="op">$</span>cp <span class="op">~</span><span class="st"> </span><span class="kw">I</span>(<span class="dv">2</span><span class="op">:</span><span class="dv">9</span>),
+     <span class="dt">ylab=</span><span class="st">&quot;Cp Statistic&quot;</span>,
+     <span class="dt">xlab=</span><span class="st">&quot;# of Regression Inputs, including Intercept&quot;</span>,
+     <span class="dt">pch=</span><span class="dv">16</span>, <span class="dt">main=</span><span class="st">&quot;Cp Plot&quot;</span>)
+<span class="kw">abline</span>(<span class="dv">0</span>,<span class="dv">1</span>, <span class="dt">col =</span> <span class="st">&quot;purple&quot;</span>)</code></pre></div>
+<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-73-1.png" width="672" /></p>
+<p>Model 4 has the smallest value of <span class="math inline">\(C_p\)</span> (and is the leftmost of the largely comparable models 4-9) while 6 is close to and 7 is right on the <span class="math inline">\(C_p = p\)</span> line, so those are the likeliest candidates.</p>
+</div>
+</div>
+<div id="all-subsets-regression-and-information-criteria" class="section level2">
+<h2><span class="header-section-number">8.5</span> “All Subsets” Regression and Information Criteria</h2>
+<p>We will have three main information criteria:</p>
+<ul>
+<li>the Bayesian Information Criterion, called BIC</li>
+<li>the Akaike Information Criterion (used by R’s default stepwise approaches,) called AIC</li>
+<li>a corrected version of AIC due to Hurwitz and Tsai, called AIC<sub>c</sub></li>
+</ul>
+<p>Each of these indicates better models by getting smaller.</p>
+<div id="the-bic-plot" class="section level3">
+<h3><span class="header-section-number">8.5.1</span> The BIC Plot</h3>
+<p>R provides the BIC directly as part of the result of running <code>regsubsets</code>, as we’ve seen.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(rs<span class="op">$</span>bic <span class="op">~</span><span class="st"> </span><span class="kw">I</span>(<span class="dv">2</span><span class="op">:</span><span class="dv">9</span>), <span class="dt">ylab=</span><span class="st">&quot;BIC&quot;</span>, <span class="dt">xlab=</span><span class="st">&quot;# of Fitted Inputs&quot;</span>,
+     <span class="dt">pch=</span><span class="dv">16</span>, <span class="dt">cex=</span><span class="fl">1.5</span>, <span class="dt">col=</span><span class="st">&quot;slateblue&quot;</span>, <span class="dt">main=</span><span class="st">&quot;BIC Plot&quot;</span>)</code></pre></div>
+<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-74-1.png" width="672" /></p>
+<p>We want to minimize BIC, which argues strongly for the model with 4 inputs, including the intercept.</p>
+</div>
+<div id="aic-with-all-subsets" class="section level3">
+<h3><span class="header-section-number">8.5.2</span> AIC with “All Subsets”</h3>
+<p>To get the AIC, we can use the formula</p>
+<p><span class="math display">\[
+AIC = n log(RSS/n) + 2p
+\]</span></p>
+<p>where <em>n</em> is the sample size, <em>p</em> = # of regression inputs to be fit in the model (including the intercept) and the RSS can be found in the <code>regsubsets</code> output:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">rs<span class="op">$</span>rss</code></pre></div>
+<pre><code>[1] 58.91478 51.74218 46.56844 45.72444 44.64364 43.69047 43.04471 42.77150</code></pre>
+<p>So, in our case, we have n = 97 subjects, and models being fit with 2 to 9 regression inputs (including the intercept), so we have:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">rs<span class="op">$</span>aic &lt;-<span class="st"> </span><span class="dv">97</span><span class="op">*</span><span class="kw">log</span>(rs<span class="op">$</span>rss <span class="op">/</span><span class="st"> </span><span class="dv">97</span>) <span class="op">+</span><span class="st"> </span><span class="dv">2</span><span class="op">*</span>(<span class="dv">2</span><span class="op">:</span><span class="dv">9</span>)
+rs<span class="op">$</span>aic</code></pre></div>
+<pre><code>[1] -44.36603 -54.95846 -63.17744 -62.95157 -63.27191 -63.36534 -62.80974
+[8] -61.42738</code></pre>
+</div>
+<div id="the-bias-corrected-aic-hurwitz-tsai" class="section level3">
+<h3><span class="header-section-number">8.5.3</span> The Bias-Corrected AIC (Hurwitz &amp; Tsai)</h3>
+<p>The bias-corrected AIC formula due to Hurwitz and Tsai is:</p>
+<p><span class="math inline">\(AIC_c\)</span> = n log(RSS/n) + 2p + [2p (p+1) / (n-p-1)] = AIC + [2p (p+1) / (n-p-1)]</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">rs<span class="op">$</span>aic.corr &lt;-<span class="st"> </span><span class="dv">97</span><span class="op">*</span><span class="kw">log</span>(rs<span class="op">$</span>rss <span class="op">/</span><span class="st"> </span><span class="dv">97</span>) <span class="op">+</span><span class="st"> </span><span class="dv">2</span><span class="op">*</span>(<span class="dv">2</span><span class="op">:</span><span class="dv">9</span>) <span class="op">+</span>
+<span class="st">               </span>(<span class="dv">2</span> <span class="op">*</span><span class="st"> </span>(<span class="dv">2</span><span class="op">:</span><span class="dv">9</span>) <span class="op">*</span><span class="st"> </span>((<span class="dv">2</span><span class="op">:</span><span class="dv">9</span>)<span class="op">+</span><span class="dv">1</span>) <span class="op">/</span><span class="st"> </span>(<span class="dv">97</span> <span class="op">-</span><span class="st"> </span>(<span class="dv">2</span><span class="op">:</span><span class="dv">9</span>) <span class="op">-</span><span class="st"> </span><span class="dv">1</span>))
 
-    backsolve</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(leaps)
-<span class="kw">library</span>(simputation)</code></pre></div>
-<pre><code>
-Attaching package: &#39;simputation&#39;</code></pre>
-<pre><code>The following object is masked from &#39;package:Hmisc&#39;:
+<span class="kw">round</span>(rs<span class="op">$</span>aic,<span class="dv">2</span>) <span class="co"># uncorrected </span></code></pre></div>
+<pre><code>[1] -44.37 -54.96 -63.18 -62.95 -63.27 -63.37 -62.81 -61.43</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">round</span>(rs<span class="op">$</span>aic.corr,<span class="dv">2</span>) <span class="co"># bias-corrected</span></code></pre></div>
+<pre><code>[1] -44.24 -54.70 -62.74 -62.29 -62.34 -62.11 -61.17 -59.36</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(rs<span class="op">$</span>aic.corr <span class="op">~</span><span class="st"> </span><span class="kw">I</span>(<span class="dv">2</span><span class="op">:</span><span class="dv">9</span>), <span class="dt">ylab=</span><span class="st">&quot;AIC, corrected&quot;</span>, <span class="dt">xlab=</span><span class="st">&quot;# of Fitted Inputs&quot;</span>,
+     <span class="dt">pch=</span><span class="dv">16</span>, <span class="dt">cex=</span><span class="fl">1.5</span>, <span class="dt">col=</span><span class="st">&quot;tomato&quot;</span>, <span class="dt">main=</span><span class="st">&quot;AIC (corrected) Plot&quot;</span>)</code></pre></div>
+<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-78-1.png" width="672" /></p>
+<p>The smallest AIC<sub>c</sub> values occur in models 4 and later, especially model 4 itself.</p>
+</div>
+</div>
+<div id="all-four-plots-together" class="section level2">
+<h2><span class="header-section-number">8.6</span> All Four Plots, Together</h2>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>,<span class="dv">2</span>))
+m2 &lt;-<span class="st"> </span><span class="kw">max</span>(rs<span class="op">$</span>adjr2) 
+m1 &lt;-<span class="st"> </span><span class="kw">which.max</span>(rs<span class="op">$</span>adjr2) <span class="op">+</span><span class="st"> </span><span class="dv">1</span>
+<span class="kw">plot</span>(rs<span class="op">$</span>adjr2 <span class="op">~</span><span class="st"> </span><span class="kw">I</span>(<span class="dv">2</span><span class="op">:</span><span class="dv">9</span>), <span class="dt">ylab=</span><span class="st">&quot;Adjusted R-squared&quot;</span>,
+     <span class="dt">xlab=</span><span class="st">&quot;# of Inputs, including intercept&quot;</span>,
+     <span class="dt">main =</span> <span class="st">&quot;Adjusted R-squared&quot;</span>)
+<span class="kw">lines</span>(<span class="kw">spline</span>(rs<span class="op">$</span>adjr2 <span class="op">~</span><span class="st"> </span><span class="kw">I</span>(<span class="dv">2</span><span class="op">:</span><span class="dv">9</span>)))
+<span class="kw">arrows</span>(m1, m2<span class="op">-</span><span class="fl">0.02</span>, m1, m2)
+<span class="kw">text</span>(m1, m2<span class="op">-</span><span class="fl">0.03</span>, <span class="kw">paste</span>(<span class="st">&quot;max =&quot;</span>, <span class="kw">format</span>(m2, <span class="dt">digits=</span><span class="dv">3</span>)))
+<span class="kw">text</span>(m1, m2<span class="op">-</span><span class="fl">0.045</span>, <span class="kw">paste</span>(<span class="st">&quot;with&quot;</span>, <span class="kw">format</span>(m1, <span class="dt">digits=</span><span class="dv">1</span>),
+                        <span class="st">&quot;inputs&quot;</span>), <span class="dt">pos=</span><span class="dv">3</span>)
 
-    impute</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(modelr)
-<span class="kw">library</span>(broom)</code></pre></div>
-<pre><code>
-Attaching package: &#39;broom&#39;</code></pre>
-<pre><code>The following object is masked from &#39;package:modelr&#39;:
+<span class="kw">plot</span>(rs<span class="op">$</span>cp <span class="op">~</span><span class="st"> </span><span class="kw">I</span>(<span class="dv">2</span><span class="op">:</span><span class="dv">9</span>),
+     <span class="dt">ylab=</span><span class="st">&quot;Cp Statistic&quot;</span>,
+     <span class="dt">xlab=</span><span class="st">&quot;# of Regression Inputs, including Intercept&quot;</span>,
+     <span class="dt">pch=</span><span class="dv">16</span>, <span class="dt">main=</span><span class="st">&quot;Cp Plot&quot;</span>)
+<span class="kw">abline</span>(<span class="dv">0</span>,<span class="dv">1</span>, <span class="dt">col =</span> <span class="st">&quot;purple&quot;</span>)
 
-    bootstrap</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(tidyverse)</code></pre></div>
-<pre><code>-- Attaching packages ------------- tidyverse 1.2.1 --</code></pre>
-<pre><code>v tibble  1.4.1     v purrr   0.2.4
-v tidyr   0.7.2     v dplyr   0.7.4
-v readr   1.1.1     v stringr 1.2.0
-v tibble  1.4.1     v forcats 0.2.0</code></pre>
-<pre><code>-- Conflicts ---------------- tidyverse_conflicts() --
-x broom::bootstrap()   masks modelr::bootstrap()
-x dplyr::contains()    masks skimr::contains()
-x dplyr::ends_with()   masks skimr::ends_with()
-x dplyr::everything()  masks skimr::everything()
-x tidyr::expand()      masks Matrix::expand()
-x tidyr::extract()     masks magrittr::extract()
-x dplyr::filter()      masks stats::filter()
-x dplyr::lag()         masks stats::lag()
-x dplyr::matches()     masks skimr::matches()
-x dplyr::num_range()   masks skimr::num_range()
-x dplyr::one_of()      masks skimr::one_of()
-x dplyr::select()      masks MASS::select()
-x purrr::set_names()   masks magrittr::set_names()
-x dplyr::src()         masks Hmisc::src()
-x dplyr::starts_with() masks skimr::starts_with()
-x dplyr::summarize()   masks Hmisc::summarize()</code></pre>
+rs<span class="op">$</span>aic.corr &lt;-<span class="st"> </span><span class="dv">97</span><span class="op">*</span><span class="kw">log</span>(rs<span class="op">$</span>rss <span class="op">/</span><span class="st"> </span><span class="dv">97</span>) <span class="op">+</span><span class="st"> </span><span class="dv">2</span><span class="op">*</span>(<span class="dv">2</span><span class="op">:</span><span class="dv">9</span>) <span class="op">+</span>
+<span class="st">               </span>(<span class="dv">2</span> <span class="op">*</span><span class="st"> </span>(<span class="dv">2</span><span class="op">:</span><span class="dv">9</span>) <span class="op">*</span><span class="st"> </span>((<span class="dv">2</span><span class="op">:</span><span class="dv">9</span>)<span class="op">+</span><span class="dv">1</span>) <span class="op">/</span><span class="st"> </span>(<span class="dv">97</span> <span class="op">-</span><span class="st"> </span>(<span class="dv">2</span><span class="op">:</span><span class="dv">9</span>) <span class="op">-</span><span class="st"> </span><span class="dv">1</span>))
+<span class="kw">plot</span>(rs<span class="op">$</span>aic.corr <span class="op">~</span><span class="st"> </span><span class="kw">I</span>(<span class="dv">2</span><span class="op">:</span><span class="dv">9</span>), <span class="dt">ylab=</span><span class="st">&quot;AIC, corrected&quot;</span>, <span class="dt">xlab=</span><span class="st">&quot;# of Fitted Inputs&quot;</span>,
+     <span class="dt">pch=</span><span class="dv">16</span>, <span class="dt">cex=</span><span class="fl">1.5</span>, <span class="dt">col=</span><span class="st">&quot;tomato&quot;</span>, <span class="dt">main=</span><span class="st">&quot;AIC (corrected) Plot&quot;</span>)
+
+<span class="kw">plot</span>(rs<span class="op">$</span>bic <span class="op">~</span><span class="st"> </span><span class="kw">I</span>(<span class="dv">2</span><span class="op">:</span><span class="dv">9</span>), <span class="dt">ylab=</span><span class="st">&quot;BIC&quot;</span>, <span class="dt">xlab=</span><span class="st">&quot;# of Fitted Inputs&quot;</span>,
+     <span class="dt">pch=</span><span class="dv">16</span>, <span class="dt">cex=</span><span class="fl">1.5</span>, <span class="dt">col=</span><span class="st">&quot;slateblue&quot;</span>, <span class="dt">main=</span><span class="st">&quot;BIC Plot&quot;</span>)</code></pre></div>
+<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-79-1.png" width="672" /></p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">1</span>))</code></pre></div>
+</div>
+<div id="table-of-key-results" class="section level2">
+<h2><span class="header-section-number">8.7</span> Table of Key Results</h2>
+<p>We can build a big table, like this:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">winners &lt;-<span class="st"> </span><span class="kw">data_frame</span>(<span class="dt">inputs =</span> <span class="dv">2</span><span class="op">:</span><span class="dv">9</span>)
+winners<span class="op">$</span>r2 &lt;-<span class="st"> </span>rs<span class="op">$</span>rsq
+winners<span class="op">$</span>adjr2 &lt;-<span class="st"> </span>rs<span class="op">$</span>adjr2
+winners<span class="op">$</span>cp &lt;-<span class="st"> </span>rs<span class="op">$</span>cp
+winners<span class="op">$</span>bic &lt;-<span class="st"> </span>rs<span class="op">$</span>bic
+winners<span class="op">$</span>aic &lt;-<span class="st"> </span>rs<span class="op">$</span>aic
+winners<span class="op">$</span>aic.corr &lt;-<span class="st"> </span>rs<span class="op">$</span>aic.corr
+winners <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">round</span>(., <span class="dv">3</span>)</code></pre></div>
+<pre><code># A tibble: 8 x 7
+  inputs    r2 adjr2    cp   bic   aic aic.corr
+   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;
+1   2.00 0.539 0.535 28.2  -66.1 -44.4    -44.2
+2   3.00 0.596 0.587 15.5  -74.1 -55.0    -54.7
+3   4.00 0.636 0.624  6.81 -79.7 -63.2    -62.7
+4   5.00 0.643 0.627  7.08 -76.9 -63.0    -62.3
+5   6.00 0.651 0.632  6.85 -74.7 -63.3    -62.3
+6   7.00 0.658 0.636  6.89 -72.2 -63.4    -62.1
+7   8.00 0.663 0.637  7.56 -69.0 -62.8    -61.2
+8   9.00 0.666 0.635  9.00 -65.1 -61.4    -59.4</code></pre>
+</div>
+<div id="models-worth-considering" class="section level2">
+<h2><span class="header-section-number">8.8</span> Models Worth Considering?</h2>
+<table>
+<thead>
+<tr class="header">
+<th align="right"><span class="math inline">\(k\)</span></th>
+<th align="right">Size</th>
+<th>Predictors</th>
+<th>Reason</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">4</td>
+<td align="right">3</td>
+<td><code>lcavol lweight svi_f</code></td>
+<td>minimizes BIC</td>
+</tr>
+<tr class="even">
+<td align="right">7</td>
+<td align="right">6</td>
+<td><code>+ age bph_f gleason_f</code></td>
+<td><span class="math inline">\(C_p\)</span> near <em>p</em></td>
+</tr>
+<tr class="odd">
+<td align="right">8</td>
+<td align="right">7</td>
+<td><code>+ lcp</code></td>
+<td>max <span class="math inline">\(R^2_{adj}\)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="anova-testing-to-compare-these-three-models" class="section level2">
+<h2><span class="header-section-number">8.9</span> ANOVA Testing to compare these three models?</h2>
+<p>Let’s run an ANOVA-based comparison of these nested models to each other and to the model with the intercept alone.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m.int &lt;-<span class="st"> </span><span class="kw">lm</span>(lpsa <span class="op">~</span><span class="st"> </span><span class="dv">1</span>, <span class="dt">data =</span> prost)
+m04 &lt;-<span class="st"> </span><span class="kw">lm</span>(lpsa <span class="op">~</span><span class="st"> </span>lcavol <span class="op">+</span><span class="st"> </span>lweight <span class="op">+</span><span class="st"> </span>svi_f, <span class="dt">data =</span> prost)
+m07 &lt;-<span class="st"> </span><span class="kw">lm</span>(lpsa <span class="op">~</span><span class="st"> </span>lcavol <span class="op">+</span><span class="st"> </span>lweight <span class="op">+</span><span class="st"> </span>svi_f <span class="op">+</span><span class="st"> </span>
+<span class="st">              </span>age <span class="op">+</span><span class="st"> </span>bph_f <span class="op">+</span><span class="st"> </span>gleason_f, <span class="dt">data =</span> prost)
+m08 &lt;-<span class="st"> </span><span class="kw">lm</span>(lpsa <span class="op">~</span><span class="st"> </span>lcavol <span class="op">+</span><span class="st"> </span>lweight <span class="op">+</span><span class="st"> </span>svi_f <span class="op">+</span><span class="st"> </span>
+<span class="st">              </span>age <span class="op">+</span><span class="st"> </span>bph_f <span class="op">+</span><span class="st"> </span>gleason_f <span class="op">+</span><span class="st"> </span>lcp, <span class="dt">data =</span> prost)
+m.full &lt;-<span class="st"> </span><span class="kw">lm</span>(lpsa <span class="op">~</span><span class="st"> </span>lcavol <span class="op">+</span><span class="st"> </span>lweight <span class="op">+</span><span class="st"> </span>svi_f <span class="op">+</span><span class="st"> </span>
+<span class="st">              </span>age <span class="op">+</span><span class="st"> </span>bph_f <span class="op">+</span><span class="st"> </span>gleason_f <span class="op">+</span><span class="st"> </span>lcp <span class="op">+</span><span class="st"> </span>pgg45, <span class="dt">data =</span> prost)</code></pre></div>
+<p>Next, we’ll run…</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">anova</span>(m.full, m08, m07, m04, m.int)</code></pre></div>
+<pre><code>Analysis of Variance Table
+
+Model 1: lpsa ~ lcavol + lweight + svi_f + age + bph_f + gleason_f + lcp + 
+    pgg45
+Model 2: lpsa ~ lcavol + lweight + svi_f + age + bph_f + gleason_f + lcp
+Model 3: lpsa ~ lcavol + lweight + svi_f + age + bph_f + gleason_f
+Model 4: lpsa ~ lcavol + lweight + svi_f
+Model 5: lpsa ~ 1
+  Res.Df     RSS Df Sum of Sq       F Pr(&gt;F)    
+1     86  41.057                                
+2     87  41.498 -1    -0.441  0.9234 0.3393    
+3     88  42.066 -1    -0.568  1.1891 0.2786    
+4     93  46.568 -5    -4.503  1.8863 0.1050    
+5     96 127.918 -3   -81.349 56.7991 &lt;2e-16 ***
+---
+Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<p>What conclusions can we draw here, on the basis of these ANOVA tests?</p>
+
+</div>
+</div>
+<h3>References</h3>
+<div id="refs" class="references">
+<div id="ref-Hastie2001">
+<p>Hastie, Trevor, Robert Tibshriani, and Jerome H. Frideman. 2001. <em>The Elements of Statistical Learning</em>. New York: Springer.</p>
+</div>
 </div>
             </section>
 
           </div>
         </div>
       </div>
-<a href="index.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-<a href="data-used-in-these-notes.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="stepwise-variable-selection.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="references.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
@@ -437,7 +690,7 @@ gitbook.start({
 "size": 2
 },
 "edit": {
-"link": "https://github.com/rstudio/bookdown-demo/edit/master/00_setup.Rmd",
+"link": "https://github.com/rstudio/bookdown-demo/edit/master/08_bestsubsets.Rmd",
 "text": "Edit"
 },
 "download": ["bookdown-demo.pdf", "bookdown-demo.epub"],

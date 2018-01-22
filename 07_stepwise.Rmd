@@ -223,13 +223,79 @@ What conclusions can we draw on the basis of these ANOVA tests?
 - The ANOVA test comparing Model 5 (kitchen sink) to Model 4 (Allen-Cady result) shows no statistically significant improvement in predictive value.
 - Neither does the ANOVA test comparing Model 3 to Model 2 or Model 4 to Model 3.
 
-This suggests that, **if we are willing to let the ANOVA test decide our best model** than that would be the model produced by forward selection, with predictors `lcavol`, `lweight` and `svi_f`. But...
+This suggests that, **if we are willing to let the ANOVA test decide our best model** than that would be the model produced by forward selection, with predictors `lcavol`, `lweight` and `svi_f`. But we haven't validated the models.
 
 1. If the purpose of the model is to predict new data, some sort of out-of-sample or cross-validation approach will be necessary, and
 2. Even if our goal isn't prediction but merely description of the current data, we would still want to build diagnostic plots to regression assumptions in each model, and
 3. There is no reason to assume in advance that any of these models is in fact correct, or that any one of these stepwise approaches is necessarily better than any other, and
 4. The mere act of running a stepwise regression model, as we'll see, can increase the bias in our findings if we accept the results at face value.
 
-So we'll need some additional methods for selecting variables, and for then validating the results once we complete the selection process. 
+So we'll need some ways to validate the results once we complete the selection process. 
+
+### Validating the Results of the Various Models
+
+We can use a 5-fold cross-validation approach to assess the predictions made by our potential models and then compare them. Let's compare our three models:
+
+- the three predictor model obtained by forward selection, including `lcavol`, `lweight`, and `svi_f`
+- the five predictor model obtained by backwards elimination, including `lcavol`, `lweight`, `svi_f`, and also `age`, and `bph_f`
+- the six predictor model obtained by the Allen-Cady approach, adding `gleason_f` to the previous model. 
+
+Here's the 5-fold validation work (and resulting RMSE and MAE estimates) for the three-predictor model.
+
+```{r validation_prost_3}
+set.seed(43201012)
+
+prost3_models <- prost %>%
+    crossv_kfold(k = 5) %>%
+    mutate(model = map(train, ~ lm(lpsa ~ lcavol + lweight + 
+                                       svi_f, data = .)))
+
+prost3_preds <- prost3_models %>%
+    unnest(map2(model, test, ~ augment(.x, newdata = .y)))
+
+prost3_preds %>%
+    summarize(RMSE_prost3 = sqrt(mean((lpsa - .fitted) ^2)),
+              MAE_prost3 = mean(abs(lpsa - .fitted)))
+```
+
+Now, we'll generate the RMSE and MAE estimates for the five-predictor model.
+
+```{r validation_prost_5}
+set.seed(43206879)
+
+prost5_models <- prost %>%
+    crossv_kfold(k = 5) %>%
+    mutate(model = map(train, ~ lm(lpsa ~ lcavol + lweight + 
+                                       svi_f + age + bph_f, data = .)))
+
+prost5_preds <- prost5_models %>%
+    unnest(map2(model, test, ~ augment(.x, newdata = .y)))
+
+prost5_preds %>%
+    summarize(RMSE_prost5 = sqrt(mean((lpsa - .fitted) ^2)),
+              MAE_prost5 = mean(abs(lpsa - .fitted)))
+```
+
+And at last, we'll generate the RMSE and MAE estimates for the six-predictor model.
+
+```{r validation_prost_6}
+set.seed(43236198)
+
+prost6_models <- prost %>%
+    crossv_kfold(k = 5) %>%
+    mutate(model = map(train, ~ lm(lpsa ~ lcavol + lweight + 
+                                       svi_f + age + bph_f + gleason_f, data = .)))
+
+prost6_preds <- prost6_models %>%
+    unnest(map2(model, test, ~ augment(.x, newdata = .y)))
+
+prost6_preds %>%
+    summarize(RMSE_prost6 = sqrt(mean((lpsa - .fitted) ^2)),
+              MAE_prost6 = mean(abs(lpsa - .fitted)))
+```
+
+It appears that the six-predictor model does better than either of the other two approaches, with smaller RMSE and MAE. The three-predictor model does slightly better in terms of root mean square prediction error and slightly worse in terms of mean absolute prediction error than the five-predictor model.
+
+OK. A mixed bag, with different conclusions depending on which summary we want to look at. But of course, stepwise regression isn't the only way to do variable selection. Let's consider a broader range of potential predictor sets.
 
 

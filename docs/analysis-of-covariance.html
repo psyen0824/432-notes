@@ -31,8 +31,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   
   
-<link rel="prev" href="index.html">
-<link rel="next" href="data-used-in-these-notes.html">
+<link rel="prev" href="analysis-of-variance.html">
+<link rel="next" href="missing-data-mechanisms-and-single-imputation.html">
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
@@ -333,82 +333,309 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="r-packages-used-in-these-notes" class="section level1 unnumbered">
-<h1>R Packages used in these notes</h1>
-<p>Here, we’ll load in the packages used in these notes.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(tableone)
-<span class="kw">library</span>(skimr)
-<span class="kw">library</span>(ggridges)</code></pre></div>
-<pre><code>Loading required package: ggplot2</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(magrittr)
-<span class="kw">library</span>(arm)</code></pre></div>
-<pre><code>Loading required package: MASS</code></pre>
-<pre><code>Loading required package: Matrix</code></pre>
-<pre><code>Loading required package: lme4</code></pre>
-<pre><code>
-arm (Version 1.9-3, built: 2016-11-21)</code></pre>
-<pre><code>Working directory is C:/Users/Thomas/Dropbox/2018-432/432-notes</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(rms)</code></pre></div>
-<pre><code>Loading required package: Hmisc</code></pre>
-<pre><code>Loading required package: lattice</code></pre>
-<pre><code>Loading required package: survival</code></pre>
-<pre><code>Loading required package: Formula</code></pre>
-<pre><code>
-Attaching package: &#39;Hmisc&#39;</code></pre>
-<pre><code>The following objects are masked from &#39;package:base&#39;:
+<div id="analysis-of-covariance" class="section level1">
+<h1><span class="header-section-number">Chapter 4</span> Analysis of Covariance</h1>
+<div id="an-emphysema-study" class="section level2">
+<h2><span class="header-section-number">4.1</span> An Emphysema Study</h2>
+<p>My source for this example is <span class="citation">Riffenburgh (<a href="#ref-Riffenburgh2006">2006</a>)</span>, section 18.4. Serum theophylline levels (in mg/dl) were measured in 16 patients with emphysema at baseline, then 5 days later (at the end of a course of antibiotics) and then at 10 days after baseline. Clinicians anticipate that the antibiotic will increase the theophylline level. The data are stored in the <code>emphysema.csv</code> data file, and note that the age for patient 5 is not available.</p>
+<div id="codebook" class="section level3">
+<h3><span class="header-section-number">4.1.1</span> Codebook</h3>
+<table>
+<thead>
+<tr class="header">
+<th align="right">Variable</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right"><code>patient</code></td>
+<td>ID code</td>
+</tr>
+<tr class="even">
+<td align="right"><code>age</code></td>
+<td>patient’s age in years</td>
+</tr>
+<tr class="odd">
+<td align="right"><code>sex</code></td>
+<td>patient’s sex (F or M)</td>
+</tr>
+<tr class="even">
+<td align="right"><code>st_base</code></td>
+<td>patient’s serum theophylline at baseline (mg/dl)</td>
+</tr>
+<tr class="odd">
+<td align="right"><code>st_day5</code></td>
+<td>patient’s serum theophylline at day 5 (mg/dl)</td>
+</tr>
+<tr class="even">
+<td align="right"><code>st_day10</code></td>
+<td>patient’s serum theophylline at day 10 (mg/dl)</td>
+</tr>
+</tbody>
+</table>
+<p>We’re going to look at the change from baseline to day 5 as our outcome of interest, since the clinical expectation is that the antibiotic (azithromycin) will increase theophylline levels.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">emphysema &lt;-<span class="st"> </span>emphysema <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">    </span><span class="kw">mutate</span>(<span class="dt">st_delta =</span> st_day5 <span class="op">-</span><span class="st"> </span>st_base)
 
-    format.pval, units</code></pre>
-<pre><code>Loading required package: SparseM</code></pre>
-<pre><code>
-Attaching package: &#39;SparseM&#39;</code></pre>
-<pre><code>The following object is masked from &#39;package:base&#39;:
+emphysema</code></pre></div>
+<pre><code># A tibble: 16 x 7
+   patient   age sex   st_base st_day5 st_day10 st_delta
+     &lt;int&gt; &lt;int&gt; &lt;fct&gt;   &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;
+ 1       1    61 F       14.1     2.30    10.3   -11.8  
+ 2       2    70 F        7.20    5.40     7.30  - 1.80 
+ 3       3    65 M       14.2    11.9     11.3   - 2.30 
+ 4       4    65 M       10.3    10.7     13.8     0.400
+ 5       5    NA M        9.90   10.7     11.7     0.800
+ 6       6    76 M        5.20    6.80     4.20    1.60 
+ 7       7    72 M       10.4    14.6     14.1     4.20 
+ 8       8    69 F       10.5     7.20     5.40  - 3.30 
+ 9       9    66 M        5.00    5.00     5.10    0    
+10      10    62 M        8.60    8.10     7.40  - 0.500
+11      11    65 F       16.6    14.9     13.0   - 1.70 
+12      12    71 M       16.4    18.6     17.1     2.20 
+13      13    51 F       12.2    11.0     12.3   - 1.20 
+14      14    71 M        6.60    3.70     4.50  - 2.90 
+15      15    64 F       15.4    15.2     13.6   - 0.200
+16      16    50 M       10.2    10.8     11.2     0.600</code></pre>
+</div>
+</div>
+<div id="does-sex-affect-the-mean-change-in-theophylline" class="section level2">
+<h2><span class="header-section-number">4.2</span> Does <code>sex</code> affect the mean change in theophylline?</h2>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">emphysema <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">skim</span>(st_delta)</code></pre></div>
+<pre><code>Skim summary statistics
+ n obs: 16 
+ n variables: 7 
 
-    backsolve</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(leaps)
-<span class="kw">library</span>(simputation)</code></pre></div>
-<pre><code>
-Attaching package: &#39;simputation&#39;</code></pre>
-<pre><code>The following object is masked from &#39;package:Hmisc&#39;:
+Variable type: numeric 
+ variable missing complete  n  mean   sd    p0   p25 median  p75 p100
+ st_delta       0       16 16 -0.99 3.48 -11.8 -1.92  -0.35 0.65  4.2</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">emphysema <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">group_by</span>(sex) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">skim</span>(st_delta)</code></pre></div>
+<pre><code>Skim summary statistics
+ n obs: 16 
+ n variables: 7 
+ group variables: sex 
 
-    impute</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(modelr)
-<span class="kw">library</span>(broom)</code></pre></div>
-<pre><code>
-Attaching package: &#39;broom&#39;</code></pre>
-<pre><code>The following object is masked from &#39;package:modelr&#39;:
+Variable type: numeric 
+ sex variable missing complete  n  mean   sd    p0   p25 median   p75 p100
+   F st_delta       0        6  6 -3.33 4.27 -11.8 -2.92  -1.75 -1.32 -0.2
+   M st_delta       0       10 10  0.41 2.07  -2.9 -0.38   0.5   1.4   4.2</code></pre>
+<p>Overall, the mean change in theophylline during the course of the antibiotic is -0.99, but this is -3.33 for female patients and 0.41 for male patients.</p>
+<p>A one-way ANOVA model looks like this:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">anova</span>(<span class="kw">lm</span>(st_delta <span class="op">~</span><span class="st"> </span>sex, <span class="dt">data =</span> emphysema))</code></pre></div>
+<pre><code>Analysis of Variance Table
 
-    bootstrap</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(tidyverse)</code></pre></div>
-<pre><code>-- Attaching packages ------------- tidyverse 1.2.1 --</code></pre>
-<pre><code>v tibble  1.4.1     v purrr   0.2.4
-v tidyr   0.7.2     v dplyr   0.7.4
-v readr   1.1.1     v stringr 1.2.0
-v tibble  1.4.1     v forcats 0.2.0</code></pre>
-<pre><code>-- Conflicts ---------------- tidyverse_conflicts() --
-x broom::bootstrap()   masks modelr::bootstrap()
-x dplyr::contains()    masks skimr::contains()
-x dplyr::ends_with()   masks skimr::ends_with()
-x dplyr::everything()  masks skimr::everything()
-x tidyr::expand()      masks Matrix::expand()
-x tidyr::extract()     masks magrittr::extract()
-x dplyr::filter()      masks stats::filter()
-x dplyr::lag()         masks stats::lag()
-x dplyr::matches()     masks skimr::matches()
-x dplyr::num_range()   masks skimr::num_range()
-x dplyr::one_of()      masks skimr::one_of()
-x dplyr::select()      masks MASS::select()
-x purrr::set_names()   masks magrittr::set_names()
-x dplyr::src()         masks Hmisc::src()
-x dplyr::starts_with() masks skimr::starts_with()
-x dplyr::summarize()   masks Hmisc::summarize()</code></pre>
+Response: st_delta
+          Df  Sum Sq Mean Sq F value  Pr(&gt;F)  
+sex        1  52.547  52.547  5.6789 0.03189 *
+Residuals 14 129.542   9.253                  
+---
+Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<p>The ANOVA F test finds a statistically significant difference between the mean <code>st_delta</code> among males and the mean <code>st_delta</code> among females. But is there more to the story?</p>
+</div>
+<div id="is-there-an-association-between-age-and-sex-in-this-study" class="section level2">
+<h2><span class="header-section-number">4.3</span> Is there an association between <code>age</code> and <code>sex</code> in this study?</h2>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">emphysema <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">group_by</span>(sex) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">skim</span>(age)</code></pre></div>
+<pre><code>Skim summary statistics
+ n obs: 16 
+ n variables: 7 
+ group variables: sex 
+
+Variable type: integer 
+ sex variable missing complete  n  mean   sd p0   p25 median p75 p100
+   F      age       0        6  6 63.33 6.89 51 61.75   64.5  68   70
+   M      age       1        9 10 66.44 7.57 50 65      66    71   76</code></pre>
+<p>But we note that the male patients are also older than the female patients, on average (mean age for males is 66.4, for females 63.3)</p>
+<ul>
+<li>Does the fact that male patients are older affect change in theophylline level?</li>
+<li>And how should we deal with the one missing <code>age</code> value (in a male patient)?</li>
+</ul>
+</div>
+<div id="adding-a-quantitative-covariate-age-to-the-model" class="section level2">
+<h2><span class="header-section-number">4.4</span> Adding a quantitative covariate, <code>age</code>, to the model</h2>
+<p>We could fit an ANOVA model to predict <code>st_delta</code> using <code>sex</code> and <code>age</code> directly, but only if we categorized <code>age</code> into two or more groups. Because <code>age</code> is not categorical, we cannot include it in an ANOVA. But if age is an influence, and we don’t adjust for it, it may well bias the outcome of our initial ANOVA. With a quantitative variable like <code>age</code>, we will need a method called ANCOVA, for <strong>analysis of covariance</strong>.</p>
+<div id="the-ancova-model" class="section level3">
+<h3><span class="header-section-number">4.4.1</span> The ANCOVA model</h3>
+<p>ANCOVA in this case is just an ANOVA model with our outcome (<code>st_delta</code>) adjusted for a continuous covariate, called <code>age</code>. For the moment, we’ll ignore the one subject with missing <code>age</code> and simply fit the regression model with <code>sex</code> and <code>age</code>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(<span class="kw">lm</span>(st_delta <span class="op">~</span><span class="st"> </span>sex <span class="op">+</span><span class="st"> </span>age, <span class="dt">data =</span> emphysema))</code></pre></div>
+<pre><code>
+Call:
+lm(formula = st_delta ~ sex + age, data = emphysema)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-8.3352 -0.4789  0.6948  1.5580  3.5202 
+
+Coefficients:
+            Estimate Std. Error t value Pr(&gt;|t|)  
+(Intercept) -6.90266    7.92948  -0.871   0.4011  
+sexM         3.52466    1.75815   2.005   0.0681 .
+age          0.05636    0.12343   0.457   0.6561  
+---
+Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+
+Residual standard error: 3.255 on 12 degrees of freedom
+  (1 observation deleted due to missingness)
+Multiple R-squared:  0.2882,    Adjusted R-squared:  0.1696 
+F-statistic:  2.43 on 2 and 12 DF,  p-value: 0.13</code></pre>
+<p>This model assumes that the slope of the regression line between <code>st_delta</code> and <code>age</code> is the same for both sexes.</p>
+<p>Note that the model yields <code>st_delta</code> = -6.9 + 3.52 (<code>sex</code> = male) + 0.056 <code>age</code>, or</p>
+<ul>
+<li><code>st_delta</code> = -3.38 + 0.056 <code>age</code> for female patients, and</li>
+<li><code>st_delta</code> = -6.9 + 0.056 <code>age</code> for male patients.</li>
+</ul>
+<p>Note that we can test this assumption of equal slopes by fitting an alternative model (with a product term between <code>sex</code> and <code>age</code>) that doesn’t require the assumption, and we’ll do that later.</p>
+</div>
+<div id="the-ancova-table" class="section level3">
+<h3><span class="header-section-number">4.4.2</span> The ANCOVA Table</h3>
+<p>First, though, we’ll look at the ANCOVA table.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">anova</span>(<span class="kw">lm</span>(st_delta <span class="op">~</span><span class="st"> </span>sex <span class="op">+</span><span class="st"> </span>age, <span class="dt">data =</span> emphysema))</code></pre></div>
+<pre><code>Analysis of Variance Table
+
+Response: st_delta
+          Df  Sum Sq Mean Sq F value  Pr(&gt;F)  
+sex        1  49.284  49.284  4.6507 0.05203 .
+age        1   2.209   2.209  0.2085 0.65612  
+Residuals 12 127.164  10.597                  
+---
+Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<p>When we tested <code>sex</code> without accounting for <code>age</code>, we found a <em>p</em> value of 0.032, which is less than our usual cutpoint of 0.05. But when we adjusted for <code>age</code>, we find that <code>sex</code> loses significance, even though <code>age</code> is not a significant influence on <code>st_delta</code> by itself, according to the ANCOVA table.</p>
+</div>
+</div>
+<div id="rerunning-the-ancova-model-after-simple-imputation" class="section level2">
+<h2><span class="header-section-number">4.5</span> Rerunning the ANCOVA model after simple imputation</h2>
+<p>We could have <em>imputed</em> the missing <code>age</code> value for patient 5, rather than just deleting that patient. Suppose we do the simplest potentially reasonable thing to do: insert the mean <code>age</code> in where the NA value currently exists.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">emph_imp &lt;-<span class="st"> </span><span class="kw">replace_na</span>(emphysema, <span class="kw">list</span>(<span class="dt">age =</span> <span class="kw">mean</span>(emphysema<span class="op">$</span>age, <span class="dt">na.rm =</span> <span class="ot">TRUE</span>)))
+
+emph_imp</code></pre></div>
+<pre><code># A tibble: 16 x 7
+   patient   age sex   st_base st_day5 st_day10 st_delta
+     &lt;int&gt; &lt;dbl&gt; &lt;fct&gt;   &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;
+ 1       1  61.0 F       14.1     2.30    10.3   -11.8  
+ 2       2  70.0 F        7.20    5.40     7.30  - 1.80 
+ 3       3  65.0 M       14.2    11.9     11.3   - 2.30 
+ 4       4  65.0 M       10.3    10.7     13.8     0.400
+ 5       5  65.2 M        9.90   10.7     11.7     0.800
+ 6       6  76.0 M        5.20    6.80     4.20    1.60 
+ 7       7  72.0 M       10.4    14.6     14.1     4.20 
+ 8       8  69.0 F       10.5     7.20     5.40  - 3.30 
+ 9       9  66.0 M        5.00    5.00     5.10    0    
+10      10  62.0 M        8.60    8.10     7.40  - 0.500
+11      11  65.0 F       16.6    14.9     13.0   - 1.70 
+12      12  71.0 M       16.4    18.6     17.1     2.20 
+13      13  51.0 F       12.2    11.0     12.3   - 1.20 
+14      14  71.0 M        6.60    3.70     4.50  - 2.90 
+15      15  64.0 F       15.4    15.2     13.6   - 0.200
+16      16  50.0 M       10.2    10.8     11.2     0.600</code></pre>
+<p>More on simple imputation and missing data is coming soon.</p>
+<p>For now, we can rerun the ANCOVA model on this new data set, after imputation…</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">anova</span>(<span class="kw">lm</span>(st_delta <span class="op">~</span><span class="st"> </span>sex <span class="op">+</span><span class="st"> </span>age, <span class="dt">data =</span> emph_imp))</code></pre></div>
+<pre><code>Analysis of Variance Table
+
+Response: st_delta
+          Df  Sum Sq Mean Sq F value  Pr(&gt;F)  
+sex        1  52.547  52.547  5.3623 0.03755 *
+age        1   2.151   2.151  0.2195 0.64721  
+Residuals 13 127.392   9.799                  
+---
+Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<p>When we do this, we see that now the <code>sex</code> variable returns to a <em>p</em> value below 0.05. Our complete case analysis (which omitted patient 5) gives us a different result than the ANCOVA based on the data after mean imputation.</p>
+</div>
+<div id="looking-at-a-factor-covariate-interaction" class="section level2">
+<h2><span class="header-section-number">4.6</span> Looking at a factor-covariate interaction</h2>
+<p>Let’s run a model including the interaction (product) term between <code>age</code> and <code>sex</code>, which implies that the slope of <code>age</code> on our outcome (<code>st_delta</code>) depends on the patient’s sex. We’ll use the imputed data again. Here is the new ANCOVA table, which suggests that the interaction of <code>age</code> and <code>sex</code> is small (because it accounts for only a small amount of the total Sum of Squares) and not significant (p = 0.91).</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">anova</span>(<span class="kw">lm</span>(st_delta <span class="op">~</span><span class="st"> </span>sex <span class="op">*</span><span class="st"> </span>age, <span class="dt">data =</span> emph_imp))</code></pre></div>
+<pre><code>Analysis of Variance Table
+
+Response: st_delta
+          Df  Sum Sq Mean Sq F value  Pr(&gt;F)  
+sex        1  52.547  52.547  4.9549 0.04594 *
+age        1   2.151   2.151  0.2028 0.66051  
+sex:age    1   0.130   0.130  0.0123 0.91355  
+Residuals 12 127.261  10.605                  
+---
+Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<p>Since the interaction term is neither substantial nor significant, we probably don’t need it here. But let’s look at its interpretation anyway, just to fix ideas. To do that, we’ll need the coefficients from the underlying regression model.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">tidy</span>(<span class="kw">lm</span>(st_delta <span class="op">~</span><span class="st"> </span>sex <span class="op">*</span><span class="st"> </span>age, <span class="dt">data =</span> emph_imp))</code></pre></div>
+<pre><code>         term    estimate  std.error  statistic   p.value
+1 (Intercept) -5.64606742 13.4536974 -0.4196666 0.6821446
+2        sexM  1.72031026 16.8389209  0.1021627 0.9203148
+3         age  0.03651685  0.2113871  0.1727488 0.8657284
+4    sexM:age  0.02885946  0.2603044  0.1108681 0.9135536</code></pre>
+<p>Our ANCOVA model for <code>st_delta</code> incorporating the <code>age</code> x <code>sex</code> product term is -5.65 + 1.72 (sex = M) + 0.037 age + 0.029 (sex = M)(age). So that means:</p>
+<ul>
+<li>our model for females is <code>st_delta</code> = -5.65 + 0.037 <code>age</code></li>
+<li>our model for males is <code>st_delta</code> = (-5.65 + 1.72) + (0.037 + 0.029) <code>age</code>, or -3.93 + 0.066 <code>age</code></li>
+</ul>
+<p>but, again, our conclusion from the ANCOVA table is that this increase in complexity (letting both the slope and intercept vary by <code>sex</code>) doesn’t add much in the way of predictive value for our <code>st_delta</code> outcome.</p>
+</div>
+<div id="centering-the-covariate-to-facilitate-ancova-interpretation" class="section level2">
+<h2><span class="header-section-number">4.7</span> Centering the Covariate to Facilitate ANCOVA Interpretation</h2>
+<p>When developing an ANCOVA model, we will often <strong>center</strong> or even <strong>center and rescale</strong> the covariate to facilitate interpretation of the product term. In this case, let’s center <code>age</code> and rescale it by dividing by two standard deviations.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">emph_imp <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">skim</span>(age)</code></pre></div>
+<pre><code>Skim summary statistics
+ n obs: 16 
+ n variables: 7 
+
+Variable type: numeric 
+ variable missing complete  n mean   sd p0  p25 median   p75 p100
+      age       0       16 16 65.2 6.98 50 63.5   65.1 70.25   76</code></pre>
+<p>Note that in our imputed data, the mean <code>age</code> is 65.2 and the standard deviation of <code>age</code> is 7 years.</p>
+<p>So we build the rescaled <code>age</code> variable that I’ll call <code>age_z</code>, and then use it to refit our model.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">emph_imp &lt;-<span class="st"> </span>emph_imp <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">mutate</span>(<span class="dt">age_z =</span> (age <span class="op">-</span><span class="st"> </span><span class="kw">mean</span>(age))<span class="op">/</span><span class="st"> </span>(<span class="dv">2</span> <span class="op">*</span><span class="st"> </span><span class="kw">sd</span>(age)))
+
+<span class="kw">anova</span>(<span class="kw">lm</span>(st_delta <span class="op">~</span><span class="st"> </span>sex <span class="op">*</span><span class="st"> </span>age_z, <span class="dt">data =</span> emph_imp))</code></pre></div>
+<pre><code>Analysis of Variance Table
+
+Response: st_delta
+          Df  Sum Sq Mean Sq F value  Pr(&gt;F)  
+sex        1  52.547  52.547  4.9549 0.04594 *
+age_z      1   2.151   2.151  0.2028 0.66051  
+sex:age_z  1   0.130   0.130  0.0123 0.91355  
+Residuals 12 127.261  10.605                  
+---
+Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">tidy</span>(<span class="kw">lm</span>(st_delta <span class="op">~</span><span class="st"> </span>sex <span class="op">*</span><span class="st"> </span>age_z, <span class="dt">data =</span> emph_imp))</code></pre></div>
+<pre><code>         term   estimate std.error  statistic    p.value
+1 (Intercept) -3.2651685  1.386802 -2.3544587 0.03641637
+2        sexM  3.6019471  1.735706  2.0752055 0.06013138
+3       age_z  0.5096337  2.950144  0.1727488 0.86572835
+4  sexM:age_z  0.4027661  3.632839  0.1108681 0.91355364</code></pre>
+<p>Comparing the two models, we have:</p>
+<ul>
+<li>(unscaled): <code>st_delta</code> = -5.65 + 1.72 (<code>sex</code> = M) + 0.037 <code>age</code> + 0.029 (<code>sex</code> = M) x (<code>age</code>)</li>
+<li>(rescaled): <code>st_delta</code> = -3.27 + 3.60 (<code>sex</code> = M) + 0.510 rescaled <code>age_z</code> + 0.402 (<code>sex</code> = M) x (rescaled <code>age_z</code>)</li>
+</ul>
+<p>In essence, the rescaled model on <code>age_z</code> is:</p>
+<ul>
+<li><code>st_delta</code> = -3.27 + 0.510 <code>age_z</code> for female subjects, and</li>
+<li><code>st_delta</code> = (-3.27 + 3.60) + (0.510 + 0.402) <code>age_z</code> = 0.33 + 0.912 <code>age_z</code> for male subjects</li>
+</ul>
+<p>Interpreting the centered, rescaled model, we have:</p>
+<ul>
+<li>no change in the ANOVA results or R-squared or residual standard deviation compared to the uncentered, unscaled model, but</li>
+<li>the intercept (-3.27) now represents the <code>st_delta</code> for a female of average age,</li>
+<li>the <code>sex</code> slope (3.60) represents the (male - female) difference in predicted <code>st_delta</code> for a person of average age,</li>
+<li>the <code>age_z</code> slope (0.510) represents the difference in predicted <code>st_delta</code> for a female one standard deviation older than the mean age as compared to a female one standard deviation younger than the mean age, and</li>
+<li>the product term’s slope (0.402) represents the male - female difference in the slope of <code>age_z</code>, so that if you add the <code>age_z</code> slope (0.510) and the interaction slope (0.402) you see the difference in predicted <code>st_delta</code> for a male one standard deviation older than the mean age as compared to a male one standard deviation younger than the mean age.</li>
+</ul>
+
+</div>
+</div>
+<h3>References</h3>
+<div id="refs" class="references">
+<div id="ref-Riffenburgh2006">
+<p>Riffenburgh, Robert H. 2006. <em>Statistics in Medicine</em>. Second Edition. Burlington, MA: Elsevier Academic Press.</p>
+</div>
 </div>
             </section>
 
           </div>
         </div>
       </div>
-<a href="index.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-<a href="data-used-in-these-notes.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="analysis-of-variance.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="missing-data-mechanisms-and-single-imputation.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
@@ -437,7 +664,7 @@ gitbook.start({
 "size": 2
 },
 "edit": {
-"link": "https://github.com/rstudio/bookdown-demo/edit/master/00_setup.Rmd",
+"link": "https://github.com/rstudio/bookdown-demo/edit/master/04-ancova.Rmd",
 "text": "Edit"
 },
 "download": ["bookdown-demo.pdf", "bookdown-demo.epub"],

@@ -241,58 +241,94 @@ plot(c5_prost_A, which = 5)
 
 Suppose we want to evaluate whether our model `c5_prost_A` predicts effectively in new data. 
 
-One approach (used, for instance, in 431) would be to split our sample into a separate training and test samples, and then:
+One approach (used, for instance, in 431) would be to split our sample into a separate training (perhaps 70% of the data) and test (perhaps 30% of the data) samples, and then:
 
 - 1. fit the model in the training sample,
 - 2. use the resulting model to make predictions for `lpsa` in the test sample, and
 - 3. evaluate the quality of those predictions, perhaps by comparing the results to what we'd get using a different model.
 
-One problem with this approach is that with a small data set like this, we may be reluctant to cut our sample size for the training or the testing down. A potential solution is the idea of cross-validation, 
+One problem with this approach is that with a small data set like this, we may be reluctant to cut our sample size for the training or the testing down because we're afraid that our model building and testing will be hampered by a small sample size. A potential solution is the idea of **cross-validation**, which involves partitioning our data into a series of training-test subsets, multiple times, and then combining the results. 
 
 The rest of this section is built on some material by David Robinson at https://rpubs.com/dgrtwo/cv-modelr. 
 
-This bit of code performs what is called *10-crossfold separation*. In words, this approach splits the 896 observations in our data into 10 exclusive partitions of about 90% into a training sample, and the remaining 10% in a test sample. The next part of the code maps a modeling step to the training data, and then fits the resulting model on the test data using the `broom` package's `augment` function. 
+Suppose that we want to perform what is called *10-crossfold separation*. In words, this approach splits the 97 observations in our `prost` data frame into 10 exclusive partitions of about 90% (so about 87-88 observations) into a training sample, and the remaining 10% (9-10 observations) in a test sample^[If we did 5-crossfold validation, we'd have 5 partitions into samples of 80% training and 20% test samples.]. We then refit a model of interest using the training data, and fit the resulting model on the test data using the `broom` package's `augment` function. This process is then repeated (a total of 10 times) so that each observation is used 9 times in the training sample, and once in the test sample.
 
-I've selected the variables in this case so that the model we'll fit is the `m2_c7` model we've been looking at, although there are several ways to accomplish this.
+To code this in R, we'll make use of a few new ideas. Our goal will be to cross-validate model `c5_prost_A`, which, you'll recall, uses `lcavol_c`, `svi` and their interaction, to predict `lpsa` in the `prost` data.
 
-```{r validation_c2_m7_first_approach}
-set.seed(4320118)
+1. First, we set a seed for the validation algorithm, so we can replicate our results down the line.
+2. Then we use the `crossv_kfold` function from the `modelr` package to split the `prost` data into ten different partitions, and then use each partition for a split into training and test samples, which the machine indexes with `train` and `test`.
+3. Then we use some magic and the `map` function from the `purrr` package (part of the core `tidyverse`) to fit a new `lm(lpsa ~ lcavol_c * svi)` model to each of the training samples genereated by `crossv_kfold`.
+4. Finally, some additional magic with the `unnest` and `map2` functions applies each of these new models to the appropriate test sample, and generate predictions (`.fitted`) and standard errors for each prediction (`.se.fit`).
 
-models <- smartcle2 %>%
-    select(bmi, female, exerany, sleephrs, 
-           internet30, alcdays, genhealth) %>%
+```{r validation_c5_prost_A_10fold}
+set.seed(4320308)
+
+prost_models <- prost %>%
     crossv_kfold(k = 10) %>%
-    mutate(model = map(train, ~ lm(bmi ~ ., data = .)))
+    mutate(model = map(train, ~ lm(lpsa ~ lcavol_c * svi, data = .)))
 
-predictions <- models %>%
+prost_predictions <- prost_models %>%
     unnest(map2(model, test, ~ augment(.x, newdata = .y)))
 
-predictions
+head(prost_predictions)
 ```
 
-The results are a set of predictions based on the splits into training and test groups (remember there are 10 of them, indexed by `.id`) that describe the complete set of 896 respondents again.
+The results are a set of predictions based on the splits into training and test groups (remember there are 10 such splits, indexed by `.id`) that describe the complete set of 97 subjects again. 
 
-What this lets us now do is calculate the root Mean Squared Prediction Error (RMSE) and Mean Absolute Prediction Error (MAE) for this model (the `c2_m7` model) across these observations, and also to compare that error to a model that simply predicts the mean `bmi` across all patients (the `intercept only` model.) In practice, we could consider two distinct models in doing this work.
+### Cross-Validated Summaries of Prediction Quality
 
-```{r validation_c2_m7_first_approach_predsummary}
-predictions %>%
-    summarize(RMSE_c2_m7 = sqrt(mean((bmi - .fitted) ^2)),
-              MAE_c2_m7 = mean(abs(bmi - .fitted)),
-              RMSE_interceptonly = sqrt(mean((bmi - mean(bmi))^2)),
-              MAE_interceptonly = mean(abs(bmi - mean(bmi))))
+Now, we can calculate the root Mean Squared Prediction Error (RMSE) and Mean Absolute Prediction Error (MAE) for this modeling approach (using `lcavol_c` and `svi` to predict `lpsa`) across these observations. 
+
+```{r validation_c5_prost_A_10fold_errors}
+prost_predictions %>%
+    summarize(RMSE_ourmodel = sqrt(mean((lpsa - .fitted) ^2)),
+              MAE_ourmodel = mean(abs(lpsa - .fitted)))
 ```
 
-Another thing we could do with this tibble of predictions we have created is to graph the size of the prediction errors (observed `bmi` minus predicted values in `.fitted`) that our modeling approach makes.
+For now, we'll compare our model to the "intercept only" model that simply predicts the mean `lpsa` across all patients. 
 
-```{r validation_c2_m7_first_approach_errorhistogram}
-predictions %>%
-    mutate(errors = bmi - .fitted) %>%
+```{r validation_c5_prost_interceptonly_10fold_errors}
+prost_predictions %>%
+    summarize(RMSE_intercept = sqrt(mean((lpsa - mean(lpsa)) ^2)),
+              MAE_intercept = mean(abs(lpsa - mean(lpsa))))
+```
+
+So our model looks meaningfully better than the "intercept only" model, in that both the RMSE and MAE are much lower (better) with our model.
+
+Another thing we could do with this tibble of predictions we have created is to graph the size of the prediction errors (observed `lpsa` minus predicted values in `.fitted`) that our modeling approach makes.
+
+```{r validation_c5_prost_A_10fold_errors_histogram}
+prost_predictions %>%
+    mutate(errors = lpsa - .fitted) %>%
     ggplot(., aes(x = errors)) +
     geom_histogram(bins = 30, fill = "darkviolet", col = "yellow") + 
-    labs(title = "Cross-Validated Errors in Prediction of BMI",
-         subtitle = "Using a model (`c2_m7`) including 6 regression inputs",
-         caption = "SMART BRFSS 2016 data for Cleveland-Elyria MMSA, n = 896",
-         x = "Error in predicting BMI")
+    labs(title = "Cross-Validated Errors in Prediction of log(PSA)",
+         subtitle = "Using a model (`c5_prostA`) including lcavol_c and svi and their interaction",
+         x = "Error in predicting log(PSA)")
 ```
 
+This suggests that some of our results are off by quite a bit, on the log(PSA) scale, which is summarized for the original data below.
 
+```{r}
+prost %>% skim(lpsa)
+```
+
+If we like, we could transform the predictions and observed values back to the scale of PSA (unlogged) and then calculate and display errors, as follows:
+
+```{r validation_c5_prost_A_10fold_errorsonPSA_histogram}
+prost_predictions %>%
+    mutate(err.psa = exp(lpsa) - exp(.fitted)) %>%
+    ggplot(., aes(x = err.psa)) +
+    geom_histogram(bins = 30, fill = "darkorange", col = "yellow") + 
+    labs(title = "Cross-Validated Errors in Prediction of PSA",
+         subtitle = "Using a model (`c5_prostA`) including lcavol_c and svi and their interaction",
+         x = "Error in predicting PSA")
+```
+
+This suggests that some of our results are off by quite a bit, on the original scale of PSA, which is summarized below.
+
+```{r}
+prost %>% mutate(psa = exp(lpsa)) %>% skim(psa)
+```
+
+We'll return to the notion of cross-validation again, but for now, let's consider the problem of considering adding more predictors to our model, and then making sensible selections as to which predictors actually should be incorporated.

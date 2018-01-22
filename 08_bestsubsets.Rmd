@@ -1,0 +1,278 @@
+# "Best Subsets" Variable Selection in our Prostate Cancer Study
+
+A second approach to model selection involved fitting all possible subset models and identifying the ones that look best according to some meaningful criterion and ideally one that includes enough variables to model the response appropriately without including lots of redundant or unnecessary terms. 
+
+## Four Key Summaries We'll Use to Evaluate Potential Models
+
+1. Adjusted R^2^, which we try to maximize.
+2. Akaike's Information Criterion (AIC), which we try to minimize, and a Bias-Corrected version of AIC due to Hurwitz and Tsai, which we use when the sample size is small, specifically when the sample size $n$ and the number of predictors being studied $k$ are such that $n/k \leq 40$. We also try to minimize this bias-corrected AIC.
+3. Bayesian Information Criterion (BIC), which we also try to minimize.
+4. Mallows' C~p~ statistic, which we (essentially) try to minimize.
+
+Choosing between AIC and BIC can be challenging.
+
+> For model selection purposes, there is no clear choice between AIC and BIC. Given a family of models, including the true model, the probability that BIC will select the correct model approaches one as the sample size n approaches infinity - thus BIC is asymptotically consistent, which AIC is not. [But, for practical purposes,] BIC often chooses models that are too simple [relative to AIC] because of its heavy penalty on complexity. 
+
+- Source: @Hastie2001, page 208.
+
+Several useful tools for running "all subsets" or "best subsets" regression comparisons are developed in R's `leaps` package.
+
+## Using `regsubsets` in the `leaps` package
+
+We can use the `leaps` package to obtain results in the `prost` study from looking at all possible subsets of the candidate predictors. 
+
+The `leaps` package isn't particularly friendly to the tidyverse, and will require us first to identify a set of candidate predictors using `with` and `cbind`, then apply those to a `regsubsets` function, which identifies the set of models.
+
+To start, we'll ask R to find the one best subset (with 1 predictor variable [in addition to the intercept], then with 2 predictors, and then with each of 3, 4, ... 8 predictor variables) according to an exhaustive search without forcing any of the variables to be in or out. We'd use the `nvmax` command within the `regsubsets` function to limit the number of regression inputs to a maximum.
+
+```{r}
+preds <- with(prost, 
+   cbind(lcavol, lweight, age, bph_f, svi_f, lcp, gleason_f, pgg45))
+
+x1 <- regsubsets(preds, y=prost$lpsa)
+rs <- summary(x1)
+rs
+```
+
+So...
+
+- the best one-predictor model used `lcavol`
+- the best two-predictor model used `lcavol` and `lweight`
+- the best three-predictor model used `lcavol`, `lweight` and `svi_f`
+- the best four-predictor model added `bph_f`, and
+- the best five-predictor model added `age`
+- the best six-input model added `gleason_f`,
+- the best seven-input model added `lcp`,
+- and the eight-input model adds `pgg45`.
+
+### Summaries of "Winning" Models
+
+We can easily pull out R^2^, adjusted R^2^, C~p~, and BIC results for the "winning" models of each size.
+
+```{r}
+winners <- tbl_df(rs$which)
+winners$k <- 2:9
+winners$r2 <- rs$rsq
+winners$adjr2 <- rs$adjr2
+winners$cp <- rs$cp
+winners$bic <- rs$bic
+```
+
+And here is a table of those results...
+
+```{r}
+winners
+```
+
+- All of these "best subsets" are hierarchical, in that each model is a subset of the one below it. This isn't inevitably true.
+- By adjusted R^2^, which we want to maximize, the best model appears to be the model with $k$ = 8.
+- By *C~p~*, which we want to minimize (within reason), the best choice appears to be the $k$ = 4, 6 or 7 model.
+- By BIC, the best model has $k$ = 4.
+
+## Plotting the Best Subsets Results
+
+### The Adjusted R^2^ Plot
+
+```{r}
+plot(rs$adjr2 ~ I(2:9), ylab="Adjusted R-squared",
+     xlab="# of Inputs, including intercept")
+lines(spline(rs$adjr2 ~ I(2:9)))
+```
+
+Models 4-9 all look like reasonable choices here.
+
+### A Fancier Version (identifying the largest adjusted R^2^)
+
+```{r}
+m2 <- max(rs$adjr2) 
+m1 <- which.max(rs$adjr2) + 1
+plot(rs$adjr2 ~ I(2:9), ylab="Adjusted R-squared",
+     xlab="# of Inputs, including intercept")
+lines(spline(rs$adjr2 ~ I(2:9)))
+arrows(m1, m2-0.02, m1, m2)
+text(m1, m2-0.03, paste("max =", format(m2, digits=3)))
+text(m1, m2-0.045, paste("with", format(m1, digits=1),
+                        "inputs"), pos=3)
+```
+
+## Mallows' $C_p$
+
+The $C_p$ statistic focuses directly on the tradeoff between **bias** (due to excluding important predictors from the model) and extra **variance** (due to including too many unimportant predictors in the model.) 
+
+If N is the sample size, and we select $p$ regression predictors from a set of $K$ (where $p < K$), then the $C_p$ statistic is
+
+$C_p = \frac{SSE_p}{MSE_K} - N + 2p$
+
+where:
+
+- $SSE_p$ is the sum of squares for error (residual) in the model with $p$ predictors
+- $MSE_K$ is the residual mean square after regression in the model with all $K$ predictors
+
+As it turns out, this is just measuring the particular model's lack of fit, and then adding a penalty for the number of terms in the model (specifically $2p - N$ is the penalty since the lack of fit is measured as $(N-p) \frac{SSE_p}{MSE_K}$.
+
+If a model has no meaningful lack of fit (i.e. no substantial bias) then the expected value of $C_p$ is roughly $p$. 
+
+Otherwise, the expectation is $p$ plus a positive bias term. 
+
+In general, we want to see *smaller* values of $C_p$. 
+
+Often, we do this by choosing a subset of predictors that have $C_p$ near the value of $p$.
+
+### The $C_p$ Plot
+
+The $C_p$ plot is just a scatterplot of $C_p$ on the Y-axis, and $p$ on the X-axis. 
+
+Each of the various predictor subsets we will study is represented in a single point. A model without bias should have $C_p$ roughly equal to $p$, so we'll frequently draw a line at $C_p = p$ to make that clear. We then select our model from among all models with small $C_p$ statistics.
+
+```{r}
+plot(rs$cp ~ I(2:9),
+     ylab="Cp Statistic",
+     xlab="# of Regression Inputs, including Intercept",
+     pch=16, main="Cp Plot")
+abline(0,1, col = "purple")
+```
+
+Model 4 has the smallest value of $C_p$ (and is the leftmost of the largely comparable models 4-9) while 6 is close to and 7 is right on the $C_p = p$ line, so those are the likeliest candidates.
+
+## "All Subsets" Regression and Information Criteria
+
+We will have three main information criteria:
+
+- the Bayesian Information Criterion, called BIC
+- the Akaike Information Criterion (used by R's default stepwise approaches,) called AIC
+- a corrected version of AIC due to Hurwitz and Tsai, called AIC~c~
+
+Each of these indicates better models by getting smaller.
+
+### The BIC Plot
+
+R provides the BIC directly as part of the result of running `regsubsets`, as we've seen.
+
+```{r}
+plot(rs$bic ~ I(2:9), ylab="BIC", xlab="# of Fitted Inputs",
+     pch=16, cex=1.5, col="slateblue", main="BIC Plot")
+```
+
+We want to minimize BIC, which argues strongly for the model with 4 inputs, including the intercept.
+
+### AIC with "All Subsets"
+
+To get the AIC, we can use the formula 
+
+$$
+AIC = n log(RSS/n) + 2p
+$$
+
+where *n* is the sample size, *p* = \# of regression inputs to be fit in the model (including the intercept) and the RSS can be found in the `regsubsets` output:
+
+```{r}
+rs$rss
+```
+
+So, in our case, we have n = 97 subjects, and models being fit with 2 to 9 regression inputs (including the intercept), so we have:
+
+```{r}
+rs$aic <- 97*log(rs$rss / 97) + 2*(2:9)
+rs$aic
+```
+
+### The Bias-Corrected AIC (Hurwitz \& Tsai)
+
+The bias-corrected AIC formula due to Hurwitz and Tsai is:
+
+$AIC_c$ = n log(RSS/n) + 2p + [2p (p+1) / (n-p-1)] = AIC + [2p (p+1) / (n-p-1)]
+
+```{r}
+rs$aic.corr <- 97*log(rs$rss / 97) + 2*(2:9) +
+               (2 * (2:9) * ((2:9)+1) / (97 - (2:9) - 1))
+
+round(rs$aic,2) # uncorrected 
+round(rs$aic.corr,2) # bias-corrected
+```
+
+
+
+```{r}
+plot(rs$aic.corr ~ I(2:9), ylab="AIC, corrected", xlab="# of Fitted Inputs",
+     pch=16, cex=1.5, col="tomato", main="AIC (corrected) Plot")
+```
+
+The smallest AIC~c~ values occur in models 4 and later, especially model 4 itself.
+
+## All Four Plots, Together
+
+```{r, fig.height = 8}
+par(mfrow = c(2,2))
+m2 <- max(rs$adjr2) 
+m1 <- which.max(rs$adjr2) + 1
+plot(rs$adjr2 ~ I(2:9), ylab="Adjusted R-squared",
+     xlab="# of Inputs, including intercept",
+     main = "Adjusted R-squared")
+lines(spline(rs$adjr2 ~ I(2:9)))
+arrows(m1, m2-0.02, m1, m2)
+text(m1, m2-0.03, paste("max =", format(m2, digits=3)))
+text(m1, m2-0.045, paste("with", format(m1, digits=1),
+                        "inputs"), pos=3)
+
+plot(rs$cp ~ I(2:9),
+     ylab="Cp Statistic",
+     xlab="# of Regression Inputs, including Intercept",
+     pch=16, main="Cp Plot")
+abline(0,1, col = "purple")
+
+rs$aic.corr <- 97*log(rs$rss / 97) + 2*(2:9) +
+               (2 * (2:9) * ((2:9)+1) / (97 - (2:9) - 1))
+plot(rs$aic.corr ~ I(2:9), ylab="AIC, corrected", xlab="# of Fitted Inputs",
+     pch=16, cex=1.5, col="tomato", main="AIC (corrected) Plot")
+
+plot(rs$bic ~ I(2:9), ylab="BIC", xlab="# of Fitted Inputs",
+     pch=16, cex=1.5, col="slateblue", main="BIC Plot")
+par(mfrow = c(1,1))
+```
+
+## Table of Key Results
+
+We can build a big table, like this:
+
+```{r}
+winners <- data_frame(inputs = 2:9)
+winners$r2 <- rs$rsq
+winners$adjr2 <- rs$adjr2
+winners$cp <- rs$cp
+winners$bic <- rs$bic
+winners$aic <- rs$aic
+winners$aic.corr <- rs$aic.corr
+winners %>% round(., 3)
+```
+
+## Models Worth Considering?
+
+$k$ | Size | Predictors | Reason
+---:|---:| ------------| -------
+4 | 3 | `lcavol lweight svi_f` | minimizes BIC
+7 | 6 |`+ age bph_f gleason_f` | $C_p$ near *p*
+8 | 7 | `+ lcp` | max $R^2_{adj}$
+
+## ANOVA Testing to compare these three models?
+
+Let's run an ANOVA-based comparison of these nested models to each other and to the model with the intercept alone.
+
+```{r}
+m.int <- lm(lpsa ~ 1, data = prost)
+m04 <- lm(lpsa ~ lcavol + lweight + svi_f, data = prost)
+m07 <- lm(lpsa ~ lcavol + lweight + svi_f + 
+              age + bph_f + gleason_f, data = prost)
+m08 <- lm(lpsa ~ lcavol + lweight + svi_f + 
+              age + bph_f + gleason_f + lcp, data = prost)
+m.full <- lm(lpsa ~ lcavol + lweight + svi_f + 
+              age + bph_f + gleason_f + lcp + pgg45, data = prost)
+```
+
+Next, we'll run...
+
+```{r}
+anova(m.full, m08, m07, m04, m.int)
+```
+
+What conclusions can we draw here, on the basis of these ANOVA tests?
+
