@@ -7,7 +7,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>Data Science for Biological, Medical and Health Research: Notes for 432</title>
   <meta name="description" content="These are the Course Notes for 432.">
-  <meta name="generator" content="bookdown 0.5 and GitBook 2.6.7">
+  <meta name="generator" content="bookdown 0.6 and GitBook 2.6.7">
 
   <meta property="og:title" content="Data Science for Biological, Medical and Health Research: Notes for 432" />
   <meta property="og:type" content="book" />
@@ -481,8 +481,8 @@ F-statistic:  2.43 on 2 and 12 DF,  p-value: 0.13</code></pre>
 <p>This model assumes that the slope of the regression line between <code>st_delta</code> and <code>age</code> is the same for both sexes.</p>
 <p>Note that the model yields <code>st_delta</code> = -6.9 + 3.52 (<code>sex</code> = male) + 0.056 <code>age</code>, or</p>
 <ul>
-<li><code>st_delta</code> = -3.38 + 0.056 <code>age</code> for female patients, and</li>
-<li><code>st_delta</code> = -6.9 + 0.056 <code>age</code> for male patients.</li>
+<li><code>st_delta</code> = -6.9 + 0.056 <code>age</code> for female patients, and</li>
+<li><code>st_delta</code> = (-6.9 + 3.52) + 0.056 <code>age</code> = -3.38 + 0.056 <code>age</code> for male patients.</li>
 </ul>
 <p>Note that we can test this assumption of equal slopes by fitting an alternative model (with a product term between <code>sex</code> and <code>age</code>) that doesn’t require the assumption, and we’ll do that later.</p>
 </div>
@@ -680,9 +680,11 @@ gitbook.start({
   (function () {
     var script = document.createElement("script");
     script.type = "text/javascript";
-    script.src  = "https://cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML";
-    if (location.protocol !== "file:" && /^https?:/.test(script.src))
-      script.src  = script.src.replace(/^https?:/, '');
+    var src = "";
+    if (src === "" || src === "true") src = "https://cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:" && /^https?:/.test(src))
+      src = src.replace(/^https?:/, '');
+    script.src = src;
     document.getElementsByTagName("head")[0].appendChild(script);
   })();
 </script>

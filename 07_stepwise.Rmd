@@ -133,7 +133,7 @@ lcavol + lweight + svi_f +
 
 When we are willing to do this sorting before collecting (or analyzing) the data, then we can do Allen-Cady backwards elimination using the `drop1` command in R.
 
-**Step 1.** Fit the full model, then see if removing `lweight` improves AIC...
+**Step 1.** Fit the full model, then see if removing `pgg45` improves AIC...
 
 ```{r}
 with(prost, drop1(lm(lpsa ~ gleason_f + lcavol + svi_f + 

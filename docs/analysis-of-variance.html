@@ -7,7 +7,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>Data Science for Biological, Medical and Health Research: Notes for 432</title>
   <meta name="description" content="These are the Course Notes for 432.">
-  <meta name="generator" content="bookdown 0.5 and GitBook 2.6.7">
+  <meta name="generator" content="bookdown 0.6 and GitBook 2.6.7">
 
   <meta property="og:title" content="Data Science for Biological, Medical and Health Research: Notes for 432" />
   <meta property="og:type" content="book" />
@@ -449,7 +449,7 @@ D-C  6.920  0.9961324 12.843868 0.0154615</code></pre>
 
 bond.sum</code></pre></div>
 <pre><code># A tibble: 8 x 4
-# Groups: resin [?]
+# Groups:   resin [?]
   resin light   mean.str sd.str
   &lt;fct&gt; &lt;fct&gt;      &lt;dbl&gt;  &lt;dbl&gt;
 1 A     Halogen     17.8   4.02
@@ -716,7 +716,7 @@ light      1   34.7   34.72  0.6797    0.4123
 Residuals 75 3830.5   51.07                      
 ---
 Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
-<p>And, it appears, if we ignore the interaction, then <code>resin</code> type has a significant impact on <code>strength</code> but <code>light</code> source doesn’t. This is a bit clearer, when we look at boxplots of the separated <code>light</code> and <code>resin</code> groups.</p>
+<p>And, it appears, if we ignore the interaction, then <code>resin</code> type has a significant impact on <code>strength</code> but <code>light</code> source doesn’t. This is clearer when we look at boxplots of the separated <code>light</code> and <code>resin</code> groups.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">p1 &lt;-<span class="st"> </span><span class="kw">ggplot</span>(bonding, <span class="kw">aes</span>(<span class="dt">x =</span> light, <span class="dt">y =</span> strength)) <span class="op">+</span><span class="st"> </span>
 <span class="st">    </span><span class="kw">geom_boxplot</span>()
 p2 &lt;-<span class="st"> </span><span class="kw">ggplot</span>(bonding, <span class="kw">aes</span>(<span class="dt">x =</span> resin, <span class="dt">y =</span> strength)) <span class="op">+</span>
@@ -825,7 +825,7 @@ gridExtra<span class="op">::</span><span class="kw">grid.arrange</span>(p1, p2, 
 
 cort.sum</code></pre></div>
 <pre><code># A tibble: 6 x 4
-# Groups: interv [?]
+# Groups:   interv [?]
   interv fat_est   mean.cort se.cort
   &lt;fct&gt;  &lt;fct&gt;         &lt;dbl&gt;   &lt;dbl&gt;
 1 High   healthy       0.695   0.217
@@ -1029,9 +1029,11 @@ gitbook.start({
   (function () {
     var script = document.createElement("script");
     script.type = "text/javascript";
-    script.src  = "https://cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML";
-    if (location.protocol !== "file:" && /^https?:/.test(script.src))
-      script.src  = script.src.replace(/^https?:/, '');
+    var src = "";
+    if (src === "" || src === "true") src = "https://cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:" && /^https?:/.test(src))
+      src = src.replace(/^https?:/, '');
+    script.src = src;
     document.getElementsByTagName("head")[0].appendChild(script);
   })();
 </script>

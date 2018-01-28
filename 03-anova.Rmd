@@ -230,7 +230,7 @@ So, in the no-interaction model, only the intercept changes.
 anova(c3_m2)
 ```
 
-And, it appears, if we ignore the interaction, then `resin` type has a significant impact on `strength` but `light` source doesn't. This is a bit clearer, when we look at boxplots of the separated `light` and `resin` groups. 
+And, it appears, if we ignore the interaction, then `resin` type has a significant impact on `strength` but `light` source doesn't. This is clearer when we look at boxplots of the separated `light` and `resin` groups. 
 
 ```{r boxplots_c3_bonding_without_interaction}
 p1 <- ggplot(bonding, aes(x = light, y = strength)) + 

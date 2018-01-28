@@ -7,7 +7,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>Data Science for Biological, Medical and Health Research: Notes for 432</title>
   <meta name="description" content="These are the Course Notes for 432.">
-  <meta name="generator" content="bookdown 0.5 and GitBook 2.6.7">
+  <meta name="generator" content="bookdown 0.6 and GitBook 2.6.7">
 
   <meta property="og:title" content="Data Science for Biological, Medical and Health Research: Notes for 432" />
   <meta property="og:type" content="book" />
@@ -922,8 +922,8 @@ extra.ica 0.129370206</code></pre>
  8     8  16629 1618757  0.0103 NS         0.500     10 F         273
  9     9  22315 1567602  0.0142 NS         0.500     10 F         216
 10    10  77961 1060057  0.0735 BD         3.00      10 F         267
-# ... with 24 more rows, and 2 more variables: wt.loss &lt;dbl&gt;, wt.tumor
-#   &lt;int&gt;</code></pre>
+# ... with 24 more rows, and 2 more variables: wt.loss &lt;dbl&gt;,
+#   wt.tumor &lt;int&gt;</code></pre>
 </div>
 <div id="a-table-1-for-bloodbrain" class="section level2">
 <h2><span class="header-section-number">1.10</span> A Table 1 for <code>bloodbrain</code></h2>
@@ -1188,9 +1188,11 @@ gitbook.start({
   (function () {
     var script = document.createElement("script");
     script.type = "text/javascript";
-    script.src  = "https://cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML";
-    if (location.protocol !== "file:" && /^https?:/.test(script.src))
-      script.src  = script.src.replace(/^https?:/, '');
+    var src = "";
+    if (src === "" || src === "true") src = "https://cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:" && /^https?:/.test(src))
+      src = src.replace(/^https?:/, '');
+    script.src = src;
     document.getElementsByTagName("head")[0].appendChild(script);
   })();
 </script>

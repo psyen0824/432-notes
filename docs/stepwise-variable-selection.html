@@ -7,7 +7,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>Data Science for Biological, Medical and Health Research: Notes for 432</title>
   <meta name="description" content="These are the Course Notes for 432.">
-  <meta name="generator" content="bookdown 0.5 and GitBook 2.6.7">
+  <meta name="generator" content="bookdown 0.6 and GitBook 2.6.7">
 
   <meta property="og:title" content="Data Science for Biological, Medical and Health Research: Notes for 432" />
   <meta property="og:type" content="book" />
@@ -590,7 +590,7 @@ Coefficients:
 <li>and then rated the importance of the other variables as <code>lcavol</code> (most important), then <code>svi_f</code> then <code>age</code>, and then <code>bph_f</code>, then <code>lweight</code> and <code>lcp</code> followed by <code>pgg45</code> (least important)</li>
 </ul>
 <p>When we are willing to do this sorting before collecting (or analyzing) the data, then we can do Allen-Cady backwards elimination using the <code>drop1</code> command in R.</p>
-<p><strong>Step 1.</strong> Fit the full model, then see if removing <code>lweight</code> improves AIC…</p>
+<p><strong>Step 1.</strong> Fit the full model, then see if removing <code>pgg45</code> improves AIC…</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">with</span>(prost, <span class="kw">drop1</span>(<span class="kw">lm</span>(lpsa <span class="op">~</span><span class="st"> </span>gleason_f <span class="op">+</span><span class="st"> </span>lcavol <span class="op">+</span><span class="st"> </span>svi_f <span class="op">+</span><span class="st"> </span>
 <span class="st">              </span>age <span class="op">+</span><span class="st"> </span>bph_f <span class="op">+</span><span class="st"> </span>lweight <span class="op">+</span><span class="st"> </span>lcp <span class="op">+</span><span class="st"> </span>pgg45),
               <span class="dt">scope =</span> (<span class="op">~</span><span class="st"> </span>pgg45)))</code></pre></div>
@@ -862,9 +862,11 @@ gitbook.start({
   (function () {
     var script = document.createElement("script");
     script.type = "text/javascript";
-    script.src  = "https://cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML";
-    if (location.protocol !== "file:" && /^https?:/.test(script.src))
-      script.src  = script.src.replace(/^https?:/, '');
+    var src = "";
+    if (src === "" || src === "true") src = "https://cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:" && /^https?:/.test(src))
+      src = src.replace(/^https?:/, '');
+    script.src = src;
     document.getElementsByTagName("head")[0].appendChild(script);
   })();
 </script>

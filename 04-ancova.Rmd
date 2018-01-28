@@ -71,8 +71,8 @@ This model assumes that the slope of the regression line between `st_delta` and 
 
 Note that the model yields `st_delta` = -6.9 + 3.52 (`sex` = male) + 0.056 `age`, or 
 
-- `st_delta` = -3.38 + 0.056 `age` for female patients, and
-- `st_delta` = -6.9 + 0.056 `age` for male patients.
+- `st_delta` = -6.9 + 0.056 `age` for female patients, and
+- `st_delta` = (-6.9 + 3.52) + 0.056 `age` = -3.38 + 0.056 `age` for male patients.
 
 Note that we can test this assumption of equal slopes by fitting an alternative model (with a product term between `sex` and `age`) that doesn't require the assumption, and we'll do that later. 
 
