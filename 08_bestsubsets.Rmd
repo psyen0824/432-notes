@@ -240,7 +240,7 @@ p3
 
 The smallest AIC~c~ values occur in models 4 and later, especially model 4 itself.
 
-## The BIC plot
+### The BIC plot
 
 ```{r}
 p4 <- ggplot(best_mods, aes(x = k, y = bic,
