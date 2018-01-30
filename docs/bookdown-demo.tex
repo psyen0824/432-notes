@@ -124,7 +124,7 @@
   \postauthor{\par}
   \predate{\centering\large\emph}
   \postdate{\par}
-  \date{Built 2018-01-28 14:30:24}
+  \date{Built 2018-01-30 11:47:10}
 
 \usepackage{booktabs}
 \usepackage{amsthm}
@@ -7860,102 +7860,257 @@ So\ldots{}
   and the eight-input model adds \texttt{pgg45}.
 \end{itemize}
 
-\subsection{\texorpdfstring{Summaries of ``Winning''
-Models}{Summaries of Winning Models}}\label{summaries-of-winning-models}
-
-We can easily pull out R\textsuperscript{2}, adjusted
-R\textsuperscript{2}, C\textsubscript{p}, and BIC results for the
-``winning'' models of each size.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{winners <-}\StringTok{ }\KeywordTok{tbl_df}\NormalTok{(rs}\OperatorTok{$}\NormalTok{which)}
-\NormalTok{winners}\OperatorTok{$}\NormalTok{k <-}\StringTok{ }\DecValTok{2}\OperatorTok{:}\DecValTok{9}
-\NormalTok{winners}\OperatorTok{$}\NormalTok{r2 <-}\StringTok{ }\NormalTok{rs}\OperatorTok{$}\NormalTok{rsq}
-\NormalTok{winners}\OperatorTok{$}\NormalTok{adjr2 <-}\StringTok{ }\NormalTok{rs}\OperatorTok{$}\NormalTok{adjr2}
-\NormalTok{winners}\OperatorTok{$}\NormalTok{cp <-}\StringTok{ }\NormalTok{rs}\OperatorTok{$}\NormalTok{cp}
-\NormalTok{winners}\OperatorTok{$}\NormalTok{bic <-}\StringTok{ }\NormalTok{rs}\OperatorTok{$}\NormalTok{bic}
-\end{Highlighting}
-\end{Shaded}
-
-And here is a table of those results\ldots{}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{winners}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-# A tibble: 8 x 14
-  `(Intercept)` lcavol lweight age   bph_f svi_f lcp   gleason_f pgg45
-  <lgl>         <lgl>  <lgl>   <lgl> <lgl> <lgl> <lgl> <lgl>     <lgl>
-1 T             T      F       F     F     F     F     F         F    
-2 T             T      T       F     F     F     F     F         F    
-3 T             T      T       F     F     T     F     F         F    
-4 T             T      T       F     T     T     F     F         F    
-5 T             T      T       T     T     T     F     F         F    
-6 T             T      T       T     T     T     F     T         F    
-7 T             T      T       T     T     T     T     T         F    
-8 T             T      T       T     T     T     T     T         T    
-# ... with 5 more variables: k <int>, r2 <dbl>, adjr2 <dbl>, cp <dbl>,
-#   bic <dbl>
-\end{verbatim}
+All of these ``best subsets'' are hierarchical, in that each model is a
+subset of the one below it. This isn't inevitably true.
 
 \begin{itemize}
 \tightlist
 \item
-  All of these ``best subsets'' are hierarchical, in that each model is
-  a subset of the one below it. This isn't inevitably true.
-\item
-  By adjusted R\textsuperscript{2}, which we want to maximize, the best
-  model appears to be the model with \(k\) = 8.
-\item
-  By \emph{C\textsubscript{p}}, which we want to minimize (within
-  reason), the best choice appears to be the \(k\) = 4, 6 or 7 model.
-\item
-  By BIC, the best model has \(k\) = 4.
+  To determine which model is best, we can plot key summaries of model
+  fit (adjusted R\textsuperscript{2}, Mallows' \(C_p\), bias-corrected
+  AIC, and BIC) using either base R plotting techniques (what I've done
+  in the past) or \texttt{ggplot2} (what I use now.) I'll show both
+  types of plotting approaches in the next two sections.
 \end{itemize}
 
-\section{Plotting the Best Subsets
-Results}\label{plotting-the-best-subsets-results}
+\subsection{\texorpdfstring{Using \texttt{which} and
+\texttt{obj}}{Using which and obj}}\label{using-which-and-obj}
+
+Let's see what we've fit:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{rs}\OperatorTok{$}\NormalTok{obj}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Subset selection object
+8 Variables  (and intercept)
+          Forced in Forced out
+lcavol        FALSE      FALSE
+lweight       FALSE      FALSE
+age           FALSE      FALSE
+bph_f         FALSE      FALSE
+svi_f         FALSE      FALSE
+lcp           FALSE      FALSE
+gleason_f     FALSE      FALSE
+pgg45         FALSE      FALSE
+1 subsets of each size up to 8
+Selection Algorithm: exhaustive
+\end{verbatim}
+
+To see the eight models selected by the system, we use:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{rs}\OperatorTok{$}\NormalTok{which}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+  (Intercept) lcavol lweight   age bph_f svi_f   lcp gleason_f pgg45
+1        TRUE   TRUE   FALSE FALSE FALSE FALSE FALSE     FALSE FALSE
+2        TRUE   TRUE    TRUE FALSE FALSE FALSE FALSE     FALSE FALSE
+3        TRUE   TRUE    TRUE FALSE FALSE  TRUE FALSE     FALSE FALSE
+4        TRUE   TRUE    TRUE FALSE  TRUE  TRUE FALSE     FALSE FALSE
+5        TRUE   TRUE    TRUE  TRUE  TRUE  TRUE FALSE     FALSE FALSE
+6        TRUE   TRUE    TRUE  TRUE  TRUE  TRUE FALSE      TRUE FALSE
+7        TRUE   TRUE    TRUE  TRUE  TRUE  TRUE  TRUE      TRUE FALSE
+8        TRUE   TRUE    TRUE  TRUE  TRUE  TRUE  TRUE      TRUE  TRUE
+\end{verbatim}
+
+We built one subset of each size up to eight predictors, not including
+the intercept. This means we have models of size k = 2, 3, 4, 5, 6, 7, 8
+and 9.
+
+The models are:
+
+\begin{longtable}[]{@{}rl@{}}
+\toprule
+Size k & Predictors included (besides intercept)\tabularnewline
+\midrule
+\endhead
+2 & lcavol\tabularnewline
+3 & lcavol and lweight\tabularnewline
+4 & add svi\_f\tabularnewline
+5 & add bph\_f\tabularnewline
+6 & add age\tabularnewline
+7 & add gleason\_f\tabularnewline
+8 & add lcp\tabularnewline
+9 & add pgg45\tabularnewline
+\bottomrule
+\end{longtable}
+
+\section{Calculating bias-corrected
+AIC}\label{calculating-bias-corrected-aic}
+
+The bias-corrected AIC formula due to Hurwitz and Tsai requires three
+inputs:
+
+\begin{itemize}
+\tightlist
+\item
+  the residual sum of squares for a model
+\item
+  the sample size (n) or number of observations used to fit the model
+\item
+  the number of regression inputs, k, including the intercept, used in
+  the model
+\end{itemize}
+
+So, for a particular model fit to \emph{n} observations, on \emph{k}
+predictors (including the intercept) and a residual sum of squares equal
+to RSS, we have:
+
+\[
+AIC_c = n log(\frac{RSS}{n}) + 2k + \frac{2k (k+1)}{n-k-1}
+\]
+
+Note that the corrected \(AIC_c\) can be related to the original AIC
+via:
+
+\[
+AIC_c = AIC + \frac{2k (k+1)}{n - k - 1}
+\]
+
+\subsection{Calculation of aic.c in our
+setting}\label{calculation-of-aic.c-in-our-setting}
+
+In our case, we have \(n\) = 97 observations, and built a series of
+models with \(k\) = \texttt{2:9} predictors (including the intercept in
+each case), so we will insert those values into the general formula for
+bias-corrected AIC which is:
+
+\begin{verbatim}
+aic.c <- n * log( rs$rss / n) + 2 * k + 
+                      (2 * k * (k + 1) / (n - k - 1))
+\end{verbatim}
+
+We can obtain the residual sum of squares explained by each model by
+pulling \texttt{rss} from the \texttt{regsubsets} summary contained here
+in \texttt{rs}.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{data_frame}\NormalTok{(}\DataTypeTok{k =} \DecValTok{2}\OperatorTok{:}\DecValTok{9}\NormalTok{, }\DataTypeTok{RSS =}\NormalTok{ rs}\OperatorTok{$}\NormalTok{rss)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+# A tibble: 8 x 2
+      k   RSS
+  <int> <dbl>
+1     2  58.9
+2     3  51.7
+3     4  46.6
+4     5  45.7
+5     6  44.6
+6     7  43.7
+7     8  43.0
+8     9  42.8
+\end{verbatim}
+
+In this case, we have:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{rs}\OperatorTok{$}\NormalTok{aic.c <-}\StringTok{ }\DecValTok{97}\OperatorTok{*}\KeywordTok{log}\NormalTok{(rs}\OperatorTok{$}\NormalTok{rss }\OperatorTok{/}\StringTok{ }\DecValTok{97}\NormalTok{) }\OperatorTok{+}\StringTok{ }\DecValTok{2}\OperatorTok{*}\NormalTok{(}\DecValTok{2}\OperatorTok{:}\DecValTok{9}\NormalTok{) }\OperatorTok{+}
+\StringTok{               }\NormalTok{(}\DecValTok{2} \OperatorTok{*}\StringTok{ }\NormalTok{(}\DecValTok{2}\OperatorTok{:}\DecValTok{9}\NormalTok{) }\OperatorTok{*}\StringTok{ }\NormalTok{((}\DecValTok{2}\OperatorTok{:}\DecValTok{9}\NormalTok{)}\OperatorTok{+}\DecValTok{1}\NormalTok{) }\OperatorTok{/}\StringTok{ }\NormalTok{(}\DecValTok{97} \OperatorTok{-}\StringTok{ }\NormalTok{(}\DecValTok{2}\OperatorTok{:}\DecValTok{9}\NormalTok{) }\OperatorTok{-}\StringTok{ }\DecValTok{1}\NormalTok{))}
+
+\KeywordTok{round}\NormalTok{(rs}\OperatorTok{$}\NormalTok{aic,}\DecValTok{2}\NormalTok{) }\CommentTok{# uncorrected }
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+[1] -44.24 -54.70 -62.74 -62.29 -62.34 -62.11 -61.17 -59.36
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{round}\NormalTok{(rs}\OperatorTok{$}\NormalTok{aic.c,}\DecValTok{2}\NormalTok{) }\CommentTok{# bias-corrected}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+[1] -44.24 -54.70 -62.74 -62.29 -62.34 -62.11 -61.17 -59.36
+\end{verbatim}
+
+\subsection{Building a Tibble containing the necessary
+information}\label{building-a-tibble-containing-the-necessary-information}
+
+Again, note the use of 2:9 for the values of \(k\), because we're
+fitting one model for each size from 2 through 9.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{best_mods_}\DecValTok{1}\NormalTok{ <-}\StringTok{ }\KeywordTok{data_frame}\NormalTok{(}
+    \DataTypeTok{k =} \DecValTok{2}\OperatorTok{:}\DecValTok{9}\NormalTok{,}
+    \DataTypeTok{r2 =}\NormalTok{ rs}\OperatorTok{$}\NormalTok{rsq,}
+    \DataTypeTok{adjr2 =}\NormalTok{ rs}\OperatorTok{$}\NormalTok{adjr2,}
+    \DataTypeTok{cp =}\NormalTok{ rs}\OperatorTok{$}\NormalTok{cp,}
+    \DataTypeTok{aic.c =}\NormalTok{ rs}\OperatorTok{$}\NormalTok{aic.c,}
+    \DataTypeTok{bic =}\NormalTok{ rs}\OperatorTok{$}\NormalTok{bic}
+\NormalTok{)}
+
+\NormalTok{best_mods <-}\StringTok{ }\KeywordTok{cbind}\NormalTok{(best_mods_}\DecValTok{1}\NormalTok{, rs}\OperatorTok{$}\NormalTok{which)}
+
+\NormalTok{best_mods}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+  k        r2     adjr2        cp     aic.c       bic (Intercept) lcavol
+1 2 0.5394320 0.5345839 28.213914 -44.23838 -66.05416        TRUE   TRUE
+2 3 0.5955040 0.5868977 15.456669 -54.70040 -74.07188        TRUE   TRUE
+3 4 0.6359499 0.6242063  6.811986 -62.74265 -79.71614        TRUE   TRUE
+4 5 0.6425479 0.6270065  7.075509 -62.29223 -76.91557        TRUE   TRUE
+5 6 0.6509970 0.6318211  6.851826 -62.33858 -74.66120        TRUE   TRUE
+6 7 0.6584484 0.6356783  6.890739 -62.10692 -72.17992        TRUE   TRUE
+7 8 0.6634967 0.6370302  7.562119 -61.17338 -69.04961        TRUE   TRUE
+8 9 0.6656326 0.6352355  9.000000 -59.35841 -65.09253        TRUE   TRUE
+  lweight   age bph_f svi_f   lcp gleason_f pgg45
+1   FALSE FALSE FALSE FALSE FALSE     FALSE FALSE
+2    TRUE FALSE FALSE FALSE FALSE     FALSE FALSE
+3    TRUE FALSE FALSE  TRUE FALSE     FALSE FALSE
+4    TRUE FALSE  TRUE  TRUE FALSE     FALSE FALSE
+5    TRUE  TRUE  TRUE  TRUE FALSE     FALSE FALSE
+6    TRUE  TRUE  TRUE  TRUE FALSE      TRUE FALSE
+7    TRUE  TRUE  TRUE  TRUE  TRUE      TRUE FALSE
+8    TRUE  TRUE  TRUE  TRUE  TRUE      TRUE  TRUE
+\end{verbatim}
+
+\section{\texorpdfstring{Plotting the Best Subsets Results using
+\texttt{ggplot2}}{Plotting the Best Subsets Results using ggplot2}}\label{plotting-the-best-subsets-results-using-ggplot2}
 
 \subsection{\texorpdfstring{The Adjusted R\textsuperscript{2}
 Plot}{The Adjusted R2 Plot}}\label{the-adjusted-r2-plot}
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\KeywordTok{plot}\NormalTok{(rs}\OperatorTok{$}\NormalTok{adjr2 }\OperatorTok{~}\StringTok{ }\KeywordTok{I}\NormalTok{(}\DecValTok{2}\OperatorTok{:}\DecValTok{9}\NormalTok{), }\DataTypeTok{ylab=}\StringTok{"Adjusted R-squared"}\NormalTok{,}
-     \DataTypeTok{xlab=}\StringTok{"# of Inputs, including intercept"}\NormalTok{)}
-\KeywordTok{lines}\NormalTok{(}\KeywordTok{spline}\NormalTok{(rs}\OperatorTok{$}\NormalTok{adjr2 }\OperatorTok{~}\StringTok{ }\KeywordTok{I}\NormalTok{(}\DecValTok{2}\OperatorTok{:}\DecValTok{9}\NormalTok{)))}
+\NormalTok{p1 <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(best_mods, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ k, }\DataTypeTok{y =}\NormalTok{ adjr2,}
+                            \DataTypeTok{label =} \KeywordTok{round}\NormalTok{(adjr2,}\DecValTok{2}\NormalTok{))) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_line}\NormalTok{() }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_label}\NormalTok{() }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_label}\NormalTok{(}\DataTypeTok{data =} \KeywordTok{subset}\NormalTok{(best_mods,}
+\NormalTok{                             adjr2 }\OperatorTok{==}\StringTok{ }\KeywordTok{max}\NormalTok{(adjr2)),}
+               \KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ k, }\DataTypeTok{y =}\NormalTok{ adjr2, }\DataTypeTok{label =} \KeywordTok{round}\NormalTok{(adjr2,}\DecValTok{2}\NormalTok{)),}
+               \DataTypeTok{fill =} \StringTok{"yellow"}\NormalTok{, }\DataTypeTok{col =} \StringTok{"blue"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{theme_bw}\NormalTok{() }\OperatorTok{+}
+\StringTok{    }\KeywordTok{scale_x_continuous}\NormalTok{(}\DataTypeTok{breaks =} \DecValTok{2}\OperatorTok{:}\DecValTok{9}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{x =} \StringTok{"# of predictors (including intercept)"}\NormalTok{,}
+         \DataTypeTok{y =} \StringTok{"Adjusted R-squared"}\NormalTok{)}
+
+\NormalTok{p1}
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-71-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-74-1.pdf}
 
-Models 4-9 all look like reasonable choices here.
+Models 4-9 all look like reasonable choices here. The maximum adjusted
+R\textsuperscript{2} is seen in the model of size 8.
 
-\subsection{\texorpdfstring{A Fancier Version (identifying the largest
-adjusted
-R\textsuperscript{2})}{A Fancier Version (identifying the largest adjusted R2)}}\label{a-fancier-version-identifying-the-largest-adjusted-r2}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{m2 <-}\StringTok{ }\KeywordTok{max}\NormalTok{(rs}\OperatorTok{$}\NormalTok{adjr2) }
-\NormalTok{m1 <-}\StringTok{ }\KeywordTok{which.max}\NormalTok{(rs}\OperatorTok{$}\NormalTok{adjr2) }\OperatorTok{+}\StringTok{ }\DecValTok{1}
-\KeywordTok{plot}\NormalTok{(rs}\OperatorTok{$}\NormalTok{adjr2 }\OperatorTok{~}\StringTok{ }\KeywordTok{I}\NormalTok{(}\DecValTok{2}\OperatorTok{:}\DecValTok{9}\NormalTok{), }\DataTypeTok{ylab=}\StringTok{"Adjusted R-squared"}\NormalTok{,}
-     \DataTypeTok{xlab=}\StringTok{"# of Inputs, including intercept"}\NormalTok{)}
-\KeywordTok{lines}\NormalTok{(}\KeywordTok{spline}\NormalTok{(rs}\OperatorTok{$}\NormalTok{adjr2 }\OperatorTok{~}\StringTok{ }\KeywordTok{I}\NormalTok{(}\DecValTok{2}\OperatorTok{:}\DecValTok{9}\NormalTok{)))}
-\KeywordTok{arrows}\NormalTok{(m1, m2}\OperatorTok{-}\FloatTok{0.02}\NormalTok{, m1, m2)}
-\KeywordTok{text}\NormalTok{(m1, m2}\OperatorTok{-}\FloatTok{0.03}\NormalTok{, }\KeywordTok{paste}\NormalTok{(}\StringTok{"max ="}\NormalTok{, }\KeywordTok{format}\NormalTok{(m2, }\DataTypeTok{digits=}\DecValTok{3}\NormalTok{)))}
-\KeywordTok{text}\NormalTok{(m1, m2}\OperatorTok{-}\FloatTok{0.045}\NormalTok{, }\KeywordTok{paste}\NormalTok{(}\StringTok{"with"}\NormalTok{, }\KeywordTok{format}\NormalTok{(m1, }\DataTypeTok{digits=}\DecValTok{1}\NormalTok{),}
-                        \StringTok{"inputs"}\NormalTok{), }\DataTypeTok{pos=}\DecValTok{3}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-72-1.pdf}
-
-\section{\texorpdfstring{Mallows'
+\subsection{\texorpdfstring{Mallows'
 \(C_p\)}{Mallows' C\_p}}\label{mallows-c_p}
 
 The \(C_p\) statistic focuses directly on the tradeoff between
@@ -7985,21 +8140,183 @@ fit, and then adding a penalty for the number of terms in the model
 (specifically \(2p - N\) is the penalty since the lack of fit is
 measured as \((N-p) \frac{SSE_p}{MSE_K}\).
 
-If a model has no meaningful lack of fit (i.e.~no substantial bias) then
-the expected value of \(C_p\) is roughly \(p\).
-
-Otherwise, the expectation is \(p\) plus a positive bias term.
-
-In general, we want to see \emph{smaller} values of \(C_p\).
-
-Often, we do this by choosing a subset of predictors that have \(C_p\)
-near the value of \(p\).
+\begin{itemize}
+\tightlist
+\item
+  If a model has no meaningful lack of fit (i.e.~no substantial bias)
+  then the expected value of \(C_p\) is roughly \(p\).
+\item
+  Otherwise, the expectation is \(p\) plus a positive bias term.
+\item
+  In general, we want to see \emph{smaller} values of \(C_p\).
+\item
+  We usually select a ``winning model'' by choosing a subset of
+  predictors that have \(C_p\) near the value of \(p\).
+\end{itemize}
 
 \subsection{\texorpdfstring{The \(C_p\)
 Plot}{The C\_p Plot}}\label{the-c_p-plot}
 
 The \(C_p\) plot is just a scatterplot of \(C_p\) on the Y-axis, and
 \(p\) on the X-axis.
+
+Each of the various predictor subsets we will study is represented in a
+single point. A model without bias should have \(C_p\) roughly equal to
+\(p\), so we'll frequently draw a line at \(C_p = p\) to make that
+clear. We then select our model from among all models with small \(C_p\)
+statistics.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{p2 <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(best_mods, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ k, }\DataTypeTok{y =}\NormalTok{ cp,}
+                            \DataTypeTok{label =} \KeywordTok{round}\NormalTok{(cp,}\DecValTok{1}\NormalTok{))) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_line}\NormalTok{() }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_label}\NormalTok{() }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_abline}\NormalTok{(}\DataTypeTok{intercept =} \DecValTok{0}\NormalTok{, }\DataTypeTok{slope =} \DecValTok{1}\NormalTok{,}
+                \DataTypeTok{col =} \StringTok{"red"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{theme_bw}\NormalTok{() }\OperatorTok{+}
+\StringTok{    }\KeywordTok{scale_x_continuous}\NormalTok{(}\DataTypeTok{breaks =} \DecValTok{2}\OperatorTok{:}\DecValTok{9}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{x =} \StringTok{"# of predictors (including intercept)"}\NormalTok{,}
+         \DataTypeTok{y =} \StringTok{"Mallows' Cp"}\NormalTok{)}
+
+\NormalTok{p2}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-75-1.pdf}
+
+\begin{itemize}
+\tightlist
+\item
+  Model 7 looks pretty good, with C\textsubscript{p} just barely smaller
+  than the size (p = 7) of the model.
+\item
+  Model 6 is also a possibility, with the difference \(C_p - p\)
+  minimized among all models with \(C_p >= p\).
+\end{itemize}
+
+\subsection{\texorpdfstring{``All Subsets'' Regression and Information
+Criteria}{All Subsets Regression and Information Criteria}}\label{all-subsets-regression-and-information-criteria}
+
+We might consider any of three main information criteria:
+
+\begin{itemize}
+\tightlist
+\item
+  the Bayesian Information Criterion, called BIC
+\item
+  the Akaike Information Criterion (used by R's default stepwise
+  approaches,) called AIC
+\item
+  a corrected version of AIC due to Hurwitz and Tsai, called
+  AIC\textsubscript{c}
+\end{itemize}
+
+Each of these indicates better models by getting smaller. I'll focus on
+bias-corrected AIC and on BIC.
+
+\subsection{The bias-corrected AIC
+plot}\label{the-bias-corrected-aic-plot}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{p3 <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(best_mods, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ k, }\DataTypeTok{y =}\NormalTok{ aic.c,}
+                             \DataTypeTok{label =} \KeywordTok{round}\NormalTok{(aic.c,}\DecValTok{1}\NormalTok{))) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_line}\NormalTok{() }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_label}\NormalTok{() }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_label}\NormalTok{(}\DataTypeTok{data =} \KeywordTok{subset}\NormalTok{(best_mods, aic.c }\OperatorTok{==}\StringTok{ }\KeywordTok{min}\NormalTok{(aic.c)),}
+               \KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ k, }\DataTypeTok{y =}\NormalTok{ aic.c), }\DataTypeTok{fill =} \StringTok{"pink"}\NormalTok{, }
+               \DataTypeTok{col =} \StringTok{"red"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{theme_bw}\NormalTok{() }\OperatorTok{+}
+\StringTok{    }\KeywordTok{scale_x_continuous}\NormalTok{(}\DataTypeTok{breaks =} \DecValTok{2}\OperatorTok{:}\DecValTok{9}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{x =} \StringTok{"# of predictors (including intercept)"}\NormalTok{,}
+         \DataTypeTok{y =} \StringTok{"Bias-Corrected AIC"}\NormalTok{)}
+
+\NormalTok{p3}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-76-1.pdf}
+
+The smallest AIC\textsubscript{c} values occur in models 4 and later,
+especially model 4 itself.
+
+\section{The BIC plot}\label{the-bic-plot}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{p4 <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(best_mods, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ k, }\DataTypeTok{y =}\NormalTok{ bic,}
+                            \DataTypeTok{label =} \KeywordTok{round}\NormalTok{(bic,}\DecValTok{1}\NormalTok{))) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_line}\NormalTok{() }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_label}\NormalTok{() }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_label}\NormalTok{(}\DataTypeTok{data =} \KeywordTok{subset}\NormalTok{(best_mods, bic }\OperatorTok{==}\StringTok{ }\KeywordTok{min}\NormalTok{(bic)),}
+               \KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ k, }\DataTypeTok{y =}\NormalTok{ bic),}
+               \DataTypeTok{fill =} \StringTok{"lightgreen"}\NormalTok{, }\DataTypeTok{col =} \StringTok{"blue"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{theme_bw}\NormalTok{() }\OperatorTok{+}
+\StringTok{    }\KeywordTok{scale_x_continuous}\NormalTok{(}\DataTypeTok{breaks =} \DecValTok{2}\OperatorTok{:}\DecValTok{9}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{x =} \StringTok{"# of predictors (including intercept)"}\NormalTok{,}
+         \DataTypeTok{y =} \StringTok{"BIC"}\NormalTok{)}
+
+\NormalTok{p4}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-77-1.pdf}
+
+\subsection{All Four Plots in One Figure (via
+ggplot2)}\label{all-four-plots-in-one-figure-via-ggplot2}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{gridExtra}\OperatorTok{::}\KeywordTok{grid.arrange}\NormalTok{(p1, p2, p3, p4, }\DataTypeTok{nrow =} \DecValTok{2}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-78-1.pdf}
+
+\section{Plotting the Best Subsets Results using base R
+plots}\label{plotting-the-best-subsets-results-using-base-r-plots}
+
+\subsection{\texorpdfstring{The Adjusted R\textsuperscript{2}
+Plot}{The Adjusted R2 Plot}}\label{the-adjusted-r2-plot-1}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plot}\NormalTok{(rs}\OperatorTok{$}\NormalTok{adjr2 }\OperatorTok{~}\StringTok{ }\KeywordTok{I}\NormalTok{(}\DecValTok{2}\OperatorTok{:}\DecValTok{9}\NormalTok{), }\DataTypeTok{ylab=}\StringTok{"Adjusted R-squared"}\NormalTok{,}
+     \DataTypeTok{xlab=}\StringTok{"# of Inputs, including intercept"}\NormalTok{)}
+\KeywordTok{lines}\NormalTok{(}\KeywordTok{spline}\NormalTok{(rs}\OperatorTok{$}\NormalTok{adjr2 }\OperatorTok{~}\StringTok{ }\KeywordTok{I}\NormalTok{(}\DecValTok{2}\OperatorTok{:}\DecValTok{9}\NormalTok{)))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-79-1.pdf}
+
+Again, models 4-9 all look like reasonable choices here.
+
+\subsection{\texorpdfstring{A Fancier Version (identifying the largest
+adjusted
+R\textsuperscript{2})}{A Fancier Version (identifying the largest adjusted R2)}}\label{a-fancier-version-identifying-the-largest-adjusted-r2}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{m2 <-}\StringTok{ }\KeywordTok{max}\NormalTok{(rs}\OperatorTok{$}\NormalTok{adjr2) }
+\NormalTok{m1 <-}\StringTok{ }\KeywordTok{which.max}\NormalTok{(rs}\OperatorTok{$}\NormalTok{adjr2) }\OperatorTok{+}\StringTok{ }\DecValTok{1}
+\KeywordTok{plot}\NormalTok{(rs}\OperatorTok{$}\NormalTok{adjr2 }\OperatorTok{~}\StringTok{ }\KeywordTok{I}\NormalTok{(}\DecValTok{2}\OperatorTok{:}\DecValTok{9}\NormalTok{), }\DataTypeTok{ylab=}\StringTok{"Adjusted R-squared"}\NormalTok{,}
+     \DataTypeTok{xlab=}\StringTok{"# of Inputs, including intercept"}\NormalTok{)}
+\KeywordTok{lines}\NormalTok{(}\KeywordTok{spline}\NormalTok{(rs}\OperatorTok{$}\NormalTok{adjr2 }\OperatorTok{~}\StringTok{ }\KeywordTok{I}\NormalTok{(}\DecValTok{2}\OperatorTok{:}\DecValTok{9}\NormalTok{)))}
+\KeywordTok{arrows}\NormalTok{(m1, m2}\OperatorTok{-}\FloatTok{0.02}\NormalTok{, m1, m2)}
+\KeywordTok{text}\NormalTok{(m1, m2}\OperatorTok{-}\FloatTok{0.03}\NormalTok{, }\KeywordTok{paste}\NormalTok{(}\StringTok{"max ="}\NormalTok{, }\KeywordTok{format}\NormalTok{(m2, }\DataTypeTok{digits=}\DecValTok{3}\NormalTok{)))}
+\KeywordTok{text}\NormalTok{(m1, m2}\OperatorTok{-}\FloatTok{0.045}\NormalTok{, }\KeywordTok{paste}\NormalTok{(}\StringTok{"with"}\NormalTok{, }\KeywordTok{format}\NormalTok{(m1, }\DataTypeTok{digits=}\DecValTok{1}\NormalTok{),}
+                        \StringTok{"inputs"}\NormalTok{), }\DataTypeTok{pos=}\DecValTok{3}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-80-1.pdf}
+
+\subsection{\texorpdfstring{The \(C_p\)
+Plot}{The C\_p Plot}}\label{the-c_p-plot-1}
+
+Again, the \(C_p\) plot is just a scatterplot of \(C_p\) on the Y-axis,
+and \(p\) on the X-axis.
 
 Each of the various predictor subsets we will study is represented in a
 single point. A model without bias should have \(C_p\) roughly equal to
@@ -8017,32 +8334,13 @@ statistics.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-73-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-81-1.pdf}
 
 Model 4 has the smallest value of \(C_p\) (and is the leftmost of the
 largely comparable models 4-9) while 6 is close to and 7 is right on the
 \(C_p = p\) line, so those are the likeliest candidates.
 
-\section{\texorpdfstring{``All Subsets'' Regression and Information
-Criteria}{All Subsets Regression and Information Criteria}}\label{all-subsets-regression-and-information-criteria}
-
-We will have three main information criteria:
-
-\begin{itemize}
-\tightlist
-\item
-  the Bayesian Information Criterion, called BIC
-\item
-  the Akaike Information Criterion (used by R's default stepwise
-  approaches,) called AIC
-\item
-  a corrected version of AIC due to Hurwitz and Tsai, called
-  AIC\textsubscript{c}
-\end{itemize}
-
-Each of these indicates better models by getting smaller.
-
-\subsection{The BIC Plot}\label{the-bic-plot}
+\subsection{The BIC Plot}\label{the-bic-plot-1}
 
 R provides the BIC directly as part of the result of running
 \texttt{regsubsets}, as we've seen.
@@ -8054,73 +8352,27 @@ R provides the BIC directly as part of the result of running
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-74-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-82-1.pdf}
 
 We want to minimize BIC, which argues strongly for the model with 4
 inputs, including the intercept.
 
-\subsection{\texorpdfstring{AIC with ``All
-Subsets''}{AIC with All Subsets}}\label{aic-with-all-subsets}
-
-To get the AIC, we can use the formula
-
-\[
-AIC = n log(RSS/n) + 2p
-\]
-
-where \emph{n} is the sample size, \emph{p} = \# of regression inputs to
-be fit in the model (including the intercept) and the RSS can be found
-in the \texttt{regsubsets} output:
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{rs}\OperatorTok{$}\NormalTok{rss}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-[1] 58.91478 51.74218 46.56844 45.72444 44.64364 43.69047 43.04471 42.77150
-\end{verbatim}
-
-So, in our case, we have n = 97 subjects, and models being fit with 2 to
-9 regression inputs (including the intercept), so we have:
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{rs}\OperatorTok{$}\NormalTok{aic <-}\StringTok{ }\DecValTok{97}\OperatorTok{*}\KeywordTok{log}\NormalTok{(rs}\OperatorTok{$}\NormalTok{rss }\OperatorTok{/}\StringTok{ }\DecValTok{97}\NormalTok{) }\OperatorTok{+}\StringTok{ }\DecValTok{2}\OperatorTok{*}\NormalTok{(}\DecValTok{2}\OperatorTok{:}\DecValTok{9}\NormalTok{)}
-\NormalTok{rs}\OperatorTok{$}\NormalTok{aic}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-[1] -44.36603 -54.95846 -63.17744 -62.95157 -63.27191 -63.36534 -62.80974
-[8] -61.42738
-\end{verbatim}
-
 \subsection{The Bias-Corrected AIC (Hurwitz \&
 Tsai)}\label{the-bias-corrected-aic-hurwitz-tsai}
 
-The bias-corrected AIC formula due to Hurwitz and Tsai is:
+The bias-corrected AIC formula due to Hurwitz and Tsai is, as we've
+seen:
 
-\(AIC_c\) = n log(RSS/n) + 2p + {[}2p (p+1) / (n-p-1){]} = AIC + {[}2p
-(p+1) / (n-p-1){]}
+\[
+AIC_c = n log(\frac{RSS}{n}) + 2k + \frac{2k (k+1)}{n-k-1}
+\]
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{rs}\OperatorTok{$}\NormalTok{aic.corr <-}\StringTok{ }\DecValTok{97}\OperatorTok{*}\KeywordTok{log}\NormalTok{(rs}\OperatorTok{$}\NormalTok{rss }\OperatorTok{/}\StringTok{ }\DecValTok{97}\NormalTok{) }\OperatorTok{+}\StringTok{ }\DecValTok{2}\OperatorTok{*}\NormalTok{(}\DecValTok{2}\OperatorTok{:}\DecValTok{9}\NormalTok{) }\OperatorTok{+}
+\NormalTok{rs}\OperatorTok{$}\NormalTok{aic.c <-}\StringTok{ }\DecValTok{97}\OperatorTok{*}\KeywordTok{log}\NormalTok{(rs}\OperatorTok{$}\NormalTok{rss }\OperatorTok{/}\StringTok{ }\DecValTok{97}\NormalTok{) }\OperatorTok{+}\StringTok{ }\DecValTok{2}\OperatorTok{*}\NormalTok{(}\DecValTok{2}\OperatorTok{:}\DecValTok{9}\NormalTok{) }\OperatorTok{+}
 \StringTok{               }\NormalTok{(}\DecValTok{2} \OperatorTok{*}\StringTok{ }\NormalTok{(}\DecValTok{2}\OperatorTok{:}\DecValTok{9}\NormalTok{) }\OperatorTok{*}\StringTok{ }\NormalTok{((}\DecValTok{2}\OperatorTok{:}\DecValTok{9}\NormalTok{)}\OperatorTok{+}\DecValTok{1}\NormalTok{) }\OperatorTok{/}\StringTok{ }\NormalTok{(}\DecValTok{97} \OperatorTok{-}\StringTok{ }\NormalTok{(}\DecValTok{2}\OperatorTok{:}\DecValTok{9}\NormalTok{) }\OperatorTok{-}\StringTok{ }\DecValTok{1}\NormalTok{))}
 
 \KeywordTok{round}\NormalTok{(rs}\OperatorTok{$}\NormalTok{aic,}\DecValTok{2}\NormalTok{) }\CommentTok{# uncorrected }
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-[1] -44.37 -54.96 -63.18 -62.95 -63.27 -63.37 -62.81 -61.43
-\end{verbatim}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\KeywordTok{round}\NormalTok{(rs}\OperatorTok{$}\NormalTok{aic.corr,}\DecValTok{2}\NormalTok{) }\CommentTok{# bias-corrected}
 \end{Highlighting}
 \end{Shaded}
 
@@ -8130,17 +8382,28 @@ The bias-corrected AIC formula due to Hurwitz and Tsai is:
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\KeywordTok{plot}\NormalTok{(rs}\OperatorTok{$}\NormalTok{aic.corr }\OperatorTok{~}\StringTok{ }\KeywordTok{I}\NormalTok{(}\DecValTok{2}\OperatorTok{:}\DecValTok{9}\NormalTok{), }\DataTypeTok{ylab=}\StringTok{"AIC, corrected"}\NormalTok{, }\DataTypeTok{xlab=}\StringTok{"# of Fitted Inputs"}\NormalTok{,}
+\KeywordTok{round}\NormalTok{(rs}\OperatorTok{$}\NormalTok{aic.c,}\DecValTok{2}\NormalTok{) }\CommentTok{# bias-corrected}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+[1] -44.24 -54.70 -62.74 -62.29 -62.34 -62.11 -61.17 -59.36
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plot}\NormalTok{(rs}\OperatorTok{$}\NormalTok{aic.c }\OperatorTok{~}\StringTok{ }\KeywordTok{I}\NormalTok{(}\DecValTok{2}\OperatorTok{:}\DecValTok{9}\NormalTok{), }\DataTypeTok{ylab=}\StringTok{"AIC, corrected"}\NormalTok{, }\DataTypeTok{xlab=}\StringTok{"# of Fitted Inputs"}\NormalTok{,}
      \DataTypeTok{pch=}\DecValTok{16}\NormalTok{, }\DataTypeTok{cex=}\FloatTok{1.5}\NormalTok{, }\DataTypeTok{col=}\StringTok{"tomato"}\NormalTok{, }\DataTypeTok{main=}\StringTok{"AIC (corrected) Plot"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-78-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-84-1.pdf}
 
 The smallest AIC\textsubscript{c} values occur in models 4 and later,
 especially model 4 itself.
 
-\section{All Four Plots, Together}\label{all-four-plots-together}
+\subsection{All Four Plots, Together (from Base
+R)}\label{all-four-plots-together-from-base-r}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -8162,9 +8425,9 @@ especially model 4 itself.
      \DataTypeTok{pch=}\DecValTok{16}\NormalTok{, }\DataTypeTok{main=}\StringTok{"Cp Plot"}\NormalTok{)}
 \KeywordTok{abline}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{1}\NormalTok{, }\DataTypeTok{col =} \StringTok{"purple"}\NormalTok{)}
 
-\NormalTok{rs}\OperatorTok{$}\NormalTok{aic.corr <-}\StringTok{ }\DecValTok{97}\OperatorTok{*}\KeywordTok{log}\NormalTok{(rs}\OperatorTok{$}\NormalTok{rss }\OperatorTok{/}\StringTok{ }\DecValTok{97}\NormalTok{) }\OperatorTok{+}\StringTok{ }\DecValTok{2}\OperatorTok{*}\NormalTok{(}\DecValTok{2}\OperatorTok{:}\DecValTok{9}\NormalTok{) }\OperatorTok{+}
+\NormalTok{rs}\OperatorTok{$}\NormalTok{aic.c <-}\StringTok{ }\DecValTok{97}\OperatorTok{*}\KeywordTok{log}\NormalTok{(rs}\OperatorTok{$}\NormalTok{rss }\OperatorTok{/}\StringTok{ }\DecValTok{97}\NormalTok{) }\OperatorTok{+}\StringTok{ }\DecValTok{2}\OperatorTok{*}\NormalTok{(}\DecValTok{2}\OperatorTok{:}\DecValTok{9}\NormalTok{) }\OperatorTok{+}
 \StringTok{               }\NormalTok{(}\DecValTok{2} \OperatorTok{*}\StringTok{ }\NormalTok{(}\DecValTok{2}\OperatorTok{:}\DecValTok{9}\NormalTok{) }\OperatorTok{*}\StringTok{ }\NormalTok{((}\DecValTok{2}\OperatorTok{:}\DecValTok{9}\NormalTok{)}\OperatorTok{+}\DecValTok{1}\NormalTok{) }\OperatorTok{/}\StringTok{ }\NormalTok{(}\DecValTok{97} \OperatorTok{-}\StringTok{ }\NormalTok{(}\DecValTok{2}\OperatorTok{:}\DecValTok{9}\NormalTok{) }\OperatorTok{-}\StringTok{ }\DecValTok{1}\NormalTok{))}
-\KeywordTok{plot}\NormalTok{(rs}\OperatorTok{$}\NormalTok{aic.corr }\OperatorTok{~}\StringTok{ }\KeywordTok{I}\NormalTok{(}\DecValTok{2}\OperatorTok{:}\DecValTok{9}\NormalTok{), }\DataTypeTok{ylab=}\StringTok{"AIC, corrected"}\NormalTok{, }\DataTypeTok{xlab=}\StringTok{"# of Fitted Inputs"}\NormalTok{,}
+\KeywordTok{plot}\NormalTok{(rs}\OperatorTok{$}\NormalTok{aic.c }\OperatorTok{~}\StringTok{ }\KeywordTok{I}\NormalTok{(}\DecValTok{2}\OperatorTok{:}\DecValTok{9}\NormalTok{), }\DataTypeTok{ylab=}\StringTok{"AIC, corrected"}\NormalTok{, }\DataTypeTok{xlab=}\StringTok{"# of Fitted Inputs"}\NormalTok{,}
      \DataTypeTok{pch=}\DecValTok{16}\NormalTok{, }\DataTypeTok{cex=}\FloatTok{1.5}\NormalTok{, }\DataTypeTok{col=}\StringTok{"tomato"}\NormalTok{, }\DataTypeTok{main=}\StringTok{"AIC (corrected) Plot"}\NormalTok{)}
 
 \KeywordTok{plot}\NormalTok{(rs}\OperatorTok{$}\NormalTok{bic }\OperatorTok{~}\StringTok{ }\KeywordTok{I}\NormalTok{(}\DecValTok{2}\OperatorTok{:}\DecValTok{9}\NormalTok{), }\DataTypeTok{ylab=}\StringTok{"BIC"}\NormalTok{, }\DataTypeTok{xlab=}\StringTok{"# of Fitted Inputs"}\NormalTok{,}
@@ -8172,7 +8435,7 @@ especially model 4 itself.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-79-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-85-1.pdf}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -8186,50 +8449,62 @@ We can build a big table, like this:
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{winners <-}\StringTok{ }\KeywordTok{data_frame}\NormalTok{(}\DataTypeTok{inputs =} \DecValTok{2}\OperatorTok{:}\DecValTok{9}\NormalTok{)}
-\NormalTok{winners}\OperatorTok{$}\NormalTok{r2 <-}\StringTok{ }\NormalTok{rs}\OperatorTok{$}\NormalTok{rsq}
-\NormalTok{winners}\OperatorTok{$}\NormalTok{adjr2 <-}\StringTok{ }\NormalTok{rs}\OperatorTok{$}\NormalTok{adjr2}
-\NormalTok{winners}\OperatorTok{$}\NormalTok{cp <-}\StringTok{ }\NormalTok{rs}\OperatorTok{$}\NormalTok{cp}
-\NormalTok{winners}\OperatorTok{$}\NormalTok{bic <-}\StringTok{ }\NormalTok{rs}\OperatorTok{$}\NormalTok{bic}
-\NormalTok{winners}\OperatorTok{$}\NormalTok{aic <-}\StringTok{ }\NormalTok{rs}\OperatorTok{$}\NormalTok{aic}
-\NormalTok{winners}\OperatorTok{$}\NormalTok{aic.corr <-}\StringTok{ }\NormalTok{rs}\OperatorTok{$}\NormalTok{aic.corr}
-\NormalTok{winners }\OperatorTok{%>%}\StringTok{ }\KeywordTok{round}\NormalTok{(., }\DecValTok{3}\NormalTok{)}
+\NormalTok{best_mods}
 \end{Highlighting}
 \end{Shaded}
 
 \begin{verbatim}
-# A tibble: 8 x 7
-  inputs    r2 adjr2    cp   bic   aic aic.corr
-   <dbl> <dbl> <dbl> <dbl> <dbl> <dbl>    <dbl>
-1   2.00 0.539 0.535 28.2  -66.1 -44.4    -44.2
-2   3.00 0.596 0.587 15.5  -74.1 -55.0    -54.7
-3   4.00 0.636 0.624  6.81 -79.7 -63.2    -62.7
-4   5.00 0.643 0.627  7.08 -76.9 -63.0    -62.3
-5   6.00 0.651 0.632  6.85 -74.7 -63.3    -62.3
-6   7.00 0.658 0.636  6.89 -72.2 -63.4    -62.1
-7   8.00 0.663 0.637  7.56 -69.0 -62.8    -61.2
-8   9.00 0.666 0.635  9.00 -65.1 -61.4    -59.4
+  k        r2     adjr2        cp     aic.c       bic (Intercept) lcavol
+1 2 0.5394320 0.5345839 28.213914 -44.23838 -66.05416        TRUE   TRUE
+2 3 0.5955040 0.5868977 15.456669 -54.70040 -74.07188        TRUE   TRUE
+3 4 0.6359499 0.6242063  6.811986 -62.74265 -79.71614        TRUE   TRUE
+4 5 0.6425479 0.6270065  7.075509 -62.29223 -76.91557        TRUE   TRUE
+5 6 0.6509970 0.6318211  6.851826 -62.33858 -74.66120        TRUE   TRUE
+6 7 0.6584484 0.6356783  6.890739 -62.10692 -72.17992        TRUE   TRUE
+7 8 0.6634967 0.6370302  7.562119 -61.17338 -69.04961        TRUE   TRUE
+8 9 0.6656326 0.6352355  9.000000 -59.35841 -65.09253        TRUE   TRUE
+  lweight   age bph_f svi_f   lcp gleason_f pgg45
+1   FALSE FALSE FALSE FALSE FALSE     FALSE FALSE
+2    TRUE FALSE FALSE FALSE FALSE     FALSE FALSE
+3    TRUE FALSE FALSE  TRUE FALSE     FALSE FALSE
+4    TRUE FALSE  TRUE  TRUE FALSE     FALSE FALSE
+5    TRUE  TRUE  TRUE  TRUE FALSE     FALSE FALSE
+6    TRUE  TRUE  TRUE  TRUE FALSE      TRUE FALSE
+7    TRUE  TRUE  TRUE  TRUE  TRUE      TRUE FALSE
+8    TRUE  TRUE  TRUE  TRUE  TRUE      TRUE  TRUE
 \end{verbatim}
 
 \section{Models Worth Considering?}\label{models-worth-considering}
 
 \begin{longtable}[]{@{}rrll@{}}
 \toprule
-\(k\) & Size & Predictors & Reason\tabularnewline
+\(k\) & Predictors & Reason\tabularnewline
 \midrule
 \endhead
-4 & 3 & \texttt{lcavol\ lweight\ svi\_f} & minimizes BIC\tabularnewline
-7 & 6 & \texttt{+\ age\ bph\_f\ gleason\_f} & \(C_p\) near
+4 & \texttt{lcavol\ lweight\ svi\_f} & minimizes BIC,
+AIC\textsubscript{c}\tabularnewline
+7 & \texttt{+\ age\ bph\_f\ gleason\_f} & \(C_p\) near
 \emph{p}\tabularnewline
-8 & 7 & \texttt{+\ lcp} & max \(R^2_{adj}\)\tabularnewline
+8 & \texttt{+\ lcp} & max \(R^2_{adj}\)\tabularnewline
 \bottomrule
 \end{longtable}
 
-\section{ANOVA Testing to compare these three
-models?}\label{anova-testing-to-compare-these-three-models}
+\section{Compare these candidate models
+in-sample?}\label{compare-these-candidate-models-in-sample}
+
+\subsection{\texorpdfstring{Using \texttt{anova} to compare nested
+models}{Using anova to compare nested models}}\label{using-anova-to-compare-nested-models}
 
 Let's run an ANOVA-based comparison of these nested models to each other
 and to the model with the intercept alone.
+
+\begin{itemize}
+\tightlist
+\item
+  The models are \textbf{nested} because \texttt{m04} is a subset of the
+  predictors in \texttt{m07}, which includes a subset of the predictors
+  in \texttt{m08}.
+\end{itemize}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -8272,6 +8547,230 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 \end{verbatim}
 
 What conclusions can we draw here, on the basis of these ANOVA tests?
+
+\begin{itemize}
+\tightlist
+\item
+  The first \emph{p} value, of 0.3393, compares what the \texttt{anova}
+  called Model 1, and what we call \texttt{m.full} to what the
+  \texttt{anova} called Model 2, and what we call \texttt{m08}. So
+  there's no significant decline in predictive value observed when we
+  drop from the \texttt{m.full} model to the \texttt{m08} model. This
+  suggests that the \texttt{m08} model may be a better choice.
+\item
+  The second \emph{p} value, of 0.2786, compares \texttt{m08} to
+  \texttt{m07}, and suggests that we lose no significant predictive
+  value by dropping down to \texttt{m07}.
+\item
+  The third \emph{p} value, of 0.1050, compares \texttt{m07} to
+  \texttt{m04}, and suggests that we lose no significant predictive
+  value by dropping down to \texttt{m04}.
+\item
+  But the fourth \emph{p} value, of 2e-16 (or, functionally, zero),
+  compares \texttt{m04} to \texttt{m.int} and suggests that we do gain
+  significant predictive value by including the predictors in
+  \texttt{m04} as compared to a model with an intercept alone.
+\item
+  So, by the significance tests, the model we'd select would be
+  \texttt{m04}, but, of course, in-sample statistical significance alone
+  isn't a good enough reason to select a model if we want to do
+  prediction well.
+\end{itemize}
+
+\section{AIC and BIC comparisons, within the training
+sample}\label{aic-and-bic-comparisons-within-the-training-sample}
+
+Next, we'll compare the three candidate models (ignoring the
+intercept-only and kitchen sink models) in terms of their AIC values and
+BIC values, again using the same sample we used to fit the models in the
+first place.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{AIC}\NormalTok{(m04, m07, m08)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+    df      AIC
+m04  5 214.0966
+m07 10 214.2327
+m08 11 214.9148
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{BIC}\NormalTok{(m04, m07, m08)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+    df      BIC
+m04  5 226.9702
+m07 10 239.9798
+m08 11 243.2366
+\end{verbatim}
+
+\begin{itemize}
+\tightlist
+\item
+  The model with the smallest AIC value shows the best performance
+  within the sample on that measure.
+\item
+  Similarly, smaller BIC values are associated with predictor sets that
+  perform better in sample on that criterion.
+\item
+  BIC often suggests smaller models (with fewer regression inputs) than
+  does AIC. Does that happen in this case?
+\item
+  Note that \texttt{AIC} and \texttt{BIC} can be calculated in a few
+  different ways, so we may see some variation if we don't compare
+  apples to apples with regard to the R functions involved.
+\end{itemize}
+
+\section{Cross-Validation of Candidate Models out of
+Sample}\label{cross-validation-of-candidate-models-out-of-sample}
+
+\subsection{\texorpdfstring{20-fold Cross-Validation of model
+\texttt{m04}}{20-fold Cross-Validation of model m04}}\label{fold-cross-validation-of-model-m04}
+
+Model \texttt{m04} uses \texttt{lcavol}, \texttt{lweight} and
+\texttt{svi\_f} to predict the \texttt{lpsa} outcome. Let's do 20-fold
+cross-validation of this modeling approach, and calculate the root mean
+squared prediction error and the mean absolute prediction error for that
+modeling scheme.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{43201}\NormalTok{)}
+
+\NormalTok{cv_m04 <-}\StringTok{ }\NormalTok{prost }\OperatorTok{%>%}
+\StringTok{    }\KeywordTok{crossv_kfold}\NormalTok{(}\DataTypeTok{k =} \DecValTok{20}\NormalTok{) }\OperatorTok{%>%}
+\StringTok{    }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{model =} \KeywordTok{map}\NormalTok{(train, }
+                       \OperatorTok{~}\StringTok{ }\KeywordTok{lm}\NormalTok{(lpsa }\OperatorTok{~}\StringTok{ }\NormalTok{lcavol }\OperatorTok{+}\StringTok{ }\NormalTok{lweight }\OperatorTok{+}\StringTok{ }\NormalTok{svi_f,}
+                                   \DataTypeTok{data =}\NormalTok{ .)))}
+
+\NormalTok{cv_m04_pred <-}\StringTok{ }\NormalTok{cv_m04 }\OperatorTok{%>%}
+\StringTok{    }\KeywordTok{unnest}\NormalTok{(}\KeywordTok{map2}\NormalTok{(model, test, }\OperatorTok{~}\StringTok{ }\KeywordTok{augment}\NormalTok{(.x, }\DataTypeTok{newdata =}\NormalTok{ .y)))}
+
+\NormalTok{cv_m04_results <-}\StringTok{ }\NormalTok{cv_m04_pred }\OperatorTok{%>%}
+\StringTok{    }\KeywordTok{summarize}\NormalTok{(}\DataTypeTok{Model =} \StringTok{"m04"}\NormalTok{, }
+              \DataTypeTok{RMSE =} \KeywordTok{sqrt}\NormalTok{(}\KeywordTok{mean}\NormalTok{((lpsa }\OperatorTok{-}\StringTok{ }\NormalTok{.fitted) }\OperatorTok{^}\DecValTok{2}\NormalTok{)),}
+              \DataTypeTok{MAE =} \KeywordTok{mean}\NormalTok{(}\KeywordTok{abs}\NormalTok{(lpsa }\OperatorTok{-}\StringTok{ }\NormalTok{.fitted)))}
+
+\NormalTok{cv_m04_results}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+# A tibble: 1 x 3
+  Model  RMSE   MAE
+  <chr> <dbl> <dbl>
+1 m04   0.725 0.574
+\end{verbatim}
+
+\subsection{\texorpdfstring{20-fold Cross-Validation of model
+\texttt{m07}}{20-fold Cross-Validation of model m07}}\label{fold-cross-validation-of-model-m07}
+
+Model \texttt{m07} uses \texttt{lcavol}, \texttt{lweight},
+\texttt{svi\_f}, \texttt{age}, \texttt{bph\_f}, and \texttt{gleason\_f}
+to predict the \texttt{lpsa} outcome. Let's now do 20-fold
+cross-validation of this modeling approach, and calculate the root mean
+squared prediction error and the mean absolute prediction error for that
+modeling scheme. Note the small changes required, as compared to our
+cross-validation of model \texttt{m04} a moment ago.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{43202}\NormalTok{)}
+
+\NormalTok{cv_m07 <-}\StringTok{ }\NormalTok{prost }\OperatorTok{%>%}
+\StringTok{    }\KeywordTok{crossv_kfold}\NormalTok{(}\DataTypeTok{k =} \DecValTok{20}\NormalTok{) }\OperatorTok{%>%}
+\StringTok{    }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{model =} \KeywordTok{map}\NormalTok{(train, }
+                       \OperatorTok{~}\StringTok{ }\KeywordTok{lm}\NormalTok{(lpsa }\OperatorTok{~}\StringTok{ }\NormalTok{lcavol }\OperatorTok{+}\StringTok{ }\NormalTok{lweight }\OperatorTok{+}\StringTok{ }
+\StringTok{                                }\NormalTok{svi_f }\OperatorTok{+}\StringTok{ }\NormalTok{age }\OperatorTok{+}\StringTok{ }\NormalTok{bph_f }\OperatorTok{+}\StringTok{ }
+\StringTok{                                }\NormalTok{gleason_f,}
+                                   \DataTypeTok{data =}\NormalTok{ .)))}
+
+\NormalTok{cv_m07_pred <-}\StringTok{ }\NormalTok{cv_m07 }\OperatorTok{%>%}
+\StringTok{    }\KeywordTok{unnest}\NormalTok{(}\KeywordTok{map2}\NormalTok{(model, test, }\OperatorTok{~}\StringTok{ }\KeywordTok{augment}\NormalTok{(.x, }\DataTypeTok{newdata =}\NormalTok{ .y)))}
+
+\NormalTok{cv_m07_results <-}\StringTok{ }\NormalTok{cv_m07_pred }\OperatorTok{%>%}
+\StringTok{    }\KeywordTok{summarize}\NormalTok{(}\DataTypeTok{Model =} \StringTok{"m07"}\NormalTok{, }
+              \DataTypeTok{RMSE =} \KeywordTok{sqrt}\NormalTok{(}\KeywordTok{mean}\NormalTok{((lpsa }\OperatorTok{-}\StringTok{ }\NormalTok{.fitted) }\OperatorTok{^}\DecValTok{2}\NormalTok{)),}
+              \DataTypeTok{MAE =} \KeywordTok{mean}\NormalTok{(}\KeywordTok{abs}\NormalTok{(lpsa }\OperatorTok{-}\StringTok{ }\NormalTok{.fitted)))}
+
+\NormalTok{cv_m07_results}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+# A tibble: 1 x 3
+  Model  RMSE   MAE
+  <chr> <dbl> <dbl>
+1 m07   0.730 0.556
+\end{verbatim}
+
+\subsection{\texorpdfstring{20-fold Cross-Validation of model
+\texttt{m08}}{20-fold Cross-Validation of model m08}}\label{fold-cross-validation-of-model-m08}
+
+Model \texttt{m08} uses \texttt{lcavol}, \texttt{lweight},
+\texttt{svi\_f}, \texttt{age}, \texttt{bph\_f}, \texttt{gleason\_f} and
+\texttt{lcp} to predict the \texttt{lpsa} outcome. Let's now do 20-fold
+cross-validation of this modeling approach.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{43202}\NormalTok{)}
+
+\NormalTok{cv_m08 <-}\StringTok{ }\NormalTok{prost }\OperatorTok{%>%}
+\StringTok{    }\KeywordTok{crossv_kfold}\NormalTok{(}\DataTypeTok{k =} \DecValTok{20}\NormalTok{) }\OperatorTok{%>%}
+\StringTok{    }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{model =} \KeywordTok{map}\NormalTok{(train, }
+                       \OperatorTok{~}\StringTok{ }\KeywordTok{lm}\NormalTok{(lpsa }\OperatorTok{~}\StringTok{ }\NormalTok{lcavol }\OperatorTok{+}\StringTok{ }\NormalTok{lweight }\OperatorTok{+}\StringTok{ }
+\StringTok{                                }\NormalTok{svi_f }\OperatorTok{+}\StringTok{ }\NormalTok{age }\OperatorTok{+}\StringTok{ }\NormalTok{bph_f }\OperatorTok{+}\StringTok{ }
+\StringTok{                                }\NormalTok{gleason_f }\OperatorTok{+}\StringTok{ }\NormalTok{lcp,}
+                                   \DataTypeTok{data =}\NormalTok{ .)))}
+
+\NormalTok{cv_m08_pred <-}\StringTok{ }\NormalTok{cv_m08 }\OperatorTok{%>%}
+\StringTok{    }\KeywordTok{unnest}\NormalTok{(}\KeywordTok{map2}\NormalTok{(model, test, }\OperatorTok{~}\StringTok{ }\KeywordTok{augment}\NormalTok{(.x, }\DataTypeTok{newdata =}\NormalTok{ .y)))}
+
+\NormalTok{cv_m08_results <-}\StringTok{ }\NormalTok{cv_m08_pred }\OperatorTok{%>%}
+\StringTok{    }\KeywordTok{summarize}\NormalTok{(}\DataTypeTok{Model =} \StringTok{"m08"}\NormalTok{, }
+              \DataTypeTok{RMSE =} \KeywordTok{sqrt}\NormalTok{(}\KeywordTok{mean}\NormalTok{((lpsa }\OperatorTok{-}\StringTok{ }\NormalTok{.fitted) }\OperatorTok{^}\DecValTok{2}\NormalTok{)),}
+              \DataTypeTok{MAE =} \KeywordTok{mean}\NormalTok{(}\KeywordTok{abs}\NormalTok{(lpsa }\OperatorTok{-}\StringTok{ }\NormalTok{.fitted)))}
+
+\NormalTok{cv_m08_results}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+# A tibble: 1 x 3
+  Model  RMSE   MAE
+  <chr> <dbl> <dbl>
+1 m08   0.729 0.557
+\end{verbatim}
+
+\subsection{Comparing the Results of the
+Cross-Validations}\label{comparing-the-results-of-the-cross-validations}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{bind_rows}\NormalTok{(cv_m04_results, cv_m07_results, cv_m08_results)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+# A tibble: 3 x 3
+  Model  RMSE   MAE
+  <chr> <dbl> <dbl>
+1 m04   0.725 0.574
+2 m07   0.730 0.556
+3 m08   0.729 0.557
+\end{verbatim}
+
+It appears that model \texttt{m04} has the smallest RMSE and MAE in this
+case. So, that's the model with the strongest cross-validated predictive
+accuracy, by these two standards.
 
 \bibliography{text.bib}
 

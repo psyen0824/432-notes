@@ -45,31 +45,226 @@ So...
 - the best seven-input model added `lcp`,
 - and the eight-input model adds `pgg45`.
 
-### Summaries of "Winning" Models
+All of these "best subsets" are hierarchical, in that each model is a subset of the one below it. This isn't inevitably true.
 
-We can easily pull out R^2^, adjusted R^2^, C~p~, and BIC results for the "winning" models of each size.
+- To determine which model is best, we can plot key summaries of model fit (adjusted R^2^, Mallows' $C_p$, bias-corrected AIC, and BIC) using either base R plotting techniques (what I've done in the past) or `ggplot2` (what I use now.) I'll show both types of plotting approaches in the next two sections.
 
-```{r}
-winners <- tbl_df(rs$which)
-winners$k <- 2:9
-winners$r2 <- rs$rsq
-winners$adjr2 <- rs$adjr2
-winners$cp <- rs$cp
-winners$bic <- rs$bic
-```
 
-And here is a table of those results...
+### Using `which` and `obj`
+
+Let's see what we've fit:
 
 ```{r}
-winners
+rs$obj
 ```
 
-- All of these "best subsets" are hierarchical, in that each model is a subset of the one below it. This isn't inevitably true.
-- By adjusted R^2^, which we want to maximize, the best model appears to be the model with $k$ = 8.
-- By *C~p~*, which we want to minimize (within reason), the best choice appears to be the $k$ = 4, 6 or 7 model.
-- By BIC, the best model has $k$ = 4.
+To see the eight models selected by the system, we use:
 
-## Plotting the Best Subsets Results
+```{r}
+rs$which
+```
+
+We built one subset of each size up to eight predictors, not including the intercept. This means we have models of size k = 2, 3, 4, 5, 6, 7, 8 and 9.
+
+The models are:
+
+Size k | Predictors included (besides intercept)
+-----: | --------------------------------------------------
+2 | lcavol
+3 | lcavol and lweight
+4 | add svi_f
+5 | add bph_f
+6 | add age
+7 | add gleason_f
+8 | add lcp
+9 | add pgg45
+
+## Calculating bias-corrected AIC
+
+The bias-corrected AIC formula due to Hurwitz and Tsai requires three inputs:
+
+- the residual sum of squares for a model
+- the sample size (n) or number of observations used to fit the model
+- the number of regression inputs, k, including the intercept, used in the model
+
+So, for a particular model fit to *n* observations, on *k* predictors (including the intercept) and a residual sum of squares equal to RSS, we have:
+
+$$
+AIC_c = n log(\frac{RSS}{n}) + 2k + \frac{2k (k+1)}{n-k-1}
+$$
+
+Note that the corrected $AIC_c$ can be related to the original AIC via:
+
+$$
+AIC_c = AIC + \frac{2k (k+1)}{n - k - 1}
+$$
+
+### Calculation of aic.c in our setting
+
+In our case, we have $n$ = 97 observations, and built a series of models with $k$ = `2:9` predictors (including the intercept in each case), so we will insert those values into the general formula for bias-corrected AIC which is:
+
+```
+aic.c <- n * log( rs$rss / n) + 2 * k + 
+                      (2 * k * (k + 1) / (n - k - 1))
+```
+
+We can obtain the residual sum of squares explained by each model by pulling `rss` from the `regsubsets` summary contained here in `rs`.
+
+```{r}
+data_frame(k = 2:9, RSS = rs$rss)
+```
+
+In this case, we have:
+
+```{r}
+rs$aic.c <- 97*log(rs$rss / 97) + 2*(2:9) +
+               (2 * (2:9) * ((2:9)+1) / (97 - (2:9) - 1))
+
+round(rs$aic,2) # uncorrected 
+round(rs$aic.c,2) # bias-corrected
+```
+
+### Building a Tibble containing the necessary information
+
+Again, note the use of 2:9 for the values of $k$, because we're fitting one model for each size from 2 through 9.
+
+```{r}
+best_mods_1 <- data_frame(
+    k = 2:9,
+    r2 = rs$rsq,
+    adjr2 = rs$adjr2,
+    cp = rs$cp,
+    aic.c = rs$aic.c,
+    bic = rs$bic
+)
+
+best_mods <- cbind(best_mods_1, rs$which)
+
+best_mods
+```
+
+## Plotting the Best Subsets Results using `ggplot2`
+
+### The Adjusted R^2^ Plot
+
+```{r}
+p1 <- ggplot(best_mods, aes(x = k, y = adjr2,
+                            label = round(adjr2,2))) +
+    geom_line() +
+    geom_label() +
+    geom_label(data = subset(best_mods,
+                             adjr2 == max(adjr2)),
+               aes(x = k, y = adjr2, label = round(adjr2,2)),
+               fill = "yellow", col = "blue") +
+    theme_bw() +
+    scale_x_continuous(breaks = 2:9) +
+    labs(x = "# of predictors (including intercept)",
+         y = "Adjusted R-squared")
+
+p1
+```
+
+Models 4-9 all look like reasonable choices here. The maximum adjusted R^2^ is seen in the model of size 8.
+
+### Mallows' $C_p$
+
+The $C_p$ statistic focuses directly on the tradeoff between **bias** (due to excluding important predictors from the model) and extra **variance** (due to including too many unimportant predictors in the model.) 
+
+If N is the sample size, and we select $p$ regression predictors from a set of $K$ (where $p < K$), then the $C_p$ statistic is
+
+$C_p = \frac{SSE_p}{MSE_K} - N + 2p$
+
+where:
+
+- $SSE_p$ is the sum of squares for error (residual) in the model with $p$ predictors
+- $MSE_K$ is the residual mean square after regression in the model with all $K$ predictors
+
+As it turns out, this is just measuring the particular model's lack of fit, and then adding a penalty for the number of terms in the model (specifically $2p - N$ is the penalty since the lack of fit is measured as $(N-p) \frac{SSE_p}{MSE_K}$.
+
+- If a model has no meaningful lack of fit (i.e. no substantial bias) then the expected value of $C_p$ is roughly $p$. 
+- Otherwise, the expectation is $p$ plus a positive bias term. 
+- In general, we want to see *smaller* values of $C_p$. 
+- We usually select a "winning model" by choosing a subset of predictors that have $C_p$ near the value of $p$.
+
+### The $C_p$ Plot
+
+The $C_p$ plot is just a scatterplot of $C_p$ on the Y-axis, and $p$ on the X-axis. 
+
+Each of the various predictor subsets we will study is represented in a single point. A model without bias should have $C_p$ roughly equal to $p$, so we'll frequently draw a line at $C_p = p$ to make that clear. We then select our model from among all models with small $C_p$ statistics.
+
+```{r}
+p2 <- ggplot(best_mods, aes(x = k, y = cp,
+                            label = round(cp,1))) +
+    geom_line() +
+    geom_label() +
+    geom_abline(intercept = 0, slope = 1,
+                col = "red") +
+    theme_bw() +
+    scale_x_continuous(breaks = 2:9) +
+    labs(x = "# of predictors (including intercept)",
+         y = "Mallows' Cp")
+
+p2
+```
+
+- Model 7 looks pretty good, with C~p~ just barely smaller than the size (p = 7) of the model.
+- Model 6 is also a possibility, with the difference $C_p - p$ minimized among all models with $C_p >= p$.
+
+### "All Subsets" Regression and Information Criteria
+
+We might consider any of three main information criteria:
+
+- the Bayesian Information Criterion, called BIC
+- the Akaike Information Criterion (used by R's default stepwise approaches,) called AIC
+- a corrected version of AIC due to Hurwitz and Tsai, called AIC~c~
+
+Each of these indicates better models by getting smaller. I'll focus on bias-corrected AIC and on BIC.
+
+### The bias-corrected AIC plot
+
+```{r}
+p3 <- ggplot(best_mods, aes(x = k, y = aic.c,
+                             label = round(aic.c,1))) +
+    geom_line() +
+    geom_label() +
+    geom_label(data = subset(best_mods, aic.c == min(aic.c)),
+               aes(x = k, y = aic.c), fill = "pink", 
+               col = "red") +
+    theme_bw() +
+    scale_x_continuous(breaks = 2:9) +
+    labs(x = "# of predictors (including intercept)",
+         y = "Bias-Corrected AIC")
+
+p3
+```
+
+The smallest AIC~c~ values occur in models 4 and later, especially model 4 itself.
+
+## The BIC plot
+
+```{r}
+p4 <- ggplot(best_mods, aes(x = k, y = bic,
+                            label = round(bic,1))) +
+    geom_line() +
+    geom_label() +
+    geom_label(data = subset(best_mods, bic == min(bic)),
+               aes(x = k, y = bic),
+               fill = "lightgreen", col = "blue") +
+    theme_bw() +
+    scale_x_continuous(breaks = 2:9) +
+    labs(x = "# of predictors (including intercept)",
+         y = "BIC")
+
+p4
+```
+
+### All Four Plots in One Figure (via ggplot2)
+
+```{r, fig.height = 7}
+gridExtra::grid.arrange(p1, p2, p3, p4, nrow = 2)
+```
+
+## Plotting the Best Subsets Results using base R plots
 
 ### The Adjusted R^2^ Plot
 
@@ -79,7 +274,7 @@ plot(rs$adjr2 ~ I(2:9), ylab="Adjusted R-squared",
 lines(spline(rs$adjr2 ~ I(2:9)))
 ```
 
-Models 4-9 all look like reasonable choices here.
+Again, models 4-9 all look like reasonable choices here.
 
 ### A Fancier Version (identifying the largest adjusted R^2^)
 
@@ -95,32 +290,10 @@ text(m1, m2-0.045, paste("with", format(m1, digits=1),
                         "inputs"), pos=3)
 ```
 
-## Mallows' $C_p$
-
-The $C_p$ statistic focuses directly on the tradeoff between **bias** (due to excluding important predictors from the model) and extra **variance** (due to including too many unimportant predictors in the model.) 
-
-If N is the sample size, and we select $p$ regression predictors from a set of $K$ (where $p < K$), then the $C_p$ statistic is
-
-$C_p = \frac{SSE_p}{MSE_K} - N + 2p$
-
-where:
-
-- $SSE_p$ is the sum of squares for error (residual) in the model with $p$ predictors
-- $MSE_K$ is the residual mean square after regression in the model with all $K$ predictors
-
-As it turns out, this is just measuring the particular model's lack of fit, and then adding a penalty for the number of terms in the model (specifically $2p - N$ is the penalty since the lack of fit is measured as $(N-p) \frac{SSE_p}{MSE_K}$.
-
-If a model has no meaningful lack of fit (i.e. no substantial bias) then the expected value of $C_p$ is roughly $p$. 
-
-Otherwise, the expectation is $p$ plus a positive bias term. 
-
-In general, we want to see *smaller* values of $C_p$. 
-
-Often, we do this by choosing a subset of predictors that have $C_p$ near the value of $p$.
 
 ### The $C_p$ Plot
 
-The $C_p$ plot is just a scatterplot of $C_p$ on the Y-axis, and $p$ on the X-axis. 
+Again, the $C_p$ plot is just a scatterplot of $C_p$ on the Y-axis, and $p$ on the X-axis. 
 
 Each of the various predictor subsets we will study is represented in a single point. A model without bias should have $C_p$ roughly equal to $p$, so we'll frequently draw a line at $C_p = p$ to make that clear. We then select our model from among all models with small $C_p$ statistics.
 
@@ -134,16 +307,6 @@ abline(0,1, col = "purple")
 
 Model 4 has the smallest value of $C_p$ (and is the leftmost of the largely comparable models 4-9) while 6 is close to and 7 is right on the $C_p = p$ line, so those are the likeliest candidates.
 
-## "All Subsets" Regression and Information Criteria
-
-We will have three main information criteria:
-
-- the Bayesian Information Criterion, called BIC
-- the Akaike Information Criterion (used by R's default stepwise approaches,) called AIC
-- a corrected version of AIC due to Hurwitz and Tsai, called AIC~c~
-
-Each of these indicates better models by getting smaller.
-
 ### The BIC Plot
 
 R provides the BIC directly as part of the result of running `regsubsets`, as we've seen.
@@ -155,51 +318,31 @@ plot(rs$bic ~ I(2:9), ylab="BIC", xlab="# of Fitted Inputs",
 
 We want to minimize BIC, which argues strongly for the model with 4 inputs, including the intercept.
 
-### AIC with "All Subsets"
-
-To get the AIC, we can use the formula 
-
-$$
-AIC = n log(RSS/n) + 2p
-$$
-
-where *n* is the sample size, *p* = \# of regression inputs to be fit in the model (including the intercept) and the RSS can be found in the `regsubsets` output:
-
-```{r}
-rs$rss
-```
-
-So, in our case, we have n = 97 subjects, and models being fit with 2 to 9 regression inputs (including the intercept), so we have:
-
-```{r}
-rs$aic <- 97*log(rs$rss / 97) + 2*(2:9)
-rs$aic
-```
-
 ### The Bias-Corrected AIC (Hurwitz \& Tsai)
 
-The bias-corrected AIC formula due to Hurwitz and Tsai is:
+The bias-corrected AIC formula due to Hurwitz and Tsai is, as we've seen:
 
-$AIC_c$ = n log(RSS/n) + 2p + [2p (p+1) / (n-p-1)] = AIC + [2p (p+1) / (n-p-1)]
+$$
+AIC_c = n log(\frac{RSS}{n}) + 2k + \frac{2k (k+1)}{n-k-1}
+$$
 
 ```{r}
-rs$aic.corr <- 97*log(rs$rss / 97) + 2*(2:9) +
+rs$aic.c <- 97*log(rs$rss / 97) + 2*(2:9) +
                (2 * (2:9) * ((2:9)+1) / (97 - (2:9) - 1))
 
 round(rs$aic,2) # uncorrected 
-round(rs$aic.corr,2) # bias-corrected
+round(rs$aic.c,2) # bias-corrected
 ```
 
 
-
 ```{r}
-plot(rs$aic.corr ~ I(2:9), ylab="AIC, corrected", xlab="# of Fitted Inputs",
+plot(rs$aic.c ~ I(2:9), ylab="AIC, corrected", xlab="# of Fitted Inputs",
      pch=16, cex=1.5, col="tomato", main="AIC (corrected) Plot")
 ```
 
 The smallest AIC~c~ values occur in models 4 and later, especially model 4 itself.
 
-## All Four Plots, Together
+### All Four Plots, Together (from Base R)
 
 ```{r, fig.height = 8}
 par(mfrow = c(2,2))
@@ -220,9 +363,9 @@ plot(rs$cp ~ I(2:9),
      pch=16, main="Cp Plot")
 abline(0,1, col = "purple")
 
-rs$aic.corr <- 97*log(rs$rss / 97) + 2*(2:9) +
+rs$aic.c <- 97*log(rs$rss / 97) + 2*(2:9) +
                (2 * (2:9) * ((2:9)+1) / (97 - (2:9) - 1))
-plot(rs$aic.corr ~ I(2:9), ylab="AIC, corrected", xlab="# of Fitted Inputs",
+plot(rs$aic.c ~ I(2:9), ylab="AIC, corrected", xlab="# of Fitted Inputs",
      pch=16, cex=1.5, col="tomato", main="AIC (corrected) Plot")
 
 plot(rs$bic ~ I(2:9), ylab="BIC", xlab="# of Fitted Inputs",
@@ -235,27 +378,24 @@ par(mfrow = c(1,1))
 We can build a big table, like this:
 
 ```{r}
-winners <- data_frame(inputs = 2:9)
-winners$r2 <- rs$rsq
-winners$adjr2 <- rs$adjr2
-winners$cp <- rs$cp
-winners$bic <- rs$bic
-winners$aic <- rs$aic
-winners$aic.corr <- rs$aic.corr
-winners %>% round(., 3)
+best_mods
 ```
 
 ## Models Worth Considering?
 
-$k$ | Size | Predictors | Reason
+$k$ | Predictors | Reason
 ---:|---:| ------------| -------
-4 | 3 | `lcavol lweight svi_f` | minimizes BIC
-7 | 6 |`+ age bph_f gleason_f` | $C_p$ near *p*
-8 | 7 | `+ lcp` | max $R^2_{adj}$
+4 | `lcavol lweight svi_f` | minimizes BIC, AIC~c~
+7 | `+ age bph_f gleason_f` | $C_p$ near *p*
+8 | `+ lcp` | max $R^2_{adj}$
 
-## ANOVA Testing to compare these three models?
+## Compare these candidate models in-sample?
+
+### Using `anova` to compare nested models
 
 Let's run an ANOVA-based comparison of these nested models to each other and to the model with the intercept alone.
+
+- The models are **nested** because `m04` is a subset of the predictors in `m07`, which includes a subset of the predictors in `m08`.
 
 ```{r}
 m.int <- lm(lpsa ~ 1, data = prost)
@@ -275,4 +415,114 @@ anova(m.full, m08, m07, m04, m.int)
 ```
 
 What conclusions can we draw here, on the basis of these ANOVA tests?
+
+- The first *p* value, of 0.3393, compares what the `anova` called Model 1, and what we call `m.full` to what the `anova` called Model 2, and what we call `m08`. So there's no significant decline in predictive value observed when we drop from the `m.full` model to the `m08` model. This suggests that the `m08` model may be a better choice.
+- The second *p* value, of 0.2786, compares `m08` to `m07`, and suggests that we lose no significant predictive value by dropping down to `m07`.
+- The third *p* value, of 0.1050, compares `m07` to `m04`, and suggests that we lose no significant predictive value by dropping down to `m04`.
+- But the fourth *p* value, of 2e-16 (or, functionally, zero), compares `m04` to `m.int` and suggests that we do gain significant predictive value by including the predictors in `m04` as compared to a model with an intercept alone.
+- So, by the significance tests, the model we'd select would be `m04`, but, of course, in-sample statistical significance alone isn't a good enough reason to select a model if we want to do prediction well. 
+
+## AIC and BIC comparisons, within the training sample
+
+Next, we'll compare the three candidate models (ignoring the intercept-only and kitchen sink models) in terms of their AIC values and BIC values, again using the same sample we used to fit the models in the first place. 
+
+```{r}
+AIC(m04, m07, m08)
+```
+
+
+```{r}
+BIC(m04, m07, m08)
+```
+
+- The model with the smallest AIC value shows the best performance within the sample on that measure.
+- Similarly, smaller BIC values are associated with predictor sets that perform better in sample on that criterion.
+- BIC often suggests smaller models (with fewer regression inputs) than does AIC. Does that happen in this case?
+- Note that `AIC` and `BIC` can be calculated in a few different ways, so we may see some variation if we don't compare apples to apples with regard to the R functions involved.
+
+## Cross-Validation of Candidate Models out of Sample
+
+### 20-fold Cross-Validation of model `m04`
+
+Model `m04` uses `lcavol`, `lweight` and `svi_f` to predict the `lpsa` outcome. Let's do 20-fold cross-validation of this modeling approach, and calculate the root mean squared prediction error and the mean absolute prediction error for that modeling scheme.
+
+```{r}
+set.seed(43201)
+
+cv_m04 <- prost %>%
+    crossv_kfold(k = 20) %>%
+    mutate(model = map(train, 
+                       ~ lm(lpsa ~ lcavol + lweight + svi_f,
+                                   data = .)))
+
+cv_m04_pred <- cv_m04 %>%
+    unnest(map2(model, test, ~ augment(.x, newdata = .y)))
+
+cv_m04_results <- cv_m04_pred %>%
+    summarize(Model = "m04", 
+              RMSE = sqrt(mean((lpsa - .fitted) ^2)),
+              MAE = mean(abs(lpsa - .fitted)))
+
+cv_m04_results
+```
+
+### 20-fold Cross-Validation of model `m07`
+
+Model `m07` uses `lcavol`, `lweight`, `svi_f`, `age`, `bph_f`, and `gleason_f` to predict the `lpsa` outcome. Let's now do 20-fold cross-validation of this modeling approach, and calculate the root mean squared prediction error and the mean absolute prediction error for that modeling scheme. Note the small changes required, as compared to our cross-validation of model `m04` a moment ago.
+
+```{r}
+set.seed(43202)
+
+cv_m07 <- prost %>%
+    crossv_kfold(k = 20) %>%
+    mutate(model = map(train, 
+                       ~ lm(lpsa ~ lcavol + lweight + 
+                                svi_f + age + bph_f + 
+                                gleason_f,
+                                   data = .)))
+
+cv_m07_pred <- cv_m07 %>%
+    unnest(map2(model, test, ~ augment(.x, newdata = .y)))
+
+cv_m07_results <- cv_m07_pred %>%
+    summarize(Model = "m07", 
+              RMSE = sqrt(mean((lpsa - .fitted) ^2)),
+              MAE = mean(abs(lpsa - .fitted)))
+
+cv_m07_results
+```
+
+### 20-fold Cross-Validation of model `m08`
+
+Model `m08` uses `lcavol`, `lweight`, `svi_f`, `age`, `bph_f`, `gleason_f` and `lcp` to predict the `lpsa` outcome. Let's now do 20-fold cross-validation of this modeling approach.
+
+```{r}
+set.seed(43202)
+
+cv_m08 <- prost %>%
+    crossv_kfold(k = 20) %>%
+    mutate(model = map(train, 
+                       ~ lm(lpsa ~ lcavol + lweight + 
+                                svi_f + age + bph_f + 
+                                gleason_f + lcp,
+                                   data = .)))
+
+cv_m08_pred <- cv_m08 %>%
+    unnest(map2(model, test, ~ augment(.x, newdata = .y)))
+
+cv_m08_results <- cv_m08_pred %>%
+    summarize(Model = "m08", 
+              RMSE = sqrt(mean((lpsa - .fitted) ^2)),
+              MAE = mean(abs(lpsa - .fitted)))
+
+cv_m08_results
+```
+
+### Comparing the Results of the Cross-Validations
+
+```{r}
+bind_rows(cv_m04_results, cv_m07_results, cv_m08_results)
+```
+
+It appears that model `m04` has the smallest RMSE and MAE in this case. So, that's the model with the strongest cross-validated predictive accuracy, by these two standards.
 
