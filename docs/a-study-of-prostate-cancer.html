@@ -370,7 +370,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
  9       9  1.05  -0.777    3.54    47 Low        0 -1.39 6           0
 10      10  1.05   0.223    3.24    63 Low        0 -1.39 6           0
 # ... with 87 more rows</code></pre>
-<p>Note that a related <code>prost</code> data frame is also available as part of several R packages, including the <code>faraway</code> package, but there is an error in the <code>lweight</code> data for subject 32 in those presentations. The value of <code>lweight</code> for subject 32 should not be 6.1, corresponding to a prostate that is 449 grams in size, but instead the <code>lweight</code> value should be 3.804438, corresponding to a 44.9 gram prostate<a href="#fn6" class="footnoteRef" id="fnref6"><sup>6</sup></a>.</p>
+<p>Note that a related <code>prost</code> data frame is also available as part of several R packages, including the <code>faraway</code> package, but there is an error in the <code>lweight</code> data for subject 32 in those presentations. The value of <code>lweight</code> for subject 32 should not be 6.1, corresponding to a prostate that is 449 grams in size, but instead the <code>lweight</code> value should be 3.804438, corresponding to a 44.9 gram prostate<a href="#fn7" class="footnoteRef" id="fnref7"><sup>7</sup></a>.</p>
 <p>I’ve also changed the <code>gleason</code> and <code>bph</code> variables from their presentation in other settings, to let me teach some additional details.</p>
 </div>
 <div id="code-book" class="section level2">
@@ -730,7 +730,7 @@ Variable type: numeric
 </ul>
 <p>One problem with this approach is that with a small data set like this, we may be reluctant to cut our sample size for the training or the testing down because we’re afraid that our model building and testing will be hampered by a small sample size. A potential solution is the idea of <strong>cross-validation</strong>, which involves partitioning our data into a series of training-test subsets, multiple times, and then combining the results.</p>
 <p>The rest of this section is built on some material by David Robinson at <a href="https://rpubs.com/dgrtwo/cv-modelr" class="uri">https://rpubs.com/dgrtwo/cv-modelr</a>.</p>
-<p>Suppose that we want to perform what is called <em>10-crossfold separation</em>. In words, this approach splits the 97 observations in our <code>prost</code> data frame into 10 exclusive partitions of about 90% (so about 87-88 observations) into a training sample, and the remaining 10% (9-10 observations) in a test sample<a href="#fn7" class="footnoteRef" id="fnref7"><sup>7</sup></a>. We then refit a model of interest using the training data, and fit the resulting model on the test data using the <code>broom</code> package’s <code>augment</code> function. This process is then repeated (a total of 10 times) so that each observation is used 9 times in the training sample, and once in the test sample.</p>
+<p>Suppose that we want to perform what is called <em>10-crossfold separation</em>. In words, this approach splits the 97 observations in our <code>prost</code> data frame into 10 exclusive partitions of about 90% (so about 87-88 observations) into a training sample, and the remaining 10% (9-10 observations) in a test sample<a href="#fn8" class="footnoteRef" id="fnref8"><sup>8</sup></a>. We then refit a model of interest using the training data, and fit the resulting model on the test data using the <code>broom</code> package’s <code>augment</code> function. This process is then repeated (a total of 10 times) so that each observation is used 9 times in the training sample, and once in the test sample.</p>
 <p>To code this in R, we’ll make use of a few new ideas. Our goal will be to cross-validate model <code>c5_prost_A</code>, which, you’ll recall, uses <code>lcavol_c</code>, <code>svi</code> and their interaction, to predict <code>lpsa</code> in the <code>prost</code> data.</p>
 <ol style="list-style-type: decimal">
 <li>First, we set a seed for the validation algorithm, so we can replicate our results down the line.</li>
@@ -829,9 +829,9 @@ Variable type: numeric
 </div>
 <div class="footnotes">
 <hr />
-<ol start="6">
-<li id="fn6"><p><a href="https://statweb.stanford.edu/~tibs/ElemStatLearn/" class="uri">https://statweb.stanford.edu/~tibs/ElemStatLearn/</a> attributes the correction to Professor Stephen W. Link.<a href="a-study-of-prostate-cancer.html#fnref6">↩</a></p></li>
-<li id="fn7"><p>If we did 5-crossfold validation, we’d have 5 partitions into samples of 80% training and 20% test samples.<a href="a-study-of-prostate-cancer.html#fnref7">↩</a></p></li>
+<ol start="7">
+<li id="fn7"><p><a href="https://statweb.stanford.edu/~tibs/ElemStatLearn/" class="uri">https://statweb.stanford.edu/~tibs/ElemStatLearn/</a> attributes the correction to Professor Stephen W. Link.<a href="a-study-of-prostate-cancer.html#fnref7">↩</a></p></li>
+<li id="fn8"><p>If we did 5-crossfold validation, we’d have 5 partitions into samples of 80% training and 20% test samples.<a href="a-study-of-prostate-cancer.html#fnref8">↩</a></p></li>
 </ol>
 </div>
             </section>

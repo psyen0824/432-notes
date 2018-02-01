@@ -43,7 +43,7 @@ With the small size of this experiment (*n* = 20 for each `resin` type), graphic
 bonding %>% group_by(resin) %>% skim(strength)
 ```
 
-Since the means and medians are fairly close, and the distributions (with the possible exception of `resin` D) are reasonably well approximated by the Normal, I'll fit an ANOVA model.
+Since the means and medians within each group are fairly close, and the distributions (with the possible exception of `resin` D) are reasonably well approximated by the Normal, I'll fit an ANOVA model^[If the data weren't approximately Normally distributed, we might instead consider a rank-based alternative to ANOVA, like the Kruskal-Wallis test.].
 
 ```{r}
 anova(lm(strength ~ resin, data = bonding))

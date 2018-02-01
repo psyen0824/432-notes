@@ -416,7 +416,7 @@ Variable type: numeric
  35.2
  34.5
  47.2</code></pre>
-<p>Since the means and medians are fairly close, and the distributions (with the possible exception of <code>resin</code> D) are reasonably well approximated by the Normal, I’ll fit an ANOVA model.</p>
+<p>Since the means and medians within each group are fairly close, and the distributions (with the possible exception of <code>resin</code> D) are reasonably well approximated by the Normal, I’ll fit an ANOVA model<a href="#fn6" class="footnoteRef" id="fnref6"><sup>6</sup></a>.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">anova</span>(<span class="kw">lm</span>(strength <span class="op">~</span><span class="st"> </span>resin, <span class="dt">data =</span> bonding))</code></pre></div>
 <pre><code>Analysis of Variance Table
 
@@ -993,6 +993,7 @@ unhealthy-healthy -0.3582443 -0.6662455 -0.05024305 0.0229266</code></pre>
 <hr />
 <ol start="5">
 <li id="fn5"><p>The MPa is defined as the failure load (in Newtons) divided by the entire bonded area, in mm<sup>2</sup>.<a href="analysis-of-variance.html#fnref5">↩</a></p></li>
+<li id="fn6"><p>If the data weren’t approximately Normally distributed, we might instead consider a rank-based alternative to ANOVA, like the Kruskal-Wallis test.<a href="analysis-of-variance.html#fnref6">↩</a></p></li>
 </ol>
 </div>
             </section>

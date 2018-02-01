@@ -124,7 +124,7 @@
   \postauthor{\par}
   \predate{\centering\large\emph}
   \postdate{\par}
-  \date{Built 2018-01-30 15:33:28}
+  \date{Built 2018-02-01 07:06:32}
 
 \usepackage{booktabs}
 \usepackage{amsthm}
@@ -4101,9 +4101,12 @@ Variable type: numeric
  47.2
 \end{verbatim}
 
-Since the means and medians are fairly close, and the distributions
-(with the possible exception of \texttt{resin} D) are reasonably well
-approximated by the Normal, I'll fit an ANOVA model.
+Since the means and medians within each group are fairly close, and the
+distributions (with the possible exception of \texttt{resin} D) are
+reasonably well approximated by the Normal, I'll fit an ANOVA
+model\footnote{If the data weren't approximately Normally distributed,
+  we might instead consider a rank-based alternative to ANOVA, like the
+  Kruskal-Wallis test.}.
 
 \begin{Shaded}
 \begin{Highlighting}[]
