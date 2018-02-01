@@ -124,7 +124,7 @@
   \postauthor{\par}
   \predate{\centering\large\emph}
   \postdate{\par}
-  \date{Built 2018-02-01 07:06:32}
+  \date{Built 2018-02-01 17:10:42}
 
 \usepackage{booktabs}
 \usepackage{amsthm}
@@ -8021,16 +8021,6 @@ In this case, we have:
 \NormalTok{rs}\OperatorTok{$}\NormalTok{aic.c <-}\StringTok{ }\DecValTok{97}\OperatorTok{*}\KeywordTok{log}\NormalTok{(rs}\OperatorTok{$}\NormalTok{rss }\OperatorTok{/}\StringTok{ }\DecValTok{97}\NormalTok{) }\OperatorTok{+}\StringTok{ }\DecValTok{2}\OperatorTok{*}\NormalTok{(}\DecValTok{2}\OperatorTok{:}\DecValTok{9}\NormalTok{) }\OperatorTok{+}
 \StringTok{               }\NormalTok{(}\DecValTok{2} \OperatorTok{*}\StringTok{ }\NormalTok{(}\DecValTok{2}\OperatorTok{:}\DecValTok{9}\NormalTok{) }\OperatorTok{*}\StringTok{ }\NormalTok{((}\DecValTok{2}\OperatorTok{:}\DecValTok{9}\NormalTok{)}\OperatorTok{+}\DecValTok{1}\NormalTok{) }\OperatorTok{/}\StringTok{ }\NormalTok{(}\DecValTok{97} \OperatorTok{-}\StringTok{ }\NormalTok{(}\DecValTok{2}\OperatorTok{:}\DecValTok{9}\NormalTok{) }\OperatorTok{-}\StringTok{ }\DecValTok{1}\NormalTok{))}
 
-\KeywordTok{round}\NormalTok{(rs}\OperatorTok{$}\NormalTok{aic,}\DecValTok{2}\NormalTok{) }\CommentTok{# uncorrected }
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-[1] -44.24 -54.70 -62.74 -62.29 -62.34 -62.11 -61.17 -59.36
-\end{verbatim}
-
-\begin{Shaded}
-\begin{Highlighting}[]
 \KeywordTok{round}\NormalTok{(rs}\OperatorTok{$}\NormalTok{aic.c,}\DecValTok{2}\NormalTok{) }\CommentTok{# bias-corrected}
 \end{Highlighting}
 \end{Shaded}
@@ -8038,6 +8028,118 @@ In this case, we have:
 \begin{verbatim}
 [1] -44.24 -54.70 -62.74 -62.29 -62.34 -62.11 -61.17 -59.36
 \end{verbatim}
+
+The impact of this bias correction can be modest but important. Here's a
+little table looking closely at the results in this problem. The
+uncorrected AIC are obtained using \texttt{extractAIC}, as described in
+the next section.
+
+\begin{longtable}[]{@{}rrrrrrrrr@{}}
+\toprule
+Size & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9\tabularnewline
+\midrule
+\endhead
+Bias-corrected AIC & -44.2 & -54.7 & -62.7 & -62.3 & -62.3 & -62.1 &
+-61.2 & -59.4\tabularnewline
+Uncorrected AIC & -44.4 & -55.0 & -63.2 & -62.4 & -63.4 & -63.0 & -62.4
+& -61.4\tabularnewline
+\bottomrule
+\end{longtable}
+
+\subsection{The Uncorrected AIC provides no more useful information
+here}\label{the-uncorrected-aic-provides-no-more-useful-information-here}
+
+We could, if necessary, also calculate the \emph{uncorrected}
+\texttt{aic} value for each model, but we won't make any direct use of
+that, because that will not provide any new information not already
+gathered by the \(C_p\) statistic for a linear regression model. If you
+wanted to find the uncorrected AIC for a given model, you can use the
+\texttt{extractAIC} function.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{extractAIC}\NormalTok{(}\KeywordTok{lm}\NormalTok{(lpsa }\OperatorTok{~}\StringTok{ }\NormalTok{lcavol, }\DataTypeTok{data =}\NormalTok{ prost))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+[1]   2.00000 -44.36603
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{extractAIC}\NormalTok{(}\KeywordTok{lm}\NormalTok{(lpsa }\OperatorTok{~}\StringTok{ }\NormalTok{lcavol }\OperatorTok{+}\StringTok{ }\NormalTok{lweight, }\DataTypeTok{data =}\NormalTok{ prost))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+[1]   3.00000 -54.95846
+\end{verbatim}
+
+Note that:
+
+\begin{itemize}
+\tightlist
+\item
+  these results are fairly comparable to the bias-corrected AIC we built
+  above, and
+\item
+  the \texttt{extractAIC} and \texttt{AIC} functions look like they give
+  very different results, but they really don't.
+\end{itemize}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{AIC}\NormalTok{(}\KeywordTok{lm}\NormalTok{(lpsa }\OperatorTok{~}\StringTok{ }\NormalTok{lcavol, }\DataTypeTok{data =}\NormalTok{ prost))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+[1] 232.908
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{AIC}\NormalTok{(}\KeywordTok{lm}\NormalTok{(lpsa }\OperatorTok{~}\StringTok{ }\NormalTok{lcavol }\OperatorTok{+}\StringTok{ }\NormalTok{lweight, }\DataTypeTok{data =}\NormalTok{ prost))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+[1] 222.3156
+\end{verbatim}
+
+But notice that the differences in AIC are the same, either way,
+comparing these two models:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{extractAIC}\NormalTok{(}\KeywordTok{lm}\NormalTok{(lpsa }\OperatorTok{~}\StringTok{ }\NormalTok{lcavol, }\DataTypeTok{data =}\NormalTok{ prost)) }\OperatorTok{-}\StringTok{ }\KeywordTok{extractAIC}\NormalTok{(}\KeywordTok{lm}\NormalTok{(lpsa }\OperatorTok{~}\StringTok{ }\NormalTok{lcavol }\OperatorTok{+}\StringTok{ }\NormalTok{lweight, }\DataTypeTok{data =}\NormalTok{ prost))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+[1] -1.00000 10.59243
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{AIC}\NormalTok{(}\KeywordTok{lm}\NormalTok{(lpsa }\OperatorTok{~}\StringTok{ }\NormalTok{lcavol, }\DataTypeTok{data =}\NormalTok{ prost)) }\OperatorTok{-}\StringTok{ }\KeywordTok{AIC}\NormalTok{(}\KeywordTok{lm}\NormalTok{(lpsa }\OperatorTok{~}\StringTok{ }\NormalTok{lcavol }\OperatorTok{+}\StringTok{ }\NormalTok{lweight, }\DataTypeTok{data =}\NormalTok{ prost))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+[1] 10.59243
+\end{verbatim}
+
+\begin{itemize}
+\tightlist
+\item
+  AIC is only defined up to an additive constant.
+\item
+  Since the difference between two models using either \texttt{AIC} or
+  \texttt{extractAIC} is the same, this doesn't actually matter which
+  one we use, so long as we use the same one consistently.
+\end{itemize}
 
 \subsection{Building a Tibble containing the necessary
 information}\label{building-a-tibble-containing-the-necessary-information}
@@ -8108,7 +8210,7 @@ Plot}{The Adjusted R2 Plot}}\label{the-adjusted-r2-plot}
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-74-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-77-1.pdf}
 
 Models 4-9 all look like reasonable choices here. The maximum adjusted
 R\textsuperscript{2} is seen in the model of size 8.
@@ -8186,7 +8288,7 @@ statistics.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-75-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-78-1.pdf}
 
 \begin{itemize}
 \tightlist
@@ -8239,7 +8341,7 @@ plot}\label{the-bias-corrected-aic-plot}
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-76-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-79-1.pdf}
 
 The smallest AIC\textsubscript{c} values occur in models 4 and later,
 especially model 4 itself.
@@ -8264,7 +8366,7 @@ especially model 4 itself.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-77-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-80-1.pdf}
 
 \subsection{All Four Plots in One Figure (via
 ggplot2)}\label{all-four-plots-in-one-figure-via-ggplot2}
@@ -8275,7 +8377,7 @@ ggplot2)}\label{all-four-plots-in-one-figure-via-ggplot2}
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-78-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-81-1.pdf}
 
 \section{Plotting the Best Subsets Results using base R
 plots}\label{plotting-the-best-subsets-results-using-base-r-plots}
@@ -8291,7 +8393,7 @@ Plot}{The Adjusted R2 Plot}}\label{the-adjusted-r2-plot-1}
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-79-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-82-1.pdf}
 
 Again, models 4-9 all look like reasonable choices here.
 
@@ -8313,7 +8415,7 @@ R\textsuperscript{2})}{A Fancier Version (identifying the largest adjusted R2)}}
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-80-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-83-1.pdf}
 
 \subsection{\texorpdfstring{The \(C_p\)
 Plot}{The C\_p Plot}}\label{the-c_p-plot-1}
@@ -8337,7 +8439,7 @@ statistics.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-81-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-84-1.pdf}
 
 Model 4 has the smallest value of \(C_p\) (and is the leftmost of the
 largely comparable models 4-9) while 6 is close to and 7 is right on the
@@ -8355,7 +8457,7 @@ R provides the BIC directly as part of the result of running
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-82-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-85-1.pdf}
 
 We want to minimize BIC, which argues strongly for the model with 4
 inputs, including the intercept.
@@ -8400,7 +8502,7 @@ AIC_c = n log(\frac{RSS}{n}) + 2k + \frac{2k (k+1)}{n-k-1}
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-84-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-87-1.pdf}
 
 The smallest AIC\textsubscript{c} values occur in models 4 and later,
 especially model 4 itself.
@@ -8438,7 +8540,7 @@ R)}\label{all-four-plots-together-from-base-r}
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-85-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-88-1.pdf}
 
 \begin{Shaded}
 \begin{Highlighting}[]

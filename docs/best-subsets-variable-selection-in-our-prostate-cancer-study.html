@@ -297,7 +297,8 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </ul></li>
 <li class="chapter" data-level="8.3" data-path="best-subsets-variable-selection-in-our-prostate-cancer-study.html"><a href="best-subsets-variable-selection-in-our-prostate-cancer-study.html#calculating-bias-corrected-aic"><i class="fa fa-check"></i><b>8.3</b> Calculating bias-corrected AIC</a><ul>
 <li class="chapter" data-level="8.3.1" data-path="best-subsets-variable-selection-in-our-prostate-cancer-study.html"><a href="best-subsets-variable-selection-in-our-prostate-cancer-study.html#calculation-of-aic.c-in-our-setting"><i class="fa fa-check"></i><b>8.3.1</b> Calculation of aic.c in our setting</a></li>
-<li class="chapter" data-level="8.3.2" data-path="best-subsets-variable-selection-in-our-prostate-cancer-study.html"><a href="best-subsets-variable-selection-in-our-prostate-cancer-study.html#building-a-tibble-containing-the-necessary-information"><i class="fa fa-check"></i><b>8.3.2</b> Building a Tibble containing the necessary information</a></li>
+<li class="chapter" data-level="8.3.2" data-path="best-subsets-variable-selection-in-our-prostate-cancer-study.html"><a href="best-subsets-variable-selection-in-our-prostate-cancer-study.html#the-uncorrected-aic-provides-no-more-useful-information-here"><i class="fa fa-check"></i><b>8.3.2</b> The Uncorrected AIC provides no more useful information here</a></li>
+<li class="chapter" data-level="8.3.3" data-path="best-subsets-variable-selection-in-our-prostate-cancer-study.html"><a href="best-subsets-variable-selection-in-our-prostate-cancer-study.html#building-a-tibble-containing-the-necessary-information"><i class="fa fa-check"></i><b>8.3.3</b> Building a Tibble containing the necessary information</a></li>
 </ul></li>
 <li class="chapter" data-level="8.4" data-path="best-subsets-variable-selection-in-our-prostate-cancer-study.html"><a href="best-subsets-variable-selection-in-our-prostate-cancer-study.html#plotting-the-best-subsets-results-using-ggplot2"><i class="fa fa-check"></i><b>8.4</b> Plotting the Best Subsets Results using <code>ggplot2</code></a><ul>
 <li class="chapter" data-level="8.4.1" data-path="best-subsets-variable-selection-in-our-prostate-cancer-study.html"><a href="best-subsets-variable-selection-in-our-prostate-cancer-study.html#the-adjusted-r2-plot"><i class="fa fa-check"></i><b>8.4.1</b> The Adjusted R<sup>2</sup> Plot</a></li>
@@ -530,13 +531,77 @@ AIC_c = AIC + \frac{2k (k+1)}{n - k - 1}
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">rs<span class="op">$</span>aic.c &lt;-<span class="st"> </span><span class="dv">97</span><span class="op">*</span><span class="kw">log</span>(rs<span class="op">$</span>rss <span class="op">/</span><span class="st"> </span><span class="dv">97</span>) <span class="op">+</span><span class="st"> </span><span class="dv">2</span><span class="op">*</span>(<span class="dv">2</span><span class="op">:</span><span class="dv">9</span>) <span class="op">+</span>
 <span class="st">               </span>(<span class="dv">2</span> <span class="op">*</span><span class="st"> </span>(<span class="dv">2</span><span class="op">:</span><span class="dv">9</span>) <span class="op">*</span><span class="st"> </span>((<span class="dv">2</span><span class="op">:</span><span class="dv">9</span>)<span class="op">+</span><span class="dv">1</span>) <span class="op">/</span><span class="st"> </span>(<span class="dv">97</span> <span class="op">-</span><span class="st"> </span>(<span class="dv">2</span><span class="op">:</span><span class="dv">9</span>) <span class="op">-</span><span class="st"> </span><span class="dv">1</span>))
 
-<span class="kw">round</span>(rs<span class="op">$</span>aic,<span class="dv">2</span>) <span class="co"># uncorrected </span></code></pre></div>
+<span class="kw">round</span>(rs<span class="op">$</span>aic.c,<span class="dv">2</span>) <span class="co"># bias-corrected</span></code></pre></div>
 <pre><code>[1] -44.24 -54.70 -62.74 -62.29 -62.34 -62.11 -61.17 -59.36</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">round</span>(rs<span class="op">$</span>aic.c,<span class="dv">2</span>) <span class="co"># bias-corrected</span></code></pre></div>
-<pre><code>[1] -44.24 -54.70 -62.74 -62.29 -62.34 -62.11 -61.17 -59.36</code></pre>
+<p>The impact of this bias correction can be modest but important. Here’s a little table looking closely at the results in this problem. The uncorrected AIC are obtained using <code>extractAIC</code>, as described in the next section.</p>
+<table>
+<thead>
+<tr class="header">
+<th align="right">Size</th>
+<th align="right">2</th>
+<th align="right">3</th>
+<th align="right">4</th>
+<th align="right">5</th>
+<th align="right">6</th>
+<th align="right">7</th>
+<th align="right">8</th>
+<th align="right">9</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">Bias-corrected AIC</td>
+<td align="right">-44.2</td>
+<td align="right">-54.7</td>
+<td align="right">-62.7</td>
+<td align="right">-62.3</td>
+<td align="right">-62.3</td>
+<td align="right">-62.1</td>
+<td align="right">-61.2</td>
+<td align="right">-59.4</td>
+</tr>
+<tr class="even">
+<td align="right">Uncorrected AIC</td>
+<td align="right">-44.4</td>
+<td align="right">-55.0</td>
+<td align="right">-63.2</td>
+<td align="right">-62.4</td>
+<td align="right">-63.4</td>
+<td align="right">-63.0</td>
+<td align="right">-62.4</td>
+<td align="right">-61.4</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="the-uncorrected-aic-provides-no-more-useful-information-here" class="section level3">
+<h3><span class="header-section-number">8.3.2</span> The Uncorrected AIC provides no more useful information here</h3>
+<p>We could, if necessary, also calculate the <em>uncorrected</em> <code>aic</code> value for each model, but we won’t make any direct use of that, because that will not provide any new information not already gathered by the <span class="math inline">\(C_p\)</span> statistic for a linear regression model. If you wanted to find the uncorrected AIC for a given model, you can use the <code>extractAIC</code> function.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">extractAIC</span>(<span class="kw">lm</span>(lpsa <span class="op">~</span><span class="st"> </span>lcavol, <span class="dt">data =</span> prost))</code></pre></div>
+<pre><code>[1]   2.00000 -44.36603</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">extractAIC</span>(<span class="kw">lm</span>(lpsa <span class="op">~</span><span class="st"> </span>lcavol <span class="op">+</span><span class="st"> </span>lweight, <span class="dt">data =</span> prost))</code></pre></div>
+<pre><code>[1]   3.00000 -54.95846</code></pre>
+<p>Note that:</p>
+<ul>
+<li>these results are fairly comparable to the bias-corrected AIC we built above, and</li>
+<li>the <code>extractAIC</code> and <code>AIC</code> functions look like they give very different results, but they really don’t.</li>
+</ul>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">AIC</span>(<span class="kw">lm</span>(lpsa <span class="op">~</span><span class="st"> </span>lcavol, <span class="dt">data =</span> prost))</code></pre></div>
+<pre><code>[1] 232.908</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">AIC</span>(<span class="kw">lm</span>(lpsa <span class="op">~</span><span class="st"> </span>lcavol <span class="op">+</span><span class="st"> </span>lweight, <span class="dt">data =</span> prost))</code></pre></div>
+<pre><code>[1] 222.3156</code></pre>
+<p>But notice that the differences in AIC are the same, either way, comparing these two models:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">extractAIC</span>(<span class="kw">lm</span>(lpsa <span class="op">~</span><span class="st"> </span>lcavol, <span class="dt">data =</span> prost)) <span class="op">-</span><span class="st"> </span><span class="kw">extractAIC</span>(<span class="kw">lm</span>(lpsa <span class="op">~</span><span class="st"> </span>lcavol <span class="op">+</span><span class="st"> </span>lweight, <span class="dt">data =</span> prost))</code></pre></div>
+<pre><code>[1] -1.00000 10.59243</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">AIC</span>(<span class="kw">lm</span>(lpsa <span class="op">~</span><span class="st"> </span>lcavol, <span class="dt">data =</span> prost)) <span class="op">-</span><span class="st"> </span><span class="kw">AIC</span>(<span class="kw">lm</span>(lpsa <span class="op">~</span><span class="st"> </span>lcavol <span class="op">+</span><span class="st"> </span>lweight, <span class="dt">data =</span> prost))</code></pre></div>
+<pre><code>[1] 10.59243</code></pre>
+<ul>
+<li>AIC is only defined up to an additive constant.</li>
+<li>Since the difference between two models using either <code>AIC</code> or <code>extractAIC</code> is the same, this doesn’t actually matter which one we use, so long as we use the same one consistently.</li>
+</ul>
 </div>
 <div id="building-a-tibble-containing-the-necessary-information" class="section level3">
-<h3><span class="header-section-number">8.3.2</span> Building a Tibble containing the necessary information</h3>
+<h3><span class="header-section-number">8.3.3</span> Building a Tibble containing the necessary information</h3>
 <p>Again, note the use of 2:9 for the values of <span class="math inline">\(k\)</span>, because we’re fitting one model for each size from 2 through 9.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">best_mods_<span class="dv">1</span> &lt;-<span class="st"> </span><span class="kw">data_frame</span>(
     <span class="dt">k =</span> <span class="dv">2</span><span class="op">:</span><span class="dv">9</span>,
@@ -588,7 +653,7 @@ best_mods</code></pre></div>
          <span class="dt">y =</span> <span class="st">&quot;Adjusted R-squared&quot;</span>)
 
 p1</code></pre></div>
-<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-74-1.png" width="672" /></p>
+<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-77-1.png" width="672" /></p>
 <p>Models 4-9 all look like reasonable choices here. The maximum adjusted R<sup>2</sup> is seen in the model of size 8.</p>
 </div>
 <div id="mallows-c_p" class="section level3">
@@ -625,7 +690,7 @@ p1</code></pre></div>
          <span class="dt">y =</span> <span class="st">&quot;Mallows&#39; Cp&quot;</span>)
 
 p2</code></pre></div>
-<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-75-1.png" width="672" /></p>
+<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-78-1.png" width="672" /></p>
 <ul>
 <li>Model 7 looks pretty good, with C<sub>p</sub> just barely smaller than the size (p = 7) of the model.</li>
 <li>Model 6 is also a possibility, with the difference <span class="math inline">\(C_p - p\)</span> minimized among all models with <span class="math inline">\(C_p &gt;= p\)</span>.</li>
@@ -656,7 +721,7 @@ p2</code></pre></div>
          <span class="dt">y =</span> <span class="st">&quot;Bias-Corrected AIC&quot;</span>)
 
 p3</code></pre></div>
-<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-76-1.png" width="672" /></p>
+<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-79-1.png" width="672" /></p>
 <p>The smallest AIC<sub>c</sub> values occur in models 4 and later, especially model 4 itself.</p>
 </div>
 <div id="the-bic-plot" class="section level3">
@@ -674,12 +739,12 @@ p3</code></pre></div>
          <span class="dt">y =</span> <span class="st">&quot;BIC&quot;</span>)
 
 p4</code></pre></div>
-<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-77-1.png" width="672" /></p>
+<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-80-1.png" width="672" /></p>
 </div>
 <div id="all-four-plots-in-one-figure-via-ggplot2" class="section level3">
 <h3><span class="header-section-number">8.4.7</span> All Four Plots in One Figure (via ggplot2)</h3>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">gridExtra<span class="op">::</span><span class="kw">grid.arrange</span>(p1, p2, p3, p4, <span class="dt">nrow =</span> <span class="dv">2</span>)</code></pre></div>
-<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-78-1.png" width="672" /></p>
+<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-81-1.png" width="672" /></p>
 </div>
 </div>
 <div id="plotting-the-best-subsets-results-using-base-r-plots" class="section level2">
@@ -689,7 +754,7 @@ p4</code></pre></div>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(rs<span class="op">$</span>adjr2 <span class="op">~</span><span class="st"> </span><span class="kw">I</span>(<span class="dv">2</span><span class="op">:</span><span class="dv">9</span>), <span class="dt">ylab=</span><span class="st">&quot;Adjusted R-squared&quot;</span>,
      <span class="dt">xlab=</span><span class="st">&quot;# of Inputs, including intercept&quot;</span>)
 <span class="kw">lines</span>(<span class="kw">spline</span>(rs<span class="op">$</span>adjr2 <span class="op">~</span><span class="st"> </span><span class="kw">I</span>(<span class="dv">2</span><span class="op">:</span><span class="dv">9</span>)))</code></pre></div>
-<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-79-1.png" width="672" /></p>
+<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-82-1.png" width="672" /></p>
 <p>Again, models 4-9 all look like reasonable choices here.</p>
 </div>
 <div id="a-fancier-version-identifying-the-largest-adjusted-r2" class="section level3">
@@ -703,7 +768,7 @@ m1 &lt;-<span class="st"> </span><span class="kw">which.max</span>(rs<span class
 <span class="kw">text</span>(m1, m2<span class="op">-</span><span class="fl">0.03</span>, <span class="kw">paste</span>(<span class="st">&quot;max =&quot;</span>, <span class="kw">format</span>(m2, <span class="dt">digits=</span><span class="dv">3</span>)))
 <span class="kw">text</span>(m1, m2<span class="op">-</span><span class="fl">0.045</span>, <span class="kw">paste</span>(<span class="st">&quot;with&quot;</span>, <span class="kw">format</span>(m1, <span class="dt">digits=</span><span class="dv">1</span>),
                         <span class="st">&quot;inputs&quot;</span>), <span class="dt">pos=</span><span class="dv">3</span>)</code></pre></div>
-<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-80-1.png" width="672" /></p>
+<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-83-1.png" width="672" /></p>
 </div>
 <div id="the-c_p-plot-1" class="section level3">
 <h3><span class="header-section-number">8.5.3</span> The <span class="math inline">\(C_p\)</span> Plot</h3>
@@ -714,7 +779,7 @@ m1 &lt;-<span class="st"> </span><span class="kw">which.max</span>(rs<span class
      <span class="dt">xlab=</span><span class="st">&quot;# of Regression Inputs, including Intercept&quot;</span>,
      <span class="dt">pch=</span><span class="dv">16</span>, <span class="dt">main=</span><span class="st">&quot;Cp Plot&quot;</span>)
 <span class="kw">abline</span>(<span class="dv">0</span>,<span class="dv">1</span>, <span class="dt">col =</span> <span class="st">&quot;purple&quot;</span>)</code></pre></div>
-<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-81-1.png" width="672" /></p>
+<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-84-1.png" width="672" /></p>
 <p>Model 4 has the smallest value of <span class="math inline">\(C_p\)</span> (and is the leftmost of the largely comparable models 4-9) while 6 is close to and 7 is right on the <span class="math inline">\(C_p = p\)</span> line, so those are the likeliest candidates.</p>
 </div>
 <div id="the-bic-plot-1" class="section level3">
@@ -722,7 +787,7 @@ m1 &lt;-<span class="st"> </span><span class="kw">which.max</span>(rs<span class
 <p>R provides the BIC directly as part of the result of running <code>regsubsets</code>, as we’ve seen.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(rs<span class="op">$</span>bic <span class="op">~</span><span class="st"> </span><span class="kw">I</span>(<span class="dv">2</span><span class="op">:</span><span class="dv">9</span>), <span class="dt">ylab=</span><span class="st">&quot;BIC&quot;</span>, <span class="dt">xlab=</span><span class="st">&quot;# of Fitted Inputs&quot;</span>,
      <span class="dt">pch=</span><span class="dv">16</span>, <span class="dt">cex=</span><span class="fl">1.5</span>, <span class="dt">col=</span><span class="st">&quot;slateblue&quot;</span>, <span class="dt">main=</span><span class="st">&quot;BIC Plot&quot;</span>)</code></pre></div>
-<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-82-1.png" width="672" /></p>
+<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-85-1.png" width="672" /></p>
 <p>We want to minimize BIC, which argues strongly for the model with 4 inputs, including the intercept.</p>
 </div>
 <div id="the-bias-corrected-aic-hurwitz-tsai" class="section level3">
@@ -740,7 +805,7 @@ AIC_c = n log(\frac{RSS}{n}) + 2k + \frac{2k (k+1)}{n-k-1}
 <pre><code>[1] -44.24 -54.70 -62.74 -62.29 -62.34 -62.11 -61.17 -59.36</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(rs<span class="op">$</span>aic.c <span class="op">~</span><span class="st"> </span><span class="kw">I</span>(<span class="dv">2</span><span class="op">:</span><span class="dv">9</span>), <span class="dt">ylab=</span><span class="st">&quot;AIC, corrected&quot;</span>, <span class="dt">xlab=</span><span class="st">&quot;# of Fitted Inputs&quot;</span>,
      <span class="dt">pch=</span><span class="dv">16</span>, <span class="dt">cex=</span><span class="fl">1.5</span>, <span class="dt">col=</span><span class="st">&quot;tomato&quot;</span>, <span class="dt">main=</span><span class="st">&quot;AIC (corrected) Plot&quot;</span>)</code></pre></div>
-<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-84-1.png" width="672" /></p>
+<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-87-1.png" width="672" /></p>
 <p>The smallest AIC<sub>c</sub> values occur in models 4 and later, especially model 4 itself.</p>
 </div>
 <div id="all-four-plots-together-from-base-r" class="section level3">
@@ -770,7 +835,7 @@ rs<span class="op">$</span>aic.c &lt;-<span class="st"> </span><span class="dv">
 
 <span class="kw">plot</span>(rs<span class="op">$</span>bic <span class="op">~</span><span class="st"> </span><span class="kw">I</span>(<span class="dv">2</span><span class="op">:</span><span class="dv">9</span>), <span class="dt">ylab=</span><span class="st">&quot;BIC&quot;</span>, <span class="dt">xlab=</span><span class="st">&quot;# of Fitted Inputs&quot;</span>,
      <span class="dt">pch=</span><span class="dv">16</span>, <span class="dt">cex=</span><span class="fl">1.5</span>, <span class="dt">col=</span><span class="st">&quot;slateblue&quot;</span>, <span class="dt">main=</span><span class="st">&quot;BIC Plot&quot;</span>)</code></pre></div>
-<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-85-1.png" width="672" /></p>
+<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-88-1.png" width="672" /></p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">1</span>))</code></pre></div>
 </div>
 </div>

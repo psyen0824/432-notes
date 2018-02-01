@@ -120,9 +120,45 @@ In this case, we have:
 rs$aic.c <- 97*log(rs$rss / 97) + 2*(2:9) +
                (2 * (2:9) * ((2:9)+1) / (97 - (2:9) - 1))
 
-round(rs$aic,2) # uncorrected 
 round(rs$aic.c,2) # bias-corrected
 ```
+
+The impact of this bias correction can be modest but important. Here's a little table looking closely at the results in this problem. The uncorrected AIC are obtained using `extractAIC`, as described in the next section.
+
+Size | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+-----------------: | ----: | ----: | ----: | ----: | ----: | ----: | ----: | ----:
+Bias-corrected AIC | -44.2 | -54.7 | -62.7 | -62.3 | -62.3 | -62.1 | -61.2 | -59.4
+Uncorrected AIC    | -44.4 | -55.0 | -63.2 | -62.4 | -63.4 | -63.0 | -62.4 | -61.4
+
+### The Uncorrected AIC provides no more useful information here
+
+We could, if necessary, also calculate the *uncorrected* `aic` value for each model, but we won't make any direct use of that, because that will not provide any new information not already gathered by the $C_p$ statistic for a linear regression model. If you wanted to find the uncorrected AIC for a given model, you can use the `extractAIC` function.
+
+```{r}
+extractAIC(lm(lpsa ~ lcavol, data = prost))
+extractAIC(lm(lpsa ~ lcavol + lweight, data = prost))
+```
+
+Note that:
+
+- these results are fairly comparable to the bias-corrected AIC we built above, and
+- the `extractAIC` and `AIC` functions look like they give very different results, but they really don't.
+
+```{r}
+AIC(lm(lpsa ~ lcavol, data = prost))
+AIC(lm(lpsa ~ lcavol + lweight, data = prost))
+```
+
+But notice that the differences in AIC are the same, either way, comparing these two models:
+
+```{r}
+extractAIC(lm(lpsa ~ lcavol, data = prost)) - extractAIC(lm(lpsa ~ lcavol + lweight, data = prost))
+
+AIC(lm(lpsa ~ lcavol, data = prost)) - AIC(lm(lpsa ~ lcavol + lweight, data = prost))
+```
+
+- AIC is only defined up to an additive constant.
+- Since the difference between two models using either `AIC` or `extractAIC` is the same, this doesn't actually matter which one we use, so long as we use the same one consistently.
 
 ### Building a Tibble containing the necessary information
 
