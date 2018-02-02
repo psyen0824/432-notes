@@ -5,7 +5,7 @@ A second approach to model selection involved fitting all possible subset models
 ## Four Key Summaries We'll Use to Evaluate Potential Models
 
 1. Adjusted R^2^, which we try to maximize.
-2. Akaike's Information Criterion (AIC), which we try to minimize, and a Bias-Corrected version of AIC due to Hurwitz and Tsai, which we use when the sample size is small, specifically when the sample size $n$ and the number of predictors being studied $k$ are such that $n/k \leq 40$. We also try to minimize this bias-corrected AIC.
+2. Akaike's Information Criterion (AIC), which we try to minimize, and a Bias-Corrected version of AIC due to @HurvichTsai1989, which we use when the sample size is small, specifically when the sample size $n$ and the number of predictors being studied $k$ are such that $n/k \leq 40$. We also try to minimize this bias-corrected AIC.
 3. Bayesian Information Criterion (BIC), which we also try to minimize.
 4. Mallows' C~p~ statistic, which we (essentially) try to minimize.
 
@@ -19,19 +19,24 @@ Several useful tools for running "all subsets" or "best subsets" regression comp
 
 ## Using `regsubsets` in the `leaps` package
 
-We can use the `leaps` package to obtain results in the `prost` study from looking at all possible subsets of the candidate predictors. 
+We can use the `leaps` package to obtain results in the `prost` study from looking at all possible subsets of the candidate predictors. The `leaps` package isn't particularly friendly to the tidyverse. In particular, we **cannot have any character variables** in our predictor set. We specify our "kitchen sink" model, and apply the `regsubsets` function from `leaps`, which identifies the set of models.
 
-The `leaps` package isn't particularly friendly to the tidyverse, and will require us first to identify a set of candidate predictors using `with` and `cbind`, then apply those to a `regsubsets` function, which identifies the set of models.
+To start, we'll ask R to find the one best subset (with 1 predictor variable [in addition to the intercept], then with 2 predictors, and then with each of 3, 4, ... 8 predictor variables) according to an exhaustive search without forcing any of the variables to be in or out. 
 
-To start, we'll ask R to find the one best subset (with 1 predictor variable [in addition to the intercept], then with 2 predictors, and then with each of 3, 4, ... 8 predictor variables) according to an exhaustive search without forcing any of the variables to be in or out. We'd use the `nvmax` command within the `regsubsets` function to limit the number of regression inputs to a maximum.
+- Use the `nvmax` command within the `regsubsets` function to limit the number of regression inputs to a maximum.
+- Use the `nbest` command to identify how many subsets you want to identify for each predictor count.
+- If all of your predictors are **quantitative** or **binary** then you can skip the `preds` step, and simply place your kitchen sink model into `regsubsets`. 
+- But if you have multi-categorical variables (like `gleason_f` or `svi_f` in our case) then you must create a `preds` group, as follows.
+
 
 ```{r}
-preds <- with(prost, 
-   cbind(lcavol, lweight, age, bph_f, svi_f, lcp, gleason_f, pgg45))
+preds <- with(prost, cbind(lcavol, lweight, age, bph_f, 
+                           svi_f, lcp, gleason_f, pgg45))
 
-x1 <- regsubsets(preds, y=prost$lpsa)
-rs <- summary(x1)
-rs
+rs.ks <- regsubsets(preds, y = prost$lpsa, 
+                    nvmax = 8, nbest = 1)
+rs.summ <- summary(rs.ks)
+rs.summ
 ```
 
 So...
@@ -50,38 +55,38 @@ All of these "best subsets" are hierarchical, in that each model is a subset of 
 - To determine which model is best, we can plot key summaries of model fit (adjusted R^2^, Mallows' $C_p$, bias-corrected AIC, and BIC) using either base R plotting techniques (what I've done in the past) or `ggplot2` (what I use now.) I'll show both types of plotting approaches in the next two sections.
 
 
-### Using `which` and `obj`
+### Identifying the models with `which` and `outmat`
 
-Let's see what we've fit:
-
-```{r}
-rs$obj
-```
-
-To see the eight models selected by the system, we use:
+To see the models selected by the system, we use:
 
 ```{r}
-rs$which
+rs.summ$which
 ```
 
-We built one subset of each size up to eight predictors, not including the intercept. This means we have models of size k = 2, 3, 4, 5, 6, 7, 8 and 9.
+Another version of this formatted for printing is:
+
+```{r}
+rs.summ$outmat
+```
+
+We built one subset of each size up to eight predictors, and if we add the intercept term, this means we have models of size k = 2, 3, 4, 5, 6, 7, 8 and 9.
 
 The models are:
 
 Size k | Predictors included (besides intercept)
 -----: | --------------------------------------------------
-2 | lcavol
-3 | lcavol and lweight
-4 | add svi_f
-5 | add bph_f
-6 | add age
-7 | add gleason_f
-8 | add lcp
-9 | add pgg45
+2 | `lcavol`
+3 | `lcavol` and `lweight`
+4 | add `svi_f`
+5 | add `bph_f`
+6 | add `age`
+7 | add `gleason_f`
+8 | add `lcp`
+9 | add `pgg45`
 
 ## Calculating bias-corrected AIC
 
-The bias-corrected AIC formula due to Hurwitz and Tsai requires three inputs:
+The bias-corrected AIC formula developed in @HurvichTsai1989 requires three inputs:
 
 - the residual sum of squares for a model
 - the sample size (n) or number of observations used to fit the model
@@ -104,23 +109,23 @@ $$
 In our case, we have $n$ = 97 observations, and built a series of models with $k$ = `2:9` predictors (including the intercept in each case), so we will insert those values into the general formula for bias-corrected AIC which is:
 
 ```
-aic.c <- n * log( rs$rss / n) + 2 * k + 
+aic.c <- n * log( rs.summ$rss / n) + 2 * k + 
                       (2 * k * (k + 1) / (n - k - 1))
 ```
 
-We can obtain the residual sum of squares explained by each model by pulling `rss` from the `regsubsets` summary contained here in `rs`.
+We can obtain the residual sum of squares explained by each model by pulling `rss` from the `regsubsets` summary contained here in `rs.summ`.
 
 ```{r}
-data_frame(k = 2:9, RSS = rs$rss)
+data_frame(k = 2:9, RSS = rs.summ$rss)
 ```
 
 In this case, we have:
 
 ```{r}
-rs$aic.c <- 97*log(rs$rss / 97) + 2*(2:9) +
+rs.summ$aic.c <- 97*log(rs.summ$rss / 97) + 2*(2:9) +
                (2 * (2:9) * ((2:9)+1) / (97 - (2:9) - 1))
 
-round(rs$aic.c,2) # bias-corrected
+round(rs.summ$aic.c,2) # bias-corrected
 ```
 
 The impact of this bias correction can be modest but important. Here's a little table looking closely at the results in this problem. The uncorrected AIC are obtained using `extractAIC`, as described in the next section.
@@ -167,14 +172,14 @@ Again, note the use of 2:9 for the values of $k$, because we're fitting one mode
 ```{r}
 best_mods_1 <- data_frame(
     k = 2:9,
-    r2 = rs$rsq,
-    adjr2 = rs$adjr2,
-    cp = rs$cp,
-    aic.c = rs$aic.c,
-    bic = rs$bic
+    r2 = rs.summ$rsq,
+    adjr2 = rs.summ$adjr2,
+    cp = rs.summ$cp,
+    aic.c = rs.summ$aic.c,
+    bic = rs.summ$bic
 )
 
-best_mods <- cbind(best_mods_1, rs$which)
+best_mods <- cbind(best_mods_1, rs.summ$which)
 
 best_mods
 ```
@@ -224,9 +229,12 @@ As it turns out, this is just measuring the particular model's lack of fit, and 
 
 ### The $C_p$ Plot
 
-The $C_p$ plot is just a scatterplot of $C_p$ on the Y-axis, and $p$ on the X-axis. 
+The $C_p$ plot is just a scatterplot of $C_p$ on the Y-axis, and the size of the model (coefficients plus intercept) $p = k$ on the X-axis. 
 
 Each of the various predictor subsets we will study is represented in a single point. A model without bias should have $C_p$ roughly equal to $p$, so we'll frequently draw a line at $C_p = p$ to make that clear. We then select our model from among all models with small $C_p$ statistics.
+
+- My typical approach is to identify the models where $C_p - p \geq 0$, then select from among those models the model where $C_p - p$ is minimized, and if there is a tie, select the model where $p$ is minimized.
+- Another good candidate might be a slightly overfit model (where $C_p - p < 0$ but just barely.)
 
 ```{r}
 p2 <- ggplot(best_mods, aes(x = k, y = cp,
@@ -243,8 +251,8 @@ p2 <- ggplot(best_mods, aes(x = k, y = cp,
 p2
 ```
 
-- Model 7 looks pretty good, with C~p~ just barely smaller than the size (p = 7) of the model.
-- Model 6 is also a possibility, with the difference $C_p - p$ minimized among all models with $C_p >= p$.
+- Model 6 is a possibility here, with the difference $C_p - p$ minimized among all models with $C_p >= p$.
+- Model 7 also looks pretty good, with C~p~ just barely smaller than the size (p = 7) of the model.
 
 ### "All Subsets" Regression and Information Criteria
 
@@ -252,9 +260,9 @@ We might consider any of three main information criteria:
 
 - the Bayesian Information Criterion, called BIC
 - the Akaike Information Criterion (used by R's default stepwise approaches,) called AIC
-- a corrected version of AIC due to Hurwitz and Tsai, called AIC~c~
+- a corrected version of AIC due to @HurvichTsai1989, called AIC~c~ or `aic.c`
 
-Each of these indicates better models by getting smaller. I'll focus on bias-corrected AIC and on BIC.
+Each of these indicates better models by getting smaller. Since the $C_p$ and AIC results will lead to the same model, I'll focus on plotting the bias-corrected AIC and on BIC.
 
 ### The bias-corrected AIC plot
 
@@ -298,115 +306,6 @@ p4
 
 ```{r, fig.height = 7}
 gridExtra::grid.arrange(p1, p2, p3, p4, nrow = 2)
-```
-
-## Plotting the Best Subsets Results using base R plots
-
-### The Adjusted R^2^ Plot
-
-```{r}
-plot(rs$adjr2 ~ I(2:9), ylab="Adjusted R-squared",
-     xlab="# of Inputs, including intercept")
-lines(spline(rs$adjr2 ~ I(2:9)))
-```
-
-Again, models 4-9 all look like reasonable choices here.
-
-### A Fancier Version (identifying the largest adjusted R^2^)
-
-```{r}
-m2 <- max(rs$adjr2) 
-m1 <- which.max(rs$adjr2) + 1
-plot(rs$adjr2 ~ I(2:9), ylab="Adjusted R-squared",
-     xlab="# of Inputs, including intercept")
-lines(spline(rs$adjr2 ~ I(2:9)))
-arrows(m1, m2-0.02, m1, m2)
-text(m1, m2-0.03, paste("max =", format(m2, digits=3)))
-text(m1, m2-0.045, paste("with", format(m1, digits=1),
-                        "inputs"), pos=3)
-```
-
-
-### The $C_p$ Plot
-
-Again, the $C_p$ plot is just a scatterplot of $C_p$ on the Y-axis, and $p$ on the X-axis. 
-
-Each of the various predictor subsets we will study is represented in a single point. A model without bias should have $C_p$ roughly equal to $p$, so we'll frequently draw a line at $C_p = p$ to make that clear. We then select our model from among all models with small $C_p$ statistics.
-
-```{r}
-plot(rs$cp ~ I(2:9),
-     ylab="Cp Statistic",
-     xlab="# of Regression Inputs, including Intercept",
-     pch=16, main="Cp Plot")
-abline(0,1, col = "purple")
-```
-
-Model 4 has the smallest value of $C_p$ (and is the leftmost of the largely comparable models 4-9) while 6 is close to and 7 is right on the $C_p = p$ line, so those are the likeliest candidates.
-
-### The BIC Plot
-
-R provides the BIC directly as part of the result of running `regsubsets`, as we've seen.
-
-```{r}
-plot(rs$bic ~ I(2:9), ylab="BIC", xlab="# of Fitted Inputs",
-     pch=16, cex=1.5, col="slateblue", main="BIC Plot")
-```
-
-We want to minimize BIC, which argues strongly for the model with 4 inputs, including the intercept.
-
-### The Bias-Corrected AIC (Hurwitz \& Tsai)
-
-The bias-corrected AIC formula due to Hurwitz and Tsai is, as we've seen:
-
-$$
-AIC_c = n log(\frac{RSS}{n}) + 2k + \frac{2k (k+1)}{n-k-1}
-$$
-
-```{r}
-rs$aic.c <- 97*log(rs$rss / 97) + 2*(2:9) +
-               (2 * (2:9) * ((2:9)+1) / (97 - (2:9) - 1))
-
-round(rs$aic,2) # uncorrected 
-round(rs$aic.c,2) # bias-corrected
-```
-
-
-```{r}
-plot(rs$aic.c ~ I(2:9), ylab="AIC, corrected", xlab="# of Fitted Inputs",
-     pch=16, cex=1.5, col="tomato", main="AIC (corrected) Plot")
-```
-
-The smallest AIC~c~ values occur in models 4 and later, especially model 4 itself.
-
-### All Four Plots, Together (from Base R)
-
-```{r, fig.height = 8}
-par(mfrow = c(2,2))
-m2 <- max(rs$adjr2) 
-m1 <- which.max(rs$adjr2) + 1
-plot(rs$adjr2 ~ I(2:9), ylab="Adjusted R-squared",
-     xlab="# of Inputs, including intercept",
-     main = "Adjusted R-squared")
-lines(spline(rs$adjr2 ~ I(2:9)))
-arrows(m1, m2-0.02, m1, m2)
-text(m1, m2-0.03, paste("max =", format(m2, digits=3)))
-text(m1, m2-0.045, paste("with", format(m1, digits=1),
-                        "inputs"), pos=3)
-
-plot(rs$cp ~ I(2:9),
-     ylab="Cp Statistic",
-     xlab="# of Regression Inputs, including Intercept",
-     pch=16, main="Cp Plot")
-abline(0,1, col = "purple")
-
-rs$aic.c <- 97*log(rs$rss / 97) + 2*(2:9) +
-               (2 * (2:9) * ((2:9)+1) / (97 - (2:9) - 1))
-plot(rs$aic.c ~ I(2:9), ylab="AIC, corrected", xlab="# of Fitted Inputs",
-     pch=16, cex=1.5, col="tomato", main="AIC (corrected) Plot")
-
-plot(rs$bic ~ I(2:9), ylab="BIC", xlab="# of Fitted Inputs",
-     pch=16, cex=1.5, col="slateblue", main="BIC Plot")
-par(mfrow = c(1,1))
 ```
 
 ## Table of Key Results
@@ -561,4 +460,25 @@ bind_rows(cv_m04_results, cv_m07_results, cv_m08_results)
 ```
 
 It appears that model `m04` has the smallest RMSE and MAE in this case. So, that's the model with the strongest cross-validated predictive accuracy, by these two standards.
+
+## What about Interaction Terms?
+
+Suppose we consider for a moment a much smaller and less realistic problem. We want to use best subsets to identify a model out of a set of three predictors for `lpsa`: specifically `lcavol`, `age` and `svi_f`, but now we also want to consider the interaction of `svi_f` with `lcavol` as a potential addition. Remember that `svi` is the 1/0 numeric version of `svi_f`. We could simply add a numerical product term to our model, as follows.
+
+```{r}
+pred2 <- with(prost, cbind(lcavol, age, svi_f, svixlcavol = svi*lcavol))
+
+rs.ks2 <- regsubsets(pred2, y = prost$lpsa, 
+                    nvmax = NULL, nbest = 1)
+rs.summ2 <- summary(rs.ks2)
+rs.summ2
+```
+
+In this case, best subsets doesn't identify the interaction term as an attractive predictor until it has already included the main effects that go into it. So that's fine. But if that isn't the case, we would have a problem.
+
+To resolve this, we could:
+
+1. Consider interactions beforehand, and force them in if desired.
+2. Consider interaction terms outside of best subsets, and only after the selection of main effects.
+3. Use another approach to deal with variable selection for interaction terms.
 

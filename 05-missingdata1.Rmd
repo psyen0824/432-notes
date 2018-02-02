@@ -181,5 +181,5 @@ Details on the many available methods in `simputation` are provided [in its manu
 - `impute_pmm` is one of several "hot deck" options for imputation, this one is predictive mean matching, which can be used with numeric data (only). Missing values are first imputed using a predictive model. Next, these predictions are replaced with the observed values which are nearest to the prediction. Other imputation options in this group include random hot deck, sequential hot deck and k-nearest neighbor imputation.
 - `impute_rlm` is one of several regression imputation methods, including linear models, robust linear models (which use what is called M-estimation to impute numerical variables) and lasso/elastic net/ridge regression models. 
 
-`simputation` can also do EM-based multivariate imputation, and multivariate random forest imputation, as well as many other sorts of approaches.
+The `simputation` package can also do EM-based multivariate imputation, and multivariate random forest imputation, and several other approaches.
 
