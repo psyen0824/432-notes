@@ -346,7 +346,10 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
             <section class="normal" id="section-">
 <div id="special-functions-used-in-these-notes" class="section level1 unnumbered">
 <h1>Special Functions used in these notes</h1>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">specify_decimal &lt;-<span class="st"> </span><span class="cf">function</span>(x, k) <span class="kw">format</span>(<span class="kw">round</span>(x, k), <span class="dt">nsmall=</span>k)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">specify_decimal &lt;-<span class="st"> </span><span class="cf">function</span>(x, k) <span class="kw">format</span>(<span class="kw">round</span>(x, k), <span class="dt">nsmall=</span>k)
+<span class="kw">skim_with</span>(<span class="dt">numeric =</span> <span class="kw">list</span>(<span class="dt">hist =</span> <span class="ot">NULL</span>), 
+          <span class="dt">integer =</span> <span class="kw">list</span>(<span class="dt">hist =</span> <span class="ot">NULL</span>), 
+          <span class="dt">ts =</span> <span class="kw">list</span>(<span class="dt">line_graph =</span> <span class="ot">NULL</span>))</code></pre></div>
 
 </div>
             </section>

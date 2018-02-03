@@ -36,5 +36,8 @@ maleptsd <- read.csv("data/maleptsd.csv") %>% tbl_df
 
 ```{r special_functions}
 specify_decimal <- function(x, k) format(round(x, k), nsmall=k)
+skim_with(numeric = list(hist = NULL), 
+          integer = list(hist = NULL), 
+          ts = list(line_graph = NULL))
 ```
 
