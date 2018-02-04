@@ -1,0 +1,4 @@
+# Using `ols` from the `rms` package to fit linear models
+
+Materials to come.
+

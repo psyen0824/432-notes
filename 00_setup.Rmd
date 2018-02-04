@@ -29,7 +29,6 @@ bonding <- read.csv("data/bonding.csv") %>% tbl_df
 cortisol <- read.csv("data/cortisol.csv") %>% tbl_df
 emphysema <- read.csv("data/emphysema.csv") %>% tbl_df
 prost <- read.csv("data/prost.csv") %>% tbl_df
-maleptsd <- read.csv("data/maleptsd.csv") %>% tbl_df
 pollution <- read.csv("data/pollution.csv") %>% tbl_df
 ```
 

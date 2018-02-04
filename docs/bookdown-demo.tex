@@ -124,7 +124,7 @@
   \postauthor{\par}
   \predate{\centering\large\emph}
   \postdate{\par}
-  \date{Built 2018-02-03 20:00:02}
+  \date{Built 2018-02-03 22:47:08}
 
 \usepackage{booktabs}
 \usepackage{amsthm}
@@ -241,7 +241,6 @@ Here, we'll load in the data sets used in these notes.
 \NormalTok{cortisol <-}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(}\StringTok{"data/cortisol.csv"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }\NormalTok{tbl_df}
 \NormalTok{emphysema <-}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(}\StringTok{"data/emphysema.csv"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }\NormalTok{tbl_df}
 \NormalTok{prost <-}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(}\StringTok{"data/prost.csv"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }\NormalTok{tbl_df}
-\NormalTok{maleptsd <-}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(}\StringTok{"data/maleptsd.csv"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }\NormalTok{tbl_df}
 \NormalTok{pollution <-}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(}\StringTok{"data/pollution.csv"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }\NormalTok{tbl_df}
 \end{Highlighting}
 \end{Shaded}
@@ -8913,6 +8912,29 @@ values?
 \texttt{y} using
 \texttt{x2}}{Quadratic polynomial model to predict y using x2}}\label{quadratic-polynomial-model-to-predict-y-using-x2}
 
+A polynomial in the variable \texttt{x} of degree D is a linear
+combination of the powers of \texttt{x} up to D.
+
+For example:
+
+\begin{itemize}
+\tightlist
+\item
+  Linear: \(y = \beta_0 + \beta_1 x\)
+\item
+  Quadratic: \(y = \beta_0 + \beta_1 x + \beta_2 x^2\)
+\item
+  Cubic: \(y = \beta_0 + \beta_1 x + \beta_2 x^2 + \beta_3 x^3\)
+\item
+  Quartic:
+  \(y = \beta_0 + \beta_1 x + \beta_2 x^2 + \beta_3 x^3 + \beta_4 x^4\)
+\item
+  Quintic:
+  \(y = \beta_0 + \beta_1 x + \beta_2 x^2 + \beta_3 x^3 + \beta_4 x^4 + \beta_5 x^5\)
+\end{itemize}
+
+Fitting such a model creates a **polynomial regression*.
+
 \subsection{The raw quadratic model}\label{the-raw-quadratic-model}
 
 Let's look at a \textbf{quadratic model} which predicts \texttt{y} using
@@ -9426,6 +9448,1234 @@ Do the linear, quadratic and cubic model fitted values look different?
 \end{Shaded}
 
 \includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-105-1.pdf}
+
+\section{Fitting a restricted cubic spline in a linear
+regression}\label{fitting-a-restricted-cubic-spline-in-a-linear-regression}
+
+\begin{itemize}
+\tightlist
+\item
+  A \textbf{linear spline} is a continuous function formed by connecting
+  points (called \textbf{knots} of the spline) by line segments.
+\item
+  A \textbf{restricted cubic spline} is a way to build highly
+  complicated curves into a regression equation in a fairly easily
+  structured way.
+\item
+  A restricted cubic spline is a series of polynomial functions joined
+  together at the knots.
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Such a spline gives us a way to flexibly account for non-linearity
+    without over-parametrizing the model.
+  \item
+    Restricted cubic splines can fit many different types of
+    non-linearities.
+  \item
+    Specifying the number of knots is all you need to do in R to get a
+    reasonable result from a restricted cubic spline.
+  \end{itemize}
+\end{itemize}
+
+The most common choices are 3, 4, or 5 knots. Each additional knot adds
+to the non-linearity, and spends an additional degree of freedom:
+
+\begin{itemize}
+\tightlist
+\item
+  3 Knots, 2 degrees of freedom, allows the curve to ``bend'' once.
+\item
+  4 Knots, 3 degrees of freedom, lets the curve ``bend'' twice.
+\item
+  5 Knots, 4 degrees of freedom, lets the curve ``bend'' three times.
+\end{itemize}
+
+For most applications, three to five knots strike a nice balance between
+complicating the model needlessly and fitting data pleasingly. Let's
+consider a restricted cubic spline model for our \texttt{y} based on
+\texttt{x3} again, but now with:
+
+\begin{itemize}
+\tightlist
+\item
+  in \texttt{mod5a}, 3 knots,
+\item
+  in \texttt{mod5b}, 4 knots, and
+\item
+  in \texttt{mod5c}, 5 knots
+\end{itemize}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{mod5a_rcs <-}\StringTok{ }\KeywordTok{lm}\NormalTok{(y }\OperatorTok{~}\StringTok{ }\KeywordTok{rcs}\NormalTok{(x3, }\DecValTok{3}\NormalTok{), }\DataTypeTok{data =}\NormalTok{ pollution)}
+\NormalTok{mod5b_rcs <-}\StringTok{ }\KeywordTok{lm}\NormalTok{(y }\OperatorTok{~}\StringTok{ }\KeywordTok{rcs}\NormalTok{(x3, }\DecValTok{4}\NormalTok{), }\DataTypeTok{data =}\NormalTok{ pollution)}
+\NormalTok{mod5c_rcs <-}\StringTok{ }\KeywordTok{lm}\NormalTok{(y }\OperatorTok{~}\StringTok{ }\KeywordTok{rcs}\NormalTok{(x3, }\DecValTok{5}\NormalTok{), }\DataTypeTok{data =}\NormalTok{ pollution)}
+\end{Highlighting}
+\end{Shaded}
+
+Here, for instance, is the summary of the 5-knot model:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{summary}\NormalTok{(mod5c_rcs)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+
+Call:
+lm(formula = y ~ rcs(x3, 5), data = pollution)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-141.522  -32.009    1.674   31.971  147.878 
+
+Coefficients:
+                Estimate Std. Error t value Pr(>|t|)
+(Intercept)      468.113    396.319   1.181    0.243
+rcs(x3, 5)x3       6.447      5.749   1.121    0.267
+rcs(x3, 5)x3'    -25.633     46.810  -0.548    0.586
+rcs(x3, 5)x3''   323.137    293.065   1.103    0.275
+rcs(x3, 5)x3''' -612.578    396.270  -1.546    0.128
+
+Residual standard error: 54.35 on 55 degrees of freedom
+Multiple R-squared:  0.2883,    Adjusted R-squared:  0.2366 
+F-statistic: 5.571 on 4 and 55 DF,  p-value: 0.0007734
+\end{verbatim}
+
+We'll begin by storing the fitted values from these three models and
+other summaries, for plotting.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{mod5a.aug <-}\StringTok{ }\KeywordTok{augment}\NormalTok{(mod5a_rcs)}
+\NormalTok{mod5a.aug}\OperatorTok{$}\NormalTok{x3 <-}\StringTok{ }\NormalTok{pollution}\OperatorTok{$}\NormalTok{x3}
+
+\NormalTok{mod5b.aug <-}\StringTok{ }\KeywordTok{augment}\NormalTok{(mod5b_rcs)}
+\NormalTok{mod5b.aug}\OperatorTok{$}\NormalTok{x3 <-}\StringTok{ }\NormalTok{pollution}\OperatorTok{$}\NormalTok{x3}
+
+\NormalTok{mod5c.aug <-}\StringTok{ }\KeywordTok{augment}\NormalTok{(mod5c_rcs)}
+\NormalTok{mod5c.aug}\OperatorTok{$}\NormalTok{x3 <-}\StringTok{ }\NormalTok{pollution}\OperatorTok{$}\NormalTok{x3}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{p2 <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(pollution, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x3, }\DataTypeTok{y =}\NormalTok{ y)) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_point}\NormalTok{() }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_smooth}\NormalTok{(}\DataTypeTok{method =} \StringTok{"loess"}\NormalTok{, }\DataTypeTok{col =} \StringTok{"purple"}\NormalTok{, }\DataTypeTok{se =}\NormalTok{ F) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \StringTok{"Loess Smooth"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{theme_bw}\NormalTok{()}
+
+\NormalTok{p3 <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(pollution, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x3, }\DataTypeTok{y =}\NormalTok{ y)) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_point}\NormalTok{() }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_line}\NormalTok{(}\DataTypeTok{data =}\NormalTok{ mod5a.aug, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x3, }\DataTypeTok{y =}\NormalTok{ .fitted), }
+              \DataTypeTok{col =} \StringTok{"blue"}\NormalTok{, }\DataTypeTok{size =} \FloatTok{1.25}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \StringTok{"RCS, 3 knots"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{theme_bw}\NormalTok{()}
+
+\NormalTok{p4 <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(pollution, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x3, }\DataTypeTok{y =}\NormalTok{ y)) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_point}\NormalTok{() }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_line}\NormalTok{(}\DataTypeTok{data =}\NormalTok{ mod5b.aug, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x3, }\DataTypeTok{y =}\NormalTok{ .fitted), }
+              \DataTypeTok{col =} \StringTok{"black"}\NormalTok{, }\DataTypeTok{size =} \FloatTok{1.25}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \StringTok{"RCS, 4 knots"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{theme_bw}\NormalTok{()}
+
+\NormalTok{p5 <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(pollution, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x3, }\DataTypeTok{y =}\NormalTok{ y)) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_point}\NormalTok{() }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_line}\NormalTok{(}\DataTypeTok{data =}\NormalTok{ mod5c.aug, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x3, }\DataTypeTok{y =}\NormalTok{ .fitted), }
+              \DataTypeTok{col =} \StringTok{"red"}\NormalTok{, }\DataTypeTok{size =} \FloatTok{1.25}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \StringTok{"RCS, 5 knots"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{theme_bw}\NormalTok{()}
+
+\NormalTok{gridExtra}\OperatorTok{::}\KeywordTok{grid.arrange}\NormalTok{(p2, p3, p4, p5, }\DataTypeTok{nrow =} \DecValTok{2}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-109-1.pdf}
+
+Does it seem like the fit improves markedly (perhaps approaching the
+loess smooth result) as we increase the number of knots?
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{anova}\NormalTok{(mod5a_rcs, mod5b_rcs, mod5c_rcs)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Analysis of Variance Table
+
+Model 1: y ~ rcs(x3, 3)
+Model 2: y ~ rcs(x3, 4)
+Model 3: y ~ rcs(x3, 5)
+  Res.Df    RSS Df Sum of Sq      F   Pr(>F)   
+1     57 194935                                
+2     56 171448  1   23486.9 7.9503 0.006672 **
+3     55 162481  1    8967.2 3.0354 0.087057 . 
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+\end{verbatim}
+
+Based on an ANOVA comparison, the fourth knot adds significant
+predictive value (p = 0.0067), but the fifth knot is borderline (p =
+0.0871). From the \texttt{glance} function in the \texttt{broom}
+package, we can also look at some key summaries.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{glance}\NormalTok{(mod5a_rcs)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+  r.squared adj.r.squared    sigma statistic    p.value df    logLik
+1  0.146184     0.1162256 58.48006  4.879558 0.01106323  3 -327.7187
+       AIC      BIC deviance df.residual
+1 663.4373 671.8147 194935.3          57
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{glance}\NormalTok{(mod5b_rcs)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+  r.squared adj.r.squared    sigma statistic   p.value df    logLik
+1 0.2490566     0.2088274 55.33153  6.190953 0.0010423  4 -323.8671
+       AIC      BIC deviance df.residual
+1 657.7342 668.2059 171448.4          56
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{glance}\NormalTok{(mod5c_rcs)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+  r.squared adj.r.squared    sigma statistic      p.value df    logLik
+1 0.2883327     0.2365751 54.35259  5.570826 0.0007734418  5 -322.2555
+      AIC      BIC deviance df.residual
+1 656.511 669.0771 162481.2          55
+\end{verbatim}
+
+\begin{longtable}[]{@{}rrrrrr@{}}
+\toprule
+Model & Knots & R\textsuperscript{2} & Adj. R\textsuperscript{2} & AIC &
+BIC\tabularnewline
+\midrule
+\endhead
+5a & 3 & 0.146 & 0.116 & 663.4 & 671.8\tabularnewline
+5b & 4 & 0.249 & 0.209 & 657.7 & \textbf{668.2}\tabularnewline
+5c & 5 & 0.288 & \textbf{0.237} & \textbf{656.5} & 669.1\tabularnewline
+\bottomrule
+\end{longtable}
+
+Within our sample, the five-knot RCS outperforms the 3- and 4-knot
+versions on adjusted R\textsuperscript{2} and AIC (barely) and does a
+little worse than the 4-knot RCS on BIC.
+
+Of course, we could also use the cross-validation methods we've
+developed for other linear regressions to assess predictive capacity of
+these models. I'll skip that for now.
+
+To see the values of \texttt{x3} where the splines place their knots, we
+can use the \texttt{attributes} function.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{attributes}\NormalTok{(}\KeywordTok{rcs}\NormalTok{(pollution}\OperatorTok{$}\NormalTok{x3, }\DecValTok{5}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+$dim
+[1] 60  4
+
+$dimnames
+$dimnames[[1]]
+NULL
+
+$dimnames[[2]]
+[1] "pollution"    "pollution'"   "pollution''"  "pollution'''"
+
+
+$class
+[1] "rms"
+
+$name
+[1] "pollution"
+
+$label
+[1] "pollution"
+
+$assume
+[1] "rcspline"
+
+$assume.code
+[1] 4
+
+$parms
+[1] 68 72 74 77 82
+
+$nonlinear
+[1] FALSE  TRUE  TRUE  TRUE
+
+$colnames
+[1] "pollution"    "pollution'"   "pollution''"  "pollution'''"
+\end{verbatim}
+
+The knots in this particular 5-knot spline are placed by the computer at
+68, 72, 74, 77 and 82, it seems.
+
+\section{\texorpdfstring{Spending DF on Non-Linearity: The Spearman
+\(\rho^2\)
+Plot}{Spending DF on Non-Linearity: The Spearman \textbackslash{}rho\^{}2 Plot}}\label{spending-df-on-non-linearity-the-spearman-rho2-plot}
+
+We need a flexible approach to assessing non-linearity and fitting
+models with non-linear predictors. This will lead us to a measure of
+what \citet{Harrell2001} calls \textbf{potential predictive punch} which
+hides the true form of the regression from the analyst so as to preserve
+statistical properties, but that lets us make sensible decisions about
+whether a predictor should be included in a model, and the number of
+parameters (degrees of freedom, essentially) we are willing to devote to
+it.
+
+What if we want to consider where best to spend our degrees of freedom
+on non-linear predictor terms, like interactions, polynomial functions
+or curved splines to represent our input data? The approach we'll find
+useful in the largest variety of settings is a combination of
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  a rank correlation assessment of potential predictive punch (using a
+  Spearman \(\rho^2\) plot, available in the \texttt{Hmisc} package),
+  followed by
+\item
+  the application of restricted cubic splines to fit and assess models.
+\end{enumerate}
+
+Suppose, for instance, that we want to create a model for \texttt{y}
+using some combination of linear and non-linear terms drawn from the
+complete set of 15 predictors available in the \texttt{pollution} data.
+I'd begin by running a Spearman \(\rho^2\) plot:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plot}\NormalTok{(Hmisc}\OperatorTok{::}\KeywordTok{spearman2}\NormalTok{(y }\OperatorTok{~}\StringTok{ }\NormalTok{x1 }\OperatorTok{+}\StringTok{ }\NormalTok{x2 }\OperatorTok{+}\StringTok{ }\NormalTok{x3 }\OperatorTok{+}\StringTok{ }\NormalTok{x4 }\OperatorTok{+}\StringTok{ }\NormalTok{x5 }\OperatorTok{+}\StringTok{ }\NormalTok{x6 }\OperatorTok{+}\StringTok{ }\NormalTok{x7 }\OperatorTok{+}
+\StringTok{                          }\NormalTok{x8 }\OperatorTok{+}\StringTok{ }\NormalTok{x9 }\OperatorTok{+}\StringTok{ }\NormalTok{x10 }\OperatorTok{+}\StringTok{ }\NormalTok{x11 }\OperatorTok{+}\StringTok{ }\NormalTok{x12 }\OperatorTok{+}\StringTok{ }\NormalTok{x13 }\OperatorTok{+}
+\StringTok{                          }\NormalTok{x14 }\OperatorTok{+}\StringTok{ }\NormalTok{x15, }\DataTypeTok{data =}\NormalTok{ pollution))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-113-1.pdf}
+
+The variable with the largest adjusted squared Spearman \(\rho\)
+statistic in this setting is \texttt{x9}, followed by \texttt{x6} and
+\texttt{x14}. With only 60 observations, we might well want to restrict
+ourselves to a very small model. What the Spearman plot suggests is that
+we focus any non-linear terms on \texttt{x9} first, and then perhaps
+\texttt{x6} and \texttt{x14} as they have some potential predictive
+power. It may or may not work out that the non-linear terms are
+productive.
+
+\subsection{\texorpdfstring{Fitting a Big Model to the
+\texttt{pollution}
+data}{Fitting a Big Model to the pollution data}}\label{fitting-a-big-model-to-the-pollution-data}
+
+So, one possible model built in reaction this plot might be to fit:
+
+\begin{itemize}
+\tightlist
+\item
+  a restricted cubic spline with 5 knots on x9
+\item
+  a restricted cubic spline with 3 knots on x6
+\item
+  and a quadratic polynomial on x14
+\item
+  plus a linear fit to x1 and x13
+\end{itemize}
+
+That's way more degrees of freedom (4 for x9, 2 for x6, 2 for x14 and 1
+each for x1 and x13 makes a total of 10 without the intercept term) than
+we can really justify with a sample of 60 observations. But let's see
+what happens.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{mod_big <-}\StringTok{ }\KeywordTok{lm}\NormalTok{(y }\OperatorTok{~}\StringTok{ }\KeywordTok{rcs}\NormalTok{(x9, }\DecValTok{5}\NormalTok{) }\OperatorTok{+}\StringTok{ }\KeywordTok{rcs}\NormalTok{(x6, }\DecValTok{3}\NormalTok{) }\OperatorTok{+}\StringTok{ }\KeywordTok{poly}\NormalTok{(x14, }\DecValTok{2}\NormalTok{) }\OperatorTok{+}\StringTok{ }\NormalTok{x1 }\OperatorTok{+}\StringTok{ }\NormalTok{x13, }\DataTypeTok{data =}\NormalTok{ pollution)}
+
+\KeywordTok{anova}\NormalTok{(mod_big)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Analysis of Variance Table
+
+Response: y
+             Df Sum Sq Mean Sq F value    Pr(>F)    
+rcs(x9, 5)    4 100164 25040.9 17.8482 4.229e-09 ***
+rcs(x6, 3)    2  38306 19152.8 13.6513 1.939e-05 ***
+poly(x14, 2)  2  15595  7797.7  5.5579  0.006677 ** 
+x1            1   4787  4787.3  3.4122  0.070759 .  
+x13           1    712   711.9  0.5074  0.479635    
+Residuals    49  68747  1403.0                      
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+\end{verbatim}
+
+This \texttt{anova} suggests that we have at least some predictive value
+in each spline (\texttt{x9} and \texttt{x6}) and some additional value
+in \texttt{x14}, although it's not as clear that the linear terms
+(\texttt{x1} and \texttt{x13}) did much good.
+
+\subsection{\texorpdfstring{Limitations of \texttt{lm} for fitting
+complex linear regression
+models}{Limitations of lm for fitting complex linear regression models}}\label{limitations-of-lm-for-fitting-complex-linear-regression-models}
+
+We can certainly assess this big, complex model using \texttt{lm} in
+comparison to other models:
+
+\begin{itemize}
+\tightlist
+\item
+  with in-sample summary statistics like adjusted R\textsuperscript{2},
+  AIC and BIC,
+\item
+  we can assess its assumptions with residual plots, and
+\item
+  we can also compare out-of-sample predictive quality through
+  cross-validation,
+\end{itemize}
+
+But to really delve into the details of how well this complex model
+works, and to help plot what is actually being fit, we'll probably want
+to fit the model using an alternative method for fitting linear models,
+called \texttt{ols}, from the \texttt{rms} package developed by Frank
+Harrell and colleagues. That will be the focus of our next chapter.
+
+\chapter{\texorpdfstring{Using \texttt{ols} from the \texttt{rms}
+package to fit linear
+models}{Using ols from the rms package to fit linear models}}\label{using-ols-from-the-rms-package-to-fit-linear-models}
+
+Materials to come.
+
+\chapter{Other Variable Selection
+Strategies}\label{other-variable-selection-strategies}
+
+\section{Why not use stepwise
+procedures?}\label{why-not-use-stepwise-procedures}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  The R\textsuperscript{2} for a model selected in a stepwise manner is
+  biased, high.
+\item
+  The coefficient estimates and standard errors are biased.
+\item
+  The \(p\) values for the individual-variable t tests are too small.
+\item
+  In stepwise analyses of prediction models, the final model represented
+  noise 20-74\% of the time.
+\item
+  In stepwise analyses, the final model usually contained less than half
+  of the actual number of real predictors.
+\item
+  It is not logical that a population regression coefficient would be
+  exactly zero just because its estimate was not statistically
+  significant.
+\end{enumerate}
+
+This last comment applies to things like our ``best subsets'' approach
+as well as standard stepwise procedures.
+
+Sander Greenland's comments on parsimony and stepwise approaches to
+model selection are worth addressing\ldots{}
+
+\begin{itemize}
+\tightlist
+\item
+  Stepwise variable selection on confounders leaves important
+  confounders uncontrolled.
+\item
+  Shrinkage approaches (like ridge regression and the lasso) are far
+  superior to variable selection.
+\item
+  Variable selection does more damage to confidence interval widths than
+  to point estimates.
+\end{itemize}
+
+If we are seriously concerned about \textbf{overfitting} - winding up
+with a model that doesn't perform well on new data - then stepwise
+approaches generally don't help.
+
+\citet{Vittinghoff2012} suggest four strategies for minimizing the
+chance of overfitting
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Pre-specify well-motivated predictors and how to model them.
+\item
+  Eliminate predictors without using the outcome.
+\item
+  Use the outcome, but cross-validate the target measure of prediction
+  error.
+\item
+  Use the outcome, and \textbf{shrink} the coefficient estimates.
+\end{enumerate}
+
+The best subsets methods we have studied either include a variable or
+drop it from the model. Often, this choice is based on only a tiny
+difference in the quality of a fit to data.
+
+\begin{itemize}
+\tightlist
+\item
+  \citet{Harrell2001}: not reasonable to assume that a population
+  regression coefficient would be exactly zero just because it failed to
+  meet a criterion for significance.
+\item
+  Brad Efron has suggested that a stepwise approach is ``overly greedy,
+  impulsively eliminating covariates which are correlated with other
+  covariates.''
+\end{itemize}
+
+So, what's the alternative?
+
+\section{Ridge Regression}\label{ridge-regression}
+
+\textbf{Ridge regression} involves a more smooth transition between
+useful and not useful predictors which can be obtained by constraining
+the overall size of the regression coefficients.
+
+Ridge regression assumes that the regression coefficients (after
+normalization) should not be very large. This is reasonable to assume
+when you have lots of predictors and you believe \emph{many} of them
+have some effect on the outcome.
+
+Pros:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Some nice statistical properties
+\item
+  Can be calculated using only standard least squares approaches, so
+  it's been around for a while.
+\item
+  Available in the \texttt{MASS} package.
+\end{enumerate}
+
+Ridge regression takes the sum of the squared estimated standardized
+regression coefficients and constrains that sum to only be as large as
+some value \(k\).
+
+\[
+\sum \hat{\beta_j}^2 \leq k.
+\]
+
+The value \(k\) is one of several available measures of the amount of
+shrinkage, but the main one used in the \texttt{MASS} package is a value
+\(\lambda\). As \(\lambda\) increases, the amount of shrinkage goes up,
+and \(k\) goes down.
+
+\subsection{Assessing a Ridge Regression
+Approach}\label{assessing-a-ridge-regression-approach}
+
+We'll look at a plot produced by the \texttt{lm.ridge} function for a
+ridge regression for the prostate cancer study we worked on when
+studying Stepwise Regression and Best Subsets methods earlier.
+
+\begin{itemize}
+\tightlist
+\item
+  Several (here 101) different values for \(\lambda\), our shrinkage
+  parameter, will be tested.
+\item
+  Results are plotted so that we see the coefficients across the various
+  (standardized) predictors.
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Each selection of a \(\lambda\) value implies a different vector of
+    covariate values across the predictors we are studying.
+  \item
+    The idea is to pick a value of \(\lambda\) for which the
+    coefficients seem relatively stable.
+  \end{itemize}
+\end{itemize}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{preds <-}\StringTok{ }\KeywordTok{with}\NormalTok{(prost, }\KeywordTok{cbind}\NormalTok{(lcavol, lweight, age, bph_f,}
+\NormalTok{                           svi_f, lcp, gleason_f, pgg45))}
+
+\NormalTok{x <-}\StringTok{ }\KeywordTok{lm.ridge}\NormalTok{(prost}\OperatorTok{$}\NormalTok{lpsa }\OperatorTok{~}\StringTok{ }\NormalTok{preds, }\DataTypeTok{lambda =} \DecValTok{0}\OperatorTok{:}\DecValTok{100}\NormalTok{)}
+    
+\KeywordTok{plot}\NormalTok{(x)}
+\KeywordTok{title}\NormalTok{(}\StringTok{"Ridge Regression for prost data"}\NormalTok{)}
+\KeywordTok{abline}\NormalTok{(}\DataTypeTok{h =} \DecValTok{0}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/ridge_prost_code-1.pdf}
+
+Usually, you need to use trial and error to decide the range of
+\(\lambda\) to be tested. Here, \texttt{0:100} means going from 0 (no
+shrinkage) to 100 in steps of 1.
+
+\subsection{\texorpdfstring{The \texttt{lm.ridge} plot - where do
+coefficients
+stabilize?}{The lm.ridge plot - where do coefficients stabilize?}}\label{the-lm.ridge-plot---where-do-coefficients-stabilize}
+
+Does \(\lambda = 20\) seem like a stable spot here?
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{x <-}\StringTok{ }\KeywordTok{lm.ridge}\NormalTok{(prost}\OperatorTok{$}\NormalTok{lpsa }\OperatorTok{~}\StringTok{ }\NormalTok{preds, }\DataTypeTok{lambda =} \DecValTok{0}\OperatorTok{:}\DecValTok{100}\NormalTok{)}
+\KeywordTok{plot}\NormalTok{(x)}
+\KeywordTok{title}\NormalTok{(}\StringTok{"Ridge Regression for prost data"}\NormalTok{)}
+\KeywordTok{abline}\NormalTok{(}\DataTypeTok{h =} \DecValTok{0}\NormalTok{)}
+\KeywordTok{abline}\NormalTok{(}\DataTypeTok{v=}\DecValTok{20}\NormalTok{, }\DataTypeTok{lty=}\DecValTok{2}\NormalTok{, }\DataTypeTok{col=}\StringTok{"black"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/ridge_prost_20-1.pdf}
+
+The coefficients at \(\lambda\) = 20 can be determined from the
+\texttt{lm.ridge} output. These are fully standardized coefficients. The
+original predictors are centered by their means and then scaled by their
+standard deviations and the outcome has also been centered, in these
+models.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{round}\NormalTok{(x}\OperatorTok{$}\NormalTok{coef[,}\DecValTok{20}\NormalTok{],}\DecValTok{3}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+   predslcavol   predslweight       predsage     predsbph_f     predssvi_f 
+         0.482          0.248         -0.091          0.097          0.252 
+      predslcp predsgleason_f     predspgg45 
+         0.009         -0.099          0.061 
+\end{verbatim}
+
+Was an intercept used?
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{x}\OperatorTok{$}\NormalTok{Inter}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+[1] 1
+\end{verbatim}
+
+Yes, it was. There is an automated way to pick \(\lambda\). Use the
+\texttt{select} function in the \texttt{MASS} package:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{MASS}\OperatorTok{::}\KeywordTok{select}\NormalTok{(x)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+modified HKB estimator is 4.210238 
+modified L-W estimator is 3.32223 
+smallest value of GCV  at 6 
+\end{verbatim}
+
+I'll use the GCV = generalized cross-validation to select \(\lambda\) =
+6 instead.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{x <-}\StringTok{ }\KeywordTok{lm.ridge}\NormalTok{(prost}\OperatorTok{$}\NormalTok{lpsa }\OperatorTok{~}\StringTok{ }\NormalTok{preds, }\DataTypeTok{lambda =} \DecValTok{0}\OperatorTok{:}\DecValTok{100}\NormalTok{)}
+\KeywordTok{plot}\NormalTok{(x)}
+\KeywordTok{title}\NormalTok{(}\StringTok{"Ridge Regression for prost data"}\NormalTok{)}
+\KeywordTok{abline}\NormalTok{(}\DataTypeTok{h =} \DecValTok{0}\NormalTok{)}
+\KeywordTok{abline}\NormalTok{(}\DataTypeTok{v=}\DecValTok{6}\NormalTok{, }\DataTypeTok{lty=}\DecValTok{2}\NormalTok{, }\DataTypeTok{col=}\StringTok{"black"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/ridge for ptsdmale with 40 line-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{x}\OperatorTok{$}\NormalTok{coef[,}\DecValTok{6}\NormalTok{]}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+   predslcavol   predslweight       predsage     predsbph_f     predssvi_f 
+    0.58911149     0.26773757    -0.13715070     0.11862949     0.29491008 
+      predslcp predsgleason_f     predspgg45 
+   -0.09389545    -0.10477578     0.07250609 
+\end{verbatim}
+
+\subsection{Ridge Regression: The Bottom
+Line}\label{ridge-regression-the-bottom-line}
+
+The main problem with ridge regression is that all it does is shrink the
+coefficient estimates, but it's not so useful in practical settings
+because it still includes all variables.
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  It's been easy to do ridge regression for many years, so you see it
+  occasionally in the literature.
+\item
+  It leads to the \textbf{lasso}, which incorporates the positive
+  features of shrinking regression coefficients with the ability to
+  wisely select some variables to be eliminated from the predictor pool.
+\end{enumerate}
+
+\section{The Lasso}\label{the-lasso}
+
+The lasso works by takes the sum of the absolute values of the estimated
+standardized regression coefficients and constrains it to only be as
+large as some value k.
+
+\[
+\sum \hat{|\beta_j|} \leq k.
+\]
+
+This looks like a minor change, but it's not.
+
+\subsection{Consequences of the Lasso
+Approach}\label{consequences-of-the-lasso-approach}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  In ridge regression, while the individual coefficients shrink and
+  sometimes approach zero, they seldom reach zero and are thus excluded
+  from the model. With the lasso, some coefficients do reach zero and
+  thus, those predictors do drop out of the model.
+
+  \begin{itemize}
+  \tightlist
+  \item
+    So the lasso leads to more parsimonious models than does ridge
+    regression.
+  \item
+    Ridge regression is a method of shrinkage but not model selection.
+    The lasso accomplishes both tasks.
+  \end{itemize}
+\item
+  If k is chosen to be too small, then the model may not capture
+  important characteristics of the data. If k is too large, the model
+  may over-fit the data in the sample and thus not represent the
+  population of interest accurately.
+\item
+  The lasso is far more difficult computationally than ridge regression
+  (the problem requires an algorithm called least angle regression
+  published in 2004), although R has a library (\texttt{lars}) which can
+  do the calculations pretty efficiently.
+\end{enumerate}
+
+The lasso is not an acronym, but rather refers to cowboys using a rope
+to pull cattle from the herd, much as we will pull predictors from a
+model.
+
+\subsection{How The Lasso Works}\label{how-the-lasso-works}
+
+The \texttt{lars} package lets us compute the lasso coefficient
+estimates \textbf{and} do cross-validation to determine the appropriate
+amount of shrinkage. The main tool is a pair of graphs.
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  The first plot shows what coefficients get selected as we move from
+  constraining all of the coefficients to zero (complete shrinkage)
+  towards fewer constraints all the way up to ordinary least squares,
+  showing which variables are included in the model at each point.
+\item
+  The second plot suggests where on the first plot we should look for a
+  good model choice, according to a cross-validation approach.
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{## requires lars package}
+\NormalTok{lasso1 <-}\StringTok{ }\KeywordTok{lars}\NormalTok{(preds, prost}\OperatorTok{$}\NormalTok{lpsa, }\DataTypeTok{type=}\StringTok{"lasso"}\NormalTok{)}
+\KeywordTok{plot}\NormalTok{(lasso1)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/lasso_graph1_forprost-1.pdf}
+
+\begin{itemize}
+\tightlist
+\item
+  The y axis shows standardized regression coefficients.
+
+  \begin{itemize}
+  \tightlist
+  \item
+    The \texttt{lars} package standardizes all variables so the
+    shrinkage doesn't penalize some coefficients because of their scale.
+  \end{itemize}
+\item
+  The x-axis is labeled
+  \texttt{\textbar{}beta\textbar{}/max\textbar{}beta\textbar{}}.
+
+  \begin{itemize}
+  \tightlist
+  \item
+    This ranges from 0 to 1.
+  \item
+    0 means that the sum of the \(|\hat{\beta_j}|\) is zero (completely
+    shrunk)
+  \item
+    1 means the ordinary least squares unbiased estimates.
+  \end{itemize}
+\end{itemize}
+
+The lasso graph starts at constraining all of the coefficients to zero,
+and then moves toward ordinary least squares.
+
+Identifiers for the predictors (numbers) are shown to the right of the
+graph.
+
+The vertical lines in the lasso plot show when a variable has been
+eliminated from the model, and in fact these are the only points that
+are actually shown in the default lasso graph. The labels on the top of
+the graph tell you how many predictors are in the model at that stage.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{summary}\NormalTok{(lasso1)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+LARS/LASSO
+Call: lars(x = preds, y = prost$lpsa, type = "lasso")
+  Df     Rss       Cp
+0  1 127.918 168.1835
+1  2  76.392  64.1722
+2  3  70.247  53.5293
+3  4  50.598  15.1017
+4  5  49.065  13.9485
+5  6  48.550  14.8898
+6  7  46.284  12.2276
+7  8  44.002   9.5308
+8  9  42.772   9.0000
+\end{verbatim}
+
+Based on the C\textsubscript{p} statistics, it looks like the
+improvements continue throughout, and don't really finish happening
+until we get pretty close to the full model with 9 df.
+
+\subsection{Cross-Validation with the
+Lasso}\label{cross-validation-with-the-lasso}
+
+Normally, cross-validation methods are used to determine how much
+shrinkage should be used. We'll use the \texttt{cv.lars} function.
+
+\begin{itemize}
+\tightlist
+\item
+  10-fold (K = 10) cross-validation
+
+  \begin{itemize}
+  \tightlist
+  \item
+    the data are randomly divided into 10 groups.
+  \item
+    Nine groups are used to predict the remaining group for each group
+    in turn.
+  \item
+    Overall prediction performance is computed, and the machine
+    calculates a cross-validation criterion (mean squared error) and
+    standard error for that criterion.
+  \end{itemize}
+\end{itemize}
+
+The cross-validation plot is the second lasso plot.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{432}\NormalTok{)}
+\NormalTok{lassocv <-}\StringTok{ }\KeywordTok{cv.lars}\NormalTok{(preds, prost}\OperatorTok{$}\NormalTok{lpsa, }\DataTypeTok{K=}\DecValTok{10}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/lasso_graph2-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{## default cv.lars K is 10}
+\end{Highlighting}
+\end{Shaded}
+
+We're looking to minimize cross-validated mean squared error in this
+plot, which doesn't seem to happen until the fraction gets very close to
+1.
+
+\subsection{What value of the key fraction minimizes cross-validated
+MSE?}\label{what-value-of-the-key-fraction-minimizes-cross-validated-mse}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{frac <-}\StringTok{ }\NormalTok{lassocv}\OperatorTok{$}\NormalTok{index[}\KeywordTok{which.min}\NormalTok{(lassocv}\OperatorTok{$}\NormalTok{cv)]}
+\NormalTok{frac}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+[1] 0.989899
+\end{verbatim}
+
+The cross-validation plot suggests we use a fraction of about 0.3,
+that's suggesting a model with 4-5 predictors, based on the top LASSO
+plot.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{par}\NormalTok{(}\DataTypeTok{mfrow=}\KeywordTok{c}\NormalTok{(}\DecValTok{2}\NormalTok{,}\DecValTok{1}\NormalTok{))}
+\NormalTok{lasso1 <-}\StringTok{ }\KeywordTok{lars}\NormalTok{(preds, prost}\OperatorTok{$}\NormalTok{lpsa, }\DataTypeTok{type=}\StringTok{"lasso"}\NormalTok{)}
+\KeywordTok{plot}\NormalTok{(lasso1)}
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{432}\NormalTok{)}
+\NormalTok{lassocv <-}\StringTok{ }\KeywordTok{cv.lars}\NormalTok{(preds, prost}\OperatorTok{$}\NormalTok{lpsa, }\DataTypeTok{K=}\DecValTok{10}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/lasso_bothplots-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{par}\NormalTok{(}\DataTypeTok{mfrow=}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{1}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\subsection{Coefficients for the Model Identified by the
+Cross-Validation}\label{coefficients-for-the-model-identified-by-the-cross-validation}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{coef.cv <-}\StringTok{ }\KeywordTok{coef}\NormalTok{(lasso1, }\DataTypeTok{s=}\NormalTok{frac, }\DataTypeTok{mode=}\StringTok{"fraction"}\NormalTok{)}
+\KeywordTok{round}\NormalTok{(coef.cv,}\DecValTok{4}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+   lcavol   lweight       age     bph_f     svi_f       lcp gleason_f 
+   0.5529    0.6402   -0.0217    0.1535    0.7750   -0.1155   -0.1826 
+    pgg45 
+   0.0030 
+\end{verbatim}
+
+So the model suggested by the lasso still includes all sight of these
+predictors.
+
+\subsection{Obtaining Fitted Values from
+Lasso}\label{obtaining-fitted-values-from-lasso}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{fits.cv <-}\StringTok{ }\KeywordTok{predict.lars}\NormalTok{(lasso1, preds, }\DataTypeTok{s=}\NormalTok{frac, }
+                        \DataTypeTok{type=}\StringTok{"fit"}\NormalTok{, }\DataTypeTok{mode=}\StringTok{"fraction"}\NormalTok{)}
+\NormalTok{fits.cv}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+$s
+[1] 0.989899
+
+$fraction
+[1] 0.989899
+
+$mode
+[1] "fraction"
+
+$fit
+ [1] 0.7995838 0.7493971 0.5111634 0.6098520 1.7001847 0.8338020 1.8288518
+ [8] 2.1302316 1.2487955 1.2661752 1.4704969 0.7782005 2.0755860 1.9129272
+[15] 2.1533975 1.8124981 1.2713610 2.3993624 1.3232566 1.7709029 1.9757841
+[22] 2.7451649 1.1658326 2.4825521 1.8036338 1.9112578 2.0144298 1.7829219
+[29] 1.9706111 2.1688199 2.0377131 1.8657882 1.6955904 1.3580186 1.0516394
+[36] 2.9097450 2.1898622 1.0454123 3.8896481 1.7971270 2.0932871 2.3253395
+[43] 2.0809295 2.5303655 2.4451523 2.5827203 4.0692397 2.6845105 2.7034959
+[50] 1.9590266 2.4522082 2.9801227 2.1902084 3.0559124 3.3447025 2.9765233
+[57] 1.7620182 2.3424646 2.2856404 2.6188548 2.3056410 3.5568662 2.9756755
+[64] 3.6764122 2.5097586 2.6579014 2.9482717 3.0892917 1.5113015 3.0282296
+[71] 3.2887119 2.1083273 2.8889223 3.4903026 3.6959516 3.6070031 3.2749993
+[78] 3.4518575 3.4049180 3.1814731 2.0496216 2.8986175 3.6743113 3.3292860
+[85] 2.6965297 3.8339856 2.9892543 3.0555536 4.2903885 3.0986508 3.3784385
+[92] 4.0205201 3.8309974 4.7531590 3.6290575 4.1347645 4.0982744
+\end{verbatim}
+
+\subsection{Complete Set of Fitted Values from the
+Lasso}\label{complete-set-of-fitted-values-from-the-lasso}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{round}\NormalTok{(fits.cv}\OperatorTok{$}\NormalTok{fit,}\DecValTok{3}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+ [1] 0.800 0.749 0.511 0.610 1.700 0.834 1.829 2.130 1.249 1.266 1.470
+[12] 0.778 2.076 1.913 2.153 1.812 1.271 2.399 1.323 1.771 1.976 2.745
+[23] 1.166 2.483 1.804 1.911 2.014 1.783 1.971 2.169 2.038 1.866 1.696
+[34] 1.358 1.052 2.910 2.190 1.045 3.890 1.797 2.093 2.325 2.081 2.530
+[45] 2.445 2.583 4.069 2.685 2.703 1.959 2.452 2.980 2.190 3.056 3.345
+[56] 2.977 1.762 2.342 2.286 2.619 2.306 3.557 2.976 3.676 2.510 2.658
+[67] 2.948 3.089 1.511 3.028 3.289 2.108 2.889 3.490 3.696 3.607 3.275
+[78] 3.452 3.405 3.181 2.050 2.899 3.674 3.329 2.697 3.834 2.989 3.056
+[89] 4.290 3.099 3.378 4.021 3.831 4.753 3.629 4.135 4.098
+\end{verbatim}
+
+To assess the quality of these predictions, we might plot them against
+the observed values of our outcome (\texttt{lpsa}), or we might look at
+residuals vs.~these fitted values.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{prost_lasso_res <-}\StringTok{ }\KeywordTok{data_frame}\NormalTok{(}\DataTypeTok{fitted =}\NormalTok{ fits.cv}\OperatorTok{$}\NormalTok{fit, }
+                             \DataTypeTok{actual =}\NormalTok{ prost}\OperatorTok{$}\NormalTok{lpsa, }
+                             \DataTypeTok{resid =}\NormalTok{ actual }\OperatorTok{-}\StringTok{ }\NormalTok{fitted)}
+
+\KeywordTok{ggplot}\NormalTok{(prost_lasso_res, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ actual, }\DataTypeTok{y =}\NormalTok{ fitted)) }\OperatorTok{+}\StringTok{ }
+\StringTok{    }\KeywordTok{geom_point}\NormalTok{() }\OperatorTok{+}\StringTok{ }
+\StringTok{    }\KeywordTok{geom_abline}\NormalTok{(}\DataTypeTok{slope =} \DecValTok{1}\NormalTok{, }\DataTypeTok{intercept =} \DecValTok{0}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{y =} \StringTok{"Fitted log(PSA) from Cross-Validated LASSO"}\NormalTok{,}
+         \DataTypeTok{x =} \StringTok{"Observed values of log(PSA)"}\NormalTok{,}
+         \DataTypeTok{title =} \StringTok{"Fitted vs. Actual Values of log(PSA)"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-118-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{ggplot}\NormalTok{(prost_lasso_res, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ fitted, }\DataTypeTok{y =}\NormalTok{ resid)) }\OperatorTok{+}\StringTok{ }
+\StringTok{    }\KeywordTok{geom_point}\NormalTok{() }\OperatorTok{+}\StringTok{ }
+\StringTok{    }\KeywordTok{geom_hline}\NormalTok{(}\DataTypeTok{yintercept =} \DecValTok{0}\NormalTok{, }\DataTypeTok{col =} \StringTok{"red"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_smooth}\NormalTok{(}\DataTypeTok{method =} \StringTok{"loess"}\NormalTok{, }\DataTypeTok{col =} \StringTok{"blue"}\NormalTok{, }\DataTypeTok{se =}\NormalTok{ F) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{x =} \StringTok{"LASSO-fitted log(PSA)"}\NormalTok{,}
+         \DataTypeTok{y =} \StringTok{"Residuals from Cross-Validated LASSO model"}\NormalTok{,}
+         \DataTypeTok{title =} \StringTok{"Residuals vs. Fitted Values of log(PSA) from LASSO"}\NormalTok{,}
+         \DataTypeTok{subtitle =} \StringTok{"with loess smooth"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-119-1.pdf}
+
+\subsection{When is the Lasso Most
+Useful?}\label{when-is-the-lasso-most-useful}
+
+As \citet{Faraway2015} suggests, the lasso is particularly useful when
+we believe the effects are sparse, in the sense that we believe that few
+of the many predictors we are evaluating have a meaningful effect.
+
+Consider, for instance, the analysis of gene expression data, where we
+have good reason to believe that only a small number of genes have an
+influence on our response of interest.
+
+Or, in medical claims data, where we can have thousands of available
+codes to search through that may apply to some of the people included in
+a large analysis relating health care costs to outcomes.
+
+\section{\texorpdfstring{Applying the Lasso to the \texttt{pollution}
+data}{Applying the Lasso to the pollution data}}\label{applying-the-lasso-to-the-pollution-data}
+
+Let's consider the lasso approach in application to the
+\texttt{pollution} data we've seen previously. Recall that we have 60
+observations on an outcome, \texttt{y}, and 15 predictors, labeled x1
+through x15.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{preds <-}\StringTok{ }\KeywordTok{with}\NormalTok{(pollution, }\KeywordTok{cbind}\NormalTok{(x1, x2, x3, x4, x5, x6, x7,}
+\NormalTok{                               x8, x9, x10, x11, x12, x13,}
+\NormalTok{                               x14, x15))}
+
+\NormalTok{lasso_p1 <-}\StringTok{ }\KeywordTok{lars}\NormalTok{(preds, pollution}\OperatorTok{$}\NormalTok{y, }\DataTypeTok{type=}\StringTok{"lasso"}\NormalTok{)}
+\KeywordTok{plot}\NormalTok{(lasso_p1)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/lasso_graph1_forpollution-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{summary}\NormalTok{(lasso_p1)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+LARS/LASSO
+Call: lars(x = preds, y = pollution$y, type = "lasso")
+   Df    Rss       Cp
+0   1 228311 129.1367
+1   2 185419  95.9802
+2   3 149370  68.4323
+3   4 143812  65.8764
+4   5  92077  25.4713
+5   6  83531  20.4668
+6   7  69532  10.9922
+7   8  67682  11.4760
+8   9  60689   7.7445
+9  10  60167   9.3163
+10 11  59609  10.8588
+11 12  58287  11.7757
+12 13  57266  12.9383
+13 14  56744  14.5107
+14 13  56159  12.0311
+15 14  55238  13.2765
+16 15  53847  14.1361
+17 16  53681  16.0000
+\end{verbatim}
+
+Based on the C\textsubscript{p} statistics, it looks like the big
+improvements occur somewhere around the move from 6 to 7 df. Let's look
+at the cross-validation
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{432012}\NormalTok{)}
+\NormalTok{pollution_lassocv <-}\StringTok{ }\KeywordTok{cv.lars}\NormalTok{(preds, pollution}\OperatorTok{$}\NormalTok{y, }\DataTypeTok{K=}\DecValTok{10}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-120-1.pdf}
+
+Here it looks like cross-validated MSE happens somewhere between a
+fraction of 0.2 and 0.4.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{frac <-}\StringTok{ }\NormalTok{pollution_lassocv}\OperatorTok{$}\NormalTok{index[}\KeywordTok{which.min}\NormalTok{(pollution_lassocv}\OperatorTok{$}\NormalTok{cv)]}
+\NormalTok{frac}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+[1] 0.3535354
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{par}\NormalTok{(}\DataTypeTok{mfrow=}\KeywordTok{c}\NormalTok{(}\DecValTok{2}\NormalTok{,}\DecValTok{1}\NormalTok{))}
+\NormalTok{lasso_p1 <-}\StringTok{ }\KeywordTok{lars}\NormalTok{(preds, pollution}\OperatorTok{$}\NormalTok{y, }\DataTypeTok{type=}\StringTok{"lasso"}\NormalTok{)}
+\KeywordTok{plot}\NormalTok{(lasso_p1)}
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{432012}\NormalTok{)}
+\NormalTok{pollution_lassocv <-}\StringTok{ }\KeywordTok{cv.lars}\NormalTok{(preds, pollution}\OperatorTok{$}\NormalTok{y, }\DataTypeTok{K=}\DecValTok{10}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-122-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{par}\NormalTok{(}\DataTypeTok{mfrow=}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{1}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+It looks like a model with 6-8 predictors will be the most useful. The
+cross-validated coefficients are as follows:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{poll.cv <-}\StringTok{ }\KeywordTok{coef}\NormalTok{(lasso_p1, }\DataTypeTok{s=}\NormalTok{frac, }\DataTypeTok{mode=}\StringTok{"fraction"}\NormalTok{)}
+\KeywordTok{round}\NormalTok{(poll.cv,}\DecValTok{3}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+     x1      x2      x3      x4      x5      x6      x7      x8      x9 
+  1.471  -1.164  -1.102   0.000   0.000 -10.610  -0.457   0.003   3.918 
+    x10     x11     x12     x13     x14     x15 
+  0.000   0.000   0.000   0.000   0.228   0.000 
+\end{verbatim}
+
+Note that by this cross-validated lasso selection, not only are the
+coefficients for the 8 variables remaining in the model shrunken, but
+variables \texttt{x4}, \texttt{x5}, \texttt{x10}, \texttt{x11},
+\texttt{x12}, \texttt{x13} and \texttt{x15} are all dropped from the
+model, and model \texttt{x8} almost is, as well.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{poll_fits <-}\StringTok{ }\KeywordTok{predict.lars}\NormalTok{(lasso_p1, preds, }\DataTypeTok{s=}\NormalTok{frac, }
+                        \DataTypeTok{type=}\StringTok{"fit"}\NormalTok{, }\DataTypeTok{mode=}\StringTok{"fraction"}\NormalTok{)}
+\KeywordTok{round}\NormalTok{(poll_fits}\OperatorTok{$}\NormalTok{fit,}\DecValTok{3}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+ [1]  932.627  918.415  921.904  987.396 1050.184 1065.837  912.424
+ [8]  916.605  949.647  926.168  996.625 1017.362  977.730  954.550
+[15]  931.455  894.263  931.551  868.599  973.471  940.937  881.867
+[22]  906.666  973.609  919.640  933.821  956.352  913.018  925.650
+[29]  874.528  983.829 1042.870  915.002  937.760  885.464  989.947
+[36]  931.709 1013.795  969.729 1003.962  983.813  896.042  918.446
+[43]  934.609 1004.565  910.273  976.747  831.132  907.996  826.485
+[50]  895.082  909.398  917.969  926.777  917.381  991.266  879.972
+[57]  942.867  913.737  960.952  949.030
+\end{verbatim}
+
+Here's a plot of the actual \texttt{pollution} y values, against these
+fitted values.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{poll_lasso_res <-}\StringTok{ }\KeywordTok{data_frame}\NormalTok{(}\DataTypeTok{fitted =}\NormalTok{ poll_fits}\OperatorTok{$}\NormalTok{fit, }
+                             \DataTypeTok{actual =}\NormalTok{ pollution}\OperatorTok{$}\NormalTok{y, }
+                             \DataTypeTok{resid =}\NormalTok{ actual }\OperatorTok{-}\StringTok{ }\NormalTok{fitted)}
+
+\KeywordTok{ggplot}\NormalTok{(poll_lasso_res, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ actual, }\DataTypeTok{y =}\NormalTok{ fitted)) }\OperatorTok{+}\StringTok{ }
+\StringTok{    }\KeywordTok{geom_point}\NormalTok{() }\OperatorTok{+}\StringTok{ }
+\StringTok{    }\KeywordTok{geom_abline}\NormalTok{(}\DataTypeTok{slope =} \DecValTok{1}\NormalTok{, }\DataTypeTok{intercept =} \DecValTok{0}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{y =} \StringTok{"Fitted y values from Cross-Validated LASSO"}\NormalTok{,}
+         \DataTypeTok{x =} \StringTok{"Observed values of y = Age-Adjusted Mortality Rate"}\NormalTok{,}
+         \DataTypeTok{title =} \StringTok{"Fitted vs. Actual Values of Age-Adjusted Mortality"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-124-1.pdf}
+
+And now, here's a plot or residuals vs.~fitted values.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{ggplot}\NormalTok{(poll_lasso_res, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ fitted, }\DataTypeTok{y =}\NormalTok{ resid)) }\OperatorTok{+}\StringTok{ }
+\StringTok{    }\KeywordTok{geom_point}\NormalTok{() }\OperatorTok{+}\StringTok{ }
+\StringTok{    }\KeywordTok{geom_hline}\NormalTok{(}\DataTypeTok{yintercept =} \DecValTok{0}\NormalTok{, }\DataTypeTok{col =} \StringTok{"red"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_smooth}\NormalTok{(}\DataTypeTok{method =} \StringTok{"loess"}\NormalTok{, }\DataTypeTok{col =} \StringTok{"blue"}\NormalTok{, }\DataTypeTok{se =}\NormalTok{ F) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{x =} \StringTok{"LASSO-fitted Age-Adjusted Mortality"}\NormalTok{,}
+         \DataTypeTok{y =} \StringTok{"Residuals from Cross-Validated LASSO model"}\NormalTok{,}
+         \DataTypeTok{title =} \StringTok{"Residuals vs. Fitted Values of Age-Adjusted Mortality from LASSO"}\NormalTok{,}
+         \DataTypeTok{subtitle =} \StringTok{"with loess smooth"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-125-1.pdf}
 
 \bibliography{text.bib}
 
