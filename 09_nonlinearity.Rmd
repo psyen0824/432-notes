@@ -1,0 +1,250 @@
+# Adding Non-linear Terms to a Linear Regression Model
+
+## The `pollution` data
+
+Consider the `pollution` data set, which contain 15 independent variables and a measure of mortality, describing 60 US metropolitan areas in 1959-1961. The data come from @McDonald1973, and are available at http://www4.stat.ncsu.edu/~boos/var.select/pollution.html and our web site.
+
+```{r c9_print_pollution}
+pollution
+```
+
+Here's a codebook:
+
+Variable | Description
+----: | --------------------------------------------------
+`y`  | Total Age Adjusted Mortality Rate
+`x1` | Mean annual precipitation in inches
+`x2` | Mean January temperature in degrees Fahrenheit
+`x3` | Mean July temperature in degrees Fahrenheit
+`x4` | Percent of 1960 SMSA population that is 65 years of age or over
+`x5` | Population per household, 1960 SMSA
+`x6` | Median school years completed for those over 25 in 1960 SMSA
+`x7` | Percent of housing units that are found with facilities
+`x8` | Population per square mile in urbanized area in 1960
+`x9` | Percent of 1960 urbanized area population that is non-white
+`x10` | Percent employment in white-collar occupations in 1960 urbanized area
+`x11` | Percent of families with income under 3; 000 in 1960 urbanized area
+`x12` | Relative population potential of hydrocarbons, HC
+`x13` | Relative pollution potential of oxides of nitrogen, NOx
+`x14` | Relative pollution potential of sulfur dioxide, SO2
+`x15` | Percent relative humidity, annual average at 1 p.m.
+
+## Fitting a straight line model to predict `y` from `x2`
+
+Consider the relationship between `y`, the age-adjusted mortality rate, and `x2`, the mean January temperature, across these 60 areas. I'll include both a linear model (in blue) and a loess smooth (in red.) Does the relationship appear to be linear?
+
+```{r c9_lm_and_loess_y_on_x2}
+ggplot(pollution, aes(x = x2, y = y)) +
+    geom_point() +
+    geom_smooth(method = "lm", col = "blue", se = F) +
+    geom_smooth(method = "loess", col = "red", se = F)
+```
+
+Suppose we plot the residuals that emerge from the linear model shown in blue, above. Do we see a curve in a plot of residuals against fitted values?
+
+```{r fit_c9_m1_and_check_residuals_for_curve}
+plot(lm(y ~ x2, data = pollution), which = 1)
+```
+
+## Quadratic polynomial model to predict `y` using `x2`
+
+### The raw quadratic model
+
+Let's look at a **quadratic model** which predicts `y` using `x2` and the square of `x2`, so that our model is of the form:
+
+$$
+y = \beta_0 + \beta_1 x_2 + \beta_2 x_2^2 + error
+$$
+
+There are several ways to fit this exact model. 
+
+- One approach is to calculate the square of `x2` within our `pollution` data set, and then feed both `x2` and `x2squared` to `lm`.
+- Another approach uses the I function within our `lm` to specify the use of both `x2` and its square.
+- Yet another approach uses the `poly` function within our `lm`, which can be used to specify raw models including `x2` and `x2squared`.
+
+```{r}
+pollution <- pollution %>%
+    mutate(x2squared = x2^2)
+
+mod2a <- lm(y ~ x2 + x2squared, data = pollution)
+mod2b <- lm(y ~ x2 + I(x2^2), data = pollution)
+mod2c <- lm(y ~ poly(x2, degree = 2, raw = TRUE), data = pollution)
+```
+
+Each of these approaches produces the same model, as they are just different ways of expressing the same idea.
+
+```{r}
+summary(mod2a)
+```
+
+And if we plot the fitted values for this `mod2` using whatever approach you like, we get exactly the same result.
+
+```{r}
+mod2a.aug <- augment(mod2a)
+mod2a.aug$x2 <- pollution$x2
+
+ggplot(pollution, aes(x = x2, y = y)) +
+    geom_point() +
+    geom_line(data = mod2a.aug, aes(x = x2, y = .fitted), 
+              col = "red") +
+    labs(title = "Model 2a: Quadratic fit using x2 and x2^2")
+```
+
+```{r}
+mod2b.aug <- augment(mod2b)
+mod2b.aug$x2 <- pollution$x2
+
+mod2c.aug <- augment(mod2c)
+mod2c.aug$x2 <- pollution$x2
+
+p1 <- ggplot(pollution, aes(x = x2, y = y)) +
+    geom_point() +
+    geom_line(data = mod2b.aug, aes(x = x2, y = .fitted), 
+              col = "red") +
+    labs(title = "Model 2b: Quadratic fit")
+
+p2 <- ggplot(pollution, aes(x = x2, y = y)) +
+    geom_point() +
+    geom_line(data = mod2c.aug, aes(x = x2, y = .fitted), 
+              col = "blue") +
+    labs(title = "Model 2c: Quadratic fit")
+
+gridExtra::grid.arrange(p1, p2, nrow = 1)
+```
+
+### Raw quadratic fit after centering `x2` 
+
+Sometimes, we'll center (and perhaps rescale, too) the x2 variable before including it in a quadratic fit like this.
+
+```{r}
+pollution <- pollution %>%
+    mutate(x2_c = x2 - mean(x2))
+
+mod2d <- lm(y ~ x2_c + I(x2_c^2), data = pollution)
+
+summary(mod2d)
+```
+
+Note that this model looks very different, with the exception of the second order quadratic term. But, it produces the same fitted values as the models we fit previously.
+
+```{r}
+mod2d.aug <- augment(mod2d)
+mod2d.aug$x2 <- pollution$x2
+
+ggplot(pollution, aes(x = x2, y = y)) +
+    geom_point() +
+    geom_line(data = mod2d.aug, aes(x = x2, y = .fitted), 
+              col = "red") +
+    labs(title = "Model 2d: Quadratic fit using centered x2 and x2^2")
+```
+
+Or, if you don't believe me yet, look at the four sets of fitted values another way.
+
+```{r}
+mod2a.aug %>% skim(.fitted)
+mod2b.aug %>% skim(.fitted)
+mod2c.aug %>% skim(.fitted)
+mod2d.aug %>% skim(.fitted)
+```
+
+## Orthogonal Polynomials
+
+Now, let's fit an orthogonal polynomial of degree 2 to predict `y` using `x2`.
+
+```{r}
+mod2_orth <- lm(y ~ poly(x2, 2), data = pollution)
+
+summary(mod2_orth)
+```
+
+Now this looks very different in the equation, but, again, we can see that this produces exactly the same fitted values as our previous models, and the same model fit summaries. Is it, in fact, the same model? Here, we'll plot the fitted Model 2a in a red line, and this new Model 2 with Orthogonal Polynomials as blue points.
+
+```{r}
+mod2orth.aug <- augment(mod2_orth)
+mod2orth.aug$x2 <- pollution$x2
+
+ggplot(pollution, aes(x = x2, y = y)) +
+    geom_point() +
+    geom_line(data = mod2a.aug, aes(x = x2, y = .fitted),
+              col = "red") +
+    geom_point(data = mod2orth.aug, aes(x = x2, y = .fitted), 
+              col = "blue") +
+    labs(title = "Model 2 with Orthogonal Polynomial, degree 2")
+```
+
+Yes, it is again the same model in terms of the predictions it makes for `y`.
+
+By default, with `raw = FALSE`, the `poly()` function within a linear model computes what is called an **orthogonal polynomial**. An orthogonal polynomial sets up a model design matrix using the coding we've seen previously: `x2` and `x2`^2 in our case, and then scales those columns so that each column is **orthogonal** to the previous ones. This eliminates the collinearity (correlation between predictors) and lets our t tests tell us whether the addition of any particular polynomial term improves the fit of the model over the lower orders.
+
+Would the addition of a cubic term help us much in predicting `y` from `x2`?
+
+```{r}
+mod3 <- lm(y ~ poly(x2, 3), data = pollution)
+summary(mod3)
+```
+
+It doesn't appear that the cubic term adds much here, if anything. The *p* value is not significant for the third degree polynomial, the summaries of fit quality aren't much improved, and as we can see from the plot below, the predictions don't actually change all that much.
+
+```{r}
+mod3.aug <- augment(mod3)
+mod3.aug$x2 <- pollution$x2
+
+ggplot(pollution, aes(x = x2, y = y)) +
+    geom_point() +
+    geom_line(data = mod2orth.aug, aes(x = x2, y = .fitted),
+              col = "red") +
+    geom_line(data = mod3.aug, aes(x = x2, y = .fitted), 
+              col = "blue") +
+    labs(title = "Quadratic (red) vs. Cubic (blue) Polynomial Fits")
+```
+
+## Fit a cubic polynomial to predict `y` from `x3`
+
+What if we consider another predictor instead? Let's look at `x3`, the Mean July temperature in degrees Fahrenheit. Here is the `loess` smooth.
+
+```{r}
+ggplot(pollution, aes(x = x3, y = y)) +
+    geom_point() +
+    geom_smooth(method = "loess")
+```
+
+That looks pretty curvy - perhaps we need a more complex polynomial. We'll consider a linear model (`mod4_L`), a quadratic fit (`mod4_Q`) and a polynomial of degree 3: a **cubic** fit (`mod_4C`)
+
+```{r}
+mod4_L <- lm(y ~ x3, data = pollution)
+summary(mod4_L)
+
+mod4_Q <- lm(y ~ poly(x3, 2), data = pollution)
+summary(mod4_Q)
+
+mod4_C <- lm(y ~ poly(x3, 3), data = pollution)
+summary(mod4_C)
+```
+
+It looks like the cubic polynomial term is of some real importance here. Do the linear, quadratic and cubic model fitted values look different?
+
+```{r}
+mod4_L.aug <- augment(mod4_L)
+mod4_L.aug$x3 <- pollution$x3
+
+mod4_Q.aug <- augment(mod4_Q)
+mod4_Q.aug$x3 <- pollution$x3
+
+mod4_C.aug <- augment(mod4_C)
+mod4_C.aug$x3 <- pollution$x3
+
+ggplot(pollution, aes(x = x3, y = y)) +
+    geom_point() +
+    geom_line(data = mod4_L.aug, aes(x = x3, y = .fitted), 
+              col = "blue", size = 1.25) +
+    geom_line(data = mod4_Q.aug, aes(x = x3, y = .fitted),
+              col = "black", size = 1.25) +
+    geom_line(data = mod4_C.aug, aes(x = x3, y = .fitted),
+              col = "red", size = 1.25) +
+    geom_text(x = 66, y = 930, label = "Linear Fit", col = "blue") +
+    geom_text(x = 64, y = 820, label = "Quadratic Fit", col = "black") +
+    geom_text(x = 83, y = 900, label = "Cubic Fit", col = "red") +
+    labs(title = "Linear, Quadratic and Cubic Fits predicting y with x3") +
+    theme_bw()
+```
+

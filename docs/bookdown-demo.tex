@@ -124,7 +124,7 @@
   \postauthor{\par}
   \predate{\centering\large\emph}
   \postdate{\par}
-  \date{Built 2018-02-03 18:39:55}
+  \date{Built 2018-02-03 20:00:02}
 
 \usepackage{booktabs}
 \usepackage{amsthm}
@@ -242,6 +242,7 @@ Here, we'll load in the data sets used in these notes.
 \NormalTok{emphysema <-}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(}\StringTok{"data/emphysema.csv"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }\NormalTok{tbl_df}
 \NormalTok{prost <-}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(}\StringTok{"data/prost.csv"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }\NormalTok{tbl_df}
 \NormalTok{maleptsd <-}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(}\StringTok{"data/maleptsd.csv"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }\NormalTok{tbl_df}
+\NormalTok{pollution <-}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(}\StringTok{"data/pollution.csv"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }\NormalTok{tbl_df}
 \end{Highlighting}
 \end{Shaded}
 
@@ -8800,6 +8801,631 @@ To resolve this, we could:
   Use another approach to deal with variable selection for interaction
   terms.
 \end{enumerate}
+
+\chapter{Adding Non-linear Terms to a Linear Regression
+Model}\label{adding-non-linear-terms-to-a-linear-regression-model}
+
+\section{\texorpdfstring{The \texttt{pollution}
+data}{The pollution data}}\label{the-pollution-data}
+
+Consider the \texttt{pollution} data set, which contain 15 independent
+variables and a measure of mortality, describing 60 US metropolitan
+areas in 1959-1961. The data come from \citet{McDonald1973}, and are
+available at
+\url{http://www4.stat.ncsu.edu/~boos/var.select/pollution.html} and our
+web site.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{pollution}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+# A tibble: 60 x 16
+      x1    x2    x3    x4    x5    x6    x7    x8     x9   x10   x11
+   <int> <int> <int> <dbl> <dbl> <dbl> <dbl> <int>  <dbl> <dbl> <dbl>
+ 1    36    27    71  8.10  3.34 11.4   81.5  3243  8.80   42.6  11.7
+ 2    35    23    72 11.1   3.14 11.0   78.8  4281  3.50   50.7  14.4
+ 3    44    29    74 10.4   3.21  9.80  81.6  4260  0.800  39.4  12.4
+ 4    47    45    79  6.50  3.41 11.1   77.5  3125 27.1    50.2  20.6
+ 5    43    35    77  7.60  3.44  9.60  84.6  6441 24.4    43.7  14.3
+ 6    53    45    80  7.70  3.45 10.2   66.8  3325 38.5    43.1  25.5
+ 7    43    30    74 10.9   3.23 12.1   83.9  4679  3.50   49.2  11.3
+ 8    45    30    73  9.30  3.29 10.6   86.0  2140  5.30   40.4  10.5
+ 9    36    24    70  9.00  3.31 10.5   83.2  6582  8.10   42.5  12.6
+10    36    27    72  9.50  3.36 10.7   79.3  4213  6.70   41.0  13.2
+# ... with 50 more rows, and 5 more variables: x12 <int>, x13 <int>,
+#   x14 <int>, x15 <int>, y <dbl>
+\end{verbatim}
+
+Here's a codebook:
+
+\begin{longtable}[]{@{}rl@{}}
+\toprule
+Variable & Description\tabularnewline
+\midrule
+\endhead
+\texttt{y} & Total Age Adjusted Mortality Rate\tabularnewline
+\texttt{x1} & Mean annual precipitation in inches\tabularnewline
+\texttt{x2} & Mean January temperature in degrees
+Fahrenheit\tabularnewline
+\texttt{x3} & Mean July temperature in degrees Fahrenheit\tabularnewline
+\texttt{x4} & Percent of 1960 SMSA population that is 65 years of age or
+over\tabularnewline
+\texttt{x5} & Population per household, 1960 SMSA\tabularnewline
+\texttt{x6} & Median school years completed for those over 25 in 1960
+SMSA\tabularnewline
+\texttt{x7} & Percent of housing units that are found with
+facilities\tabularnewline
+\texttt{x8} & Population per square mile in urbanized area in
+1960\tabularnewline
+\texttt{x9} & Percent of 1960 urbanized area population that is
+non-white\tabularnewline
+\texttt{x10} & Percent employment in white-collar occupations in 1960
+urbanized area\tabularnewline
+\texttt{x11} & Percent of families with income under 3; 000 in 1960
+urbanized area\tabularnewline
+\texttt{x12} & Relative population potential of hydrocarbons,
+HC\tabularnewline
+\texttt{x13} & Relative pollution potential of oxides of nitrogen,
+NOx\tabularnewline
+\texttt{x14} & Relative pollution potential of sulfur dioxide,
+SO2\tabularnewline
+\texttt{x15} & Percent relative humidity, annual average at 1
+p.m.\tabularnewline
+\bottomrule
+\end{longtable}
+
+\section{\texorpdfstring{Fitting a straight line model to predict
+\texttt{y} from
+\texttt{x2}}{Fitting a straight line model to predict y from x2}}\label{fitting-a-straight-line-model-to-predict-y-from-x2}
+
+Consider the relationship between \texttt{y}, the age-adjusted mortality
+rate, and \texttt{x2}, the mean January temperature, across these 60
+areas. I'll include both a linear model (in blue) and a loess smooth (in
+red.) Does the relationship appear to be linear?
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{ggplot}\NormalTok{(pollution, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x2, }\DataTypeTok{y =}\NormalTok{ y)) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_point}\NormalTok{() }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_smooth}\NormalTok{(}\DataTypeTok{method =} \StringTok{"lm"}\NormalTok{, }\DataTypeTok{col =} \StringTok{"blue"}\NormalTok{, }\DataTypeTok{se =}\NormalTok{ F) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_smooth}\NormalTok{(}\DataTypeTok{method =} \StringTok{"loess"}\NormalTok{, }\DataTypeTok{col =} \StringTok{"red"}\NormalTok{, }\DataTypeTok{se =}\NormalTok{ F)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/c9_lm_and_loess_y_on_x2-1.pdf}
+
+Suppose we plot the residuals that emerge from the linear model shown in
+blue, above. Do we see a curve in a plot of residuals against fitted
+values?
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plot}\NormalTok{(}\KeywordTok{lm}\NormalTok{(y }\OperatorTok{~}\StringTok{ }\NormalTok{x2, }\DataTypeTok{data =}\NormalTok{ pollution), }\DataTypeTok{which =} \DecValTok{1}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/fit_c9_m1_and_check_residuals_for_curve-1.pdf}
+
+\section{\texorpdfstring{Quadratic polynomial model to predict
+\texttt{y} using
+\texttt{x2}}{Quadratic polynomial model to predict y using x2}}\label{quadratic-polynomial-model-to-predict-y-using-x2}
+
+\subsection{The raw quadratic model}\label{the-raw-quadratic-model}
+
+Let's look at a \textbf{quadratic model} which predicts \texttt{y} using
+\texttt{x2} and the square of \texttt{x2}, so that our model is of the
+form:
+
+\[
+y = \beta_0 + \beta_1 x_2 + \beta_2 x_2^2 + error
+\]
+
+There are several ways to fit this exact model.
+
+\begin{itemize}
+\tightlist
+\item
+  One approach is to calculate the square of \texttt{x2} within our
+  \texttt{pollution} data set, and then feed both \texttt{x2} and
+  \texttt{x2squared} to \texttt{lm}.
+\item
+  Another approach uses the I function within our \texttt{lm} to specify
+  the use of both \texttt{x2} and its square.
+\item
+  Yet another approach uses the \texttt{poly} function within our
+  \texttt{lm}, which can be used to specify raw models including
+  \texttt{x2} and \texttt{x2squared}.
+\end{itemize}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{pollution <-}\StringTok{ }\NormalTok{pollution }\OperatorTok{%>%}
+\StringTok{    }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{x2squared =}\NormalTok{ x2}\OperatorTok{^}\DecValTok{2}\NormalTok{)}
+
+\NormalTok{mod2a <-}\StringTok{ }\KeywordTok{lm}\NormalTok{(y }\OperatorTok{~}\StringTok{ }\NormalTok{x2 }\OperatorTok{+}\StringTok{ }\NormalTok{x2squared, }\DataTypeTok{data =}\NormalTok{ pollution)}
+\NormalTok{mod2b <-}\StringTok{ }\KeywordTok{lm}\NormalTok{(y }\OperatorTok{~}\StringTok{ }\NormalTok{x2 }\OperatorTok{+}\StringTok{ }\KeywordTok{I}\NormalTok{(x2}\OperatorTok{^}\DecValTok{2}\NormalTok{), }\DataTypeTok{data =}\NormalTok{ pollution)}
+\NormalTok{mod2c <-}\StringTok{ }\KeywordTok{lm}\NormalTok{(y }\OperatorTok{~}\StringTok{ }\KeywordTok{poly}\NormalTok{(x2, }\DataTypeTok{degree =} \DecValTok{2}\NormalTok{, }\DataTypeTok{raw =} \OtherTok{TRUE}\NormalTok{), }\DataTypeTok{data =}\NormalTok{ pollution)}
+\end{Highlighting}
+\end{Shaded}
+
+Each of these approaches produces the same model, as they are just
+different ways of expressing the same idea.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{summary}\NormalTok{(mod2a)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+
+Call:
+lm(formula = y ~ x2 + x2squared, data = pollution)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-148.977  -38.651    6.889   35.312  189.346 
+
+Coefficients:
+             Estimate Std. Error t value Pr(>|t|)    
+(Intercept) 785.77449   79.54086   9.879 5.87e-14 ***
+x2            8.87640    4.27394   2.077   0.0423 *  
+x2squared    -0.11704    0.05429  -2.156   0.0353 *  
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 60.83 on 57 degrees of freedom
+Multiple R-squared:  0.07623,   Adjusted R-squared:  0.04382 
+F-statistic: 2.352 on 2 and 57 DF,  p-value: 0.1044
+\end{verbatim}
+
+And if we plot the fitted values for this \texttt{mod2} using whatever
+approach you like, we get exactly the same result.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{mod2a.aug <-}\StringTok{ }\KeywordTok{augment}\NormalTok{(mod2a)}
+\NormalTok{mod2a.aug}\OperatorTok{$}\NormalTok{x2 <-}\StringTok{ }\NormalTok{pollution}\OperatorTok{$}\NormalTok{x2}
+
+\KeywordTok{ggplot}\NormalTok{(pollution, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x2, }\DataTypeTok{y =}\NormalTok{ y)) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_point}\NormalTok{() }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_line}\NormalTok{(}\DataTypeTok{data =}\NormalTok{ mod2a.aug, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x2, }\DataTypeTok{y =}\NormalTok{ .fitted), }
+              \DataTypeTok{col =} \StringTok{"red"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \StringTok{"Model 2a: Quadratic fit using x2 and x2^2"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-94-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{mod2b.aug <-}\StringTok{ }\KeywordTok{augment}\NormalTok{(mod2b)}
+\NormalTok{mod2b.aug}\OperatorTok{$}\NormalTok{x2 <-}\StringTok{ }\NormalTok{pollution}\OperatorTok{$}\NormalTok{x2}
+
+\NormalTok{mod2c.aug <-}\StringTok{ }\KeywordTok{augment}\NormalTok{(mod2c)}
+\NormalTok{mod2c.aug}\OperatorTok{$}\NormalTok{x2 <-}\StringTok{ }\NormalTok{pollution}\OperatorTok{$}\NormalTok{x2}
+
+\NormalTok{p1 <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(pollution, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x2, }\DataTypeTok{y =}\NormalTok{ y)) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_point}\NormalTok{() }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_line}\NormalTok{(}\DataTypeTok{data =}\NormalTok{ mod2b.aug, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x2, }\DataTypeTok{y =}\NormalTok{ .fitted), }
+              \DataTypeTok{col =} \StringTok{"red"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \StringTok{"Model 2b: Quadratic fit"}\NormalTok{)}
+
+\NormalTok{p2 <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(pollution, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x2, }\DataTypeTok{y =}\NormalTok{ y)) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_point}\NormalTok{() }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_line}\NormalTok{(}\DataTypeTok{data =}\NormalTok{ mod2c.aug, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x2, }\DataTypeTok{y =}\NormalTok{ .fitted), }
+              \DataTypeTok{col =} \StringTok{"blue"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \StringTok{"Model 2c: Quadratic fit"}\NormalTok{)}
+
+\NormalTok{gridExtra}\OperatorTok{::}\KeywordTok{grid.arrange}\NormalTok{(p1, p2, }\DataTypeTok{nrow =} \DecValTok{1}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-95-1.pdf}
+
+\subsection{\texorpdfstring{Raw quadratic fit after centering
+\texttt{x2}}{Raw quadratic fit after centering x2}}\label{raw-quadratic-fit-after-centering-x2}
+
+Sometimes, we'll center (and perhaps rescale, too) the x2 variable
+before including it in a quadratic fit like this.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{pollution <-}\StringTok{ }\NormalTok{pollution }\OperatorTok{%>%}
+\StringTok{    }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{x2_c =}\NormalTok{ x2 }\OperatorTok{-}\StringTok{ }\KeywordTok{mean}\NormalTok{(x2))}
+
+\NormalTok{mod2d <-}\StringTok{ }\KeywordTok{lm}\NormalTok{(y }\OperatorTok{~}\StringTok{ }\NormalTok{x2_c }\OperatorTok{+}\StringTok{ }\KeywordTok{I}\NormalTok{(x2_c}\OperatorTok{^}\DecValTok{2}\NormalTok{), }\DataTypeTok{data =}\NormalTok{ pollution)}
+
+\KeywordTok{summary}\NormalTok{(mod2d)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+
+Call:
+lm(formula = y ~ x2_c + I(x2_c^2), data = pollution)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-148.977  -38.651    6.889   35.312  189.346 
+
+Coefficients:
+             Estimate Std. Error t value Pr(>|t|)    
+(Intercept) 952.25941    9.59896  99.204   <2e-16 ***
+x2_c          0.92163    0.93237   0.988   0.3271    
+I(x2_c^2)    -0.11704    0.05429  -2.156   0.0353 *  
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 60.83 on 57 degrees of freedom
+Multiple R-squared:  0.07623,   Adjusted R-squared:  0.04382 
+F-statistic: 2.352 on 2 and 57 DF,  p-value: 0.1044
+\end{verbatim}
+
+Note that this model looks very different, with the exception of the
+second order quadratic term. But, it produces the same fitted values as
+the models we fit previously.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{mod2d.aug <-}\StringTok{ }\KeywordTok{augment}\NormalTok{(mod2d)}
+\NormalTok{mod2d.aug}\OperatorTok{$}\NormalTok{x2 <-}\StringTok{ }\NormalTok{pollution}\OperatorTok{$}\NormalTok{x2}
+
+\KeywordTok{ggplot}\NormalTok{(pollution, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x2, }\DataTypeTok{y =}\NormalTok{ y)) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_point}\NormalTok{() }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_line}\NormalTok{(}\DataTypeTok{data =}\NormalTok{ mod2d.aug, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x2, }\DataTypeTok{y =}\NormalTok{ .fitted), }
+              \DataTypeTok{col =} \StringTok{"red"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \StringTok{"Model 2d: Quadratic fit using centered x2 and x2^2"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-97-1.pdf}
+
+Or, if you don't believe me yet, look at the four sets of fitted values
+another way.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{mod2a.aug }\OperatorTok{%>%}\StringTok{ }\KeywordTok{skim}\NormalTok{(.fitted)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Skim summary statistics
+ n obs: 60 
+ n variables: 10 
+
+Variable type: numeric 
+ variable missing complete  n   mean    sd    p0    p25 median    p75
+  .fitted       0       60 60 940.36 17.18 855.1 936.72  945.6 950.29
+   p100
+ 954.07
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{mod2b.aug }\OperatorTok{%>%}\StringTok{ }\KeywordTok{skim}\NormalTok{(.fitted)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Skim summary statistics
+ n obs: 60 
+ n variables: 10 
+
+Variable type: numeric 
+ variable missing complete  n   mean    sd    p0    p25 median    p75
+  .fitted       0       60 60 940.36 17.18 855.1 936.72  945.6 950.29
+   p100
+ 954.07
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{mod2c.aug }\OperatorTok{%>%}\StringTok{ }\KeywordTok{skim}\NormalTok{(.fitted)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Skim summary statistics
+ n obs: 60 
+ n variables: 10 
+
+Variable type: numeric 
+ variable missing complete  n   mean    sd    p0    p25 median    p75
+  .fitted       0       60 60 940.36 17.18 855.1 936.72  945.6 950.29
+   p100
+ 954.07
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{mod2d.aug }\OperatorTok{%>%}\StringTok{ }\KeywordTok{skim}\NormalTok{(.fitted)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Skim summary statistics
+ n obs: 60 
+ n variables: 11 
+
+Variable type: numeric 
+ variable missing complete  n   mean    sd    p0    p25 median    p75
+  .fitted       0       60 60 940.36 17.18 855.1 936.72  945.6 950.29
+   p100
+ 954.07
+\end{verbatim}
+
+\section{Orthogonal Polynomials}\label{orthogonal-polynomials}
+
+Now, let's fit an orthogonal polynomial of degree 2 to predict
+\texttt{y} using \texttt{x2}.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{mod2_orth <-}\StringTok{ }\KeywordTok{lm}\NormalTok{(y }\OperatorTok{~}\StringTok{ }\KeywordTok{poly}\NormalTok{(x2, }\DecValTok{2}\NormalTok{), }\DataTypeTok{data =}\NormalTok{ pollution)}
+
+\KeywordTok{summary}\NormalTok{(mod2_orth)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+
+Call:
+lm(formula = y ~ poly(x2, 2), data = pollution)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-148.977  -38.651    6.889   35.312  189.346 
+
+Coefficients:
+             Estimate Std. Error t value Pr(>|t|)    
+(Intercept)   940.358      7.853 119.746   <2e-16 ***
+poly(x2, 2)1  -14.345     60.829  -0.236   0.8144    
+poly(x2, 2)2 -131.142     60.829  -2.156   0.0353 *  
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 60.83 on 57 degrees of freedom
+Multiple R-squared:  0.07623,   Adjusted R-squared:  0.04382 
+F-statistic: 2.352 on 2 and 57 DF,  p-value: 0.1044
+\end{verbatim}
+
+Now this looks very different in the equation, but, again, we can see
+that this produces exactly the same fitted values as our previous
+models, and the same model fit summaries. Is it, in fact, the same
+model? Here, we'll plot the fitted Model 2a in a red line, and this new
+Model 2 with Orthogonal Polynomials as blue points.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{mod2orth.aug <-}\StringTok{ }\KeywordTok{augment}\NormalTok{(mod2_orth)}
+\NormalTok{mod2orth.aug}\OperatorTok{$}\NormalTok{x2 <-}\StringTok{ }\NormalTok{pollution}\OperatorTok{$}\NormalTok{x2}
+
+\KeywordTok{ggplot}\NormalTok{(pollution, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x2, }\DataTypeTok{y =}\NormalTok{ y)) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_point}\NormalTok{() }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_line}\NormalTok{(}\DataTypeTok{data =}\NormalTok{ mod2a.aug, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x2, }\DataTypeTok{y =}\NormalTok{ .fitted),}
+              \DataTypeTok{col =} \StringTok{"red"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_point}\NormalTok{(}\DataTypeTok{data =}\NormalTok{ mod2orth.aug, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x2, }\DataTypeTok{y =}\NormalTok{ .fitted), }
+              \DataTypeTok{col =} \StringTok{"blue"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \StringTok{"Model 2 with Orthogonal Polynomial, degree 2"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-100-1.pdf}
+
+Yes, it is again the same model in terms of the predictions it makes for
+\texttt{y}.
+
+By default, with \texttt{raw\ =\ FALSE}, the \texttt{poly()} function
+within a linear model computes what is called an \textbf{orthogonal
+polynomial}. An orthogonal polynomial sets up a model design matrix
+using the coding we've seen previously: \texttt{x2} and \texttt{x2}\^{}2
+in our case, and then scales those columns so that each column is
+\textbf{orthogonal} to the previous ones. This eliminates the
+collinearity (correlation between predictors) and lets our t tests tell
+us whether the addition of any particular polynomial term improves the
+fit of the model over the lower orders.
+
+Would the addition of a cubic term help us much in predicting \texttt{y}
+from \texttt{x2}?
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{mod3 <-}\StringTok{ }\KeywordTok{lm}\NormalTok{(y }\OperatorTok{~}\StringTok{ }\KeywordTok{poly}\NormalTok{(x2, }\DecValTok{3}\NormalTok{), }\DataTypeTok{data =}\NormalTok{ pollution)}
+\KeywordTok{summary}\NormalTok{(mod3)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+
+Call:
+lm(formula = y ~ poly(x2, 3), data = pollution)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-146.262  -39.679    5.569   35.984  191.536 
+
+Coefficients:
+             Estimate Std. Error t value Pr(>|t|)    
+(Intercept)   940.358      7.917 118.772   <2e-16 ***
+poly(x2, 3)1  -14.345     61.328  -0.234   0.8159    
+poly(x2, 3)2 -131.142     61.328  -2.138   0.0369 *  
+poly(x2, 3)3   16.918     61.328   0.276   0.7837    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 61.33 on 56 degrees of freedom
+Multiple R-squared:  0.07748,   Adjusted R-squared:  0.02806 
+F-statistic: 1.568 on 3 and 56 DF,  p-value: 0.2073
+\end{verbatim}
+
+It doesn't appear that the cubic term adds much here, if anything. The
+\emph{p} value is not significant for the third degree polynomial, the
+summaries of fit quality aren't much improved, and as we can see from
+the plot below, the predictions don't actually change all that much.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{mod3.aug <-}\StringTok{ }\KeywordTok{augment}\NormalTok{(mod3)}
+\NormalTok{mod3.aug}\OperatorTok{$}\NormalTok{x2 <-}\StringTok{ }\NormalTok{pollution}\OperatorTok{$}\NormalTok{x2}
+
+\KeywordTok{ggplot}\NormalTok{(pollution, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x2, }\DataTypeTok{y =}\NormalTok{ y)) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_point}\NormalTok{() }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_line}\NormalTok{(}\DataTypeTok{data =}\NormalTok{ mod2orth.aug, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x2, }\DataTypeTok{y =}\NormalTok{ .fitted),}
+              \DataTypeTok{col =} \StringTok{"red"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_line}\NormalTok{(}\DataTypeTok{data =}\NormalTok{ mod3.aug, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x2, }\DataTypeTok{y =}\NormalTok{ .fitted), }
+              \DataTypeTok{col =} \StringTok{"blue"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \StringTok{"Quadratic (red) vs. Cubic (blue) Polynomial Fits"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-102-1.pdf}
+
+\section{\texorpdfstring{Fit a cubic polynomial to predict \texttt{y}
+from
+\texttt{x3}}{Fit a cubic polynomial to predict y from x3}}\label{fit-a-cubic-polynomial-to-predict-y-from-x3}
+
+What if we consider another predictor instead? Let's look at
+\texttt{x3}, the Mean July temperature in degrees Fahrenheit. Here is
+the \texttt{loess} smooth.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{ggplot}\NormalTok{(pollution, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x3, }\DataTypeTok{y =}\NormalTok{ y)) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_point}\NormalTok{() }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_smooth}\NormalTok{(}\DataTypeTok{method =} \StringTok{"loess"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-103-1.pdf}
+
+That looks pretty curvy - perhaps we need a more complex polynomial.
+We'll consider a linear model (\texttt{mod4\_L}), a quadratic fit
+(\texttt{mod4\_Q}) and a polynomial of degree 3: a \textbf{cubic} fit
+(\texttt{mod\_4C})
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{mod4_L <-}\StringTok{ }\KeywordTok{lm}\NormalTok{(y }\OperatorTok{~}\StringTok{ }\NormalTok{x3, }\DataTypeTok{data =}\NormalTok{ pollution)}
+\KeywordTok{summary}\NormalTok{(mod4_L)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+
+Call:
+lm(formula = y ~ x3, data = pollution)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-139.813  -34.341    4.271   38.197  149.587 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  670.529    123.140   5.445  1.1e-06 ***
+x3             3.618      1.648   2.196   0.0321 *  
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 60.29 on 58 degrees of freedom
+Multiple R-squared:  0.07674,   Adjusted R-squared:  0.06082 
+F-statistic: 4.821 on 1 and 58 DF,  p-value: 0.03213
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{mod4_Q <-}\StringTok{ }\KeywordTok{lm}\NormalTok{(y }\OperatorTok{~}\StringTok{ }\KeywordTok{poly}\NormalTok{(x3, }\DecValTok{2}\NormalTok{), }\DataTypeTok{data =}\NormalTok{ pollution)}
+\KeywordTok{summary}\NormalTok{(mod4_Q)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+
+Call:
+lm(formula = y ~ poly(x3, 2), data = pollution)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-132.004  -42.184    4.069   47.126  157.396 
+
+Coefficients:
+             Estimate Std. Error t value Pr(>|t|)    
+(Intercept)   940.358      7.553 124.503   <2e-16 ***
+poly(x3, 2)1  132.364     58.504   2.262   0.0275 *  
+poly(x3, 2)2 -125.270     58.504  -2.141   0.0365 *  
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 58.5 on 57 degrees of freedom
+Multiple R-squared:  0.1455,    Adjusted R-squared:  0.1155 
+F-statistic: 4.852 on 2 and 57 DF,  p-value: 0.01133
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{mod4_C <-}\StringTok{ }\KeywordTok{lm}\NormalTok{(y }\OperatorTok{~}\StringTok{ }\KeywordTok{poly}\NormalTok{(x3, }\DecValTok{3}\NormalTok{), }\DataTypeTok{data =}\NormalTok{ pollution)}
+\KeywordTok{summary}\NormalTok{(mod4_C)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+
+Call:
+lm(formula = y ~ poly(x3, 3), data = pollution)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-148.004  -29.998    1.441   34.579  141.396 
+
+Coefficients:
+             Estimate Std. Error t value Pr(>|t|)    
+(Intercept)   940.358      7.065 133.095  < 2e-16 ***
+poly(x3, 3)1  132.364     54.728   2.419  0.01886 *  
+poly(x3, 3)2 -125.270     54.728  -2.289  0.02588 *  
+poly(x3, 3)3 -165.439     54.728  -3.023  0.00377 ** 
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 54.73 on 56 degrees of freedom
+Multiple R-squared:  0.2654,    Adjusted R-squared:  0.226 
+F-statistic: 6.742 on 3 and 56 DF,  p-value: 0.0005799
+\end{verbatim}
+
+It looks like the cubic polynomial term is of some real importance here.
+Do the linear, quadratic and cubic model fitted values look different?
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{mod4_L.aug <-}\StringTok{ }\KeywordTok{augment}\NormalTok{(mod4_L)}
+\NormalTok{mod4_L.aug}\OperatorTok{$}\NormalTok{x3 <-}\StringTok{ }\NormalTok{pollution}\OperatorTok{$}\NormalTok{x3}
+
+\NormalTok{mod4_Q.aug <-}\StringTok{ }\KeywordTok{augment}\NormalTok{(mod4_Q)}
+\NormalTok{mod4_Q.aug}\OperatorTok{$}\NormalTok{x3 <-}\StringTok{ }\NormalTok{pollution}\OperatorTok{$}\NormalTok{x3}
+
+\NormalTok{mod4_C.aug <-}\StringTok{ }\KeywordTok{augment}\NormalTok{(mod4_C)}
+\NormalTok{mod4_C.aug}\OperatorTok{$}\NormalTok{x3 <-}\StringTok{ }\NormalTok{pollution}\OperatorTok{$}\NormalTok{x3}
+
+\KeywordTok{ggplot}\NormalTok{(pollution, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x3, }\DataTypeTok{y =}\NormalTok{ y)) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_point}\NormalTok{() }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_line}\NormalTok{(}\DataTypeTok{data =}\NormalTok{ mod4_L.aug, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x3, }\DataTypeTok{y =}\NormalTok{ .fitted), }
+              \DataTypeTok{col =} \StringTok{"blue"}\NormalTok{, }\DataTypeTok{size =} \FloatTok{1.25}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_line}\NormalTok{(}\DataTypeTok{data =}\NormalTok{ mod4_Q.aug, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x3, }\DataTypeTok{y =}\NormalTok{ .fitted),}
+              \DataTypeTok{col =} \StringTok{"black"}\NormalTok{, }\DataTypeTok{size =} \FloatTok{1.25}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_line}\NormalTok{(}\DataTypeTok{data =}\NormalTok{ mod4_C.aug, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x3, }\DataTypeTok{y =}\NormalTok{ .fitted),}
+              \DataTypeTok{col =} \StringTok{"red"}\NormalTok{, }\DataTypeTok{size =} \FloatTok{1.25}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_text}\NormalTok{(}\DataTypeTok{x =} \DecValTok{66}\NormalTok{, }\DataTypeTok{y =} \DecValTok{930}\NormalTok{, }\DataTypeTok{label =} \StringTok{"Linear Fit"}\NormalTok{, }\DataTypeTok{col =} \StringTok{"blue"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_text}\NormalTok{(}\DataTypeTok{x =} \DecValTok{64}\NormalTok{, }\DataTypeTok{y =} \DecValTok{820}\NormalTok{, }\DataTypeTok{label =} \StringTok{"Quadratic Fit"}\NormalTok{, }\DataTypeTok{col =} \StringTok{"black"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_text}\NormalTok{(}\DataTypeTok{x =} \DecValTok{83}\NormalTok{, }\DataTypeTok{y =} \DecValTok{900}\NormalTok{, }\DataTypeTok{label =} \StringTok{"Cubic Fit"}\NormalTok{, }\DataTypeTok{col =} \StringTok{"red"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \StringTok{"Linear, Quadratic and Cubic Fits predicting y with x3"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{theme_bw}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-105-1.pdf}
 
 \bibliography{text.bib}
 
