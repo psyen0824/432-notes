@@ -265,7 +265,7 @@ ggplot(pollution, aes(x = x3, y = y)) +
 - A **linear spline** is a continuous function formed by connecting points (called **knots** of the spline) by line segments.
 - A **restricted cubic spline** is a way to build highly complicated curves into a regression equation in a fairly easily structured way.
 - A restricted cubic spline is a series of polynomial functions joined together at the knots. 
-    + Such a spline gives us a way to flexibly account for non-linearity without over-parametrizing the model.
+    + Such a spline gives us a way to flexibly account for non-linearity without over-fitting the model.
     + Restricted cubic splines can fit many different types of non-linearities.
     + Specifying the number of knots is all you need to do in R to get a reasonable result from a restricted cubic spline. 
 
@@ -369,6 +369,88 @@ attributes(rcs(pollution$x3, 5))
 
 The knots in this particular 5-knot spline are placed by the computer at 68, 72, 74, 77 and 82, it seems.
 
+There are two kinds of Multivariate Regression Models
+
+1. [Prediction] Those that are built so that we can make accurate predictions.
+2. [Explanatory] Those that are built to help understand underlying phenomena.
+
+While those two notions overlap considerably, they do imply different things about how we strategize about model-building and model assessment. Harrell's primary concern is effective use of the available data for **prediction** - this implies some things that will be different from what we've seen in the past.
+
+Harrell refers to multivariable regression modeling strategy as the process of **spending degrees of freedom**. 
+The main job in strategizing about multivariate modeling is to
+
+1.	Decide the number of degrees of freedom that can be spent
+2.	Decide where to spend them
+3.	Spend them, wisely.
+
+What this means is essentially linked to making decisions about predictor complexity, both in terms of how many predictors will be included in the regression model, and about how we'll include those predictors.
+
+## "Spending" Degrees of Freedom
+
+- "Spending" df includes 
+    + fitting parameter estimates in models, or 
+    + examining figures built using the outcome variable Y that tell you how to model the predictors. 
+
+If you use a scatterplot of Y vs. X or the residuals of the Y-X regression model vs. X to decide whether a linear model is appropriate, then how many degrees of freedom have you actually spent? 
+
+Grambsch and O'Brien conclude that if you wish to preserve the key statistical properties of the various estimation and fitting procedures used in building a model, you can't retrieve these degrees of freedom once they have been spent.
+
+### Overfitting and Limits on the \# of Predictors
+
+Suppose you have a total sample size of $n$ observations, then you really shouldn't be thinking about estimating more than $n / 15$ regression coefficients, at the most. 
+
+- If $k$ is the number of parameters in a full model containing all candidate predictors for a stepwise analysis, then $k$ should be no greater than $n / 15$.
+- $k$ should include all variables screened for association with the response, including interaction terms.
+
+So if you have 97 observations in your data, then you can probably just barely justify the use of a stepwise analysis using the main effects alone of 5 candidate variables (with one additional DF for the intercept term.) 
+
+@Harrell2001 also mentions that if you have a **narrowly distributed** predictor, without a lot of variation to work with, then an even larger sample size $n$ should be required. See @Vittinghoff2012, Section 10.3 for more details.
+
+### The Importance of Collinearity
+
+> Collinearity denotes correlation between predictors high enough to degrade the precision of the regression coefficient estimates substantially for some or all of the correlated predictors 
+
+- @Vittinghoff2012, section 10.4.1
+
+- Can one predictor in a model be predicted well using the other predictors in the model?
+    + Strong correlations (for instance, $r \geq 0.8$) are especially troublesome.
+- Effects of collinearity
+    + decreases precision, in the sense of increasing the standard errors of the parameter estimates
+    + decreases power
+    + increases the difficulty of interpreting individual predictor effects
+    + overall F test is significant, but individual t tests may not be
+    
+Suppose we want to assess whether variable $X_j$ is collinear with the other predictors in a model. We run a regression predicting $X_j$ using the other predictors, and obtain the R^2^. The VIF is defined as 1 / (1 - this R^2^), and we usually interpret VIFs above 5 as indicating a serious multicollinearity problem (i.e. R^2^ values for this predictor of 0.8 and above would thus concern us.)
+
+```{r}
+vif(lm(y ~ x1 + x2 + x3 + x4 + x5 + x6, data = pollution))
+```
+
+Occasionally, you'll see the inverse of VIF reported, and this is called *tolerance*. 
+
+- tolerance = 1 / VIF
+
+### Collinearity in an Explanatory Model
+
+- When we are attempting to **identify multiple independent predictors** (the explanatory model approach), then we will need to choose between collinear variables
+    + options suggested by @Vittinghoff2012, p. 422, include choosing on the basis of plausibility as a causal factor, 
+    + choosing the variable that has higher data quality (is measured more accurately or has fewer missing values.) 
+    + Often, we choose to include a variable that is statistically significant as a predictor, and drop others, should we be so lucky.
+
+- Larger effects, especially if they are associated with predictors that have minimal correlation with the other predictors under study, cause less trouble in terms of potential violation of the $n/15$ rule for what constitutes a reasonable number of predictors.
+
+
+### Collinearity in a Prediction Model
+
+- If we are primarily building a **prediction model** for which inference on the individual predictors is not of interest, then it is totally reasonable to use both predictors in the model, if doing so reduces prediction error. 
+    + Collinearity doesn't affect predictions in our model development sample.
+    + Collinearity doesn't affect predictions on new data so long as the new data have similar relationships between predictors.
+    + If our key predictor is correlated strongly with a confounder, then if the predictor remains significant after adjustment for the confounder, then this suggests a meaningful independent effect. 
+        + If the effects of the predictor are clearly confounded by the adjustment variable, we again have a clear result. 
+        + If neither is statistically significant after adjustment, the data may be inadequate.
+    + If the collinearity is between adjustment variables, but doesn't involve the key predictor, then inclusion of the collinear variables is unlikely to cause substantial problems.
+
+
 ## Spending DF on Non-Linearity: The Spearman $\rho^2$ Plot
 
 We need a flexible approach to assessing non-linearity and fitting models with non-linear predictors. This will lead us to a measure of what @Harrell2001 calls **potential predictive punch** which hides the true form of the regression from the analyst so as to preserve statistical properties, but that lets us make sensible decisions about whether a predictor should be included in a model, and the number of parameters (degrees of freedom, essentially) we are willing to devote to it.
@@ -397,7 +479,7 @@ So, one possible model built in reaction this plot might be to fit:
 - and a quadratic polynomial on x14
 - plus a linear fit to x1 and x13
 
-That's way more degrees of freedom (4 for x9, 2 for x6, 2 for x14 and 1 each for x1 and x13 makes a total of 10 without the intercept term) than we can really justify with a sample of 60 observations. But let's see what happens.
+That's way more degrees of freedom (4 for `x9`, 2 for `x6`, 2 for `x14` and 1 each for x1 and x13 makes a total of 10 without the intercept term) than we can really justify with a sample of 60 observations. But let's see what happens.
 
 ```{r}
 mod_big <- lm(y ~ rcs(x9, 5) + rcs(x6, 3) + poly(x14, 2) + x1 + x13, data = pollution)

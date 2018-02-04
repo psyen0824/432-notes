@@ -124,7 +124,7 @@
   \postauthor{\par}
   \predate{\centering\large\emph}
   \postdate{\par}
-  \date{Built 2018-02-03 22:47:08}
+  \date{Built 2018-02-03 23:36:33}
 
 \usepackage{booktabs}
 \usepackage{amsthm}
@@ -9469,7 +9469,7 @@ regression}\label{fitting-a-restricted-cubic-spline-in-a-linear-regression}
   \tightlist
   \item
     Such a spline gives us a way to flexibly account for non-linearity
-    without over-parametrizing the model.
+    without over-fitting the model.
   \item
     Restricted cubic splines can fit many different types of
     non-linearities.
@@ -9732,6 +9732,237 @@ $colnames
 The knots in this particular 5-knot spline are placed by the computer at
 68, 72, 74, 77 and 82, it seems.
 
+There are two kinds of Multivariate Regression Models
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  {[}Prediction{]} Those that are built so that we can make accurate
+  predictions.
+\item
+  {[}Explanatory{]} Those that are built to help understand underlying
+  phenomena.
+\end{enumerate}
+
+While those two notions overlap considerably, they do imply different
+things about how we strategize about model-building and model
+assessment. Harrell's primary concern is effective use of the available
+data for \textbf{prediction} - this implies some things that will be
+different from what we've seen in the past.
+
+Harrell refers to multivariable regression modeling strategy as the
+process of \textbf{spending degrees of freedom}. The main job in
+strategizing about multivariate modeling is to
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Decide the number of degrees of freedom that can be spent
+\item
+  Decide where to spend them
+\item
+  Spend them, wisely.
+\end{enumerate}
+
+What this means is essentially linked to making decisions about
+predictor complexity, both in terms of how many predictors will be
+included in the regression model, and about how we'll include those
+predictors.
+
+\section{\texorpdfstring{``Spending'' Degrees of
+Freedom}{Spending Degrees of Freedom}}\label{spending-degrees-of-freedom}
+
+\begin{itemize}
+\tightlist
+\item
+  ``Spending'' df includes
+
+  \begin{itemize}
+  \tightlist
+  \item
+    fitting parameter estimates in models, or
+  \item
+    examining figures built using the outcome variable Y that tell you
+    how to model the predictors.
+  \end{itemize}
+\end{itemize}
+
+If you use a scatterplot of Y vs.~X or the residuals of the Y-X
+regression model vs.~X to decide whether a linear model is appropriate,
+then how many degrees of freedom have you actually spent?
+
+Grambsch and O'Brien conclude that if you wish to preserve the key
+statistical properties of the various estimation and fitting procedures
+used in building a model, you can't retrieve these degrees of freedom
+once they have been spent.
+
+\subsection{Overfitting and Limits on the \# of
+Predictors}\label{overfitting-and-limits-on-the-of-predictors}
+
+Suppose you have a total sample size of \(n\) observations, then you
+really shouldn't be thinking about estimating more than \(n / 15\)
+regression coefficients, at the most.
+
+\begin{itemize}
+\tightlist
+\item
+  If \(k\) is the number of parameters in a full model containing all
+  candidate predictors for a stepwise analysis, then \(k\) should be no
+  greater than \(n / 15\).
+\item
+  \(k\) should include all variables screened for association with the
+  response, including interaction terms.
+\end{itemize}
+
+So if you have 97 observations in your data, then you can probably just
+barely justify the use of a stepwise analysis using the main effects
+alone of 5 candidate variables (with one additional DF for the intercept
+term.)
+
+\citet{Harrell2001} also mentions that if you have a \textbf{narrowly
+distributed} predictor, without a lot of variation to work with, then an
+even larger sample size \(n\) should be required. See
+\citet{Vittinghoff2012}, Section 10.3 for more details.
+
+\subsection{The Importance of
+Collinearity}\label{the-importance-of-collinearity}
+
+\begin{quote}
+Collinearity denotes correlation between predictors high enough to
+degrade the precision of the regression coefficient estimates
+substantially for some or all of the correlated predictors
+\end{quote}
+
+\begin{itemize}
+\item
+  \citet{Vittinghoff2012}, section 10.4.1
+\item
+  Can one predictor in a model be predicted well using the other
+  predictors in the model?
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Strong correlations (for instance, \(r \geq 0.8\)) are especially
+    troublesome.
+  \end{itemize}
+\item
+  Effects of collinearity
+
+  \begin{itemize}
+  \tightlist
+  \item
+    decreases precision, in the sense of increasing the standard errors
+    of the parameter estimates
+  \item
+    decreases power
+  \item
+    increases the difficulty of interpreting individual predictor
+    effects
+  \item
+    overall F test is significant, but individual t tests may not be
+  \end{itemize}
+\end{itemize}
+
+Suppose we want to assess whether variable \(X_j\) is collinear with the
+other predictors in a model. We run a regression predicting \(X_j\)
+using the other predictors, and obtain the R\textsuperscript{2}. The VIF
+is defined as 1 / (1 - this R\textsuperscript{2}), and we usually
+interpret VIFs above 5 as indicating a serious multicollinearity problem
+(i.e.~R\textsuperscript{2} values for this predictor of 0.8 and above
+would thus concern us.)
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{vif}\NormalTok{(}\KeywordTok{lm}\NormalTok{(y }\OperatorTok{~}\StringTok{ }\NormalTok{x1 }\OperatorTok{+}\StringTok{ }\NormalTok{x2 }\OperatorTok{+}\StringTok{ }\NormalTok{x3 }\OperatorTok{+}\StringTok{ }\NormalTok{x4 }\OperatorTok{+}\StringTok{ }\NormalTok{x5 }\OperatorTok{+}\StringTok{ }\NormalTok{x6, }\DataTypeTok{data =}\NormalTok{ pollution))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+      x1       x2       x3       x4       x5       x6 
+2.238862 2.058731 2.153044 4.174448 3.447399 1.792996 
+\end{verbatim}
+
+Occasionally, you'll see the inverse of VIF reported, and this is called
+\emph{tolerance}.
+
+\begin{itemize}
+\tightlist
+\item
+  tolerance = 1 / VIF
+\end{itemize}
+
+\subsection{Collinearity in an Explanatory
+Model}\label{collinearity-in-an-explanatory-model}
+
+\begin{itemize}
+\tightlist
+\item
+  When we are attempting to \textbf{identify multiple independent
+  predictors} (the explanatory model approach), then we will need to
+  choose between collinear variables
+
+  \begin{itemize}
+  \tightlist
+  \item
+    options suggested by \citet{Vittinghoff2012}, p.~422, include
+    choosing on the basis of plausibility as a causal factor,
+  \item
+    choosing the variable that has higher data quality (is measured more
+    accurately or has fewer missing values.)
+  \item
+    Often, we choose to include a variable that is statistically
+    significant as a predictor, and drop others, should we be so lucky.
+  \end{itemize}
+\item
+  Larger effects, especially if they are associated with predictors that
+  have minimal correlation with the other predictors under study, cause
+  less trouble in terms of potential violation of the \(n/15\) rule for
+  what constitutes a reasonable number of predictors.
+\end{itemize}
+
+\subsection{Collinearity in a Prediction
+Model}\label{collinearity-in-a-prediction-model}
+
+\begin{itemize}
+\tightlist
+\item
+  If we are primarily building a \textbf{prediction model} for which
+  inference on the individual predictors is not of interest, then it is
+  totally reasonable to use both predictors in the model, if doing so
+  reduces prediction error.
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Collinearity doesn't affect predictions in our model development
+    sample.
+  \item
+    Collinearity doesn't affect predictions on new data so long as the
+    new data have similar relationships between predictors.
+  \item
+    If our key predictor is correlated strongly with a confounder, then
+    if the predictor remains significant after adjustment for the
+    confounder, then this suggests a meaningful independent effect.
+
+    \begin{itemize}
+    \tightlist
+    \item
+      If the effects of the predictor are clearly confounded by the
+      adjustment variable, we again have a clear result.
+    \item
+      If neither is statistically significant after adjustment, the data
+      may be inadequate.
+    \end{itemize}
+  \item
+    If the collinearity is between adjustment variables, but doesn't
+    involve the key predictor, then inclusion of the collinear variables
+    is unlikely to cause substantial problems.
+  \end{itemize}
+\end{itemize}
+
 \section{\texorpdfstring{Spending DF on Non-Linearity: The Spearman
 \(\rho^2\)
 Plot}{Spending DF on Non-Linearity: The Spearman \textbackslash{}rho\^{}2 Plot}}\label{spending-df-on-non-linearity-the-spearman-rho2-plot}
@@ -9774,7 +10005,7 @@ I'd begin by running a Spearman \(\rho^2\) plot:
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-113-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-114-1.pdf}
 
 The variable with the largest adjusted squared Spearman \(\rho\)
 statistic in this setting is \texttt{x9}, followed by \texttt{x6} and
@@ -9803,10 +10034,10 @@ So, one possible model built in reaction this plot might be to fit:
   plus a linear fit to x1 and x13
 \end{itemize}
 
-That's way more degrees of freedom (4 for x9, 2 for x6, 2 for x14 and 1
-each for x1 and x13 makes a total of 10 without the intercept term) than
-we can really justify with a sample of 60 observations. But let's see
-what happens.
+That's way more degrees of freedom (4 for \texttt{x9}, 2 for
+\texttt{x6}, 2 for \texttt{x14} and 1 each for x1 and x13 makes a total
+of 10 without the intercept term) than we can really justify with a
+sample of 60 observations. But let's see what happens.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -9865,7 +10096,678 @@ Harrell and colleagues. That will be the focus of our next chapter.
 package to fit linear
 models}{Using ols from the rms package to fit linear models}}\label{using-ols-from-the-rms-package-to-fit-linear-models}
 
-Materials to come.
+At the end of the previous chapter, we had fit a model to the
+\texttt{pollution} data that predicted our outcome \texttt{y} =
+Age-Adjusted Mortality Rate, using:
+
+\begin{itemize}
+\tightlist
+\item
+  a restricted cubic spline with 5 knots on \texttt{x9}
+\item
+  a restricted cubic spline with 3 knots on \texttt{x6}
+\item
+  a polynomial in 2 degrees on \texttt{x14}
+\item
+  linear terms for \texttt{x1} and \texttt{x13}
+\end{itemize}
+
+but this model was hard to evaluate in some ways. Now, instead of using
+\texttt{lm} to fit this model, we'll use a new function called
+\texttt{ols} from the \texttt{rms} package developed by Frank Harrell
+and colleagues, in part to support ideas developed in
+\citet{Harrell2001} for clinical prediction models.
+
+\section{\texorpdfstring{Fitting a model with
+\texttt{ols}}{Fitting a model with ols}}\label{fitting-a-model-with-ols}
+
+We will use the \texttt{datadist} approach when fitting a linear model
+with \texttt{ols} from the \texttt{rms} package, so as to store
+additional important elements of the model fit.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(rms)}
+
+\NormalTok{d <-}\StringTok{ }\KeywordTok{datadist}\NormalTok{(pollution)}
+\KeywordTok{options}\NormalTok{(}\DataTypeTok{datadist =} \StringTok{"d"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+Next, we'll fit the model using \texttt{ols} and place its results in
+\texttt{newmod}.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{newmod <-}\StringTok{ }\KeywordTok{ols}\NormalTok{(y }\OperatorTok{~}\StringTok{ }\KeywordTok{rcs}\NormalTok{(x9, }\DecValTok{5}\NormalTok{) }\OperatorTok{+}\StringTok{ }\KeywordTok{rcs}\NormalTok{(x6, }\DecValTok{3}\NormalTok{) }\OperatorTok{+}\StringTok{ }\KeywordTok{pol}\NormalTok{(x14, }\DecValTok{2}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{                  }\NormalTok{x1 }\OperatorTok{+}\StringTok{ }\NormalTok{x13, }
+              \DataTypeTok{data =}\NormalTok{ pollution, }\DataTypeTok{x =} \OtherTok{TRUE}\NormalTok{, }\DataTypeTok{y =} \OtherTok{TRUE}\NormalTok{)}
+\NormalTok{newmod}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Linear Regression Model
+ 
+ ols(formula = y ~ rcs(x9, 5) + rcs(x6, 3) + pol(x14, 2) + x1 + 
+     x13, data = pollution, x = TRUE, y = TRUE)
+ 
+                 Model Likelihood     Discrimination    
+                    Ratio Test           Indexes        
+ Obs       60    LR chi2     72.02    R2       0.699    
+ sigma37.4566    d.f.           10    R2 adj   0.637    
+ d.f.      49    Pr(> chi2) 0.0000    g       58.961    
+ 
+ Residuals
+ 
+     Min      1Q  Median      3Q     Max 
+ -86.189 -18.554  -1.799  18.645 104.307 
+ 
+ 
+           Coef      S.E.     t     Pr(>|t|)
+ Intercept  796.2658 162.3269  4.91 <0.0001 
+ x9          -2.6328   6.3504 -0.41 0.6803  
+ x9'        121.4651 124.4827  0.98 0.3340  
+ x9''      -219.8025 227.6775 -0.97 0.3391  
+ x9'''      151.5700 171.3867  0.88 0.3808  
+ x6           7.6817  15.5230  0.49 0.6229  
+ x6'        -29.4388  18.0531 -1.63 0.1094  
+ x14          0.5652   0.2547  2.22 0.0311  
+ x14^2       -0.0010   0.0010 -0.96 0.3407  
+ x1           1.0717   0.7317  1.46 0.1494  
+ x13         -0.1028   0.1443 -0.71 0.4796  
+ 
+\end{verbatim}
+
+Some of the advantages and disadvantages of fitting linear regression
+models with \texttt{ols} or \texttt{lm} will reveal themselves over
+time. For now, one advantage for \texttt{ols} is that the entire
+variance-covariance matrix is saved. Most of the time, there will be
+some value to considering both \texttt{ols} and \texttt{lm} approaches.
+
+Most of this output should be familiar, but a few pieces are different.
+
+\subsection{The Model Likelihood Ratio
+Test}\label{the-model-likelihood-ratio-test}
+
+The \textbf{Model Likelihood Ratio Test} compares \texttt{newmod} to the
+null model with only an intercept term. It is a goodness-of-fit test
+that we'll use in several types of model settings this semester.
+
+\begin{itemize}
+\tightlist
+\item
+  In many settings, the logarithm of the likelihood ratio, multiplied by
+  -2, yields a value which can be compared to a \(\chi^2\) distribution.
+  So here, the value 72.02 is -2(log likelihood), and is compared to a
+  \(\chi^2\) distribution with 10 degrees of freedom. We reject the null
+  hypothesis that \texttt{newmod} is no better than the null model, and
+  conclude instead that at least of these predictors adds statistically
+  significant value.
+
+  \begin{itemize}
+  \tightlist
+  \item
+    For \texttt{ols}, interpret the model likelihood ratio test like the
+    global (ANOVA) F test in \texttt{lm}.
+  \item
+    The likelihood function is the probability of observing our data
+    under the specified model.
+  \item
+    We can compare two nested models by evaluating the difference in
+    their likelihood ratios and degrees of freedom, then comparing the
+    result to a \(\chi^2\) distribution.
+  \end{itemize}
+\end{itemize}
+
+\subsection{The g statistic}\label{the-g-statistic}
+
+The \textbf{g statistic} is new and is referred to as the g-index. it's
+based on Gini's mean difference and is purported to be a robust and
+highly efficient measure of variation.
+
+\begin{itemize}
+\tightlist
+\item
+  Here, g = 58.9, which implies that if you randomly select two of the
+  60 areas included in the model, the average difference in predicted
+  \texttt{y} (Age-Adjusted Mortality Rate) using this model will be
+  58.9.
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Technically, g is Gini's mean difference of the predicted values.
+  \end{itemize}
+\end{itemize}
+
+\section{\texorpdfstring{ANOVA for an \texttt{ols}
+model}{ANOVA for an ols model}}\label{anova-for-an-ols-model}
+
+One advantage of the \texttt{ols} approach is that when you apply an
+\texttt{anova} to it, it separates out the linear and non-linear
+components of restricted cubic splines and polynomial terms (as well as
+product terms, if your model includes them.)
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{anova}\NormalTok{(newmod)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+                Analysis of Variance          Response: y 
+
+ Factor          d.f. Partial SS  MS         F     P     
+ x9               4    35219.7647  8804.9412  6.28 0.0004
+  Nonlinear       3     1339.3081   446.4360  0.32 0.8121
+ x6               2     9367.6008  4683.8004  3.34 0.0437
+  Nonlinear       1     3730.7388  3730.7388  2.66 0.1094
+ x14              2    18679.6957  9339.8478  6.66 0.0028
+  Nonlinear       1     1298.7625  1298.7625  0.93 0.3407
+ x1               1     3009.1829  3009.1829  2.14 0.1494
+ x13              1      711.9108   711.9108  0.51 0.4796
+ TOTAL NONLINEAR  5     6656.1824  1331.2365  0.95 0.4582
+ REGRESSION      10   159563.8285 15956.3829 11.37 <.0001
+ ERROR           49    68746.8004  1402.9959             
+\end{verbatim}
+
+Unlike the \texttt{anova} approach in \texttt{lm}, in \texttt{ols}
+ANOVA, \emph{partial} F tests are presented - each predictor is assessed
+as ``last predictor in'' much like the usual \emph{t} tests in
+\texttt{lm}. In essence, the partial sums of squares and F tests here
+describe the marginal impact of removing each covariate from
+\texttt{newmod}.
+
+We conclude that the non-linear parts of \texttt{x9} and \texttt{x6} and
+\texttt{x14} combined don't seem to add much value, but that overall,
+\texttt{x9}, \texttt{x6} and \texttt{x14} seem to be valuable. So it
+must be the linear parts of those variables within our model that are
+doing the lion's share of the work.
+
+\section{Effect Estimates}\label{effect-estimates}
+
+A particularly useful thing to get out of the \texttt{ols} approach that
+is not as easily available in \texttt{lm} (without recoding or
+standardizing our predictors) is a summary of the effects of each
+predictor in an interesting scale.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{summary}\NormalTok{(newmod)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+             Effects              Response : y 
+
+ Factor Low   High  Diff. Effect   S.E.    Lower 0.95 Upper 0.95
+ x9      4.95 15.65 10.70  40.4060 14.0790  12.1120   68.6990   
+ x6     10.40 11.50  1.10 -18.2930  8.1499 -34.6710   -1.9153   
+ x14    11.00 69.00 58.00  28.3480 10.6480   6.9503   49.7460   
+ x1     32.75 43.25 10.50  11.2520  7.6833  -4.1878   26.6930   
+ x13     4.00 23.75 19.75  -2.0303  2.8502  -7.7579    3.6973   
+\end{verbatim}
+
+This ``effects summary'' shows the effect on \texttt{y} of moving from
+the 25th to the 75th percentile of each variable (along with a standard
+error and 95\% confidence interval) while holding the other variable at
+the level specified at the bottom of the output.
+
+The most useful way to look at this sort of analysis is often a plot.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plot}\NormalTok{(}\KeywordTok{summary}\NormalTok{(newmod))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-120-1.pdf}
+
+For \texttt{x9} note from the \texttt{summary} above that the 25th
+percentile is 4.95 and the 75th is 15.65. Our conclusion is that the
+estimated effect of moving \texttt{x9} from 4.95 to 15.65 is an increase
+of 40.4 on \texttt{y}, with a 95\% CI of (12.1, 68.7).
+
+For a categorical variable, the low level is shown first and then the
+high level.
+
+The plot shows the point estimate (arrow head) and then the 90\%
+(narrowest bar), 95\% (middle bar) and 99\% (widest bar in lightest
+color) confidence intervals for each predictor's effect.
+
+\begin{itemize}
+\tightlist
+\item
+  It's easier to distinguish this in the \texttt{x9} plot than the one
+  for \texttt{x13}.
+\item
+  Remember that what is being compared is the first value to the second
+  value's impact on the outcome, with other predictors held constant.
+\end{itemize}
+
+\subsection{Simultaneous Confidence
+Intervals}\label{simultaneous-confidence-intervals}
+
+These confidence intervals make no effort to deal with the multiple
+comparisons problem, but just fit individual 95\% (or whatever level you
+choose) confidence intervals for each predictor. The natural alternative
+is to make an adjustment for multiple comparisons in fitting the
+confidence intervals, so that the set of (in this case, 2) confidence
+intervals for effect sizes has a family-wise 95\% confidence level.
+You'll note that the effect estimates and standard errors are unchanged,
+but the confidence limits are a bit wider.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{summary}\NormalTok{(newmod, }\DataTypeTok{conf.type=}\KeywordTok{c}\NormalTok{(}\StringTok{'simultaneous'}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+             Effects              Response : y 
+
+ Factor Low   High  Diff. Effect   S.E.    Lower 0.95 Upper 0.95
+ x9      4.95 15.65 10.70  40.4060 14.0790   3.12280  77.6890   
+ x6     10.40 11.50  1.10 -18.2930  8.1499 -39.87400   3.2882   
+ x14    11.00 69.00 58.00  28.3480 10.6480   0.15192  56.5440   
+ x1     32.75 43.25 10.50  11.2520  7.6833  -9.09340  31.5980   
+ x13     4.00 23.75 19.75  -2.0303  2.8502  -9.57760   5.5171   
+\end{verbatim}
+
+Remember that if you're looking for the usual \texttt{lm} summary for an
+\texttt{ols} object, use \texttt{summary.lm}, and that the
+\texttt{display} function from \texttt{arm} does not recognize
+\texttt{ols} objects.
+
+\section{\texorpdfstring{The \texttt{Predict} function for an
+\texttt{ols}
+model}{The Predict function for an ols model}}\label{the-predict-function-for-an-ols-model}
+
+The \texttt{Predict} function is very flexible, and can be used to
+produce individual or simultaneous confidence limits.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{Predict}\NormalTok{(newmod, }\DataTypeTok{x9 =} \DecValTok{12}\NormalTok{, }\DataTypeTok{x6 =} \DecValTok{12}\NormalTok{, }\DataTypeTok{x14 =} \DecValTok{40}\NormalTok{, }\DataTypeTok{x1 =} \DecValTok{40}\NormalTok{, }\DataTypeTok{x13 =} \DecValTok{20}\NormalTok{) }\CommentTok{# individual limits}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+  x9 x6 x14 x1 x13     yhat    lower   upper
+1 12 12  40 40  20 923.0982 893.0984 953.098
+
+Response variable (y): y 
+
+Limits are 0.95 confidence limits
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{Predict}\NormalTok{(newmod, }\DataTypeTok{x9 =} \DecValTok{5}\OperatorTok{:}\DecValTok{15}\NormalTok{) }\CommentTok{# individual limits}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+   x9    x6 x14 x1 x13     yhat    lower    upper
+1   5 11.05  30 38   9 913.7392 889.4802 937.9983
+2   6 11.05  30 38   9 916.3490 892.0082 940.6897
+3   7 11.05  30 38   9 921.3093 898.9657 943.6529
+4   8 11.05  30 38   9 927.6464 907.0355 948.2574
+5   9 11.05  30 38   9 934.3853 913.3761 955.3946
+6  10 11.05  30 38   9 940.5510 917.8371 963.2648
+7  11 11.05  30 38   9 945.2225 921.9971 968.4479
+8  12 11.05  30 38   9 948.2885 926.4576 970.1194
+9  13 11.05  30 38   9 950.2608 930.3003 970.2213
+10 14 11.05  30 38   9 951.6671 932.2370 971.0971
+11 15 11.05  30 38   9 953.0342 932.1662 973.9021
+
+Response variable (y): y 
+
+Adjust to: x6=11.05 x14=30 x1=38 x13=9  
+
+Limits are 0.95 confidence limits
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{Predict}\NormalTok{(newmod, }\DataTypeTok{x9 =} \DecValTok{5}\OperatorTok{:}\DecValTok{15}\NormalTok{, }\DataTypeTok{conf.type =} \StringTok{'simult'}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+   x9    x6 x14 x1 x13     yhat    lower    upper
+1   5 11.05  30 38   9 913.7392 882.4311 945.0473
+2   6 11.05  30 38   9 916.3490 884.9354 947.7625
+3   7 11.05  30 38   9 921.3093 892.4733 950.1454
+4   8 11.05  30 38   9 927.6464 901.0465 954.2464
+5   9 11.05  30 38   9 934.3853 907.2713 961.4993
+6  10 11.05  30 38   9 940.5510 911.2371 969.8649
+7  11 11.05  30 38   9 945.2225 915.2484 975.1966
+8  12 11.05  30 38   9 948.2885 920.1141 976.4629
+9  13 11.05  30 38   9 950.2608 924.5003 976.0212
+10 14 11.05  30 38   9 951.6671 926.5912 976.7430
+11 15 11.05  30 38   9 953.0342 926.1025 979.9658
+
+Response variable (y): y 
+
+Adjust to: x6=11.05 x14=30 x1=38 x13=9  
+
+Limits are 0.95 confidence limits
+\end{verbatim}
+
+The plot below shows the individual effects in \texttt{newmod} in five
+subpanels, using the default approach of displaying the same range of
+values as are seen in the data. Note that each panel shows point and
+interval estimates of the effects, and spot the straight lines in
+\texttt{x1} and \texttt{x13}, the single bends in \texttt{x14} and
+\texttt{x6} and the wiggles in \texttt{x9}, corresponding to the amount
+of non-linearity specified in the model.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{Predict}\NormalTok{(newmod))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-123-1.pdf}
+
+\section{\texorpdfstring{Checking Influence via
+\texttt{dfbeta}}{Checking Influence via dfbeta}}\label{checking-influence-via-dfbeta}
+
+For an \texttt{ols} object, we have several tools for looking at
+residuals. The most interesting to me is \texttt{which.influence} which
+is reliant on the notion of \texttt{dfbeta}.
+
+\begin{itemize}
+\tightlist
+\item
+  DFBETA is estimated for each observation in the data, and each
+  coefficient in the model.
+\item
+  The DFBETA is the difference in the estimated coefficient caused by
+  deleting the observation, scaled by the coefficient's standard error
+  estimated with the observation deleted.
+\item
+  The \texttt{which.influence} command applied to an \texttt{ols} model
+  produces a list of all of the predictors estimated by the model,
+  including the intercept.
+
+  \begin{itemize}
+  \tightlist
+  \item
+    For each predictor, the command lists all observations (by row
+    number) that, if removed from the model, would cause the estimated
+    coefficient (the ``beta'') for that predictor to change by at least
+    some particular cutoff.
+  \item
+    The default is that the DFBETA for that predictor is 0.2 or more.
+  \end{itemize}
+\end{itemize}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{which.influence}\NormalTok{(newmod)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+$Intercept
+[1]  2 11 28 32 37 49 59
+
+$x9
+[1]  2  3  6  9 31 35 49 57 58
+
+$x6
+[1]  2 11 15 28 32 37 50 56 59
+
+$x14
+[1]  2  6  7 12 13 16 32 37
+
+$x1
+[1]  7 18 32 37 49 57
+
+$x13
+[1] 29 32 37
+\end{verbatim}
+
+The implication here, for instance, is that if we drop row 3 from our
+data frame, and refit the model, this will have a meaningful impact on
+the estimate of \texttt{x9} but not on the other coefficients. But if we
+drop, say, row 37, we will affect the estimates of the intercept,
+\texttt{x6}, \texttt{x14}, \texttt{x1}, and \texttt{x13}.
+
+\subsection{\texorpdfstring{Using the \texttt{residuals} command for
+\texttt{dfbetas}}{Using the residuals command for dfbetas}}\label{using-the-residuals-command-for-dfbetas}
+
+To see the \texttt{dfbeta} values, standardized according to the
+approach I used above, you can use the following code (I'll use
+\texttt{head} to just show the first few rows of results) to get a
+matrix of the results.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{head}\NormalTok{(}\KeywordTok{residuals}\NormalTok{(newmod, }\DataTypeTok{type =} \StringTok{"dfbetas"}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+            [,1]         [,2]         [,3]        [,4]        [,5]
+[1,]  0.03071160 -0.023775487 -0.004055111  0.01205425 -0.03260003
+[2,] -0.38276573 -0.048404993 -0.142293606  0.17009666 -0.22350621
+[3,]  0.17226780 -0.426153536  0.350913139 -0.32949129  0.25777913
+[4,]  0.06175110 -0.006460916  0.024828272 -0.03009337  0.04154812
+[5,]  0.16875200  0.039839994 -0.058178534  0.06449504 -0.07772208
+[6,]  0.03322073  0.112699877 -0.203543632  0.23987378 -0.35201736
+            [,6]        [,7]        [,8]         [,9]        [,10]
+[1,] -0.02392315  0.01175375 -0.06494414  0.060929683 -0.011042644
+[2,]  0.44737372 -0.48562818  0.19372285 -0.212186731 -0.107830147
+[3,] -0.10263448  0.05005284 -0.02049877  0.014059330  0.010793169
+[4,] -0.06254145  0.05498432  0.01135031 -0.001877983 -0.005490454
+[5,] -0.18058630  0.16151742  0.02723710  0.065483158  0.003326357
+[6,] -0.04075617  0.02900006 -0.21508009  0.171627718  0.019241676
+           [,11]
+[1,]  0.03425156
+[2,] -0.01503250
+[3,]  0.04924166
+[4,] -0.01254111
+[5,] -0.05570035
+[6,]  0.05775536
+\end{verbatim}
+
+\subsection{\texorpdfstring{Using the \texttt{residuals} command for
+other
+summaries}{Using the residuals command for other summaries}}\label{using-the-residuals-command-for-other-summaries}
+
+The \texttt{residuals} command will also let you get ordinary residuals,
+leverage values and \texttt{dffits} values, which are the normalized
+differences in predicted values when observations are omitted. See
+\texttt{?residuals.ols} for more details.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{temp <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{area =} \DecValTok{1}\OperatorTok{:}\DecValTok{60}\NormalTok{)}
+\NormalTok{temp}\OperatorTok{$}\NormalTok{residual <-}\StringTok{ }\KeywordTok{residuals}\NormalTok{(newmod, }\DataTypeTok{type =} \StringTok{"ordinary"}\NormalTok{)}
+\NormalTok{temp}\OperatorTok{$}\NormalTok{leverage <-}\StringTok{ }\KeywordTok{residuals}\NormalTok{(newmod, }\DataTypeTok{type =} \StringTok{"hat"}\NormalTok{)}
+\NormalTok{temp}\OperatorTok{$}\NormalTok{dffits <-}\StringTok{ }\KeywordTok{residuals}\NormalTok{(newmod, }\DataTypeTok{type =} \StringTok{"dffits"}\NormalTok{)}
+\KeywordTok{tbl_df}\NormalTok{(temp)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+# A tibble: 60 x 4
+    area residual leverage  dffits
+   <int>    <dbl>    <dbl>   <dbl>
+ 1     1   -13.3    0.0929 -0.119 
+ 2     2    81.0    0.0941  0.766 
+ 3     3    28.8    0.266   0.539 
+ 4     4   -12.5    0.117  -0.128 
+ 5     5    27.8    0.204   0.419 
+ 6     6   -40.4    0.416  -1.20  
+ 7     7    37.0    0.207   0.568 
+ 8     8   -14.3    0.145  -0.169 
+ 9     9    66.6    0.0863  0.587 
+10    10   - 4.96   0.0997 -0.0460
+# ... with 50 more rows
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{ggplot}\NormalTok{(temp, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ area, }\DataTypeTok{y =}\NormalTok{ dffits)) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_point}\NormalTok{() }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_line}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-126-1.pdf}
+
+It appears that point 37 has the largest (positive) \texttt{dffits}
+value. Recall that point 37 seemed influential on several predictors and
+the intercept term. Point 32 has the smallest (or largest negative)
+\texttt{dffits}, and also appears to have been influential on several
+predictors and the intercept.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{which.max}\NormalTok{(temp}\OperatorTok{$}\NormalTok{dffits)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+[1] 37
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{which.min}\NormalTok{(temp}\OperatorTok{$}\NormalTok{dffits)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+[1] 32
+\end{verbatim}
+
+\section{Model Validation and Correcting for
+Optimism}\label{model-validation-and-correcting-for-optimism}
+
+In 431, we learned about splitting our regression models into
+\textbf{training} samples and \textbf{test} samples, performing variable
+selection work on the training sample to identify two or three candidate
+models (perhaps via a stepwise approach), and then comparing the
+predictions made by those models in a test sample.
+
+At the final project presentations, I mentioned (to many folks) that
+there was a way to automate this process a bit in 432, that would
+provide some ways to get the machine to split the data for you multiple
+times, and then average over the results, using a bootstrap approach.
+This is it.
+
+The \texttt{validate} function allows us to perform cross-validation of
+our models for some summary statistics (and then correct those
+statistics for optimism in describing likely predictive accuracy) in an
+easy way.
+
+\texttt{validate} develops:
+
+\begin{itemize}
+\tightlist
+\item
+  Resampling validation with or without backward elimination of
+  variables
+\item
+  Estimates of the \emph{optimism} in measures of predictive accuracy
+\item
+  Estimates of the intercept and slope of a calibration model
+\end{itemize}
+
+\begin{center}
+(observed y) = Intercept + Slope (predicted y)
+\end{center}
+
+with the following code\ldots{}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{432002}\NormalTok{); }\KeywordTok{validate}\NormalTok{(newmod, }\DataTypeTok{method =} \StringTok{"boot"}\NormalTok{, }\DataTypeTok{B =} \DecValTok{40}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+          index.orig training      test  optimism index.corrected  n
+R-square      0.6989   0.7500    0.5964    0.1536          0.5452 40
+MSE        1145.7800 888.2564 1535.8277 -647.5714       1793.3514 40
+g            58.9614  58.9323   55.2085    3.7238         55.2376 40
+Intercept     0.0000   0.0000   86.5968  -86.5968         86.5968 40
+Slope         1.0000   1.0000    0.9088    0.0912          0.9088 40
+\end{verbatim}
+
+So, for \texttt{R-square} we see that our original estimate was 0.6989
+
+\begin{itemize}
+\tightlist
+\item
+  Our estimated \texttt{R-square} across \texttt{n} = 40 training
+  samples was 0.7500, but in the resulting tests, the average
+  \texttt{R-square} was only 0.5964
+\item
+  This suggests an optimism of 0.7500 - 0.5964 = 0.1536 (after
+  rounding).
+\item
+  We then apply that optimism to obtain a new estimate of
+  R\textsuperscript{2} corrected for overfitting, at 0.5452, which is
+  probably a better estimate of what our results might look like in new
+  data that were similar to (but not the same as) the data we used in
+  building \texttt{newmod} than our initial estimate of 0.6989
+\end{itemize}
+
+We also obtain optimism-corrected estimates of the mean squared error
+(square of the residual standard deviation), the g index, and the
+intercept and slope of the calibration model. The ``corrected'' slope is
+a shrinkage factor that takes overfitting into account.
+
+\section{Building a Nomogram for Our
+Model}\label{building-a-nomogram-for-our-model}
+
+Another nice feature of an \texttt{ols} model object is that we can
+picture the model with a \textbf{nomogram} easily. Here is model
+\texttt{newmod}.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plot}\NormalTok{(}\KeywordTok{nomogram}\NormalTok{(newmod))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-129-1.pdf}
+
+For this model, we can use this plot to predict \texttt{y} as follows:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  find our values of \texttt{x9} on the appropriate line
+\item
+  draw a vertical line up to the points line to count the points
+  associated with our subject
+\item
+  repeat the process to obtain the points associated with \texttt{x6},
+  \texttt{x14}, \texttt{x1}, and \texttt{x13}. Sum the points.
+\item
+  draw a vertical line down from that number in the Total Points line to
+  estimate \texttt{y} (the Linear Predictor) = Age-Adjusted Mortality
+  Rate.
+\end{enumerate}
+
+The impact of the non-linearity is seen in the \texttt{x6} results, for
+example, which turn around from 9-10 to 11-12. We also see
+non-linearity's effects in the scales of the non-linear terms in terms
+of points awarded.
+
+An area with a combination of predictor values leading to a total of 100
+points, for instance, would lead to a prediction of a Mortality Rate
+near 905. An area with a total of 140 points would have a predicted
+Mortality Rate of 955, roughly.
 
 \chapter{Other Variable Selection
 Strategies}\label{other-variable-selection-strategies}
@@ -10469,7 +11371,7 @@ residuals vs.~these fitted values.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-118-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-133-1.pdf}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -10484,7 +11386,7 @@ residuals vs.~these fitted values.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-119-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-134-1.pdf}
 
 \subsection{When is the Lasso Most
 Useful?}\label{when-is-the-lasso-most-useful}
@@ -10563,7 +11465,7 @@ at the cross-validation
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-120-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-135-1.pdf}
 
 Here it looks like cross-validated MSE happens somewhere between a
 fraction of 0.2 and 0.4.
@@ -10589,7 +11491,7 @@ fraction of 0.2 and 0.4.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-122-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-137-1.pdf}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -10658,7 +11560,7 @@ fitted values.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-124-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-139-1.pdf}
 
 And now, here's a plot or residuals vs.~fitted values.
 
@@ -10675,7 +11577,7 @@ And now, here's a plot or residuals vs.~fitted values.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-125-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-140-1.pdf}
 
 \bibliography{text.bib}
 
