@@ -31,8 +31,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   
   
-<link rel="prev" href="linear-regression-on-a-small-smart-data-set.html">
-<link rel="next" href="analysis-of-covariance.html">
+<link rel="prev" href="other-variable-selection-strategies.html">
+<link rel="next" href="references.html">
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
@@ -441,659 +441,754 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="analysis-of-variance" class="section level1">
-<h1><span class="header-section-number">Chapter 3</span> Analysis of Variance</h1>
-<div id="the-bonding-data-a-designed-dental-experiment" class="section level2">
-<h2><span class="header-section-number">3.1</span> The <code>bonding</code> data: A Designed Dental Experiment</h2>
-<p>The <code>bonding</code> data describe a designed experiment into the properties of four different resin types (<code>resin</code> = A, B, C, D) and two different curing light sources (<code>light</code> = Halogen, LED) as they relate to the resulting bonding strength (measured in MPa<a href="#fn5" class="footnoteRef" id="fnref5"><sup>5</sup></a>) on the surface of teeth. The source is <span class="citation">Kim (<a href="#ref-Kim2014">2014</a>)</span>.</p>
-<p>The experiment involved making measurements of bonding strength under a total of 80 experimental setups, or runs, with 10 runs completed at each of the eight combinations of a light source and a resin type. The data are gathered in the <code>bonding.csv</code> file.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">bonding</code></pre></div>
-<pre><code># A tibble: 80 x 4
-   run_ID light   resin strength
-   &lt;fct&gt;  &lt;fct&gt;   &lt;fct&gt;    &lt;dbl&gt;
- 1 R101   LED     B         12.8
- 2 R102   Halogen B         22.2
- 3 R103   Halogen B         24.6
- 4 R104   LED     A         17.0
- 5 R105   LED     C         32.2
- 6 R106   Halogen B         27.1
- 7 R107   LED     A         23.4
- 8 R108   Halogen A         23.5
- 9 R109   Halogen D         37.3
-10 R110   Halogen A         19.7
-# ... with 70 more rows</code></pre>
-</div>
-<div id="a-one-factor-analysis-of-variance" class="section level2">
-<h2><span class="header-section-number">3.2</span> A One-Factor Analysis of Variance</h2>
-<p>Suppose we are interested in the distribution of the <code>strength</code> values for the four different types of <code>resin</code>.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">bonding <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">group_by</span>(resin) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">summarize</span>(<span class="dt">n =</span> <span class="kw">n</span>(), <span class="kw">mean</span>(strength), <span class="kw">median</span>(strength))</code></pre></div>
-<pre><code># A tibble: 4 x 4
-  resin     n `mean(strength)` `median(strength)`
-  &lt;fct&gt; &lt;int&gt;            &lt;dbl&gt;              &lt;dbl&gt;
-1 A        20             18.4               18.0
-2 B        20             22.2               22.7
-3 C        20             25.2               25.7
-4 D        20             32.1               35.3</code></pre>
-<p>I’d begin serious work with a plot.</p>
-<div id="look-at-the-data" class="section level3">
-<h3><span class="header-section-number">3.2.1</span> Look at the Data!</h3>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">ggplot</span>(bonding, <span class="kw">aes</span>(<span class="dt">x =</span> resin, <span class="dt">y =</span> strength)) <span class="op">+</span>
-<span class="st">    </span><span class="kw">geom_boxplot</span>()</code></pre></div>
-<p><img src="bookdown-demo_files/figure-html/c3_oneway_bonding_resin_boxplot-1.png" width="672" /></p>
-<p>Another good plot for this purpose is a ridgeline plot.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">ggplot</span>(bonding, <span class="kw">aes</span>(<span class="dt">x =</span> strength, <span class="dt">y =</span> resin, <span class="dt">fill =</span> resin)) <span class="op">+</span>
-<span class="st">    </span><span class="kw">geom_density_ridges2</span>() <span class="op">+</span>
-<span class="st">    </span><span class="kw">guides</span>(<span class="dt">fill =</span> <span class="ot">FALSE</span>)</code></pre></div>
-<pre><code>Picking joint bandwidth of 3.09</code></pre>
-<p><img src="bookdown-demo_files/figure-html/c3_oneway_bonding_resin_ridgelineplot-1.png" width="672" /></p>
-</div>
-<div id="table-of-summary-statistics" class="section level3">
-<h3><span class="header-section-number">3.2.2</span> Table of Summary Statistics</h3>
-<p>With the small size of this experiment (<em>n</em> = 20 for each <code>resin</code> type), graphical summaries may not perform as well as they often do. We’ll also produce a quick table of summary statistics for <code>strength</code> within each <code>resin</code> type, with the <code>skim()</code> function.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">bonding <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">group_by</span>(resin) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">skim</span>(strength)</code></pre></div>
+<div id="logistic-regression-and-the-resect-data" class="section level1">
+<h1><span class="header-section-number">Chapter 12</span> Logistic Regression and the <code>resect</code> data</h1>
+<div id="the-resect-data" class="section level2">
+<h2><span class="header-section-number">12.1</span> The <code>resect</code> data</h2>
+<p>My source for these data was <span class="citation">Riffenburgh (<a href="#ref-Riffenburgh2006">2006</a>)</span>. The data describe 134 patients who had undergone resection of the tracheal carina (most often this is done to address tumors in the trachea), and the <code>resect.csv</code> data file contains the following variables:</p>
+<ul>
+<li><code>id</code> = a patient ID #,</li>
+<li><code>age</code>= the patient’s age at surgery,</li>
+<li><code>prior</code> = prior tracheal surgery (1 = yes, 0 = no),</li>
+<li><code>resection</code> = extent of the resection (in cm),</li>
+<li><code>intubated</code> = whether intubation was required at the end of surgery (1 = yes, 0 = no), and</li>
+<li><code>died</code> = the patient’s death status (1 = dead, 0 = alive).</li>
+</ul>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">resect <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">group_by</span>(died) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">skim</span>(<span class="op">-</span>id)</code></pre></div>
 <pre><code>Skim summary statistics
- n obs: 80 
- n variables: 4 
- group variables: resin 
+ n obs: 134 
+ n variables: 6 
+ group variables: died 
+
+Variable type: integer 
+ died  variable missing complete   n   mean    sd p0 p25 median p75 p100
+    0       age       0      117 117 48.05  16.01  8  36     51  62   80
+    0 intubated       0      117 117  0.068  0.25  0   0      0   0    1
+    0     prior       0      117 117  0.24   0.43  0   0      0   0    1
+    1       age       0       17  17 46.41  14.46 26  33     46  60   66
+    1 intubated       0       17  17  0.65   0.49  0   0      1   1    1
+    1     prior       0       17  17  0.35   0.49  0   0      0   1    1
 
 Variable type: numeric 
- resin variable missing complete  n  mean   sd   p0   p25 median   p75
-     A strength       0       20 20 18.41 4.81  9.3 15.73  17.95 20.4 
-     B strength       0       20 20 22.23 6.75 11.8 18.45  22.7  25.75
-     C strength       0       20 20 25.16 6.33 14.5 20.65  25.7  30.7 
-     D strength       0       20 20 32.08 9.74 17.3 21.82  35.3  40.15
- p100
- 28  
- 35.2
- 34.5
- 47.2</code></pre>
-<p>Since the means and medians within each group are fairly close, and the distributions (with the possible exception of <code>resin</code> D) are reasonably well approximated by the Normal, I’ll fit an ANOVA model<a href="#fn6" class="footnoteRef" id="fnref6"><sup>6</sup></a>.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">anova</span>(<span class="kw">lm</span>(strength <span class="op">~</span><span class="st"> </span>resin, <span class="dt">data =</span> bonding))</code></pre></div>
-<pre><code>Analysis of Variance Table
-
-Response: strength
-          Df Sum Sq Mean Sq F value   Pr(&gt;F)    
-resin      3 1999.7  666.57  13.107 5.52e-07 ***
-Residuals 76 3865.2   50.86                     
----
-Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
-<p>It appears that the <code>resin</code> types have a significant association with mean <code>strength</code> of the bonds. Can we identify which <code>resin</code> types have generally higher or lower <code>strength</code>?</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">TukeyHSD</span>(<span class="kw">aov</span>(<span class="kw">lm</span>(strength <span class="op">~</span><span class="st"> </span>resin, <span class="dt">data =</span> bonding)))</code></pre></div>
-<pre><code>  Tukey multiple comparisons of means
-    95% family-wise confidence level
-
-Fit: aov(formula = lm(strength ~ resin, data = bonding))
-
-$resin
-      diff        lwr       upr     p adj
-B-A  3.815 -2.1088676  9.738868 0.3351635
-C-A  6.740  0.8161324 12.663868 0.0193344
-D-A 13.660  7.7361324 19.583868 0.0000003
-C-B  2.925 -2.9988676  8.848868 0.5676635
-D-B  9.845  3.9211324 15.768868 0.0002276
-D-C  6.920  0.9961324 12.843868 0.0154615</code></pre>
-<p>Based on these confidence intervals (which have a family-wise 95% confidence level), we see that D is associated with significantly larger mean <code>strength</code> than A or B or C, and that C is also associated with significantly larger mean <code>strength</code> than A. This may be easier to see in a plot of these confidence intervals.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(<span class="kw">TukeyHSD</span>(<span class="kw">aov</span>(<span class="kw">lm</span>(strength <span class="op">~</span><span class="st"> </span>resin, <span class="dt">data =</span> bonding))))</code></pre></div>
-<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-19-1.png" width="672" /></p>
+ died  variable missing complete   n mean   sd p0 p25 median p75 p100
+    0 resection       0      117 117 2.82 1.21  1 2      2.5 3.5    6
+    1 resection       0       17  17 3.97 1     2 3.5    4   4.5    6</code></pre>
+<p>We have no missing data, and 17 of the 134 patients died. Our goal will be to understand the characteristics of the patients, and how they relate to the binary outcome of interest, death.</p>
 </div>
-</div>
-<div id="a-two-way-anova-looking-at-two-factors" class="section level2">
-<h2><span class="header-section-number">3.3</span> A Two-Way ANOVA: Looking at Two Factors</h2>
-<p>Now, we’ll now add consideration of the <code>light</code> source into our study. We can look at the distribution of the <code>strength</code> values at the combinations of both <code>light</code> and <code>resin</code>, with a plot like this one…</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">ggplot</span>(bonding, <span class="kw">aes</span>(<span class="dt">x =</span> resin, <span class="dt">y =</span> strength, <span class="dt">color =</span> light)) <span class="op">+</span>
-<span class="st">    </span><span class="kw">geom_point</span>(<span class="dt">size =</span> <span class="dv">2</span>, <span class="dt">alpha =</span> <span class="fl">0.5</span>) <span class="op">+</span>
-<span class="st">    </span><span class="kw">facet_wrap</span>(<span class="op">~</span><span class="st"> </span>light) <span class="op">+</span>
-<span class="st">    </span><span class="kw">guides</span>(<span class="dt">color =</span> <span class="ot">FALSE</span>) <span class="op">+</span>
-<span class="st">    </span><span class="kw">scale_color_manual</span>(<span class="dt">values =</span> <span class="kw">c</span>(<span class="st">&quot;purple&quot;</span>, <span class="st">&quot;darkorange&quot;</span>)) <span class="op">+</span>
-<span class="st">    </span><span class="kw">theme_bw</span>() </code></pre></div>
-<p><img src="bookdown-demo_files/figure-html/c3_bonding_points_plot-1.png" width="672" /></p>
-</div>
-<div id="a-means-plot-with-standard-deviations-to-check-for-interaction" class="section level2">
-<h2><span class="header-section-number">3.4</span> A Means Plot (with standard deviations) to check for interaction</h2>
-<p>Sometimes, we’ll instead look at a plot simply of the means (and, often, the standard deviations) of <code>strength</code> at each combination of <code>light</code> and <code>resin</code>. We’ll start by building up a data set with the summaries we want to plot.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">bond.sum &lt;-<span class="st"> </span>bonding <span class="op">%&gt;%</span><span class="st"> </span>
-<span class="st">    </span><span class="kw">group_by</span>(resin, light) <span class="op">%&gt;%</span>
-<span class="st">    </span><span class="kw">summarize</span>(<span class="dt">mean.str =</span> <span class="kw">mean</span>(strength), <span class="dt">sd.str =</span> <span class="kw">sd</span>(strength))
-
-bond.sum</code></pre></div>
-<pre><code># A tibble: 8 x 4
-# Groups:   resin [?]
-  resin light   mean.str sd.str
-  &lt;fct&gt; &lt;fct&gt;      &lt;dbl&gt;  &lt;dbl&gt;
-1 A     Halogen     17.8   4.02
-2 A     LED         19.1   5.63
-3 B     Halogen     19.9   5.62
-4 B     LED         24.6   7.25
-5 C     Halogen     22.5   6.19
-6 C     LED         27.8   5.56
-7 D     Halogen     40.3   4.15
-8 D     LED         23.8   5.70</code></pre>
-<p>Now, we’ll use this new data set to plot the means and standard deviations of <code>strength</code> at each combination of <code>resin</code> and <code>light</code>.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## The error bars will overlap unless we adjust the position.
-pd &lt;-<span class="st"> </span><span class="kw">position_dodge</span>(<span class="fl">0.2</span>) <span class="co"># move them .1 to the left and right</span>
-
-<span class="kw">ggplot</span>(bond.sum, <span class="kw">aes</span>(<span class="dt">x =</span> resin, <span class="dt">y =</span> mean.str, <span class="dt">col =</span> light)) <span class="op">+</span>
-<span class="st">    </span><span class="kw">geom_errorbar</span>(<span class="kw">aes</span>(<span class="dt">ymin =</span> mean.str <span class="op">-</span><span class="st"> </span>sd.str, 
-                      <span class="dt">ymax =</span> mean.str <span class="op">+</span><span class="st"> </span>sd.str),
-                  <span class="dt">width =</span> <span class="fl">0.2</span>, <span class="dt">position =</span> pd) <span class="op">+</span>
-<span class="st">    </span><span class="kw">geom_point</span>(<span class="dt">size =</span> <span class="dv">2</span>, <span class="dt">position =</span> pd) <span class="op">+</span><span class="st"> </span>
-<span class="st">    </span><span class="kw">geom_line</span>(<span class="kw">aes</span>(<span class="dt">group =</span> light), <span class="dt">position =</span> pd) <span class="op">+</span>
-<span class="st">    </span><span class="kw">scale_color_manual</span>(<span class="dt">values =</span> <span class="kw">c</span>(<span class="st">&quot;purple&quot;</span>, <span class="st">&quot;darkorange&quot;</span>)) <span class="op">+</span>
-<span class="st">    </span><span class="kw">theme_bw</span>() <span class="op">+</span>
-<span class="st">    </span><span class="kw">labs</span>(<span class="dt">y =</span> <span class="st">&quot;Bonding Strength (MPa)&quot;</span>, <span class="dt">x =</span> <span class="st">&quot;Resin Type&quot;</span>,
-         <span class="dt">title =</span> <span class="st">&quot;Observed Means (+/- SD) of Bonding Strength&quot;</span>)</code></pre></div>
-<p><img src="bookdown-demo_files/figure-html/c3_ggplot_means_plot_bonding-1.png" width="672" /></p>
-<p>Is there evidence of a meaningful interaction between the resin type and the <code>light</code> source on the bonding strength in this plot?</p>
+<div id="running-a-simple-logistic-regression-model" class="section level2">
+<h2><span class="header-section-number">12.2</span> Running A Simple Logistic Regression Model</h2>
+<p>In the most common scenario, a logistic regression model is used to predict a binary outcome (which can take on the values 0 or 1.) We will eventually fit a logistic regression model in two ways.</p>
+<ol style="list-style-type: decimal">
+<li>Through the <code>glm</code> function in the base package of R (similar to <code>lm</code> for linear regression)</li>
+<li>Through the <code>lrm</code> function available in the <code>rms</code> package (similar to <code>ols</code> for linear regression)</li>
+</ol>
+<p>We’ll focus on the <code>glm</code> approach in this Chapter, and save the <code>lrm</code> ideas for later.</p>
+<div id="logistic-regression-can-be-harder-than-linear-regression" class="section level3">
+<h3><span class="header-section-number">12.2.1</span> Logistic Regression Can Be Harder than Linear Regression</h3>
 <ul>
-<li>Sure. A meaningful interaction just means that the strength associated with different <code>resin</code> types depends on the <code>light</code> source.
+<li>Logistic regression models are fitted using the method of maximum likelihood in <code>glm</code>, which requires multiple iterations until convergence is reached.</li>
+<li>Logistic regression models are harder to interpret (for most people) than linear regressions.</li>
+<li>Logistic regression models don’t have the same set of assumptions as linear models.</li>
+<li>Logistic regression outcomes (yes/no) carry much less information than quantitative outcomes. As a result, fitting a reasonable logistic regression requires more data than a linear model of similar size.
 <ul>
-<li>With LED <code>light</code>, it appears that <code>resin</code> C leads to the strongest bonding strength.</li>
-<li>With Halogen <code>light</code>, though, it seems that <code>resin</code> D is substantially stronger.</li>
+<li>The rule I learned in graduate school was that a logistic regression requires 100 observations to fit an intercept plus another 15 observations for each candidate predictor. That’s not terrible, but it’s a very large sample size.</li>
+<li>Frank Harrell recommends that 96 observations + a function of the number of candidate predictors (which depends on the amount of variation in the predictors, but 15 x the number of such predictors isn’t too bad if the signal to noise ratio is pretty good) are required just to get reasonable confidence intervals around your predictions.
+<ul>
+<li>In a <a href="https://twitter.com/f2harrell/status/936230071219707913">twitter note</a>, Frank suggests that 96 + 8 times the number of candidate parameters might be reasonable so long as the smallest cell of interest (combination of an outcome and a split of the covariates) is 96 or more observations.</li>
 </ul></li>
-<li>Note that the lines we see here connecting the <code>light</code> sources aren’t in parallel (as they would be if we had zero interaction between <code>resin</code> and <code>light</code>), but rather, they cross.</li>
-</ul>
-<div id="skimming-the-data-after-grouping-by-resin-and-light" class="section level3">
-<h3><span class="header-section-number">3.4.1</span> Skimming the data after grouping by <code>resin</code> and <code>light</code></h3>
-<p>We might want to look at a numerical summary of the <code>strengths</code> within these groups, too.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">bonding <span class="op">%&gt;%</span>
-<span class="st">    </span><span class="kw">group_by</span>(resin, light) <span class="op">%&gt;%</span>
-<span class="st">    </span><span class="kw">skim</span>(strength) </code></pre></div>
-<pre><code>Skim summary statistics
- n obs: 80 
- n variables: 4 
- group variables: resin, light 
-
-Variable type: numeric 
- resin   light variable missing complete  n  mean   sd   p0   p25 median
-     A Halogen strength       0       10 10 17.77 4.02  9.3 15.75  18.35
-     A     LED strength       0       10 10 19.06 5.63 11.6 16.18  17.8 
-     B Halogen strength       0       10 10 19.9  5.62 11.8 14.78  21.75
-     B     LED strength       0       10 10 24.56 7.25 12.8 20.45  24.45
-     C Halogen strength       0       10 10 22.54 6.19 14.5 18.85  21.3 
-     C     LED strength       0       10 10 27.77 5.56 16.5 24.7   28.45
-     D Halogen strength       0       10 10 40.3  4.15 35.5 36.55  40.4 
-     D     LED strength       0       10 10 23.85 5.7  17.3 19.75  21.45
-   p75 p100
- 20    23.5
- 22.5  28  
- 24.12 27.1
- 27.87 35.2
- 25.8  33  
- 31.83 34.5
- 43.62 47.2
- 28.2  35.1</code></pre>
-</div>
-</div>
-<div id="fitting-the-two-way-anova-model-with-interaction" class="section level2">
-<h2><span class="header-section-number">3.5</span> Fitting the Two-Way ANOVA model with Interaction</h2>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">c3_m1 &lt;-<span class="st"> </span><span class="kw">lm</span>(strength <span class="op">~</span><span class="st"> </span>resin <span class="op">*</span><span class="st"> </span>light, <span class="dt">data =</span> bonding)
-
-<span class="kw">summary</span>(c3_m1)</code></pre></div>
-<pre><code>
-Call:
-lm(formula = strength ~ resin * light, data = bonding)
-
-Residuals:
-    Min      1Q  Median      3Q     Max 
--11.760  -3.663  -0.320   3.697  11.250 
-
-Coefficients:
-                Estimate Std. Error t value Pr(&gt;|t|)    
-(Intercept)       17.770      1.771  10.033 2.57e-15 ***
-resinB             2.130      2.505   0.850   0.3979    
-resinC             4.770      2.505   1.904   0.0609 .  
-resinD            22.530      2.505   8.995 2.13e-13 ***
-lightLED           1.290      2.505   0.515   0.6081    
-resinB:lightLED    3.370      3.542   0.951   0.3446    
-resinC:lightLED    3.940      3.542   1.112   0.2697    
-resinD:lightLED  -17.740      3.542  -5.008 3.78e-06 ***
----
-Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-
-Residual standard error: 5.601 on 72 degrees of freedom
-Multiple R-squared:  0.6149,    Adjusted R-squared:  0.5775 
-F-statistic: 16.42 on 7 and 72 DF,  p-value: 9.801e-13</code></pre>
-<div id="the-anova-table-for-our-model" class="section level3">
-<h3><span class="header-section-number">3.5.1</span> The ANOVA table for our model</h3>
-<p>In a two-way ANOVA model, we begin by assessing the interaction term. If it’s important, then our best model is the model including the interaction. If it’s not important, we will often move on to consider a new model, fit without an interaction.</p>
-<p>The ANOVA table is especially helpful in this case, because it lets us look specifically at the interaction effect.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">anova</span>(c3_m1)</code></pre></div>
-<pre><code>Analysis of Variance Table
-
-Response: strength
-            Df  Sum Sq Mean Sq F value    Pr(&gt;F)    
-resin        3 1999.72  666.57 21.2499 5.792e-10 ***
-light        1   34.72   34.72  1.1067    0.2963    
-resin:light  3 1571.96  523.99 16.7043 2.457e-08 ***
-Residuals   72 2258.52   31.37                      
----
-Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
-</div>
-<div id="is-the-interaction-important" class="section level3">
-<h3><span class="header-section-number">3.5.2</span> Is the interaction important?</h3>
-<p>In this case, the interaction:</p>
+<li><span class="citation">Peduzzi et al. (<a href="#ref-Peduzzi1996">1996</a>)</span> suggest that if we let <span class="math inline">\(\pi\)</span> be the smaller of the proportions of “yes” or “no” cases in the population of interest, and <em>k</em> be the number of inputs under consideration, then <span class="math inline">\(N = 10k/\pi\)</span> is the minimum number of cases to include, except that if N &lt; 100 by this standard, you should increase it to 100, according to <span class="citation">Long (<a href="#ref-Long1997">1997</a>)</span>.
 <ul>
-<li>is evident in the means plot, and</li>
-<li>is highly statistically significant, and</li>
-<li>accounts for a sizeable fraction (27%) of the overall variation</li>
+<li>That suggests that if you have an outcome that happens 10% of the time, and you are running a model with 3 predictors, then you could get away with <span class="math inline">\((10 \times 3)/(0.10) = 300\)</span> observations, but if your outcome happened 40% of the time, you could get away with only <span class="math inline">\((10 \times 3)/(0.40) = 75\)</span> observations, which you’d round up to 100.</li>
+</ul></li>
+</ul></li>
 </ul>
-<p><span class="math display">\[ 
-\eta^2_{interaction} = \frac{\mbox{SS(resin:light)}}{SS(Total)}
-= \frac{1571.96}{1999.72 + 34.72 + 1571.96 + 2258.52} = 0.268
-\]</span></p>
-<p>If the interaction were <em>either</em> large or significant we would be inclined to keep it in the model. In this case, it’s both, so there’s no real reason to remove it.</p>
 </div>
-<div id="interpreting-the-interaction" class="section level3">
-<h3><span class="header-section-number">3.5.3</span> Interpreting the Interaction</h3>
-<p>Recall the model equation, which is:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">c3_m1</code></pre></div>
+<div id="obtaining-the-fitted-equation" class="section level3">
+<h3><span class="header-section-number">12.2.2</span> Obtaining the fitted equation</h3>
+<p>We’ll begin by attempting to predict death based on the extent of the resection.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">res_modA &lt;-<span class="st"> </span><span class="kw">glm</span>(died <span class="op">~</span><span class="st"> </span>resection, <span class="dt">data=</span>resect, 
+               <span class="dt">family=</span><span class="st">&quot;binomial&quot;</span>(<span class="dt">link=</span><span class="st">&quot;logit&quot;</span>))
+
+res_modA</code></pre></div>
 <pre><code>
-Call:
-lm(formula = strength ~ resin * light, data = bonding)
+Call:  glm(formula = died ~ resection, family = binomial(link = &quot;logit&quot;), 
+    data = resect)
 
 Coefficients:
-    (Intercept)           resinB           resinC           resinD  
-          17.77             2.13             4.77            22.53  
-       lightLED  resinB:lightLED  resinC:lightLED  resinD:lightLED  
-           1.29             3.37             3.94           -17.74  </code></pre>
-<p>so we have:</p>
-<p><span class="math display">\[
-strength = 17.77 + 2.13 resinB + 4.77 resinC + 22.53 resinD \\
-+ 1.29 lightLED + 3.37 resinB*lightLED \\
-+ 3.94 resinC*lightLED - 17.74 resinD*lightLED
-\]</span></p>
-<p>So, if <code>light</code> = Halogen, our equation is:</p>
-<p><span class="math display">\[
-strength = 17.77 + 2.13 resinB + 4.77 resinC + 22.53 resinD 
-\]</span></p>
-<p>And if <code>light</code> = LED, our equation is:</p>
-<p><span class="math display">\[
-strength = 19.06 + 5.50 resinB + 8.71 resinC + 4.79 resinD 
-\]</span></p>
-<p>Note that both the intercept and the slopes change as a result of the interaction. The model yields a different prediction for every possible combination of a <code>resin</code> type and a <code>light</code> source.</p>
+(Intercept)    resection  
+    -4.4337       0.7417  
+
+Degrees of Freedom: 133 Total (i.e. Null);  132 Residual
+Null Deviance:      101.9 
+Residual Deviance: 89.49    AIC: 93.49</code></pre>
+<p>Note that the <code>logit</code> link is the default approach with the <code>binomial</code> family, so we could also have used:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">res_modA &lt;-<span class="st"> </span><span class="kw">glm</span>(died <span class="op">~</span><span class="st"> </span>resection, <span class="dt">data =</span> resect, 
+                <span class="dt">family =</span> <span class="st">&quot;binomial&quot;</span>)</code></pre></div>
+<p>which yields the same model.</p>
 </div>
+<div id="interpreting-the-coefficients-of-a-logistic-regression-model" class="section level3">
+<h3><span class="header-section-number">12.2.3</span> Interpreting the Coefficients of a Logistic Regression Model</h3>
+<p>Our model is:</p>
+<p><span class="math display">\[
+logit(died = 1) = log\left(\frac{Pr(died = 1)}{1 - Pr(died = 1)}\right) = \beta_0 + \beta_1 x = -4.4337 + 0.7417 \times resection
+\]</span></p>
+<p>The predicted log odds of death for a subject with a resection of 4 cm is:</p>
+<p><span class="math display">\[
+log\left(\frac{Pr(died = 1)}{1 - Pr(died = 1)}\right) = -4.4337 + 0.7417 \times 4 = -1.467
+\]</span></p>
+<p>The predicted odds of death for a subject with a resection of 4 cm is thus:</p>
+<p><span class="math display">\[
+\frac{Pr(died = 1)}{1 - Pr(died = 1)} = e^{-4.4337 + 0.7417 \times 4} = e^{-1.467} = 0.2306
+\]</span></p>
+<p>Since the odds are less than 1, we should find that the probability of death is less than 1/2. With a little algebra, we see that the predicted probability of death for a subject with a resection of 4 cm is:</p>
+<p><span class="math display">\[
+Pr(died = 1) = \frac{e^{-4.4337 + 0.7417 \times 4}}{1 + e^{-4.4337 + 0.7417 \times 4}} = \frac{e^{-1.467}}{1 + e^{-1.467}} = \frac{0.2306}{1.2306} = 0.187
+\]</span></p>
+<p>In general, we can frame the model in terms of a statement about probabilities, like this:</p>
+<p><span class="math display">\[
+Pr(died = 1) = \frac{e^{\beta_0 + \beta_1 x}}{1 + {e^{\beta_0 + \beta_1 x}}} = \frac{e^{-4.4337 + 0.7417 \times resection}}{1 + e^{-4.4337 + 0.7417 \times resection}}
+\]</span></p>
+<p>and so by subtituting in values for <code>resection</code>, we can estimate the model’s fitted probabilities of death.</p>
 </div>
-<div id="comparing-individual-combinations-of-resin-and-light" class="section level2">
-<h2><span class="header-section-number">3.6</span> Comparing Individual Combinations of <code>resin</code> and <code>light</code></h2>
-<p>To make comparisons between individual combinations of a <code>resin</code> type and a <code>light</code> source, using something like Tukey’s HSD approach for multiple comparisons, we first refit the model using the <code>aov</code> structure, rather than <code>lm</code>.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">c3m1_aov &lt;-<span class="st"> </span><span class="kw">aov</span>(strength <span class="op">~</span><span class="st"> </span>resin <span class="op">*</span><span class="st"> </span>light, <span class="dt">data =</span> bonding)
-
-<span class="kw">summary</span>(c3m1_aov)</code></pre></div>
-<pre><code>            Df Sum Sq Mean Sq F value   Pr(&gt;F)    
-resin        3 1999.7   666.6  21.250 5.79e-10 ***
-light        1   34.7    34.7   1.107    0.296    
-resin:light  3 1572.0   524.0  16.704 2.46e-08 ***
-Residuals   72 2258.5    31.4                     
----
-Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
-<p>And now, we can obtain Tukey HSD comparisons (which will maintain an overall 95% family-wise confidence level) across the <code>resin</code> types, the <code>light</code> sources, and the combinations, with the TukeyHSD command. This approach is only completely appropriate if these comparisons are pre-planned, and if the design is balanced (as this is, with the same sample size for each combination of a <code>light</code> source and <code>resin</code> type.)</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">TukeyHSD</span>(c3m1_aov)</code></pre></div>
-<pre><code>  Tukey multiple comparisons of means
-    95% family-wise confidence level
-
-Fit: aov(formula = strength ~ resin * light, data = bonding)
-
-$resin
-      diff       lwr       upr     p adj
-B-A  3.815 -0.843129  8.473129 0.1461960
-C-A  6.740  2.081871 11.398129 0.0016436
-D-A 13.660  9.001871 18.318129 0.0000000
-C-B  2.925 -1.733129  7.583129 0.3568373
-D-B  9.845  5.186871 14.503129 0.0000026
-D-C  6.920  2.261871 11.578129 0.0011731
-
-$light
-               diff       lwr      upr     p adj
-LED-Halogen -1.3175 -3.814042 1.179042 0.2963128
-
-$`resin:light`
-                      diff          lwr        upr     p adj
-B:Halogen-A:Halogen   2.13  -5.68928258   9.949283 0.9893515
-C:Halogen-A:Halogen   4.77  -3.04928258  12.589283 0.5525230
-D:Halogen-A:Halogen  22.53  14.71071742  30.349283 0.0000000
-A:LED-A:Halogen       1.29  -6.52928258   9.109283 0.9995485
-B:LED-A:Halogen       6.79  -1.02928258  14.609283 0.1361092
-C:LED-A:Halogen      10.00   2.18071742  17.819283 0.0037074
-D:LED-A:Halogen       6.08  -1.73928258  13.899283 0.2443200
-C:Halogen-B:Halogen   2.64  -5.17928258  10.459283 0.9640100
-D:Halogen-B:Halogen  20.40  12.58071742  28.219283 0.0000000
-A:LED-B:Halogen      -0.84  -8.65928258   6.979283 0.9999747
-B:LED-B:Halogen       4.66  -3.15928258  12.479283 0.5818695
-C:LED-B:Halogen       7.87   0.05071742  15.689283 0.0473914
-D:LED-B:Halogen       3.95  -3.86928258  11.769283 0.7621860
-D:Halogen-C:Halogen  17.76   9.94071742  25.579283 0.0000000
-A:LED-C:Halogen      -3.48 -11.29928258   4.339283 0.8591455
-B:LED-C:Halogen       2.02  -5.79928258   9.839283 0.9922412
-C:LED-C:Halogen       5.23  -2.58928258  13.049283 0.4323859
-D:LED-C:Halogen       1.31  -6.50928258   9.129283 0.9995004
-A:LED-D:Halogen     -21.24 -29.05928258 -13.420717 0.0000000
-B:LED-D:Halogen     -15.74 -23.55928258  -7.920717 0.0000006
-C:LED-D:Halogen     -12.53 -20.34928258  -4.710717 0.0001014
-D:LED-D:Halogen     -16.45 -24.26928258  -8.630717 0.0000002
-B:LED-A:LED           5.50  -2.31928258  13.319283 0.3665620
-C:LED-A:LED           8.71   0.89071742  16.529283 0.0185285
-D:LED-A:LED           4.79  -3.02928258  12.609283 0.5471915
-C:LED-B:LED           3.21  -4.60928258  11.029283 0.9027236
-D:LED-B:LED          -0.71  -8.52928258   7.109283 0.9999920
-D:LED-C:LED          -3.92 -11.73928258   3.899283 0.7690762</code></pre>
-<p>One conclusion from this is that the combination of D and Halogen is significantly stronger than each of the other seven combinations.</p>
+<div id="using-predict-to-describe-the-models-fits" class="section level3">
+<h3><span class="header-section-number">12.2.4</span> Using <code>predict</code> to describe the model’s fits</h3>
+<p>To obtain these fitted odds and probabilities in R, we can use the <code>predict</code> function.</p>
+<ul>
+<li>The default predictions are on the scale of the log odds. These predictions are also available through the <code>type = &quot;link&quot;</code> command within the <code>predict</code> function for a generalized linear model like logistic regression.</li>
+<li>Here are the predicted log odds of death for a subject (Sally) with a 4 cm resection and a subject (Harry) who had a 5 cm resection.</li>
+</ul>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">predict</span>(res_modA, <span class="dt">newdata =</span> <span class="kw">data_frame</span>(<span class="dt">resection =</span> <span class="kw">c</span>(<span class="dv">4</span>,<span class="dv">5</span>)))</code></pre></div>
+<pre><code>         1          2 
+-1.4669912 -0.7253027 </code></pre>
+<ul>
+<li>We can also obtain predictions for each subject on the original response (here, probability) scale, backing out of the logit link.</li>
+</ul>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">predict</span>(res_modA, <span class="dt">newdata =</span> <span class="kw">data_frame</span>(<span class="dt">resection =</span> <span class="kw">c</span>(<span class="dv">4</span>, <span class="dv">5</span>)), 
+        <span class="dt">type =</span> <span class="st">&quot;response&quot;</span>)</code></pre></div>
+<pre><code>        1         2 
+0.1874004 0.3262264 </code></pre>
+<p>So the predicted probability of death is 0.187 for Sally, the subject with a 4 cm resection, and 0.326 for Harry, the subject with a 5 cm resection.</p>
 </div>
-<div id="the-bonding-model-without-interaction" class="section level2">
-<h2><span class="header-section-number">3.7</span> The <code>bonding</code> model without Interaction</h2>
-<p>It seems incorrect in this situation to fit a model without the interaction term, but we’ll do so just so you can see what’s involved.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">c3_m2 &lt;-<span class="st"> </span><span class="kw">lm</span>(strength <span class="op">~</span><span class="st"> </span>resin <span class="op">+</span><span class="st"> </span>light, <span class="dt">data =</span> bonding)
-
-<span class="kw">summary</span>(c3_m2)</code></pre></div>
+<div id="odds-ratio-interpretation-of-coefficients" class="section level3">
+<h3><span class="header-section-number">12.2.5</span> Odds Ratio interpretation of Coefficients</h3>
+<p>Often, we will exponentiate the estimated slope coefficients of a logistic regression model to help us understand the impact of changing a predictor on the odds of our outcome.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">exp</span>(<span class="kw">coef</span>(res_modA))</code></pre></div>
+<pre><code>(Intercept)   resection 
+ 0.01186995  2.09947754 </code></pre>
+<p>To interpret this finding, suppose we have two subjects, Harry and Sally. Harry had a resection that was 1 cm larger than Sally. This estimated coefficient suggests that the estimated odds for death associated with Harry is 2.099 times larger than the odds for death associated with Sally. In general, the odds ratio comparing two subjects who differ by 1 cm on the resection length is 2.099.</p>
+<p>To illustrate, again let’s assume that Harry’s resection was 5 cm, and Sally’s was 4 cm. Then we have:</p>
+<p><span class="math display">\[
+log\left(\frac{Pr(Harry died)}{1 - Pr(Harry died)}\right) = -4.4337 + 0.7417 \times 5 = -0.7253, \\
+log\left(\frac{Pr(Sally died)}{1 - Pr(Sally died)}\right) = -4.4337 + 0.7417 \times 4 = -1.4667.
+\]</span></p>
+<p>which implies that our estimated odds of death for Harry and Sally are:</p>
+<p><span class="math display">\[
+Odds(Harry died) = \frac{Pr(Harry died)}{1 - Pr(Harry died)} = e^{-4.4337 + 0.7417 \times 5} = e^{-0.7253} = 0.4842 \\
+Odds(Sally died) = \frac{Pr(Sally died)}{1 - Pr(Sally died)} = e^{-4.4337 + 0.7417 \times 4} = e^{-1.4667} = 0.2307
+\]</span></p>
+<p>and so the odds ratio is:</p>
+<p><span class="math display">\[
+OR = \frac{Odds(Harry died)}{Odds(Sally died)} = \frac{0.4842}{0.2307} = 2.099
+\]</span></p>
+<ul>
+<li>If the odds ratio was 1, that would mean that Harry and Sally had the same estimated odds of death, and thus the same estimated probability of death, despite having different sizes of resections.</li>
+<li>Since the odds ratio is greater than 1, it means that Harry has a higher estimated odds of death than Sally, and thus that Harry has a higher estimated probability of death than Sally.</li>
+<li>If the odds ratio was less than 1, it would mean that Harry had a lower estimated odds of death than Sally, and thus that Harry had a lower estimated probability of death than Sally.</li>
+</ul>
+<p>Remember that the odds ratio is a fraction describing two positive numbers (odds can only be non-negative) so that the smallest possible odds ratio is 0.</p>
+</div>
+<div id="interpreting-the-rest-of-the-model-output-from-glm" class="section level3">
+<h3><span class="header-section-number">12.2.6</span> Interpreting the rest of the model output from <code>glm</code></h3>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">res_modA</code></pre></div>
 <pre><code>
-Call:
-lm(formula = strength ~ resin + light, data = bonding)
-
-Residuals:
-     Min       1Q   Median       3Q      Max 
--14.1163  -4.9531   0.1187   4.4613  14.4663 
+Call:  glm(formula = died ~ resection, family = &quot;binomial&quot;, data = resect)
 
 Coefficients:
-            Estimate Std. Error t value Pr(&gt;|t|)    
-(Intercept)   19.074      1.787  10.676  &lt; 2e-16 ***
-resinB         3.815      2.260   1.688  0.09555 .  
-resinC         6.740      2.260   2.982  0.00386 ** 
-resinD        13.660      2.260   6.044 5.39e-08 ***
-lightLED      -1.317      1.598  -0.824  0.41229    
+(Intercept)    resection  
+    -4.4337       0.7417  
+
+Degrees of Freedom: 133 Total (i.e. Null);  132 Residual
+Null Deviance:      101.9 
+Residual Deviance: 89.49    AIC: 93.49</code></pre>
+<p>In addition to specifying the logistic regression coefficients, we are also presented with information on degrees of freedom, deviance (null and residual) and AIC.</p>
+<ul>
+<li>The degrees of freedom indicate the sample size.
+<ul>
+<li>Recall that we had <em>n</em> = 134 subjects in the data. The “Null” model includes only an intercept term (which uses 1 df) and we thus have <em>n</em> - 1 (here 133) degrees of freedom available for estimation.</li>
+<li>In our <code>res_modA</code> model, a logistic regression is fit including a single slope (resection) and an intercept term. Each uses up one degree of freedom to build an estimate, so we have <em>n</em> - 2 = 134 - 2 = 132 residual df remaining.</li>
+</ul></li>
+<li>The AIC or Akaike Information Criterion (lower values are better) is also provided. This is helpful if we’re comparing multiple models for the same outcome.</li>
+</ul>
+</div>
+<div id="deviance-and-comparing-our-model-to-the-null-model" class="section level3">
+<h3><span class="header-section-number">12.2.7</span> Deviance and Comparing Our Model to the Null Model</h3>
+<ul>
+<li>The deviance (a measure of the model’s <em>lack of fit</em>) is available for both the null model (the model with only an intercept) and for our model (<code>res_modA</code>) predicting our outcome, mortality.</li>
+<li>The deviance test, though available in R (see below) isn’t really a test of whether the model works well. Instead, it assumes the model is true, and then tests to see if the coefficients are detectably different from zero. So it isn’t of much practical use.
+<ul>
+<li>To compare the <code>deviance</code> statistics, we can subtract the residual deviance from the null deviance to decribe the impact of our model on fit.</li>
+<li>Null Deviance - Residual Deviance can be compared to a <span class="math inline">\(\chi^2\)</span> distribution with Null DF - Residual DF degrees of freedom to obtain a global test of the in-sample predictive power of our model.</li>
+<li>We can see this comparison more directly by running <code>anova</code> on our model:</li>
+</ul></li>
+</ul>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">anova</span>(res_modA)</code></pre></div>
+<pre><code>Analysis of Deviance Table
+
+Model: binomial, link: logit
+
+Response: died
+
+Terms added sequentially (first to last)
+
+          Df Deviance Resid. Df Resid. Dev
+NULL                        133    101.943
+resection  1    12.45       132     89.493</code></pre>
+<p>To complete a deviance test and obtain a <em>p</em> value, we can run the following code to estimate the probability that a chi-square distribution with a single degree of freedom would exhibit an improvement in deviance as large as 12.45.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">pchisq</span>(<span class="fl">12.45</span>, <span class="dv">1</span>, <span class="dt">lower.tail =</span> <span class="ot">FALSE</span>)</code></pre></div>
+<pre><code>[1] 0.0004179918</code></pre>
+<p>The <em>p</em> value for the deviance test here is about 0.0004. But, again, this isn’t a test of whether the model is any good - it assumes the model is true, and then tests some consequences.</p>
+<ul>
+<li>Specifically, it tests whether (if the model is TRUE) some of the model’s coefficients are non-zero.</li>
+<li>That’s not so practially useful, so I discourage you from performing global tests of a logistic regression model with a deviance test.</li>
+</ul>
+</div>
+<div id="using-glance-with-a-logistic-regression-model" class="section level3">
+<h3><span class="header-section-number">12.2.8</span> Using <code>glance</code> with a logistic regression model</h3>
+<p>We can use the <code>glance</code> function from the <code>broom</code> package to obtain the null and residual deviance and degrees of freedom. Note that the deviance for our model is related to the log likelihood by -2*<code>logLik</code>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">glance</span>(res_modA)</code></pre></div>
+<pre><code>  null.deviance df.null    logLik      AIC     BIC deviance df.residual
+1      101.9431     133 -44.74646 93.49292 99.2886 89.49292         132</code></pre>
+<p>The <code>glance</code> result also provides the AIC, and the BIC (Bayes Information Criterion), each of which is helpful in understanding comparisons between multiple models for the same outcome (with smaller values of either criterion indicating better models.) The AIC is based on the deviance, but penalizes you for making the model more complicated. The BIC does the same sort of thing but with a different penalty.</p>
+<p>Again we see that we have a null deviance of 101.94 on 133 degrees of freedom. Including the <code>resection</code> information in the model decreased the deviance to 89.49 points on 132 degrees of freedom, so that’s a decrease of 12.45 points while using one degree of freedom, a statistically significant reduction in deviance.</p>
+</div>
+</div>
+<div id="interpreting-the-model-summary" class="section level2">
+<h2><span class="header-section-number">12.3</span> Interpreting the Model Summary</h2>
+<p>Let’s get a more detailed summary of our <code>res_modA</code> model, including 95% confidence intervals for the coefficients:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(res_modA)</code></pre></div>
+<pre><code>
+Call:
+glm(formula = died ~ resection, family = &quot;binomial&quot;, data = resect)
+
+Deviance Residuals: 
+    Min       1Q   Median       3Q      Max  
+-1.1844  -0.5435  -0.3823  -0.2663   2.4501  
+
+Coefficients:
+            Estimate Std. Error z value Pr(&gt;|z|)    
+(Intercept)  -4.4337     0.8799  -5.039 4.67e-07 ***
+resection     0.7417     0.2230   3.327 0.000879 ***
 ---
 Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 
-Residual standard error: 7.147 on 75 degrees of freedom
-Multiple R-squared:  0.3469,    Adjusted R-squared:  0.312 
-F-statistic: 9.958 on 4 and 75 DF,  p-value: 1.616e-06</code></pre>
-<p>In the no-interaction model, if <code>light</code> = Halogen, our equation is:</p>
-<p><span class="math display">\[
-strength = 19.07 + 3.82 resinB + 6.74 resinC + 13.66 resinD
-\]</span></p>
-<p>And if <code>light</code> = LED, our equation is:</p>
-<p><span class="math display">\[
-strength = 17.75 + 3.82 resinB + 6.74 resinC + 13.66 resinD
-\]</span></p>
-<p>So, in the no-interaction model, only the intercept changes.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">anova</span>(c3_m2)</code></pre></div>
-<pre><code>Analysis of Variance Table
+(Dispersion parameter for binomial family taken to be 1)
 
-Response: strength
-          Df Sum Sq Mean Sq F value    Pr(&gt;F)    
-resin      3 1999.7  666.57 13.0514 6.036e-07 ***
-light      1   34.7   34.72  0.6797    0.4123    
-Residuals 75 3830.5   51.07                      
----
-Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
-<p>And, it appears, if we ignore the interaction, then <code>resin</code> type has a significant impact on <code>strength</code> but <code>light</code> source doesn’t. This is clearer when we look at boxplots of the separated <code>light</code> and <code>resin</code> groups.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">p1 &lt;-<span class="st"> </span><span class="kw">ggplot</span>(bonding, <span class="kw">aes</span>(<span class="dt">x =</span> light, <span class="dt">y =</span> strength)) <span class="op">+</span><span class="st"> </span>
-<span class="st">    </span><span class="kw">geom_boxplot</span>()
-p2 &lt;-<span class="st"> </span><span class="kw">ggplot</span>(bonding, <span class="kw">aes</span>(<span class="dt">x =</span> resin, <span class="dt">y =</span> strength)) <span class="op">+</span>
-<span class="st">    </span><span class="kw">geom_boxplot</span>()
+    Null deviance: 101.943  on 133  degrees of freedom
+Residual deviance:  89.493  on 132  degrees of freedom
+AIC: 93.493
 
-gridExtra<span class="op">::</span><span class="kw">grid.arrange</span>(p1, p2, <span class="dt">nrow =</span> <span class="dv">1</span>)</code></pre></div>
-<p><img src="bookdown-demo_files/figure-html/boxplots_c3_bonding_without_interaction-1.png" width="672" /></p>
+Number of Fisher Scoring iterations: 5</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">confint</span>(res_modA, <span class="dt">level =</span> <span class="fl">0.95</span>)</code></pre></div>
+<pre><code>Waiting for profiling to be done...</code></pre>
+<pre><code>                2.5 %    97.5 %
+(Intercept) -6.344472 -2.855856
+resection    0.322898  1.208311</code></pre>
+<p>Some elements of this summary are very familiar from our work with linear models.</p>
+<ul>
+<li>We still have a five-number summary of residuals, although these are called <em>deviance</em> residuals.</li>
+<li>We have a table of coefficients with standard errors, and hypothesis tests, although these are Wald z-tests, rather than the t tests we saw in linear modeling.</li>
+<li>We have a summary of global fit in the comparison of null deviance and residual deviance, but without a formal p value. And we have the AIC, as discussed above.</li>
+<li>We also have some new items related to a <em>dispersion</em> parameter and to the number of Fisher Scoring Iterations.</li>
+</ul>
+<p>Let’s walk through each of these elements.</p>
+<div id="wald-z-tests-for-coefficients-in-a-logistic-regression" class="section level3">
+<h3><span class="header-section-number">12.3.1</span> Wald Z tests for Coefficients in a Logistic Regression</h3>
+<p>The coefficients output provides the estimated coefficients, and their standard errors, plus a Wald Z statistic, which is just the estimated coefficient divided by its standard error. This is compared to a standard Normal distribution to obtain the two-tailed p values summarized in the <code>Pr(&gt;|z|)</code> column.</p>
+<ul>
+<li>The interesting result is <code>resection</code>, which has a Wald Z = 3.327, yielding a <em>p</em> value of 0.00088.</li>
+<li>The hypotheses being tested here are H_0_: <code>resection</code> does not have an effect on the log odds of <code>died</code> vs. H_A_: <code>resection</code> does have such an effect.</li>
+<li>Another way of stating this is that the <em>p</em> value assesses whether the estimated coefficient of <code>resection</code>, 0.7417, is statistically detectably different from 0. If the coefficient (on the logit scale) for <code>resection</code> was truly 0, this would mean that:
+<ul>
+<li>the log odds of death did not change based on the <code>resection</code> size,</li>
+<li>the odds of death were unchanged based on the <code>resection</code> size (the odds ratio would be 1), and</li>
+<li>the probability of death was unchanged based on the <code>resection</code> size.</li>
+</ul></li>
+</ul>
+<p>In our case, we have a statistically detectable change in the log odds of <code>died</code> associated with changes in <code>resection</code>, according to this <em>p</em> value. We conclude that <code>resection</code> size is associated with a positive impact on death rates (death rates are generally higher for people with larger resections.)</p>
 </div>
-<div id="cortisol-a-hypothetical-clinical-trial" class="section level2">
-<h2><span class="header-section-number">3.8</span> <code>cortisol</code>: A Hypothetical Clinical Trial</h2>
-<p>156 adults who complained of problems with a high-stress lifestyle were enrolled in a hypothetical clinical trial of the effectiveness of a behavioral intervention designed to help reduce stress levels, as measured by salivary cortisol.</p>
-<p>The subjects were randomly assigned to one of three intervention groups (usual care, low dose, and high dose.) The “low dose” subjects received a one-week intervention with a follow-up at week 5. The “high dose” subjects received a more intensive three-week intervention, with follow up at week 5.</p>
-<p>Since cortisol levels rise and fall with circadian rhythms, the cortisol measurements were taken just after rising for all subjects. These measurements were taken at baseline, and again at five weeks. The difference (baseline - week 5) in cortisol level (in micrograms / l) serves as the primary outcome.</p>
-<div id="codebook-and-raw-data-for-cortisol" class="section level3">
-<h3><span class="header-section-number">3.8.1</span> Codebook and Raw Data for <code>cortisol</code></h3>
-<p>The data are gathered in the <code>cortisol</code> data set. Included are:</p>
-<table>
+<div id="confidence-intervals-for-the-coefficients" class="section level3">
+<h3><span class="header-section-number">12.3.2</span> Confidence Intervals for the Coefficients</h3>
+<p>As in linear regression, we can obtain 95% confidence intervals (to get other levels, change the <code>level</code> parameter in <code>confint</code>) for the intercept and slope coefficients.</p>
+<p>Here, we see, for example, that the coefficient of <code>resection</code> has a point estimate of 0.7417, and a confidence interval of (0.3229, 1.208). Since this is on the logit scale, it’s not that interpretable, but we will often exponentiate the model and its confidence interval to obtain a more interpretable result on the odds ratio scale.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">exp</span>(<span class="kw">coef</span>(res_modA))</code></pre></div>
+<pre><code>(Intercept)   resection 
+ 0.01186995  2.09947754 </code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">exp</span>(<span class="kw">confint</span>(res_modA))</code></pre></div>
+<pre><code>Waiting for profiling to be done...</code></pre>
+<pre><code>                  2.5 %     97.5 %
+(Intercept) 0.001756429 0.05750655
+resection   1.381124459 3.34782604</code></pre>
+<p>From this output, we can estimate the odds ratio for death associated with a 1 cm increase in resection size is 2.099, with a 95% CI of (1.38, 3.35). - If the odds ratio was 1, it would indicate that the odds of death did not change based on the change in resection size. - Here, it’s clear that the estimated odds of death will be larger (odds &gt; 1) for subjects with larger resection sizes. Larger odds of death also indicate larger probabilities of death. This confidence interval indicates that with 95% confidence, we conclude that increases in resection size are associated with statistically detectable increases in the odds of death. - If the odds ratio was less than 1 (remember that it cannot be less than 0) that would mean that subjects with larger resection sizes were associated with smaller estimated odds of death.</p>
+</div>
+<div id="deviance-residuals" class="section level3">
+<h3><span class="header-section-number">12.3.3</span> Deviance Residuals</h3>
+<p>In logistic regression, it’s certainly a good idea to check to see how well the model fits the data. However, there are a few different types of residuals. The residuals presented here by default are called deviance residuals. Other types of residuals are available for generalized linear models, such as Pearson residuals, working residuals, and response residuals. Logistic regression model diagnostics often make use of multiple types of residuals.</p>
+<p>The deviance residuals for each individual subject sum up to the deviance statistic for the model, and describe the contribution of each point to the model likelihood function.</p>
+<p>The deviance residual, <span class="math inline">\(d_i\)</span>, for the i<sup>th</sup> observation in a model predicting <span class="math inline">\(y_i\)</span> (a binary variable), with the estimate being <span class="math inline">\(\hat{\pi}_i\)</span> is:</p>
+<p><span class="math display">\[
+d_i = s_i \sqrt{-2 [y_i log \hat{\pi_i} + (1 - y_i) log(1 - \hat{\pi_i})]},
+\]</span></p>
+<p>where <span class="math inline">\(s_i\)</span> is 1 if <span class="math inline">\(y_i = 1\)</span> and <span class="math inline">\(s_i = -1\)</span> if <span class="math inline">\(y_i = 0\)</span>.</p>
+<p>Again, the sum of the deviance residuals is the deviance.</p>
+</div>
+<div id="dispersion-parameter" class="section level3">
+<h3><span class="header-section-number">12.3.4</span> Dispersion Parameter</h3>
+<p>The dispersion parameter is taken to be 1 for <code>glm</code> fit using either the <code>binomial</code> or <code>Poisson</code> families. For other sorts of generalized linear models, the dispersion parameter will be of some importance in estimating standard errors sensibly.</p>
+</div>
+<div id="fisher-scoring-iterations" class="section level3">
+<h3><span class="header-section-number">12.3.5</span> Fisher Scoring iterations</h3>
+<p>The solution of a logistic regression model involves maximizing a likelihood function. Fisher’s scoring algorithm in our <code>res_modA</code> needed five iterations to perform the logistic regression fit. All that this tells you is that the model converged, and didn’t require a lot of time to do so.</p>
+</div>
+</div>
+<div id="plotting-a-simple-logistic-regression-model" class="section level2">
+<h2><span class="header-section-number">12.4</span> Plotting a Simple Logistic Regression Model</h2>
+<p>Let’s plot the logistic regression model <code>res_modA</code> for <code>died</code> using the extent of the resection in terms of probabilities. We can use either of two different approaches:</p>
+<ul>
+<li>we can plot the fitted values from our specific model against the original data, using the <code>augment</code> function from the <code>broom</code> package, or</li>
+<li>we can create a smooth function called <code>binomial_smooth</code> that plots a simple logistic model in an analogous way to <code>geom_smooth(method = &quot;lm&quot;)</code> for a simple linear regression.</li>
+</ul>
+<div id="using-augment-to-capture-the-fitted-probabilities" class="section level3">
+<h3><span class="header-section-number">12.4.1</span> Using <code>augment</code> to capture the fitted probabilities</h3>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">res_A_aug &lt;-<span class="st"> </span><span class="kw">augment</span>(res_modA, resect, 
+                     <span class="dt">type.predict =</span> <span class="st">&quot;response&quot;</span>)
+<span class="kw">head</span>(res_A_aug)</code></pre></div>
+<pre><code>  id age prior resection intubated died    .fitted    .se.fit     .resid
+1  1  34     1       2.5         0    0 0.07046791 0.02562381 -0.3822929
+2  2  57     0       5.0         0    0 0.32622637 0.08605551 -0.8886631
+3  3  60     1       4.0         1    1 0.18740037 0.04269795  1.8300317
+4  4  62     1       4.2         0    0 0.21104240 0.04871389 -0.6885386
+5  5  28     0       6.0         1    1 0.50409637 0.14302982  1.1704596
+6  6  52     0       3.0         0    0 0.09897375 0.02867196 -0.4565542
+         .hat    .sigma      .cooksd .std.resid
+1 0.010024061 0.8258481 0.0003876961 -0.3842235
+2 0.033691765 0.8227475 0.0087350915 -0.9040227
+3 0.011972088 0.8107264 0.0265893468  1.8410857
+4 0.014252277 0.8243062 0.0019617278 -0.6934983
+5 0.081835623 0.8196110 0.0477480056  1.2215077
+6 0.009218619 0.8255581 0.0005157780 -0.4586733</code></pre>
+<p>This approach augments the <code>resect</code> data set with fitted, residual and other summaries of each observation’s impact on the fit, using the “response” type of prediction, which yields the fitted probabilities in the <code>.fitted</code> column.</p>
+</div>
+<div id="plotting-a-logistic-regression-models-fitted-values" class="section level3">
+<h3><span class="header-section-number">12.4.2</span> Plotting a Logistic Regression Model’s Fitted Values</h3>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">ggplot</span>(res_A_aug, <span class="kw">aes</span>(<span class="dt">x =</span> resection, <span class="dt">y =</span> died)) <span class="op">+</span>
+<span class="st">    </span><span class="kw">geom_jitter</span>(<span class="dt">height =</span> <span class="fl">0.05</span>) <span class="op">+</span>
+<span class="st">    </span><span class="kw">geom_line</span>(<span class="kw">aes</span>(<span class="dt">x =</span> resection, <span class="dt">y =</span> .fitted), 
+              <span class="dt">col =</span> <span class="st">&quot;blue&quot;</span>) <span class="op">+</span>
+<span class="st">    </span><span class="kw">labs</span>(<span class="dt">title =</span> <span class="st">&quot;Logistic Regression from Model res_modA&quot;</span>)</code></pre></div>
+<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-153-1.png" width="672" /></p>
+</div>
+<div id="plotting-a-simple-logistic-model-using-binomial_smooth" class="section level3">
+<h3><span class="header-section-number">12.4.3</span> Plotting a Simple Logistic Model using <code>binomial_smooth</code></h3>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">binomial_smooth &lt;-<span class="st"> </span><span class="cf">function</span>(...) {
+  <span class="kw">geom_smooth</span>(<span class="dt">method =</span> <span class="st">&quot;glm&quot;</span>, 
+              <span class="dt">method.args =</span> <span class="kw">list</span>(<span class="dt">family =</span> <span class="st">&quot;binomial&quot;</span>), ...)
+}
+
+<span class="kw">ggplot</span>(resect, <span class="kw">aes</span>(<span class="dt">x =</span> resection, <span class="dt">y =</span> died)) <span class="op">+</span>
+<span class="st">  </span><span class="kw">geom_jitter</span>(<span class="dt">height =</span> <span class="fl">0.05</span>) <span class="op">+</span>
+<span class="st">  </span><span class="kw">binomial_smooth</span>() <span class="op">+</span><span class="st"> </span>## ...smooth(se=FALSE) to leave out interval
+<span class="st">  </span><span class="kw">labs</span>(<span class="dt">title =</span> <span class="st">&quot;Logistic Regression from Model A&quot;</span>) <span class="op">+</span>
+<span class="st">  </span><span class="kw">theme_bw</span>()</code></pre></div>
+<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-154-1.png" width="672" /></p>
+<p>As expected, we see an increase in the model probability of death as the extent of the resection grows larger.</p>
+</div>
+</div>
+<div id="receiver-operating-characteristic-curve-analysis" class="section level2">
+<h2><span class="header-section-number">12.5</span> Receiver Operating Characteristic Curve Analysis</h2>
+<p>One way to assess the predictive accuracy within the model development sample in a logistic regression is to consider an analyses based on the receiver operating characteristic (ROC) curve. ROC curves are commonly used in assessing diagnoses in medical settings, and in signal detection applications.</p>
+<p>The accuracy of a “test” can be evaluated by considering two types of errors: false positives and false negatives.</p>
+<p>In our <code>res_modA</code> model, we use <code>resection</code> size to predict whether the patient <code>died</code>. Suppopse we established a value R, so that if the resection size was larger than R cm, we would predict that the patient <code>died</code>, and otherwise we would predict that the patient did not die.</p>
+<p>A good outcome of our model’s “test”, then, would be when the resection size is larger than R for a patient who actually died. Another good outcome would be when the resection size is smaller than R for a patient who survived.</p>
+<p>But we can make errors, too.</p>
+<ul>
+<li>A false positive error in this setting would occur when the resection size is larger than R (so we predict the patient dies) but in fact the patient does not die.</li>
+<li>A false negative error in this case would occur when the resection size is smaller than R (so we predict the patient survives) but in fact the patient dies.</li>
+</ul>
+<p>Formally, the true positive fraction (TPF) for a specific resection cutoff <span class="math inline">\(R\)</span>, is the probability of a positive test (a prediction that the patient will die) among the people who have the outcome died = 1 (those who actually die).</p>
+<p><span class="math display">\[
+TPF(R) = Pr(resection &gt; R | subject died)
+\]</span></p>
+<p>Similarly, the false positive fraction (FPF) for a specific cutoff <span class="math inline">\(R\)</span> is the probability of a positive test (prediction that the patient will die) among the people with died = 0 (those who don’t actually die)</p>
+<p><span class="math display">\[
+FPF(R) = Pr(resection &gt; R | subject did not die)
+\]</span></p>
+<p>The True Positive Rate is referred to as the sensitivity of a diagnostic test, and the True Negative rate (1 - the False Positive rate) is referred to as the specificity of a diagnostic test.</p>
+<p>Since the cutoff <span class="math inline">\(R\)</span> is not fixed in advanced, we can plot the value of TPF (on the y axis) against FPF (on the x axis) for all possible values of <span class="math inline">\(R\)</span>, and this is what the ROC curve is. Others refer to the Sensitivity on the Y axis, and 1-Specificity on the X axis, and this is the same idea.</p>
+<p>Before we get too far into the weeds, let me show you some simple situations so you can understand what you might learn from the ROC curve. The web page <a href="http://blog.yhat.com/posts/roc-curves.html" class="uri">http://blog.yhat.com/posts/roc-curves.html</a> provides source materials.</p>
+<div id="interpreting-the-area-under-the-roc-curve" class="section level3">
+<h3><span class="header-section-number">12.5.1</span> Interpreting the Area under the ROC curve</h3>
+<p>The AUC or Area under the ROC curve is the amount of space underneath the ROC curve. Often referred to as the c statistic, the AUC represents the quality of your TPR and FPR overall in a single number. The C statistic ranges from 0 to 1, with C = 0.5 for a prediction that is no better than random guessing, and C = 1 for a perfect prediction model.</p>
+<p>Next, I’ll build a simulation to demonstrate several possible ROC curves in the sections that follow.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">set.seed</span>(<span class="dv">432999</span>)
+sim.temp &lt;-<span class="st"> </span><span class="kw">data_frame</span>(<span class="dt">x =</span> <span class="kw">rnorm</span>(<span class="dt">n =</span> <span class="dv">200</span>), 
+                       <span class="dt">prob =</span> <span class="kw">exp</span>(x)<span class="op">/</span>(<span class="dv">1</span> <span class="op">+</span><span class="st"> </span><span class="kw">exp</span>(x)), 
+                       <span class="dt">y =</span> <span class="kw">as.numeric</span>(<span class="dv">1</span> <span class="op">*</span><span class="st"> </span><span class="kw">runif</span>(<span class="dv">200</span>) <span class="op">&lt;</span><span class="st"> </span>prob))
+
+sim.temp &lt;-<span class="st"> </span>sim.temp <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">mutate</span>(<span class="dt">p_guess =</span> <span class="dv">1</span>,
+           <span class="dt">p_perfect =</span> y, 
+           <span class="dt">p_bad =</span> <span class="kw">exp</span>(<span class="op">-</span><span class="dv">2</span><span class="op">*</span>x) <span class="op">/</span><span class="st"> </span>(<span class="dv">1</span> <span class="op">+</span><span class="st"> </span><span class="kw">exp</span>(<span class="op">-</span><span class="dv">2</span><span class="op">*</span>x)),
+           <span class="dt">p_ok =</span> prob <span class="op">+</span><span class="st"> </span>(<span class="dv">1</span><span class="op">-</span>y)<span class="op">*</span><span class="kw">runif</span>(<span class="dv">1</span>, <span class="dv">0</span>, <span class="fl">0.05</span>),
+           <span class="dt">p_good =</span> prob <span class="op">+</span><span class="st"> </span>y<span class="op">*</span><span class="kw">runif</span>(<span class="dv">1</span>, <span class="dv">0</span>, <span class="fl">0.27</span>))</code></pre></div>
+<div id="what-if-we-are-guessing" class="section level4">
+<h4><span class="header-section-number">12.5.1.1</span> What if we are guessing?</h4>
+<p>If we’re guessing completely at random, then the model should correctly classify a subject (as died or not died) about 50% of the time, so the TPR and FPR will be equal. This yields a diagonal line in the ROC curve, and an area under the curve (C statistic) of 0.5.</p>
+<p>There are several ways to do this on the web, but I’ll show this one, which has some bizarre code, but that’s a function of using a package called <code>ROCR</code> to do the work. It comes from <a href="http://blog.yhat.com/posts/roc-curves.html">this link</a></p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">pred_guess &lt;-<span class="st"> </span><span class="kw">prediction</span>(sim.temp<span class="op">$</span>p_guess, sim.temp<span class="op">$</span>y)
+perf_guess &lt;-<span class="st"> </span><span class="kw">performance</span>(pred_guess, <span class="dt">measure =</span> <span class="st">&quot;tpr&quot;</span>, <span class="dt">x.measure =</span> <span class="st">&quot;fpr&quot;</span>)
+auc_guess &lt;-<span class="st"> </span><span class="kw">performance</span>(pred_guess, <span class="dt">measure=</span><span class="st">&quot;auc&quot;</span>)
+
+auc_guess &lt;-<span class="st"> </span><span class="kw">round</span>(auc_guess<span class="op">@</span>y.values[[<span class="dv">1</span>]],<span class="dv">3</span>)
+roc_guess &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">fpr=</span><span class="kw">unlist</span>(perf_guess<span class="op">@</span>x.values),
+                        <span class="dt">tpr=</span><span class="kw">unlist</span>(perf_guess<span class="op">@</span>y.values),
+                        <span class="dt">model=</span><span class="st">&quot;GLM&quot;</span>)
+
+<span class="kw">ggplot</span>(roc_guess, <span class="kw">aes</span>(<span class="dt">x=</span>fpr, <span class="dt">ymin=</span><span class="dv">0</span>, <span class="dt">ymax=</span>tpr)) <span class="op">+</span>
+<span class="st">    </span><span class="kw">geom_ribbon</span>(<span class="dt">alpha=</span><span class="fl">0.2</span>, <span class="dt">fill =</span> <span class="st">&quot;blue&quot;</span>) <span class="op">+</span>
+<span class="st">    </span><span class="kw">geom_line</span>(<span class="kw">aes</span>(<span class="dt">y=</span>tpr), <span class="dt">col =</span> <span class="st">&quot;blue&quot;</span>) <span class="op">+</span>
+<span class="st">    </span><span class="kw">labs</span>(<span class="dt">title =</span> <span class="kw">paste0</span>(<span class="st">&quot;Guessing: ROC Curve w/ AUC=&quot;</span>, auc_guess)) <span class="op">+</span>
+<span class="st">    </span><span class="kw">theme_bw</span>()</code></pre></div>
+<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-156-1.png" width="672" /></p>
+</div>
+<div id="what-if-we-classify-things-perfectly" class="section level4">
+<h4><span class="header-section-number">12.5.1.2</span> What if we classify things perfectly?</h4>
+<p>If we’re classifying subjects perfectly, then we have a TPR of 1 and an FPR of 0. That yields an ROC curve that looks like the upper and left edges of a box. If our model correctly classifies a subject (as died or not died) 100% of the time, the area under the curve (c statistic) will be 1.0. We’ll add in the diagonal line here (in a dashed black line) to show how this model compares to random guessing.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">pred_perf &lt;-<span class="st"> </span><span class="kw">prediction</span>(sim.temp<span class="op">$</span>p_perfect, sim.temp<span class="op">$</span>y)
+perf_perf &lt;-<span class="st"> </span><span class="kw">performance</span>(pred_perf, <span class="dt">measure =</span> <span class="st">&quot;tpr&quot;</span>, <span class="dt">x.measure =</span> <span class="st">&quot;fpr&quot;</span>)
+auc_perf &lt;-<span class="st"> </span><span class="kw">performance</span>(pred_perf, <span class="dt">measure=</span><span class="st">&quot;auc&quot;</span>)
+
+auc_perf &lt;-<span class="st"> </span><span class="kw">round</span>(auc_perf<span class="op">@</span>y.values[[<span class="dv">1</span>]],<span class="dv">3</span>)
+roc_perf &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">fpr=</span><span class="kw">unlist</span>(perf_perf<span class="op">@</span>x.values),
+                        <span class="dt">tpr=</span><span class="kw">unlist</span>(perf_perf<span class="op">@</span>y.values),
+                        <span class="dt">model=</span><span class="st">&quot;GLM&quot;</span>)
+
+<span class="kw">ggplot</span>(roc_perf, <span class="kw">aes</span>(<span class="dt">x=</span>fpr, <span class="dt">ymin=</span><span class="dv">0</span>, <span class="dt">ymax=</span>tpr)) <span class="op">+</span>
+<span class="st">    </span><span class="kw">geom_ribbon</span>(<span class="dt">alpha=</span><span class="fl">0.2</span>, <span class="dt">fill =</span> <span class="st">&quot;blue&quot;</span>) <span class="op">+</span>
+<span class="st">    </span><span class="kw">geom_line</span>(<span class="kw">aes</span>(<span class="dt">y=</span>tpr), <span class="dt">col =</span> <span class="st">&quot;blue&quot;</span>) <span class="op">+</span>
+<span class="st">    </span><span class="kw">geom_abline</span>(<span class="dt">intercept =</span> <span class="dv">0</span>, <span class="dt">slope =</span> <span class="dv">1</span>, <span class="dt">lty =</span> <span class="st">&quot;dashed&quot;</span>) <span class="op">+</span>
+<span class="st">    </span><span class="kw">labs</span>(<span class="dt">title =</span> <span class="kw">paste0</span>(<span class="st">&quot;Perfect Prediction: ROC Curve w/ AUC=&quot;</span>, auc_perf)) <span class="op">+</span>
+<span class="st">    </span><span class="kw">theme_bw</span>()</code></pre></div>
+<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-157-1.png" width="672" /></p>
+</div>
+<div id="what-does-worse-than-guessing-look-like" class="section level4">
+<h4><span class="header-section-number">12.5.1.3</span> What does “worse than guessing” look like?</h4>
+<p>A bad classifier will appear below and to the right of the diagonal line we’d see if we were completely guessing. Such a model will have a c statistic below 0.5, and will be valueless.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">pred_bad &lt;-<span class="st"> </span><span class="kw">prediction</span>(sim.temp<span class="op">$</span>p_bad, sim.temp<span class="op">$</span>y)
+perf_bad &lt;-<span class="st"> </span><span class="kw">performance</span>(pred_bad, <span class="dt">measure =</span> <span class="st">&quot;tpr&quot;</span>, <span class="dt">x.measure =</span> <span class="st">&quot;fpr&quot;</span>)
+auc_bad &lt;-<span class="st"> </span><span class="kw">performance</span>(pred_bad, <span class="dt">measure=</span><span class="st">&quot;auc&quot;</span>)
+
+auc_bad &lt;-<span class="st"> </span><span class="kw">round</span>(auc_bad<span class="op">@</span>y.values[[<span class="dv">1</span>]],<span class="dv">3</span>)
+roc_bad &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">fpr=</span><span class="kw">unlist</span>(perf_bad<span class="op">@</span>x.values),
+                        <span class="dt">tpr=</span><span class="kw">unlist</span>(perf_bad<span class="op">@</span>y.values),
+                        <span class="dt">model=</span><span class="st">&quot;GLM&quot;</span>)
+
+<span class="kw">ggplot</span>(roc_bad, <span class="kw">aes</span>(<span class="dt">x=</span>fpr, <span class="dt">ymin=</span><span class="dv">0</span>, <span class="dt">ymax=</span>tpr)) <span class="op">+</span>
+<span class="st">    </span><span class="kw">geom_ribbon</span>(<span class="dt">alpha=</span><span class="fl">0.2</span>, <span class="dt">fill =</span> <span class="st">&quot;blue&quot;</span>) <span class="op">+</span>
+<span class="st">    </span><span class="kw">geom_line</span>(<span class="kw">aes</span>(<span class="dt">y=</span>tpr), <span class="dt">col =</span> <span class="st">&quot;blue&quot;</span>) <span class="op">+</span>
+<span class="st">    </span><span class="kw">geom_abline</span>(<span class="dt">intercept =</span> <span class="dv">0</span>, <span class="dt">slope =</span> <span class="dv">1</span>, <span class="dt">lty =</span> <span class="st">&quot;dashed&quot;</span>) <span class="op">+</span>
+<span class="st">    </span><span class="kw">labs</span>(<span class="dt">title =</span> <span class="kw">paste0</span>(<span class="st">&quot;A Bad Model: ROC Curve w/ AUC=&quot;</span>, auc_bad)) <span class="op">+</span>
+<span class="st">    </span><span class="kw">theme_bw</span>()</code></pre></div>
+<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-158-1.png" width="672" /></p>
+</div>
+<div id="what-does-better-than-guessing-look-like" class="section level4">
+<h4><span class="header-section-number">12.5.1.4</span> What does “better than guessing” look like?</h4>
+<p>An “OK” classifier will appear above and to the left of the diagonal line we’d see if we were completely guessing. Such a model will have a c statistic above 0.5, and might have some value. The plot below shows a very fairly poor model, but at least it’s better than guessing.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">pred_ok &lt;-<span class="st"> </span><span class="kw">prediction</span>(sim.temp<span class="op">$</span>p_ok, sim.temp<span class="op">$</span>y)
+perf_ok &lt;-<span class="st"> </span><span class="kw">performance</span>(pred_ok, <span class="dt">measure =</span> <span class="st">&quot;tpr&quot;</span>, <span class="dt">x.measure =</span> <span class="st">&quot;fpr&quot;</span>)
+auc_ok &lt;-<span class="st"> </span><span class="kw">performance</span>(pred_ok, <span class="dt">measure=</span><span class="st">&quot;auc&quot;</span>)
+
+auc_ok &lt;-<span class="st"> </span><span class="kw">round</span>(auc_ok<span class="op">@</span>y.values[[<span class="dv">1</span>]],<span class="dv">3</span>)
+roc_ok &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">fpr=</span><span class="kw">unlist</span>(perf_ok<span class="op">@</span>x.values),
+                        <span class="dt">tpr=</span><span class="kw">unlist</span>(perf_ok<span class="op">@</span>y.values),
+                        <span class="dt">model=</span><span class="st">&quot;GLM&quot;</span>)
+
+<span class="kw">ggplot</span>(roc_ok, <span class="kw">aes</span>(<span class="dt">x=</span>fpr, <span class="dt">ymin=</span><span class="dv">0</span>, <span class="dt">ymax=</span>tpr)) <span class="op">+</span>
+<span class="st">    </span><span class="kw">geom_ribbon</span>(<span class="dt">alpha=</span><span class="fl">0.2</span>, <span class="dt">fill =</span> <span class="st">&quot;blue&quot;</span>) <span class="op">+</span>
+<span class="st">    </span><span class="kw">geom_line</span>(<span class="kw">aes</span>(<span class="dt">y=</span>tpr), <span class="dt">col =</span> <span class="st">&quot;blue&quot;</span>) <span class="op">+</span>
+<span class="st">    </span><span class="kw">geom_abline</span>(<span class="dt">intercept =</span> <span class="dv">0</span>, <span class="dt">slope =</span> <span class="dv">1</span>, <span class="dt">lty =</span> <span class="st">&quot;dashed&quot;</span>) <span class="op">+</span>
+<span class="st">    </span><span class="kw">labs</span>(<span class="dt">title =</span> <span class="kw">paste0</span>(<span class="st">&quot;A Mediocre Model: ROC Curve w/ AUC=&quot;</span>, auc_ok)) <span class="op">+</span>
+<span class="st">    </span><span class="kw">theme_bw</span>()</code></pre></div>
+<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-159-1.png" width="672" /></p>
+<p>Sometimes people grasp for a rough guide as to the accuracy of a model’s predictions based on the area under the ROC curve. A common thought is to assess the C statistic much like you would a class grade.</p>
+<table style="width:81%;">
+<colgroup>
+<col width="16%" />
+<col width="63%" />
+</colgroup>
 <thead>
 <tr class="header">
-<th align="right">Variable</th>
-<th>Description</th>
+<th align="right">C statistic</th>
+<th>Interpretation</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td align="right"><code>subject</code></td>
-<td>subject identification code</td>
+<td align="right">0.90 to 1.00</td>
+<td>model does an excellent job at discriminating “yes” from “no” (A)</td>
 </tr>
 <tr class="even">
-<td align="right"><code>interv</code></td>
-<td>intervention group (UC = usual care, Low, High)</td>
+<td align="right">0.80 to 0.90</td>
+<td>model does a good job (B)</td>
 </tr>
 <tr class="odd">
-<td align="right"><code>waist</code></td>
-<td>waist circumference at baseline (in inches)</td>
+<td align="right">0.70 to 0.80</td>
+<td>model does a fair job (C)</td>
 </tr>
 <tr class="even">
-<td align="right"><code>sex</code></td>
-<td>male or female</td>
+<td align="right">0.60 to 0.70</td>
+<td>model does a poor job (D)</td>
 </tr>
 <tr class="odd">
-<td align="right"><code>cort.1</code></td>
-<td>salivary cortisol level (microg/l) week 1</td>
+<td align="right">0.50 to 0.60</td>
+<td>model fails (F)</td>
 </tr>
 <tr class="even">
-<td align="right"><code>cort.5</code></td>
-<td>salivary cortisol level (microg/l) week 5</td>
+<td align="right">below 0.50</td>
+<td>model is worse than random guessing</td>
 </tr>
 </tbody>
 </table>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">cortisol</code></pre></div>
-<pre><code># A tibble: 156 x 6
-   subject interv waist sex   cort.1 cort.5
-     &lt;int&gt; &lt;fct&gt;  &lt;dbl&gt; &lt;fct&gt;  &lt;dbl&gt;  &lt;dbl&gt;
- 1    1001 UC      48.3 M      13.4   13.3 
- 2    1002 Low     58.3 M      17.8   16.6 
- 3    1003 High    43.0 M      14.4   12.7 
- 4    1004 Low     44.9 M       9.00   9.80
- 5    1005 High    46.1 M      14.2   14.2 
- 6    1006 UC      41.3 M      14.8   15.1 
- 7    1007 Low     51.0 F      13.7   16.0 
- 8    1008 UC      42.0 F      17.3   18.7 
- 9    1009 Low     24.7 F      15.3   15.8 
-10    1010 Low     59.4 M      12.4   11.7 
-# ... with 146 more rows</code></pre>
+</div>
+<div id="what-does-pretty-good-look-like" class="section level4">
+<h4><span class="header-section-number">12.5.1.5</span> What does “pretty good” look like?</h4>
+<p>A strong and good classifier will appear above and to the left of the diagonal line we’d see if we were completely guessing, often with a nice curve that is continually increasing and appears to be pulled up towards the top left. Such a model will have a c statistic well above 0.5, but not as large as 1. The plot below shows a stronger model, which appears substantially better than guessing.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">pred_good &lt;-<span class="st"> </span><span class="kw">prediction</span>(sim.temp<span class="op">$</span>p_good, sim.temp<span class="op">$</span>y)
+perf_good &lt;-<span class="st"> </span><span class="kw">performance</span>(pred_good, <span class="dt">measure =</span> <span class="st">&quot;tpr&quot;</span>, <span class="dt">x.measure =</span> <span class="st">&quot;fpr&quot;</span>)
+auc_good &lt;-<span class="st"> </span><span class="kw">performance</span>(pred_good, <span class="dt">measure=</span><span class="st">&quot;auc&quot;</span>)
+
+auc_good &lt;-<span class="st"> </span><span class="kw">round</span>(auc_good<span class="op">@</span>y.values[[<span class="dv">1</span>]],<span class="dv">3</span>)
+roc_good &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">fpr=</span><span class="kw">unlist</span>(perf_good<span class="op">@</span>x.values),
+                        <span class="dt">tpr=</span><span class="kw">unlist</span>(perf_good<span class="op">@</span>y.values),
+                        <span class="dt">model=</span><span class="st">&quot;GLM&quot;</span>)
+
+<span class="kw">ggplot</span>(roc_good, <span class="kw">aes</span>(<span class="dt">x=</span>fpr, <span class="dt">ymin=</span><span class="dv">0</span>, <span class="dt">ymax=</span>tpr)) <span class="op">+</span>
+<span class="st">    </span><span class="kw">geom_ribbon</span>(<span class="dt">alpha=</span><span class="fl">0.2</span>, <span class="dt">fill =</span> <span class="st">&quot;blue&quot;</span>) <span class="op">+</span>
+<span class="st">    </span><span class="kw">geom_line</span>(<span class="kw">aes</span>(<span class="dt">y=</span>tpr), <span class="dt">col =</span> <span class="st">&quot;blue&quot;</span>) <span class="op">+</span>
+<span class="st">    </span><span class="kw">geom_abline</span>(<span class="dt">intercept =</span> <span class="dv">0</span>, <span class="dt">slope =</span> <span class="dv">1</span>, <span class="dt">lty =</span> <span class="st">&quot;dashed&quot;</span>) <span class="op">+</span>
+<span class="st">    </span><span class="kw">labs</span>(<span class="dt">title =</span> <span class="kw">paste0</span>(<span class="st">&quot;A Pretty Good Model: ROC Curve w/ AUC=&quot;</span>, auc_good)) <span class="op">+</span>
+<span class="st">    </span><span class="kw">theme_bw</span>()</code></pre></div>
+<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-160-1.png" width="672" /></p>
 </div>
 </div>
-<div id="creating-a-factor-combining-sex-and-waist" class="section level2">
-<h2><span class="header-section-number">3.9</span> Creating a factor combining sex and waist</h2>
-<p>Next, we’ll put the <code>waist</code> and <code>sex</code> data in the <code>cortisol</code> example together. We want to build a second categorical variable (called <code>fat_est</code>) combining this information, to indicate “healthy” vs. “unhealthy” levels of fat around the waist.</p>
+</div>
+<div id="the-roc-plot-for-res_moda" class="section level2">
+<h2><span class="header-section-number">12.6</span> The ROC Plot for <code>res_modA</code></h2>
+<p>Let me show you the ROC curve for our <code>res_modA</code> model.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## requires ROCR package
+prob &lt;-<span class="st"> </span><span class="kw">predict</span>(res_modA, resect, <span class="dt">type=</span><span class="st">&quot;response&quot;</span>)
+pred &lt;-<span class="st"> </span><span class="kw">prediction</span>(prob, resect<span class="op">$</span>died)
+perf &lt;-<span class="st"> </span><span class="kw">performance</span>(pred, <span class="dt">measure =</span> <span class="st">&quot;tpr&quot;</span>, <span class="dt">x.measure =</span> <span class="st">&quot;fpr&quot;</span>)
+auc &lt;-<span class="st"> </span><span class="kw">performance</span>(pred, <span class="dt">measure=</span><span class="st">&quot;auc&quot;</span>)
+## the rest of this code is a little strange
+auc &lt;-<span class="st"> </span><span class="kw">round</span>(auc<span class="op">@</span>y.values[[<span class="dv">1</span>]],<span class="dv">3</span>)
+roc.data &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">fpr=</span><span class="kw">unlist</span>(perf<span class="op">@</span>x.values),
+                       <span class="dt">tpr=</span><span class="kw">unlist</span>(perf<span class="op">@</span>y.values),
+                       <span class="dt">model=</span><span class="st">&quot;GLM&quot;</span>)
+
+<span class="kw">ggplot</span>(roc.data, <span class="kw">aes</span>(<span class="dt">x=</span>fpr, <span class="dt">ymin=</span><span class="dv">0</span>, <span class="dt">ymax=</span>tpr)) <span class="op">+</span>
+<span class="st">    </span><span class="kw">geom_ribbon</span>(<span class="dt">alpha=</span><span class="fl">0.2</span>, <span class="dt">fill =</span> <span class="st">&quot;blue&quot;</span>) <span class="op">+</span>
+<span class="st">    </span><span class="kw">geom_line</span>(<span class="kw">aes</span>(<span class="dt">y=</span>tpr), <span class="dt">col =</span> <span class="st">&quot;blue&quot;</span>) <span class="op">+</span>
+<span class="st">    </span><span class="kw">geom_abline</span>(<span class="dt">intercept =</span> <span class="dv">0</span>, <span class="dt">slope =</span> <span class="dv">1</span>, <span class="dt">lty =</span> <span class="st">&quot;dashed&quot;</span>) <span class="op">+</span>
+<span class="st">    </span><span class="kw">labs</span>(<span class="dt">title =</span> <span class="kw">paste0</span>(<span class="st">&quot;ROC Curve w/ AUC=&quot;</span>, auc)) <span class="op">+</span>
+<span class="st">    </span><span class="kw">theme_bw</span>()</code></pre></div>
+<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-161-1.png" width="672" /></p>
+<p>Based on the C statistic (AUC = 0.771) this would rank somewhere near the high end of a “fair” predictive model by this standard, not quite to the level of a “good” model.</p>
+</div>
+<div id="assessing-residual-plots-from-model-a" class="section level2">
+<h2><span class="header-section-number">12.7</span> Assessing Residual Plots from Model A</h2>
+<blockquote>
+<p>Residuals are certainly less informative for logistic regression than they are for linear regression: not only do yes/no outcomes inherently contain less information than continuous ones, but the fact that the adjusted response depends on the fit hampers our ability to use residuals as external checks on the model.</p>
+</blockquote>
+<blockquote>
+<p>This is mitigated to some extent, however, by the fact that we are also making fewer distributional assumptions in logistic regression, so there is no need to inspect residuals for, say, skewness or heteroskedasticity.</p>
+</blockquote>
 <ul>
-<li>Male subjects whose waist circumference is 40 inches or more, and</li>
-<li>Female subjects whose waist circumference is 35 inches or more, will fall in the “unhealthy” group.</li>
+<li>Patrick Breheny, University of Kentucky, <a href="https://web.as.uky.edu/statistics/users/pbreheny/760/S13/notes/3-26.pdf">Slides on GLM Residuals and Diagnostics</a></li>
 </ul>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">cortisol &lt;-<span class="st"> </span>cortisol <span class="op">%&gt;%</span>
-<span class="st">    </span><span class="kw">mutate</span>(
-        <span class="dt">fat_est =</span> <span class="kw">factor</span>(<span class="kw">case_when</span>(
-            sex <span class="op">==</span><span class="st"> &quot;M&quot;</span> <span class="op">&amp;</span><span class="st"> </span>waist <span class="op">&gt;=</span><span class="st"> </span><span class="dv">40</span> <span class="op">~</span><span class="st"> &quot;unhealthy&quot;</span>,
-            sex <span class="op">==</span><span class="st"> &quot;F&quot;</span> <span class="op">&amp;</span><span class="st"> </span>waist <span class="op">&gt;=</span><span class="st"> </span><span class="dv">35</span> <span class="op">~</span><span class="st"> &quot;unhealthy&quot;</span>,
-            <span class="ot">TRUE</span>                     <span class="op">~</span><span class="st"> &quot;healthy&quot;</span>)),
-        <span class="dt">cort_diff =</span> cort.<span class="dv">1</span> <span class="op">-</span><span class="st"> </span>cort.<span class="dv">5</span>)
-
-<span class="kw">summary</span>(cortisol)</code></pre></div>
-<pre><code>    subject      interv       waist       sex        cort.1      
- Min.   :1001   High:53   Min.   :20.80   F:83   Min.   : 6.000  
- 1st Qu.:1040   Low :52   1st Qu.:33.27   M:73   1st Qu.: 9.675  
- Median :1078   UC  :51   Median :40.35          Median :12.400  
- Mean   :1078             Mean   :40.42          Mean   :12.686  
- 3rd Qu.:1117             3rd Qu.:47.77          3rd Qu.:16.025  
- Max.   :1156             Max.   :59.90          Max.   :19.000  
-     cort.5          fat_est      cort_diff      
- Min.   : 4.2   healthy  : 56   Min.   :-2.3000  
- 1st Qu.: 9.6   unhealthy:100   1st Qu.:-0.5000  
- Median :12.6                   Median : 0.2000  
- Mean   :12.4                   Mean   : 0.2821  
- 3rd Qu.:15.7                   3rd Qu.: 1.2000  
- Max.   :19.7                   Max.   : 2.0000  </code></pre>
+<p>The usual residual plots are available in R for a logistic regression model, but most of them are irrelevant in the logistic regression setting. The residuals shouldn’t follow a standard Normal distribution, and they will not show constant variance over the range of the predictor variables, so plots looking into those issues aren’t helpful.</p>
+<p>The only plot from the standard set that we’ll look at in many settings is plot 5, which helps us assess influence (via Cook’s distance contours), and a measure related to leverage (how unusual an observation is in terms of the predictors) and standardized Pearson residuals.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(res_modA, <span class="dt">which =</span> <span class="dv">5</span>)</code></pre></div>
+<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-162-1.png" width="672" /></p>
+<p>In this case, I don’t see any highly influential points, as no points fall outside of the Cook’s distance (0.5 or 1) contours.</p>
 </div>
-<div id="a-means-plot-for-the-cortisol-trial-with-standard-errors" class="section level2">
-<h2><span class="header-section-number">3.10</span> A Means Plot for the <code>cortisol</code> trial (with standard errors)</h2>
-<p>Again, we’ll start by building up a data set with the summaries we want to plot.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">cort.sum &lt;-<span class="st"> </span>cortisol <span class="op">%&gt;%</span><span class="st"> </span>
-<span class="st">    </span><span class="kw">group_by</span>(interv, fat_est) <span class="op">%&gt;%</span>
-<span class="st">    </span><span class="kw">summarize</span>(<span class="dt">mean.cort =</span> <span class="kw">mean</span>(cort_diff), 
-              <span class="dt">se.cort =</span> <span class="kw">sd</span>(cort_diff)<span class="op">/</span><span class="kw">sqrt</span>(<span class="kw">n</span>()))
+<div id="model-b-a-kitchen-sink-logistic-regression-model" class="section level2">
+<h2><span class="header-section-number">12.8</span> Model B: A “Kitchen Sink” Logistic Regression Model</h2>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">res_modB &lt;-<span class="st"> </span><span class="kw">glm</span>(died <span class="op">~</span><span class="st"> </span>resection <span class="op">+</span><span class="st"> </span>age <span class="op">+</span><span class="st"> </span>prior <span class="op">+</span><span class="st"> </span>intubated,
+               <span class="dt">data =</span> resect, <span class="dt">family =</span> binomial)
 
-cort.sum</code></pre></div>
-<pre><code># A tibble: 6 x 4
-# Groups:   interv [?]
-  interv fat_est   mean.cort se.cort
-  &lt;fct&gt;  &lt;fct&gt;         &lt;dbl&gt;   &lt;dbl&gt;
-1 High   healthy       0.695   0.217
-2 High   unhealthy     0.352   0.150
-3 Low    healthy       0.500   0.182
-4 Low    unhealthy     0.327   0.190
-5 UC     healthy       0.347   0.225
-6 UC     unhealthy    -0.226   0.155</code></pre>
-<p>Now, we’ll use this new data set to plot the means and standard errors.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## The error bars will overlap unless we adjust the position.
-pd &lt;-<span class="st"> </span><span class="kw">position_dodge</span>(<span class="fl">0.2</span>) <span class="co"># move them .1 to the left and right</span>
-
-<span class="kw">ggplot</span>(cort.sum, <span class="kw">aes</span>(<span class="dt">x =</span> interv, <span class="dt">y =</span> mean.cort, <span class="dt">col =</span> fat_est)) <span class="op">+</span>
-<span class="st">    </span><span class="kw">geom_errorbar</span>(<span class="kw">aes</span>(<span class="dt">ymin =</span> mean.cort <span class="op">-</span><span class="st"> </span>se.cort, 
-                      <span class="dt">ymax =</span> mean.cort <span class="op">+</span><span class="st"> </span>se.cort),
-                  <span class="dt">width =</span> <span class="fl">0.2</span>, <span class="dt">position =</span> pd) <span class="op">+</span>
-<span class="st">    </span><span class="kw">geom_point</span>(<span class="dt">size =</span> <span class="dv">2</span>, <span class="dt">position =</span> pd) <span class="op">+</span><span class="st"> </span>
-<span class="st">    </span><span class="kw">geom_line</span>(<span class="kw">aes</span>(<span class="dt">group =</span> fat_est), <span class="dt">position =</span> pd) <span class="op">+</span>
-<span class="st">    </span><span class="kw">scale_color_manual</span>(<span class="dt">values =</span> <span class="kw">c</span>(<span class="st">&quot;royalblue&quot;</span>, <span class="st">&quot;darkred&quot;</span>)) <span class="op">+</span>
-<span class="st">    </span><span class="kw">theme_bw</span>() <span class="op">+</span>
-<span class="st">    </span><span class="kw">labs</span>(<span class="dt">y =</span> <span class="st">&quot;Salivary Cortisol Level&quot;</span>, <span class="dt">x =</span> <span class="st">&quot;Intervention Group&quot;</span>,
-         <span class="dt">title =</span> <span class="st">&quot;Observed Means (+/- SE) of Salivary Cortisol&quot;</span>)</code></pre></div>
-<p><img src="bookdown-demo_files/figure-html/c3_ggplot_means_plot_cortisol-1.png" width="672" /></p>
-</div>
-<div id="a-two-way-anova-model-for-cortisol-with-interaction" class="section level2">
-<h2><span class="header-section-number">3.11</span> A Two-Way ANOVA model for <code>cortisol</code> with Interaction</h2>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">c3_m3 &lt;-<span class="st"> </span><span class="kw">lm</span>(cort_diff <span class="op">~</span><span class="st"> </span>interv <span class="op">*</span><span class="st"> </span>fat_est, <span class="dt">data =</span> cortisol)
-
-<span class="kw">anova</span>(c3_m3)</code></pre></div>
-<pre><code>Analysis of Variance Table
-
-Response: cort_diff
-                Df  Sum Sq Mean Sq F value  Pr(&gt;F)  
-interv           2   7.847  3.9235  4.4698 0.01301 *
-fat_est          1   4.614  4.6139  5.2564 0.02326 *
-interv:fat_est   2   0.943  0.4715  0.5371 0.58554  
-Residuals      150 131.666  0.8778                  
----
-Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
-<p>Does it seem like we need the interaction term in this case?</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(c3_m3)</code></pre></div>
+res_modB</code></pre></div>
 <pre><code>
-Call:
-lm(formula = cort_diff ~ interv * fat_est, data = cortisol)
-
-Residuals:
-     Min       1Q   Median       3Q      Max 
--2.62727 -0.75702  0.08636  0.84848  2.12647 
+Call:  glm(formula = died ~ resection + age + prior + intubated, family = binomial, 
+    data = resect)
 
 Coefficients:
-                           Estimate Std. Error t value Pr(&gt;|t|)   
-(Intercept)                  0.6950     0.2095   3.317  0.00114 **
-intervLow                   -0.1950     0.3001  -0.650  0.51689   
-intervUC                    -0.3479     0.3091  -1.126  0.26206   
-fat_estunhealthy            -0.3435     0.2655  -1.294  0.19774   
-intervLow:fat_estunhealthy   0.1708     0.3785   0.451  0.65256   
-intervUC:fat_estunhealthy   -0.2300     0.3846  -0.598  0.55068   
+(Intercept)    resection          age        prior    intubated  
+  -5.152886     0.612211     0.001173     0.814691     2.810797  
+
+Degrees of Freedom: 133 Total (i.e. Null);  129 Residual
+Null Deviance:      101.9 
+Residual Deviance: 67.36    AIC: 77.36</code></pre>
+<div id="comparing-model-a-to-model-b" class="section level3">
+<h3><span class="header-section-number">12.8.1</span> Comparing Model A to Model B</h3>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">anova</span>(res_modA, res_modB)</code></pre></div>
+<pre><code>Analysis of Deviance Table
+
+Model 1: died ~ resection
+Model 2: died ~ resection + age + prior + intubated
+  Resid. Df Resid. Dev Df Deviance
+1       132     89.493            
+2       129     67.359  3   22.134</code></pre>
+<p>The addition of <code>age</code>, <code>prior</code> and <code>intubated</code> reduces the lack of fit by 22.134 points, at a cost of 3 degrees of freedom.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">glance</span>(res_modA)</code></pre></div>
+<pre><code>  null.deviance df.null    logLik      AIC     BIC deviance df.residual
+1      101.9431     133 -44.74646 93.49292 99.2886 89.49292         132</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">glance</span>(res_modB)</code></pre></div>
+<pre><code>  null.deviance df.null   logLik     AIC     BIC deviance df.residual
+1      101.9431     133 -33.6793 77.3586 91.8478  67.3586         129</code></pre>
+<p>By either AIC or BIC, the larger model (<code>res_modB</code>) looks more effective.</p>
+</div>
+<div id="interpreting-model-b" class="section level3">
+<h3><span class="header-section-number">12.8.2</span> Interpreting Model B</h3>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(res_modB)</code></pre></div>
+<pre><code>
+Call:
+glm(formula = died ~ resection + age + prior + intubated, family = binomial, 
+    data = resect)
+
+Deviance Residuals: 
+    Min       1Q   Median       3Q      Max  
+-1.7831  -0.3741  -0.2386  -0.2014   2.5228  
+
+Coefficients:
+             Estimate Std. Error z value Pr(&gt;|z|)    
+(Intercept) -5.152886   1.469453  -3.507 0.000454 ***
+resection    0.612211   0.282807   2.165 0.030406 *  
+age          0.001173   0.020646   0.057 0.954700    
+prior        0.814691   0.704785   1.156 0.247705    
+intubated    2.810797   0.658395   4.269 1.96e-05 ***
 ---
 Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 
-Residual standard error: 0.9369 on 150 degrees of freedom
-Multiple R-squared:  0.0924,    Adjusted R-squared:  0.06214 
-F-statistic: 3.054 on 5 and 150 DF,  p-value: 0.01179</code></pre>
-<p>How do you reconcile the apparent difference in significance levels between this regression summary and the ANOVA table above?</p>
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 101.943  on 133  degrees of freedom
+Residual deviance:  67.359  on 129  degrees of freedom
+AIC: 77.359
+
+Number of Fisher Scoring iterations: 6</code></pre>
+<p>It appears that the <code>intubated</code> predictor adds significant value to the model, by the Wald test.</p>
+<p>Let’s focus on the impact of these variables through odds ratios.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">exp</span>(<span class="kw">coef</span>(res_modB))</code></pre></div>
+<pre><code> (Intercept)    resection          age        prior    intubated 
+ 0.005782692  1.844504859  1.001173503  2.258476846 16.623153519 </code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">exp</span>(<span class="kw">confint</span>(res_modB))</code></pre></div>
+<pre><code>Waiting for profiling to be done...</code></pre>
+<pre><code>                   2.5 %     97.5 %
+(Intercept) 0.0002408626  0.0837263
+resection   1.0804548590  3.3495636
+age         0.9618416869  1.0442885
+prior       0.5485116610  9.1679931
+intubated   4.7473282453 64.6456919</code></pre>
+<p>At a 5% significance level, we might conclude that:</p>
+<ul>
+<li>larger sized <code>resection</code>s are associated with a meaningful rise (est OR: 1.84, 95% CI 1.08, 3.35) in the odds of death, holding all other predictors constant,</li>
+<li>the need for <code>intubation</code> at the end of surgery is associated with a substantial rise (est OR: 16.6, 95% CI 4.7, 64.7) in the odds of death, holding all other predictors constant, but that</li>
+<li>older <code>age</code> as well as having a <code>prior</code> tracheal surgery appears to be associated with an increase in death risk, but not to an extent that we can declare statistically significant.</li>
+</ul>
 </div>
-<div id="a-two-way-anova-model-for-cortisol-without-interaction" class="section level2">
-<h2><span class="header-section-number">3.12</span> A Two-Way ANOVA model for <code>cortisol</code> without Interaction</h2>
-<div id="the-graph" class="section level3">
-<h3><span class="header-section-number">3.12.1</span> The Graph</h3>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">p1 &lt;-<span class="st"> </span><span class="kw">ggplot</span>(cortisol, <span class="kw">aes</span>(<span class="dt">x =</span> interv, <span class="dt">y =</span> cort_diff)) <span class="op">+</span><span class="st"> </span>
-<span class="st">    </span><span class="kw">geom_boxplot</span>()
-p2 &lt;-<span class="st"> </span><span class="kw">ggplot</span>(cortisol, <span class="kw">aes</span>(<span class="dt">x =</span> fat_est, <span class="dt">y =</span> cort_diff)) <span class="op">+</span>
-<span class="st">    </span><span class="kw">geom_boxplot</span>()
-
-gridExtra<span class="op">::</span><span class="kw">grid.arrange</span>(p1, p2, <span class="dt">nrow =</span> <span class="dv">1</span>)</code></pre></div>
-<p><img src="bookdown-demo_files/figure-html/boxplots_c3_cortisol_without_interaction-1.png" width="672" /></p>
 </div>
-<div id="the-anova-model" class="section level3">
-<h3><span class="header-section-number">3.12.2</span> The ANOVA Model</h3>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">c3_m4 &lt;-<span class="st"> </span><span class="kw">lm</span>(cort_diff <span class="op">~</span><span class="st"> </span>interv <span class="op">+</span><span class="st"> </span>fat_est, <span class="dt">data =</span> cortisol)
-
-<span class="kw">anova</span>(c3_m4)</code></pre></div>
-<pre><code>Analysis of Variance Table
-
-Response: cort_diff
-           Df  Sum Sq Mean Sq F value  Pr(&gt;F)  
-interv      2   7.847  3.9235  4.4972 0.01266 *
-fat_est     1   4.614  4.6139  5.2886 0.02283 *
-Residuals 152 132.609  0.8724                  
----
-Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
-<p>How do these results compare to those we saw in the model with interaction?</p>
+<div id="plotting-model-b" class="section level2">
+<h2><span class="header-section-number">12.9</span> Plotting Model B</h2>
+<p>Let’s think about plotting the fitted values from our model, in terms of probabilities.</p>
+<div id="using-augment-to-capture-the-fitted-probabilities-1" class="section level3">
+<h3><span class="header-section-number">12.9.1</span> Using <code>augment</code> to capture the fitted probabilities</h3>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">res_B_aug &lt;-<span class="st"> </span><span class="kw">augment</span>(res_modB, resect, 
+                     <span class="dt">type.predict =</span> <span class="st">&quot;response&quot;</span>)
+<span class="kw">head</span>(res_B_aug)</code></pre></div>
+<pre><code>  id age prior resection intubated died    .fitted    .se.fit     .resid
+1  1  34     1       2.5         0    0 0.05908963 0.03851118 -0.3490198
+2  2  57     0       5.0         0    0 0.11660492 0.06253774 -0.4979613
+3  3  60     1       4.0         1    1 0.72944600 0.15010423  0.7943172
+4  4  62     1       4.2         0    0 0.15522494 0.09607978 -0.5808354
+5  5  28     0       6.0         1    1 0.79641141 0.14588554  0.6747435
+6  6  52     0       3.0         0    0 0.03713809 0.01933270 -0.2751191
+        .hat    .sigma      .cooksd .std.resid
+1 0.02667562 0.7247491 0.0003536652 -0.3537702
+2 0.03796756 0.7240341 0.0010829917 -0.5076925
+3 0.11416656 0.7215778 0.0107925872  0.8439524
+4 0.07039819 0.7234665 0.0029937671 -0.6024273
+5 0.13126049 0.7225958 0.0088920280  0.7239256
+6 0.01045207 0.7250114 0.0000823406 -0.2765683</code></pre>
 </div>
-<div id="the-regression-summary" class="section level3">
-<h3><span class="header-section-number">3.12.3</span> The Regression Summary</h3>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(c3_m4)</code></pre></div>
-<pre><code>
-Call:
-lm(formula = cort_diff ~ interv + fat_est, data = cortisol)
-
-Residuals:
-     Min       1Q   Median       3Q      Max 
--2.55929 -0.74527  0.05457  0.86456  2.05489 
-
-Coefficients:
-                 Estimate Std. Error t value Pr(&gt;|t|)    
-(Intercept)       0.70452    0.16093   4.378 2.22e-05 ***
-intervLow        -0.08645    0.18232  -0.474  0.63606    
-intervUC         -0.50063    0.18334  -2.731  0.00707 ** 
-fat_estunhealthy -0.35878    0.15601  -2.300  0.02283 *  
----
-Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-
-Residual standard error: 0.934 on 152 degrees of freedom
-Multiple R-squared:  0.0859,    Adjusted R-squared:  0.06785 
-F-statistic: 4.761 on 3 and 152 DF,  p-value: 0.00335</code></pre>
+<div id="plotting-model-b-fits-by-observed-mortality" class="section level3">
+<h3><span class="header-section-number">12.9.2</span> Plotting Model B Fits by Observed Mortality</h3>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">ggplot</span>(res_B_aug, <span class="kw">aes</span>(<span class="dt">x =</span> <span class="kw">factor</span>(died), <span class="dt">y =</span> .fitted, <span class="dt">col =</span> <span class="kw">factor</span>(died))) <span class="op">+</span>
+<span class="st">    </span><span class="kw">geom_boxplot</span>() <span class="op">+</span>
+<span class="st">    </span><span class="kw">geom_jitter</span>(<span class="dt">width =</span> <span class="fl">0.1</span>) <span class="op">+</span><span class="st"> </span>
+<span class="st">    </span><span class="kw">guides</span>(<span class="dt">col =</span> <span class="ot">FALSE</span>)</code></pre></div>
+<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-169-1.png" width="672" /></p>
+<p>Certainly it appears as though most of our predicted probabilities (of death) for the subjects who actually survived are quite small, but not all of them. We also have at least 6 big “misses” among the 17 subjects who actually died.</p>
 </div>
-<div id="tukey-hsd-comparisons" class="section level3">
-<h3><span class="header-section-number">3.12.4</span> Tukey HSD Comparisons</h3>
-<p>Without the interaction term, we can make direct comparisons between levels of the intervention, and between levels of the <code>fat_est</code> variable. This is probably best done here in a Tukey HSD comparison.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">TukeyHSD</span>(<span class="kw">aov</span>(cort_diff <span class="op">~</span><span class="st"> </span>interv <span class="op">+</span><span class="st"> </span>fat_est, <span class="dt">data =</span> cortisol))</code></pre></div>
-<pre><code>  Tukey multiple comparisons of means
-    95% family-wise confidence level
+<div id="the-roc-curve-for-model-b" class="section level3">
+<h3><span class="header-section-number">12.9.3</span> The ROC curve for Model B</h3>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## requires ROCR package
+prob &lt;-<span class="st"> </span><span class="kw">predict</span>(res_modB, resect, <span class="dt">type=</span><span class="st">&quot;response&quot;</span>)
+pred &lt;-<span class="st"> </span><span class="kw">prediction</span>(prob, resect<span class="op">$</span>died)
+perf &lt;-<span class="st"> </span><span class="kw">performance</span>(pred, <span class="dt">measure =</span> <span class="st">&quot;tpr&quot;</span>, <span class="dt">x.measure =</span> <span class="st">&quot;fpr&quot;</span>)
+auc &lt;-<span class="st"> </span><span class="kw">performance</span>(pred, <span class="dt">measure=</span><span class="st">&quot;auc&quot;</span>)
+## the rest of this code is a little strange
+auc &lt;-<span class="st"> </span><span class="kw">round</span>(auc<span class="op">@</span>y.values[[<span class="dv">1</span>]],<span class="dv">3</span>)
+roc.data &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">fpr=</span><span class="kw">unlist</span>(perf<span class="op">@</span>x.values),
+                       <span class="dt">tpr=</span><span class="kw">unlist</span>(perf<span class="op">@</span>y.values),
+                       <span class="dt">model=</span><span class="st">&quot;GLM&quot;</span>)
 
-Fit: aov(formula = cort_diff ~ interv + fat_est, data = cortisol)
-
-$interv
-                diff        lwr         upr     p adj
-Low-High -0.09074746 -0.5222655  0.34077063 0.8724916
-UC-High  -0.51642619 -0.9500745 -0.08277793 0.0150150
-UC-Low   -0.42567873 -0.8613670  0.01000948 0.0570728
-
-$fat_est
-                        diff        lwr         upr     p adj
-unhealthy-healthy -0.3582443 -0.6662455 -0.05024305 0.0229266</code></pre>
-<p>What conclusions can we draw, at a 5% significance level?</p>
+<span class="kw">ggplot</span>(roc.data, <span class="kw">aes</span>(<span class="dt">x=</span>fpr, <span class="dt">ymin=</span><span class="dv">0</span>, <span class="dt">ymax=</span>tpr)) <span class="op">+</span>
+<span class="st">    </span><span class="kw">geom_ribbon</span>(<span class="dt">alpha=</span><span class="fl">0.2</span>, <span class="dt">fill =</span> <span class="st">&quot;blue&quot;</span>) <span class="op">+</span>
+<span class="st">    </span><span class="kw">geom_line</span>(<span class="kw">aes</span>(<span class="dt">y=</span>tpr), <span class="dt">col =</span> <span class="st">&quot;blue&quot;</span>) <span class="op">+</span>
+<span class="st">    </span><span class="kw">geom_abline</span>(<span class="dt">intercept =</span> <span class="dv">0</span>, <span class="dt">slope =</span> <span class="dv">1</span>, <span class="dt">lty =</span> <span class="st">&quot;dashed&quot;</span>) <span class="op">+</span>
+<span class="st">    </span><span class="kw">labs</span>(<span class="dt">title =</span> <span class="kw">paste0</span>(<span class="st">&quot;Model B: ROC Curve w/ AUC=&quot;</span>, auc)) <span class="op">+</span>
+<span class="st">    </span><span class="kw">theme_bw</span>()</code></pre></div>
+<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-170-1.png" width="672" /></p>
+<p>The area under the curve (C-statistic) is 0.86, which certainly looks like a more discriminating fit than model A with resection alone.</p>
+</div>
+<div id="residuals-leverage-and-influence" class="section level3">
+<h3><span class="header-section-number">12.9.4</span> Residuals, Leverage and Influence</h3>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(res_modB, <span class="dt">which =</span> <span class="dv">5</span>)</code></pre></div>
+<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-171-1.png" width="672" /></p>
+<p>Again, we see no signs of deeply influential points in this model.</p>
 
 </div>
 </div>
 </div>
 <h3>References</h3>
 <div id="refs" class="references">
-<div id="ref-Kim2014">
-<p>Kim, Hae-Young. 2014. “Statistical Notes for Clinical Researchers: Two-Way Analysis of Variance (Anova) - Exploring Possible Interaction Between Factors.” <em>Restorative Dentistry &amp; Endodontics</em> 39(2): 143–47. <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3978106/" class="uri">https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3978106/</a>.</p>
+<div id="ref-Riffenburgh2006">
+<p>Riffenburgh, Robert H. 2006. <em>Statistics in Medicine</em>. Second Edition. Burlington, MA: Elsevier Academic Press.</p>
 </div>
+<div id="ref-Peduzzi1996">
+<p>Peduzzi, Peter, John Concato, Elizabeth Kemper, Theodore R. Holford, and Alvan R. Feinstein. 1996. “A Simulation Study of the Number of Events Per Variable in Logistic Regression Analysis.” <em>Journal of Clinical Epidemiology</em> 49 (12): 1373–9.</p>
 </div>
-<div class="footnotes">
-<hr />
-<ol start="5">
-<li id="fn5"><p>The MPa is defined as the failure load (in Newtons) divided by the entire bonded area, in mm<sup>2</sup>.<a href="analysis-of-variance.html#fnref5">↩</a></p></li>
-<li id="fn6"><p>If the data weren’t approximately Normally distributed, we might instead consider a rank-based alternative to ANOVA, like the Kruskal-Wallis test.<a href="analysis-of-variance.html#fnref6">↩</a></p></li>
-</ol>
+<div id="ref-Long1997">
+<p>Long, J. Scott. 1997. <em>Regression Models for Categorical and Limited Dependent Variables</em>. Thousand Oaks, CA: Sage Publications.</p>
+</div>
 </div>
             </section>
 
           </div>
         </div>
       </div>
-<a href="linear-regression-on-a-small-smart-data-set.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-<a href="analysis-of-covariance.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="other-variable-selection-strategies.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="references.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
@@ -1122,7 +1217,7 @@ gitbook.start({
 "size": 2
 },
 "edit": {
-"link": "https://github.com/rstudio/bookdown-demo/edit/master/03-anova.Rmd",
+"link": "https://github.com/rstudio/bookdown-demo/edit/master/12_logistic1.Rmd",
 "text": "Edit"
 },
 "download": ["bookdown-demo.pdf", "bookdown-demo.epub"],

@@ -1,0 +1,306 @@
+# Fitting a Logistic Regression Model with `lrm` from the `rms` library
+
+To obtain the Nagelkerke $R^2$ and the C statistic, as well as some other summaries, I'll now demonstrate the use of `lrm` to fit a logistic regression model...
+
+```{r fitting model a with lrm}
+dd <- datadist(resect)
+options(datadist="dd")
+
+model.a2 <- lrm(died ~ resection, data=resect, x=TRUE, y=TRUE)
+model.a2
+```
+
+The C statistic is estimated to be `r round(model.a2$stats["C"],3)`, with an associated (Nagelkerke) $R^2$ = `r round(model.a2$stats["R2"],3)`, both indicating at best mediocre performance for this model, as it turns out.
+
+## Interpreting Nagelkerke R^2^
+
+There are many ways to calculate $R^2$ for logistic regression. 
+
+- At the unfortunate [URL linked here](http://www.ats.ucla.edu/stat/mult_pkg/faq/general/Psuedo_RSquareds.htm) (unfortunate because the term "pseudo" is misspelled) there is a nice summary of the key issue, which is that there are at least three different ways to think about $R^2$ in linear regression that are equivalent in that context, but when you move to a categorical outcome, which interpretation you use leads you down a different path for extension to the new type of outcome.
+- Paul Allison, for instance, describes several at [this link](http://statisticalhorizons.com/r2logistic) in a post entitled "What's the Best R-Squared for Logistic Regression?"
+- Jonathan Bartlett looks at McFadden's pseudo $R^2$ in some detail (including some R code) at [this link](http://thestatsgeek.com/2014/02/08/r-squared-in-logistic-regression/), in a post entitled "R squared in logistic regression"
+
+The Nagelkerke approach that is presented as `R2` in the `lrm` output is as good as most of the available approaches, and has the positive feature that it does reach 1 if the fitted model shows as much improvement as possible over the null model (which predicts the mean response for all subjects, and has R^2^ = 0). The greater the improvement, the higher the Nagelkerke R^2^.
+
+For model A, our Nagelkerke R^2^ = `r round(model.a2$stats["R2"],3)`, which is pretty poor. It doesn't technically mean that `r round(100*model.a2$stats["R2"],1)`% of any sort of variation has been explained, though.
+
+## Interpreting the C statistic and Plotting the ROC Curve
+
+The C statistic is a measure of the area under the receiver operating characteristic curve, which we can plot as follows, if we've loaded the `pROC` package.
+
+```{r using pROC to plot the ROC curve, message=FALSE}
+roc.modA <- roc(resect$died ~ predict(model.a, type="response"))
+plot(roc.modA)
+```
+
+[This link](http://blog.yhat.com/posts/roc-curves.html) has some nice material that provides some insight into the C statistic and ROC curve. For now, let's just provide some basic guidance on the area under the curve, or the C statistic.
+
+- C ranges from 0 to 1. 0 = BAD, 1 = GOOD.
+    + values of C less than 0.5 indicate that your prediction model is not even as good as simple random guessing of "yes" or "no" for your response.
+    + C = 0.5 for random guessing
+    + C = 1 indicates a perfect classification scheme - one that correctly guesses "yes" for all "yes" patients, and for none of the "no" patients.
+- The closer C is to 1, the happier we'll be, most of the time. 
+    + Often we'll call models with 0.5 < C < 0.8 poor or weak in terms of predictive ability by this measure
+    + 0.8 $\leq$ C < 0.9 are moderately strong in terms of predictive power (indicate good discrimination)
+    + C $\geq$ 0.9 usually indicates a very strong model in this regard (indicate excellent discrimination)
+- The C statistic is directly related to **Somers' D statistic**, abbreviated $D_{xy}$, by the equation C = 0.5 + (D/2).
+    + Somers' D and the ROC area only measure how well predicted values from the model can rank-order the responses. For example, predicted probabilities of 0.01 and 0.99 for a pair of subjects are no better than probabilities of 0.2 and 0.8 using rank measures, if the first subject had a lower response value than the second.
+    + Thus, the C statistic (or $D_{xy}$) may not be very sensitive ways to choose between models, even though they provide reasonable summaries of the models individually. 
+    + This is especially true when the models are strong. The Nagelkerke R2 (see above) may be more sensitive.
+- But as it turns out, we sometimes have to look at the ROC shapes, as the summary statistic alone isn't enough.
+
+\newpage
+
+### A ggplot2 version of an ROC Curve
+
+You may want to see a `ggplot` version of an ROC curve. There are several ways to do this on the web, but I'll show this one, which has some bizarre code, but that's a function of using a library called ROCR to do the work. It comes from [this link](http://blog.yhat.com/posts/roc-curves.html)
+
+```{r ggplot for ROC using ROCR library}
+## requires ROCR and ggplot libraries
+prob <- predict(model.a, resect, type="response")
+pred <- prediction(prob, resect$died)
+perf <- performance(pred, measure = "tpr", x.measure = "fpr")
+auc <- performance(pred, measure="auc")
+## the rest of this code is a little strange
+auc <- round(auc@y.values[[1]],3)
+roc.data <- data.frame(fpr=unlist(perf@x.values),
+                       tpr=unlist(perf@y.values),
+                       model="GLM")
+ggplot(roc.data, aes(x=fpr, ymin=0, ymax=tpr)) +
+    geom_ribbon(alpha=0.2) +
+    geom_line(aes(y=tpr)) +
+    ggtitle(paste0("ROC Curve w/ AUC=", auc)) 
+```
+
+## Validating the Logistic Regression Model Summary Statistics
+
+```{r validate model a}
+set.seed(432001); validate(model.a2, B = 100)
+```
+
+Recall that our area under the curve (C statistic) = `0.5 + (Dxy/2)`, so that we can also use the first row of statistics to validate the C statistic.
+
+## Plotting the Summary of the `lrm` approach
+
+```{r summary for model a from lrm, fig.height=3.5}
+plot(summary(model.a2))
+summary(model.a2)
+```
+
+## ANOVA from the `lrm` approach
+
+```{r anova for model a from lrm}
+anova(model.a2)
+```
+
+## Are any points particularly influential?
+
+I'll use a cutoff for `dfbeta` here of 0.3, instead of the default 0.2, because I want to focus on truly influential points.
+
+```{r influence in model a}
+inf.a <- which.influence(model.a2, cutoff=0.3)
+show.influence(inf.a, dframe=resect)
+```
+
+\newpage
+
+## Calibration of Model A
+
+```{r calibration of model a}
+plot(calibrate(model.a2))
+```
+
+\newpage
+
+## A Nomogram for Model A
+
+```{r nomogram for model a, fig.height=6}
+plot(nomogram(model.a2, fun=plogis, 
+              fun.at=c(0.05, seq(0.1, 0.9, by = 0.1), 0.95), 
+              funlabel="Pr(died)"))
+```
+
+\newpage
+
+## Getting an ROC curve after an `lrm` fit
+
+Note that, in order to use the results of a fit with `lrm` rather than `glm` in our method for plotting an ROC curve with `ggplot2`, we need to change the specification of the prob values to leave out the data name, and change the type to "fitted".
+
+```{r ggplot for ROC using ROCR library for lrm model A}
+## requires ROCR and ggplot libraries
+prob <- predict(model.a2, type="fitted")
+pred <- prediction(prob, resect$died)
+perf <- performance(pred, measure = "tpr", x.measure = "fpr")
+auc <- performance(pred, measure="auc")
+## the rest of this code is a little strange
+auc <- round(auc@y.values[[1]],3)
+roc.data <- data.frame(fpr=unlist(perf@x.values),
+                       tpr=unlist(perf@y.values),
+                       model="GLM")
+ggplot(roc.data, aes(x=fpr, ymin=0, ymax=tpr)) +
+    geom_ribbon(alpha=0.2) +
+    geom_line(aes(y=tpr)) +
+    ggtitle(paste0("ROC Curve for Model A w/ AUC=", auc)) 
+```
+
+\newpage
+
+# Model B: Incorporating Other Predictors
+
+Can we predict survival from the patient's age, whether the patient had prior tracheal surgery or not, the extent of the resection, and whether intubation was required at the end of surgery? 
+
+## Spearman $\rho^2$ Plot
+
+Let's start by considering the limited use of non-linear terms for predictors that look important in a spearman $\rho^2$ plot.
+
+```{r model b - spearman rho squared plot}
+plot(spearman2(died ~ age + prior + resection + intubated, data=resect))
+```
+
+The most important variable appears to be whether intubation was required, so I'll include `intubated`'s interaction with the linear effect of the next most (apparently) important variable, `resection`, and also a cubic spline for `resection`, with three knots. Since `prior` and `age` look less important, I'll simply add them as linear terms.
+
+## Fitting Model B using `lrm`
+
+```{r model b}
+dd <- datadist(resect)
+options(datadist="dd")
+model.b <- lrm(died ~ age + prior + rcs(resection, 3) +
+                 intubated + intubated %ia% resection, 
+               data=resect, x=TRUE, y=TRUE)
+```
+
+## Assessing Model B using `lrm`'s tools
+
+```{r assessing model b part 1}
+model.b
+```
+
+### Validation of Model B summaries
+
+```{r validation of model b}
+set.seed(432002); validate(model.b, B = 100)
+```
+
+The C statistic indicates fairly strong discrimination, at C = `r round(model.b$stats["C"],2)`, although after validation, this looks much weaker (based on Dxy = `r set.seed(432002); round(validate(model.b, B = 100)[45],4)`, we would have C = 0.5 + `r set.seed(432002); round(validate(model.b, B = 100)[45],4)`/2 = `r set.seed(432002); round(0.5 + 0.5*validate(model.b, B = 100)[45],2)`) and the Nagelkerke $R^2$ is also reasonably good, at `r round(model.b$stats["R2"],2)`, although this, too, is overly optimistic, and we bias-correct through our validation study to `r set.seed(432002); round(validate(model.b, B = 100)[46],2)`.
+
+### ANOVA and Wald Tests for Model B
+
+```{r assessing model b part 2}
+anova(model.b)
+```
+
+Neither the interaction term nor the non-linearity from the cubic spline appears to be statistically significant, based on the Wald tests via ANOVA.
+
+### Effect Sizes in Model B
+
+```{r summaries of model b}
+plot(summary(model.b))
+summary(model.b)
+```
+
+### Calibration Plot for Model B
+
+```{r calibration of model b, fig.height=5}
+plot(calibrate(model.b))
+```
+
+## Getting an ROC curve after an `lrm` fit
+
+Note that, in order to use the results of a fit with `lrm` rather than `glm` in our method for plotting an ROC curve with `ggplot2`, we need to change the specification of the prob values to leave out the data name, and change the type to "fitted".
+
+```{r ggplot for ROC using ROCR library for lrm}
+## requires ROCR and ggplot libraries
+prob <- predict(model.b, type="fitted")
+pred <- prediction(prob, resect$died)
+perf <- performance(pred, measure = "tpr", x.measure = "fpr")
+auc <- performance(pred, measure="auc")
+## the rest of this code is a little strange
+auc <- round(auc@y.values[[1]],3)
+roc.data <- data.frame(fpr=unlist(perf@x.values),
+                       tpr=unlist(perf@y.values),
+                       model="GLM")
+ggplot(roc.data, aes(x=fpr, ymin=0, ymax=tpr)) +
+    geom_ribbon(alpha=0.2) +
+    geom_line(aes(y=tpr)) +
+    ggtitle(paste0("ROC Curve for Model B w/ AUC=", auc)) 
+```
+
+# Model C: Fitting a Reduced Model in light of the Model B results
+
+Can you suggest a reduced model (using a subset of the independent variables in model b.) that adequately predicts survival? 
+
+Based on the anova for model b and the spearman rho-squared plot, it appears that a two-predictor model using intubation and resection may be sufficient. Neither of the other potential predictors shows a statistically detectable effect in its Wald test.
+
+```{r model c}
+model.c <- lrm(died ~ intubated + resection, data=resect, x=TRUE, y=TRUE)
+model.c
+```
+
+The model equation is that the log odds of death is -4.637 + 2.864 `intubated` + 0.548 `resection`. This implies that, for intubated patients, the equation is -1.773 + 0.548 `resection`, while for non-intubated patients, the equation is -4.637 + 0.548 `resection`.
+
+## Plot comparing the two intubation groups
+
+```{r probability function vs. resection with intubation indicated}
+spcol <- ifelse(resect$intubated==1, "red", "blue")
+plot(jitter(resect$died,0.3) ~ resect$resection, 
+     pch=resect$intubated, col=spcol, 
+     xlab = "Extent of Resection (cm)", 
+     ylab="Death (1,0) and Estimated Probability of Death", 
+     main="Model C")
+x <- seq(1,6,0.05) ## since observed resection levels range from 1-6 cm
+lines(x, ilogit(-4.637 + 0.548*x), col="blue")
+lines(x, ilogit(-1.773 + 0.548*x), col="red")
+text(2.5, 0.6, "Intubated Patients", col="red")
+text(4, 0.2, "Not Intubated", col="blue")
+```
+
+## ANOVA for Model C
+
+```{r model c summaries}
+anova(model.c)
+```
+
+## Nomogram for Model C
+
+A nomogram of the model would help, too. 
+
+```{r model c nomogram}
+plot(nomogram(model.c, fun=plogis, 
+              fun.at=c(0.05, seq(0.1, 0.9, by=0.1), 0.95), 
+              funlabel="Pr(died)"))
+```
+
+## Effect Sizes from Model C
+
+The odds ratio associated with intubation is huge, compared to the resection size effect.
+
+```{r model c effect plot, fig.height=3}
+plot(summary(model.c))
+summary(model.c)
+```
+
+## Validation of Model C
+
+```{r}
+validate(model.c, method="boot", B=40)
+```
+
+Our bootstrap validated assessments of discrimination and goodness of fit look somewhat more reasonable now. 
+
+## Do any points seem particularly influential?
+
+As a last step, I'll look at influence, and residuals, associated with model C.
+
+```{r influence in model c}
+inf.c <- which.influence(model.c, cutoff=0.3)
+show.influence(inf.c, dframe=resect)
+```
+
+## Fitting Model C using `glm` to get plots about influence
+
+```{r glm for model c, fig.height=4.5}
+model.cglm <- glm(died ~ intubated + resection, 
+                  data=resect, family="binomial"(link="logit"))
+par(mfrow=c(1,2))
+plot(model.cglm, which=c(4:5))
+```

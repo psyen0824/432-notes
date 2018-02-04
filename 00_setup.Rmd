@@ -11,6 +11,9 @@ library(arm)
 library(rms)
 library(leaps)
 library(lars)
+library(Epi)
+library(pROC)
+library(ROCR)
 library(simputation)
 library(modelr)
 library(broom)
@@ -30,6 +33,7 @@ cortisol <- read.csv("data/cortisol.csv") %>% tbl_df
 emphysema <- read.csv("data/emphysema.csv") %>% tbl_df
 prost <- read.csv("data/prost.csv") %>% tbl_df
 pollution <- read.csv("data/pollution.csv") %>% tbl_df
+resect <- read.csv("data/resect.csv") %>% tbl_df
 ```
 
 # Special Functions used in these notes {-}

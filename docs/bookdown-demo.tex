@@ -124,7 +124,7 @@
   \postauthor{\par}
   \predate{\centering\large\emph}
   \postdate{\par}
-  \date{Built 2018-02-03 23:36:33}
+  \date{Built 2018-02-04 16:36:01}
 
 \usepackage{booktabs}
 \usepackage{amsthm}
@@ -220,6 +220,9 @@ Here, we'll load in the packages used in these notes.
 \KeywordTok{library}\NormalTok{(rms)}
 \KeywordTok{library}\NormalTok{(leaps)}
 \KeywordTok{library}\NormalTok{(lars)}
+\KeywordTok{library}\NormalTok{(Epi)}
+\KeywordTok{library}\NormalTok{(pROC)}
+\KeywordTok{library}\NormalTok{(ROCR)}
 \KeywordTok{library}\NormalTok{(simputation)}
 \KeywordTok{library}\NormalTok{(modelr)}
 \KeywordTok{library}\NormalTok{(broom)}
@@ -242,6 +245,7 @@ Here, we'll load in the data sets used in these notes.
 \NormalTok{emphysema <-}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(}\StringTok{"data/emphysema.csv"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }\NormalTok{tbl_df}
 \NormalTok{prost <-}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(}\StringTok{"data/prost.csv"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }\NormalTok{tbl_df}
 \NormalTok{pollution <-}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(}\StringTok{"data/pollution.csv"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }\NormalTok{tbl_df}
+\NormalTok{resect <-}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(}\StringTok{"data/resect.csv"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }\NormalTok{tbl_df}
 \end{Highlighting}
 \end{Shaded}
 
@@ -11578,6 +11582,1463 @@ And now, here's a plot or residuals vs.~fitted values.
 \end{Shaded}
 
 \includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-140-1.pdf}
+
+\chapter{\texorpdfstring{Logistic Regression and the \texttt{resect}
+data}{Logistic Regression and the resect data}}\label{logistic-regression-and-the-resect-data}
+
+\section{\texorpdfstring{The \texttt{resect}
+data}{The resect data}}\label{the-resect-data}
+
+My source for these data was \citet{Riffenburgh2006}. The data describe
+134 patients who had undergone resection of the tracheal carina (most
+often this is done to address tumors in the trachea), and the
+\texttt{resect.csv} data file contains the following variables:
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{id} = a patient ID \#,
+\item
+  \texttt{age}= the patient's age at surgery,
+\item
+  \texttt{prior} = prior tracheal surgery (1 = yes, 0 = no),
+\item
+  \texttt{resection} = extent of the resection (in cm),
+\item
+  \texttt{intubated} = whether intubation was required at the end of
+  surgery (1 = yes, 0 = no), and
+\item
+  \texttt{died} = the patient's death status (1 = dead, 0 = alive).
+\end{itemize}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{resect }\OperatorTok{%>%}\StringTok{ }\KeywordTok{group_by}\NormalTok{(died) }\OperatorTok{%>%}\StringTok{ }\KeywordTok{skim}\NormalTok{(}\OperatorTok{-}\NormalTok{id)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Skim summary statistics
+ n obs: 134 
+ n variables: 6 
+ group variables: died 
+
+Variable type: integer 
+ died  variable missing complete   n   mean    sd p0 p25 median p75 p100
+    0       age       0      117 117 48.05  16.01  8  36     51  62   80
+    0 intubated       0      117 117  0.068  0.25  0   0      0   0    1
+    0     prior       0      117 117  0.24   0.43  0   0      0   0    1
+    1       age       0       17  17 46.41  14.46 26  33     46  60   66
+    1 intubated       0       17  17  0.65   0.49  0   0      1   1    1
+    1     prior       0       17  17  0.35   0.49  0   0      0   1    1
+
+Variable type: numeric 
+ died  variable missing complete   n mean   sd p0 p25 median p75 p100
+    0 resection       0      117 117 2.82 1.21  1 2      2.5 3.5    6
+    1 resection       0       17  17 3.97 1     2 3.5    4   4.5    6
+\end{verbatim}
+
+We have no missing data, and 17 of the 134 patients died. Our goal will
+be to understand the characteristics of the patients, and how they
+relate to the binary outcome of interest, death.
+
+\section{Running A Simple Logistic Regression
+Model}\label{running-a-simple-logistic-regression-model}
+
+In the most common scenario, a logistic regression model is used to
+predict a binary outcome (which can take on the values 0 or 1.) We will
+eventually fit a logistic regression model in two ways.
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Through the \texttt{glm} function in the base package of R (similar to
+  \texttt{lm} for linear regression)
+\item
+  Through the \texttt{lrm} function available in the \texttt{rms}
+  package (similar to \texttt{ols} for linear regression)
+\end{enumerate}
+
+We'll focus on the \texttt{glm} approach in this Chapter, and save the
+\texttt{lrm} ideas for later.
+
+\subsection{Logistic Regression Can Be Harder than Linear
+Regression}\label{logistic-regression-can-be-harder-than-linear-regression}
+
+\begin{itemize}
+\tightlist
+\item
+  Logistic regression models are fitted using the method of maximum
+  likelihood in \texttt{glm}, which requires multiple iterations until
+  convergence is reached.
+\item
+  Logistic regression models are harder to interpret (for most people)
+  than linear regressions.
+\item
+  Logistic regression models don't have the same set of assumptions as
+  linear models.
+\item
+  Logistic regression outcomes (yes/no) carry much less information than
+  quantitative outcomes. As a result, fitting a reasonable logistic
+  regression requires more data than a linear model of similar size.
+
+  \begin{itemize}
+  \tightlist
+  \item
+    The rule I learned in graduate school was that a logistic regression
+    requires 100 observations to fit an intercept plus another 15
+    observations for each candidate predictor. That's not terrible, but
+    it's a very large sample size.
+  \item
+    Frank Harrell recommends that 96 observations + a function of the
+    number of candidate predictors (which depends on the amount of
+    variation in the predictors, but 15 x the number of such predictors
+    isn't too bad if the signal to noise ratio is pretty good) are
+    required just to get reasonable confidence intervals around your
+    predictions.
+
+    \begin{itemize}
+    \tightlist
+    \item
+      In a
+      \href{https://twitter.com/f2harrell/status/936230071219707913}{twitter
+      note}, Frank suggests that 96 + 8 times the number of candidate
+      parameters might be reasonable so long as the smallest cell of
+      interest (combination of an outcome and a split of the covariates)
+      is 96 or more observations.
+    \end{itemize}
+  \item
+    \citet{Peduzzi1996} suggest that if we let \(\pi\) be the smaller of
+    the proportions of ``yes'' or ``no'' cases in the population of
+    interest, and \emph{k} be the number of inputs under consideration,
+    then \(N = 10k/\pi\) is the minimum number of cases to include,
+    except that if N \textless{} 100 by this standard, you should
+    increase it to 100, according to \citet{Long1997}.
+
+    \begin{itemize}
+    \tightlist
+    \item
+      That suggests that if you have an outcome that happens 10\% of the
+      time, and you are running a model with 3 predictors, then you
+      could get away with \((10 \times 3)/(0.10) = 300\) observations,
+      but if your outcome happened 40\% of the time, you could get away
+      with only \((10 \times 3)/(0.40) = 75\) observations, which you'd
+      round up to 100.
+    \end{itemize}
+  \end{itemize}
+\end{itemize}
+
+\subsection{Obtaining the fitted
+equation}\label{obtaining-the-fitted-equation}
+
+We'll begin by attempting to predict death based on the extent of the
+resection.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{res_modA <-}\StringTok{ }\KeywordTok{glm}\NormalTok{(died }\OperatorTok{~}\StringTok{ }\NormalTok{resection, }\DataTypeTok{data=}\NormalTok{resect, }
+               \DataTypeTok{family=}\StringTok{"binomial"}\NormalTok{(}\DataTypeTok{link=}\StringTok{"logit"}\NormalTok{))}
+
+\NormalTok{res_modA}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+
+Call:  glm(formula = died ~ resection, family = binomial(link = "logit"), 
+    data = resect)
+
+Coefficients:
+(Intercept)    resection  
+    -4.4337       0.7417  
+
+Degrees of Freedom: 133 Total (i.e. Null);  132 Residual
+Null Deviance:      101.9 
+Residual Deviance: 89.49    AIC: 93.49
+\end{verbatim}
+
+Note that the \texttt{logit} link is the default approach with the
+\texttt{binomial} family, so we could also have used:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{res_modA <-}\StringTok{ }\KeywordTok{glm}\NormalTok{(died }\OperatorTok{~}\StringTok{ }\NormalTok{resection, }\DataTypeTok{data =}\NormalTok{ resect, }
+                \DataTypeTok{family =} \StringTok{"binomial"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+which yields the same model.
+
+\subsection{Interpreting the Coefficients of a Logistic Regression
+Model}\label{interpreting-the-coefficients-of-a-logistic-regression-model}
+
+Our model is:
+
+\[
+logit(died = 1) = log\left(\frac{Pr(died = 1)}{1 - Pr(died = 1)}\right) = \beta_0 + \beta_1 x = -4.4337 + 0.7417 \times resection
+\]
+
+The predicted log odds of death for a subject with a resection of 4 cm
+is:
+
+\[
+log\left(\frac{Pr(died = 1)}{1 - Pr(died = 1)}\right) = -4.4337 + 0.7417 \times 4 = -1.467
+\]
+
+The predicted odds of death for a subject with a resection of 4 cm is
+thus:
+
+\[
+\frac{Pr(died = 1)}{1 - Pr(died = 1)} = e^{-4.4337 + 0.7417 \times 4} = e^{-1.467} = 0.2306
+\]
+
+Since the odds are less than 1, we should find that the probability of
+death is less than 1/2. With a little algebra, we see that the predicted
+probability of death for a subject with a resection of 4 cm is:
+
+\[
+Pr(died = 1) = \frac{e^{-4.4337 + 0.7417 \times 4}}{1 + e^{-4.4337 + 0.7417 \times 4}} = \frac{e^{-1.467}}{1 + e^{-1.467}} = \frac{0.2306}{1.2306} = 0.187
+\]
+
+In general, we can frame the model in terms of a statement about
+probabilities, like this:
+
+\[
+Pr(died = 1) = \frac{e^{\beta_0 + \beta_1 x}}{1 + {e^{\beta_0 + \beta_1 x}}} = \frac{e^{-4.4337 + 0.7417 \times resection}}{1 + e^{-4.4337 + 0.7417 \times resection}}
+\]
+
+and so by subtituting in values for \texttt{resection}, we can estimate
+the model's fitted probabilities of death.
+
+\subsection{\texorpdfstring{Using \texttt{predict} to describe the
+model's
+fits}{Using predict to describe the model's fits}}\label{using-predict-to-describe-the-models-fits}
+
+To obtain these fitted odds and probabilities in R, we can use the
+\texttt{predict} function.
+
+\begin{itemize}
+\tightlist
+\item
+  The default predictions are on the scale of the log odds. These
+  predictions are also available through the \texttt{type\ =\ "link"}
+  command within the \texttt{predict} function for a generalized linear
+  model like logistic regression.
+\item
+  Here are the predicted log odds of death for a subject (Sally) with a
+  4 cm resection and a subject (Harry) who had a 5 cm resection.
+\end{itemize}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{predict}\NormalTok{(res_modA, }\DataTypeTok{newdata =} \KeywordTok{data_frame}\NormalTok{(}\DataTypeTok{resection =} \KeywordTok{c}\NormalTok{(}\DecValTok{4}\NormalTok{,}\DecValTok{5}\NormalTok{)))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+         1          2 
+-1.4669912 -0.7253027 
+\end{verbatim}
+
+\begin{itemize}
+\tightlist
+\item
+  We can also obtain predictions for each subject on the original
+  response (here, probability) scale, backing out of the logit link.
+\end{itemize}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{predict}\NormalTok{(res_modA, }\DataTypeTok{newdata =} \KeywordTok{data_frame}\NormalTok{(}\DataTypeTok{resection =} \KeywordTok{c}\NormalTok{(}\DecValTok{4}\NormalTok{, }\DecValTok{5}\NormalTok{)), }
+        \DataTypeTok{type =} \StringTok{"response"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+        1         2 
+0.1874004 0.3262264 
+\end{verbatim}
+
+So the predicted probability of death is 0.187 for Sally, the subject
+with a 4 cm resection, and 0.326 for Harry, the subject with a 5 cm
+resection.
+
+\subsection{Odds Ratio interpretation of
+Coefficients}\label{odds-ratio-interpretation-of-coefficients}
+
+Often, we will exponentiate the estimated slope coefficients of a
+logistic regression model to help us understand the impact of changing a
+predictor on the odds of our outcome.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{exp}\NormalTok{(}\KeywordTok{coef}\NormalTok{(res_modA))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+(Intercept)   resection 
+ 0.01186995  2.09947754 
+\end{verbatim}
+
+To interpret this finding, suppose we have two subjects, Harry and
+Sally. Harry had a resection that was 1 cm larger than Sally. This
+estimated coefficient suggests that the estimated odds for death
+associated with Harry is 2.099 times larger than the odds for death
+associated with Sally. In general, the odds ratio comparing two subjects
+who differ by 1 cm on the resection length is 2.099.
+
+To illustrate, again let's assume that Harry's resection was 5 cm, and
+Sally's was 4 cm. Then we have:
+
+\[
+log\left(\frac{Pr(Harry died)}{1 - Pr(Harry died)}\right) = -4.4337 + 0.7417 \times 5 = -0.7253, \\
+log\left(\frac{Pr(Sally died)}{1 - Pr(Sally died)}\right) = -4.4337 + 0.7417 \times 4 = -1.4667.
+\]
+
+which implies that our estimated odds of death for Harry and Sally are:
+
+\[
+Odds(Harry died) = \frac{Pr(Harry died)}{1 - Pr(Harry died)} = e^{-4.4337 + 0.7417 \times 5} = e^{-0.7253} = 0.4842 \\
+Odds(Sally died) = \frac{Pr(Sally died)}{1 - Pr(Sally died)} = e^{-4.4337 + 0.7417 \times 4} = e^{-1.4667} = 0.2307
+\]
+
+and so the odds ratio is:
+
+\[
+OR = \frac{Odds(Harry died)}{Odds(Sally died)} = \frac{0.4842}{0.2307} = 2.099
+\]
+
+\begin{itemize}
+\tightlist
+\item
+  If the odds ratio was 1, that would mean that Harry and Sally had the
+  same estimated odds of death, and thus the same estimated probability
+  of death, despite having different sizes of resections.
+\item
+  Since the odds ratio is greater than 1, it means that Harry has a
+  higher estimated odds of death than Sally, and thus that Harry has a
+  higher estimated probability of death than Sally.
+\item
+  If the odds ratio was less than 1, it would mean that Harry had a
+  lower estimated odds of death than Sally, and thus that Harry had a
+  lower estimated probability of death than Sally.
+\end{itemize}
+
+Remember that the odds ratio is a fraction describing two positive
+numbers (odds can only be non-negative) so that the smallest possible
+odds ratio is 0.
+
+\subsection{\texorpdfstring{Interpreting the rest of the model output
+from
+\texttt{glm}}{Interpreting the rest of the model output from glm}}\label{interpreting-the-rest-of-the-model-output-from-glm}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{res_modA}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+
+Call:  glm(formula = died ~ resection, family = "binomial", data = resect)
+
+Coefficients:
+(Intercept)    resection  
+    -4.4337       0.7417  
+
+Degrees of Freedom: 133 Total (i.e. Null);  132 Residual
+Null Deviance:      101.9 
+Residual Deviance: 89.49    AIC: 93.49
+\end{verbatim}
+
+In addition to specifying the logistic regression coefficients, we are
+also presented with information on degrees of freedom, deviance (null
+and residual) and AIC.
+
+\begin{itemize}
+\tightlist
+\item
+  The degrees of freedom indicate the sample size.
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Recall that we had \emph{n} = 134 subjects in the data. The ``Null''
+    model includes only an intercept term (which uses 1 df) and we thus
+    have \emph{n} - 1 (here 133) degrees of freedom available for
+    estimation.
+  \item
+    In our \texttt{res\_modA} model, a logistic regression is fit
+    including a single slope (resection) and an intercept term. Each
+    uses up one degree of freedom to build an estimate, so we have
+    \emph{n} - 2 = 134 - 2 = 132 residual df remaining.
+  \end{itemize}
+\item
+  The AIC or Akaike Information Criterion (lower values are better) is
+  also provided. This is helpful if we're comparing multiple models for
+  the same outcome.
+\end{itemize}
+
+\subsection{Deviance and Comparing Our Model to the Null
+Model}\label{deviance-and-comparing-our-model-to-the-null-model}
+
+\begin{itemize}
+\tightlist
+\item
+  The deviance (a measure of the model's \emph{lack of fit}) is
+  available for both the null model (the model with only an intercept)
+  and for our model (\texttt{res\_modA}) predicting our outcome,
+  mortality.
+\item
+  The deviance test, though available in R (see below) isn't really a
+  test of whether the model works well. Instead, it assumes the model is
+  true, and then tests to see if the coefficients are detectably
+  different from zero. So it isn't of much practical use.
+
+  \begin{itemize}
+  \tightlist
+  \item
+    To compare the \texttt{deviance} statistics, we can subtract the
+    residual deviance from the null deviance to decribe the impact of
+    our model on fit.
+  \item
+    Null Deviance - Residual Deviance can be compared to a \(\chi^2\)
+    distribution with Null DF - Residual DF degrees of freedom to obtain
+    a global test of the in-sample predictive power of our model.
+  \item
+    We can see this comparison more directly by running \texttt{anova}
+    on our model:
+  \end{itemize}
+\end{itemize}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{anova}\NormalTok{(res_modA)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Analysis of Deviance Table
+
+Model: binomial, link: logit
+
+Response: died
+
+Terms added sequentially (first to last)
+
+          Df Deviance Resid. Df Resid. Dev
+NULL                        133    101.943
+resection  1    12.45       132     89.493
+\end{verbatim}
+
+To complete a deviance test and obtain a \emph{p} value, we can run the
+following code to estimate the probability that a chi-square
+distribution with a single degree of freedom would exhibit an
+improvement in deviance as large as 12.45.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{pchisq}\NormalTok{(}\FloatTok{12.45}\NormalTok{, }\DecValTok{1}\NormalTok{, }\DataTypeTok{lower.tail =} \OtherTok{FALSE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+[1] 0.0004179918
+\end{verbatim}
+
+The \emph{p} value for the deviance test here is about 0.0004. But,
+again, this isn't a test of whether the model is any good - it assumes
+the model is true, and then tests some consequences.
+
+\begin{itemize}
+\tightlist
+\item
+  Specifically, it tests whether (if the model is TRUE) some of the
+  model's coefficients are non-zero.
+\item
+  That's not so practially useful, so I discourage you from performing
+  global tests of a logistic regression model with a deviance test.
+\end{itemize}
+
+\subsection{\texorpdfstring{Using \texttt{glance} with a logistic
+regression
+model}{Using glance with a logistic regression model}}\label{using-glance-with-a-logistic-regression-model}
+
+We can use the \texttt{glance} function from the \texttt{broom} package
+to obtain the null and residual deviance and degrees of freedom. Note
+that the deviance for our model is related to the log likelihood by
+-2*\texttt{logLik}.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{glance}\NormalTok{(res_modA)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+  null.deviance df.null    logLik      AIC     BIC deviance df.residual
+1      101.9431     133 -44.74646 93.49292 99.2886 89.49292         132
+\end{verbatim}
+
+The \texttt{glance} result also provides the AIC, and the BIC (Bayes
+Information Criterion), each of which is helpful in understanding
+comparisons between multiple models for the same outcome (with smaller
+values of either criterion indicating better models.) The AIC is based
+on the deviance, but penalizes you for making the model more
+complicated. The BIC does the same sort of thing but with a different
+penalty.
+
+Again we see that we have a null deviance of 101.94 on 133 degrees of
+freedom. Including the \texttt{resection} information in the model
+decreased the deviance to 89.49 points on 132 degrees of freedom, so
+that's a decrease of 12.45 points while using one degree of freedom, a
+statistically significant reduction in deviance.
+
+\section{Interpreting the Model
+Summary}\label{interpreting-the-model-summary}
+
+Let's get a more detailed summary of our \texttt{res\_modA} model,
+including 95\% confidence intervals for the coefficients:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{summary}\NormalTok{(res_modA)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+
+Call:
+glm(formula = died ~ resection, family = "binomial", data = resect)
+
+Deviance Residuals: 
+    Min       1Q   Median       3Q      Max  
+-1.1844  -0.5435  -0.3823  -0.2663   2.4501  
+
+Coefficients:
+            Estimate Std. Error z value Pr(>|z|)    
+(Intercept)  -4.4337     0.8799  -5.039 4.67e-07 ***
+resection     0.7417     0.2230   3.327 0.000879 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 101.943  on 133  degrees of freedom
+Residual deviance:  89.493  on 132  degrees of freedom
+AIC: 93.493
+
+Number of Fisher Scoring iterations: 5
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{confint}\NormalTok{(res_modA, }\DataTypeTok{level =} \FloatTok{0.95}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Waiting for profiling to be done...
+\end{verbatim}
+
+\begin{verbatim}
+                2.5 %    97.5 %
+(Intercept) -6.344472 -2.855856
+resection    0.322898  1.208311
+\end{verbatim}
+
+Some elements of this summary are very familiar from our work with
+linear models.
+
+\begin{itemize}
+\tightlist
+\item
+  We still have a five-number summary of residuals, although these are
+  called \emph{deviance} residuals.
+\item
+  We have a table of coefficients with standard errors, and hypothesis
+  tests, although these are Wald z-tests, rather than the t tests we saw
+  in linear modeling.
+\item
+  We have a summary of global fit in the comparison of null deviance and
+  residual deviance, but without a formal p value. And we have the AIC,
+  as discussed above.
+\item
+  We also have some new items related to a \emph{dispersion} parameter
+  and to the number of Fisher Scoring Iterations.
+\end{itemize}
+
+Let's walk through each of these elements.
+
+\subsection{Wald Z tests for Coefficients in a Logistic
+Regression}\label{wald-z-tests-for-coefficients-in-a-logistic-regression}
+
+The coefficients output provides the estimated coefficients, and their
+standard errors, plus a Wald Z statistic, which is just the estimated
+coefficient divided by its standard error. This is compared to a
+standard Normal distribution to obtain the two-tailed p values
+summarized in the \texttt{Pr(\textgreater{}\textbar{}z\textbar{})}
+column.
+
+\begin{itemize}
+\tightlist
+\item
+  The interesting result is \texttt{resection}, which has a Wald Z =
+  3.327, yielding a \emph{p} value of 0.00088.
+\item
+  The hypotheses being tested here are H\_0\_: \texttt{resection} does
+  not have an effect on the log odds of \texttt{died} vs.~H\_A\_:
+  \texttt{resection} does have such an effect.
+\item
+  Another way of stating this is that the \emph{p} value assesses
+  whether the estimated coefficient of \texttt{resection}, 0.7417, is
+  statistically detectably different from 0. If the coefficient (on the
+  logit scale) for \texttt{resection} was truly 0, this would mean that:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    the log odds of death did not change based on the \texttt{resection}
+    size,
+  \item
+    the odds of death were unchanged based on the \texttt{resection}
+    size (the odds ratio would be 1), and
+  \item
+    the probability of death was unchanged based on the
+    \texttt{resection} size.
+  \end{itemize}
+\end{itemize}
+
+In our case, we have a statistically detectable change in the log odds
+of \texttt{died} associated with changes in \texttt{resection},
+according to this \emph{p} value. We conclude that \texttt{resection}
+size is associated with a positive impact on death rates (death rates
+are generally higher for people with larger resections.)
+
+\subsection{Confidence Intervals for the
+Coefficients}\label{confidence-intervals-for-the-coefficients}
+
+As in linear regression, we can obtain 95\% confidence intervals (to get
+other levels, change the \texttt{level} parameter in \texttt{confint})
+for the intercept and slope coefficients.
+
+Here, we see, for example, that the coefficient of \texttt{resection}
+has a point estimate of 0.7417, and a confidence interval of (0.3229,
+1.208). Since this is on the logit scale, it's not that interpretable,
+but we will often exponentiate the model and its confidence interval to
+obtain a more interpretable result on the odds ratio scale.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{exp}\NormalTok{(}\KeywordTok{coef}\NormalTok{(res_modA))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+(Intercept)   resection 
+ 0.01186995  2.09947754 
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{exp}\NormalTok{(}\KeywordTok{confint}\NormalTok{(res_modA))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Waiting for profiling to be done...
+\end{verbatim}
+
+\begin{verbatim}
+                  2.5 %     97.5 %
+(Intercept) 0.001756429 0.05750655
+resection   1.381124459 3.34782604
+\end{verbatim}
+
+From this output, we can estimate the odds ratio for death associated
+with a 1 cm increase in resection size is 2.099, with a 95\% CI of
+(1.38, 3.35). - If the odds ratio was 1, it would indicate that the odds
+of death did not change based on the change in resection size. - Here,
+it's clear that the estimated odds of death will be larger (odds
+\textgreater{} 1) for subjects with larger resection sizes. Larger odds
+of death also indicate larger probabilities of death. This confidence
+interval indicates that with 95\% confidence, we conclude that increases
+in resection size are associated with statistically detectable increases
+in the odds of death. - If the odds ratio was less than 1 (remember that
+it cannot be less than 0) that would mean that subjects with larger
+resection sizes were associated with smaller estimated odds of death.
+
+\subsection{Deviance Residuals}\label{deviance-residuals}
+
+In logistic regression, it's certainly a good idea to check to see how
+well the model fits the data. However, there are a few different types
+of residuals. The residuals presented here by default are called
+deviance residuals. Other types of residuals are available for
+generalized linear models, such as Pearson residuals, working residuals,
+and response residuals. Logistic regression model diagnostics often make
+use of multiple types of residuals.
+
+The deviance residuals for each individual subject sum up to the
+deviance statistic for the model, and describe the contribution of each
+point to the model likelihood function.
+
+The deviance residual, \(d_i\), for the i\textsuperscript{th}
+observation in a model predicting \(y_i\) (a binary variable), with the
+estimate being \(\hat{\pi}_i\) is:
+
+\[
+d_i = s_i \sqrt{-2 [y_i log \hat{\pi_i} + (1 - y_i) log(1 - \hat{\pi_i})]},
+\]
+
+where \(s_i\) is 1 if \(y_i = 1\) and \(s_i = -1\) if \(y_i = 0\).
+
+Again, the sum of the deviance residuals is the deviance.
+
+\subsection{Dispersion Parameter}\label{dispersion-parameter}
+
+The dispersion parameter is taken to be 1 for \texttt{glm} fit using
+either the \texttt{binomial} or \texttt{Poisson} families. For other
+sorts of generalized linear models, the dispersion parameter will be of
+some importance in estimating standard errors sensibly.
+
+\subsection{Fisher Scoring iterations}\label{fisher-scoring-iterations}
+
+The solution of a logistic regression model involves maximizing a
+likelihood function. Fisher's scoring algorithm in our
+\texttt{res\_modA} needed five iterations to perform the logistic
+regression fit. All that this tells you is that the model converged, and
+didn't require a lot of time to do so.
+
+\section{Plotting a Simple Logistic Regression
+Model}\label{plotting-a-simple-logistic-regression-model}
+
+Let's plot the logistic regression model \texttt{res\_modA} for
+\texttt{died} using the extent of the resection in terms of
+probabilities. We can use either of two different approaches:
+
+\begin{itemize}
+\tightlist
+\item
+  we can plot the fitted values from our specific model against the
+  original data, using the \texttt{augment} function from the
+  \texttt{broom} package, or
+\item
+  we can create a smooth function called \texttt{binomial\_smooth} that
+  plots a simple logistic model in an analogous way to
+  \texttt{geom\_smooth(method\ =\ "lm")} for a simple linear regression.
+\end{itemize}
+
+\subsection{\texorpdfstring{Using \texttt{augment} to capture the fitted
+probabilities}{Using augment to capture the fitted probabilities}}\label{using-augment-to-capture-the-fitted-probabilities}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{res_A_aug <-}\StringTok{ }\KeywordTok{augment}\NormalTok{(res_modA, resect, }
+                     \DataTypeTok{type.predict =} \StringTok{"response"}\NormalTok{)}
+\KeywordTok{head}\NormalTok{(res_A_aug)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+  id age prior resection intubated died    .fitted    .se.fit     .resid
+1  1  34     1       2.5         0    0 0.07046791 0.02562381 -0.3822929
+2  2  57     0       5.0         0    0 0.32622637 0.08605551 -0.8886631
+3  3  60     1       4.0         1    1 0.18740037 0.04269795  1.8300317
+4  4  62     1       4.2         0    0 0.21104240 0.04871389 -0.6885386
+5  5  28     0       6.0         1    1 0.50409637 0.14302982  1.1704596
+6  6  52     0       3.0         0    0 0.09897375 0.02867196 -0.4565542
+         .hat    .sigma      .cooksd .std.resid
+1 0.010024061 0.8258481 0.0003876961 -0.3842235
+2 0.033691765 0.8227475 0.0087350915 -0.9040227
+3 0.011972088 0.8107264 0.0265893468  1.8410857
+4 0.014252277 0.8243062 0.0019617278 -0.6934983
+5 0.081835623 0.8196110 0.0477480056  1.2215077
+6 0.009218619 0.8255581 0.0005157780 -0.4586733
+\end{verbatim}
+
+This approach augments the \texttt{resect} data set with fitted,
+residual and other summaries of each observation's impact on the fit,
+using the ``response'' type of prediction, which yields the fitted
+probabilities in the \texttt{.fitted} column.
+
+\subsection{Plotting a Logistic Regression Model's Fitted
+Values}\label{plotting-a-logistic-regression-models-fitted-values}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{ggplot}\NormalTok{(res_A_aug, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ resection, }\DataTypeTok{y =}\NormalTok{ died)) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_jitter}\NormalTok{(}\DataTypeTok{height =} \FloatTok{0.05}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_line}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ resection, }\DataTypeTok{y =}\NormalTok{ .fitted), }
+              \DataTypeTok{col =} \StringTok{"blue"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \StringTok{"Logistic Regression from Model res_modA"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-153-1.pdf}
+
+\subsection{\texorpdfstring{Plotting a Simple Logistic Model using
+\texttt{binomial\_smooth}}{Plotting a Simple Logistic Model using binomial\_smooth}}\label{plotting-a-simple-logistic-model-using-binomial_smooth}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{binomial_smooth <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(...) \{}
+  \KeywordTok{geom_smooth}\NormalTok{(}\DataTypeTok{method =} \StringTok{"glm"}\NormalTok{, }
+              \DataTypeTok{method.args =} \KeywordTok{list}\NormalTok{(}\DataTypeTok{family =} \StringTok{"binomial"}\NormalTok{), ...)}
+\NormalTok{\}}
+
+\KeywordTok{ggplot}\NormalTok{(resect, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ resection, }\DataTypeTok{y =}\NormalTok{ died)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_jitter}\NormalTok{(}\DataTypeTok{height =} \FloatTok{0.05}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{binomial_smooth}\NormalTok{() }\OperatorTok{+}\StringTok{ }\NormalTok{## ...smooth(se=FALSE) to leave out interval}
+\StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \StringTok{"Logistic Regression from Model A"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{theme_bw}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-154-1.pdf}
+
+As expected, we see an increase in the model probability of death as the
+extent of the resection grows larger.
+
+\section{Receiver Operating Characteristic Curve
+Analysis}\label{receiver-operating-characteristic-curve-analysis}
+
+One way to assess the predictive accuracy within the model development
+sample in a logistic regression is to consider an analyses based on the
+receiver operating characteristic (ROC) curve. ROC curves are commonly
+used in assessing diagnoses in medical settings, and in signal detection
+applications.
+
+The accuracy of a ``test'' can be evaluated by considering two types of
+errors: false positives and false negatives.
+
+In our \texttt{res\_modA} model, we use \texttt{resection} size to
+predict whether the patient \texttt{died}. Suppopse we established a
+value R, so that if the resection size was larger than R cm, we would
+predict that the patient \texttt{died}, and otherwise we would predict
+that the patient did not die.
+
+A good outcome of our model's ``test'', then, would be when the
+resection size is larger than R for a patient who actually died. Another
+good outcome would be when the resection size is smaller than R for a
+patient who survived.
+
+But we can make errors, too.
+
+\begin{itemize}
+\tightlist
+\item
+  A false positive error in this setting would occur when the resection
+  size is larger than R (so we predict the patient dies) but in fact the
+  patient does not die.
+\item
+  A false negative error in this case would occur when the resection
+  size is smaller than R (so we predict the patient survives) but in
+  fact the patient dies.
+\end{itemize}
+
+Formally, the true positive fraction (TPF) for a specific resection
+cutoff \(R\), is the probability of a positive test (a prediction that
+the patient will die) among the people who have the outcome died = 1
+(those who actually die).
+
+\[
+TPF(R) = Pr(resection > R | subject died)
+\]
+
+Similarly, the false positive fraction (FPF) for a specific cutoff \(R\)
+is the probability of a positive test (prediction that the patient will
+die) among the people with died = 0 (those who don't actually die)
+
+\[
+FPF(R) = Pr(resection > R | subject did not die)
+\]
+
+The True Positive Rate is referred to as the sensitivity of a diagnostic
+test, and the True Negative rate (1 - the False Positive rate) is
+referred to as the specificity of a diagnostic test.
+
+Since the cutoff \(R\) is not fixed in advanced, we can plot the value
+of TPF (on the y axis) against FPF (on the x axis) for all possible
+values of \(R\), and this is what the ROC curve is. Others refer to the
+Sensitivity on the Y axis, and 1-Specificity on the X axis, and this is
+the same idea.
+
+Before we get too far into the weeds, let me show you some simple
+situations so you can understand what you might learn from the ROC
+curve. The web page \url{http://blog.yhat.com/posts/roc-curves.html}
+provides source materials.
+
+\subsection{Interpreting the Area under the ROC
+curve}\label{interpreting-the-area-under-the-roc-curve}
+
+The AUC or Area under the ROC curve is the amount of space underneath
+the ROC curve. Often referred to as the c statistic, the AUC represents
+the quality of your TPR and FPR overall in a single number. The C
+statistic ranges from 0 to 1, with C = 0.5 for a prediction that is no
+better than random guessing, and C = 1 for a perfect prediction model.
+
+Next, I'll build a simulation to demonstrate several possible ROC curves
+in the sections that follow.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{432999}\NormalTok{)}
+\NormalTok{sim.temp <-}\StringTok{ }\KeywordTok{data_frame}\NormalTok{(}\DataTypeTok{x =} \KeywordTok{rnorm}\NormalTok{(}\DataTypeTok{n =} \DecValTok{200}\NormalTok{), }
+                       \DataTypeTok{prob =} \KeywordTok{exp}\NormalTok{(x)}\OperatorTok{/}\NormalTok{(}\DecValTok{1} \OperatorTok{+}\StringTok{ }\KeywordTok{exp}\NormalTok{(x)), }
+                       \DataTypeTok{y =} \KeywordTok{as.numeric}\NormalTok{(}\DecValTok{1} \OperatorTok{*}\StringTok{ }\KeywordTok{runif}\NormalTok{(}\DecValTok{200}\NormalTok{) }\OperatorTok{<}\StringTok{ }\NormalTok{prob))}
+
+\NormalTok{sim.temp <-}\StringTok{ }\NormalTok{sim.temp }\OperatorTok{%>%}
+\StringTok{    }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{p_guess =} \DecValTok{1}\NormalTok{,}
+           \DataTypeTok{p_perfect =}\NormalTok{ y, }
+           \DataTypeTok{p_bad =} \KeywordTok{exp}\NormalTok{(}\OperatorTok{-}\DecValTok{2}\OperatorTok{*}\NormalTok{x) }\OperatorTok{/}\StringTok{ }\NormalTok{(}\DecValTok{1} \OperatorTok{+}\StringTok{ }\KeywordTok{exp}\NormalTok{(}\OperatorTok{-}\DecValTok{2}\OperatorTok{*}\NormalTok{x)),}
+           \DataTypeTok{p_ok =}\NormalTok{ prob }\OperatorTok{+}\StringTok{ }\NormalTok{(}\DecValTok{1}\OperatorTok{-}\NormalTok{y)}\OperatorTok{*}\KeywordTok{runif}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{0}\NormalTok{, }\FloatTok{0.05}\NormalTok{),}
+           \DataTypeTok{p_good =}\NormalTok{ prob }\OperatorTok{+}\StringTok{ }\NormalTok{y}\OperatorTok{*}\KeywordTok{runif}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{0}\NormalTok{, }\FloatTok{0.27}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\subsubsection{What if we are guessing?}\label{what-if-we-are-guessing}
+
+If we're guessing completely at random, then the model should correctly
+classify a subject (as died or not died) about 50\% of the time, so the
+TPR and FPR will be equal. This yields a diagonal line in the ROC curve,
+and an area under the curve (C statistic) of 0.5.
+
+There are several ways to do this on the web, but I'll show this one,
+which has some bizarre code, but that's a function of using a package
+called \texttt{ROCR} to do the work. It comes from
+\href{http://blog.yhat.com/posts/roc-curves.html}{this link}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{pred_guess <-}\StringTok{ }\KeywordTok{prediction}\NormalTok{(sim.temp}\OperatorTok{$}\NormalTok{p_guess, sim.temp}\OperatorTok{$}\NormalTok{y)}
+\NormalTok{perf_guess <-}\StringTok{ }\KeywordTok{performance}\NormalTok{(pred_guess, }\DataTypeTok{measure =} \StringTok{"tpr"}\NormalTok{, }\DataTypeTok{x.measure =} \StringTok{"fpr"}\NormalTok{)}
+\NormalTok{auc_guess <-}\StringTok{ }\KeywordTok{performance}\NormalTok{(pred_guess, }\DataTypeTok{measure=}\StringTok{"auc"}\NormalTok{)}
+
+\NormalTok{auc_guess <-}\StringTok{ }\KeywordTok{round}\NormalTok{(auc_guess}\OperatorTok{@}\NormalTok{y.values[[}\DecValTok{1}\NormalTok{]],}\DecValTok{3}\NormalTok{)}
+\NormalTok{roc_guess <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{fpr=}\KeywordTok{unlist}\NormalTok{(perf_guess}\OperatorTok{@}\NormalTok{x.values),}
+                        \DataTypeTok{tpr=}\KeywordTok{unlist}\NormalTok{(perf_guess}\OperatorTok{@}\NormalTok{y.values),}
+                        \DataTypeTok{model=}\StringTok{"GLM"}\NormalTok{)}
+
+\KeywordTok{ggplot}\NormalTok{(roc_guess, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{fpr, }\DataTypeTok{ymin=}\DecValTok{0}\NormalTok{, }\DataTypeTok{ymax=}\NormalTok{tpr)) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_ribbon}\NormalTok{(}\DataTypeTok{alpha=}\FloatTok{0.2}\NormalTok{, }\DataTypeTok{fill =} \StringTok{"blue"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_line}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{y=}\NormalTok{tpr), }\DataTypeTok{col =} \StringTok{"blue"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \KeywordTok{paste0}\NormalTok{(}\StringTok{"Guessing: ROC Curve w/ AUC="}\NormalTok{, auc_guess)) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{theme_bw}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-156-1.pdf}
+
+\subsubsection{What if we classify things
+perfectly?}\label{what-if-we-classify-things-perfectly}
+
+If we're classifying subjects perfectly, then we have a TPR of 1 and an
+FPR of 0. That yields an ROC curve that looks like the upper and left
+edges of a box. If our model correctly classifies a subject (as died or
+not died) 100\% of the time, the area under the curve (c statistic) will
+be 1.0. We'll add in the diagonal line here (in a dashed black line) to
+show how this model compares to random guessing.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{pred_perf <-}\StringTok{ }\KeywordTok{prediction}\NormalTok{(sim.temp}\OperatorTok{$}\NormalTok{p_perfect, sim.temp}\OperatorTok{$}\NormalTok{y)}
+\NormalTok{perf_perf <-}\StringTok{ }\KeywordTok{performance}\NormalTok{(pred_perf, }\DataTypeTok{measure =} \StringTok{"tpr"}\NormalTok{, }\DataTypeTok{x.measure =} \StringTok{"fpr"}\NormalTok{)}
+\NormalTok{auc_perf <-}\StringTok{ }\KeywordTok{performance}\NormalTok{(pred_perf, }\DataTypeTok{measure=}\StringTok{"auc"}\NormalTok{)}
+
+\NormalTok{auc_perf <-}\StringTok{ }\KeywordTok{round}\NormalTok{(auc_perf}\OperatorTok{@}\NormalTok{y.values[[}\DecValTok{1}\NormalTok{]],}\DecValTok{3}\NormalTok{)}
+\NormalTok{roc_perf <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{fpr=}\KeywordTok{unlist}\NormalTok{(perf_perf}\OperatorTok{@}\NormalTok{x.values),}
+                        \DataTypeTok{tpr=}\KeywordTok{unlist}\NormalTok{(perf_perf}\OperatorTok{@}\NormalTok{y.values),}
+                        \DataTypeTok{model=}\StringTok{"GLM"}\NormalTok{)}
+
+\KeywordTok{ggplot}\NormalTok{(roc_perf, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{fpr, }\DataTypeTok{ymin=}\DecValTok{0}\NormalTok{, }\DataTypeTok{ymax=}\NormalTok{tpr)) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_ribbon}\NormalTok{(}\DataTypeTok{alpha=}\FloatTok{0.2}\NormalTok{, }\DataTypeTok{fill =} \StringTok{"blue"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_line}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{y=}\NormalTok{tpr), }\DataTypeTok{col =} \StringTok{"blue"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_abline}\NormalTok{(}\DataTypeTok{intercept =} \DecValTok{0}\NormalTok{, }\DataTypeTok{slope =} \DecValTok{1}\NormalTok{, }\DataTypeTok{lty =} \StringTok{"dashed"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \KeywordTok{paste0}\NormalTok{(}\StringTok{"Perfect Prediction: ROC Curve w/ AUC="}\NormalTok{, auc_perf)) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{theme_bw}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-157-1.pdf}
+
+\subsubsection{\texorpdfstring{What does ``worse than guessing'' look
+like?}{What does worse than guessing look like?}}\label{what-does-worse-than-guessing-look-like}
+
+A bad classifier will appear below and to the right of the diagonal line
+we'd see if we were completely guessing. Such a model will have a c
+statistic below 0.5, and will be valueless.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{pred_bad <-}\StringTok{ }\KeywordTok{prediction}\NormalTok{(sim.temp}\OperatorTok{$}\NormalTok{p_bad, sim.temp}\OperatorTok{$}\NormalTok{y)}
+\NormalTok{perf_bad <-}\StringTok{ }\KeywordTok{performance}\NormalTok{(pred_bad, }\DataTypeTok{measure =} \StringTok{"tpr"}\NormalTok{, }\DataTypeTok{x.measure =} \StringTok{"fpr"}\NormalTok{)}
+\NormalTok{auc_bad <-}\StringTok{ }\KeywordTok{performance}\NormalTok{(pred_bad, }\DataTypeTok{measure=}\StringTok{"auc"}\NormalTok{)}
+
+\NormalTok{auc_bad <-}\StringTok{ }\KeywordTok{round}\NormalTok{(auc_bad}\OperatorTok{@}\NormalTok{y.values[[}\DecValTok{1}\NormalTok{]],}\DecValTok{3}\NormalTok{)}
+\NormalTok{roc_bad <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{fpr=}\KeywordTok{unlist}\NormalTok{(perf_bad}\OperatorTok{@}\NormalTok{x.values),}
+                        \DataTypeTok{tpr=}\KeywordTok{unlist}\NormalTok{(perf_bad}\OperatorTok{@}\NormalTok{y.values),}
+                        \DataTypeTok{model=}\StringTok{"GLM"}\NormalTok{)}
+
+\KeywordTok{ggplot}\NormalTok{(roc_bad, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{fpr, }\DataTypeTok{ymin=}\DecValTok{0}\NormalTok{, }\DataTypeTok{ymax=}\NormalTok{tpr)) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_ribbon}\NormalTok{(}\DataTypeTok{alpha=}\FloatTok{0.2}\NormalTok{, }\DataTypeTok{fill =} \StringTok{"blue"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_line}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{y=}\NormalTok{tpr), }\DataTypeTok{col =} \StringTok{"blue"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_abline}\NormalTok{(}\DataTypeTok{intercept =} \DecValTok{0}\NormalTok{, }\DataTypeTok{slope =} \DecValTok{1}\NormalTok{, }\DataTypeTok{lty =} \StringTok{"dashed"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \KeywordTok{paste0}\NormalTok{(}\StringTok{"A Bad Model: ROC Curve w/ AUC="}\NormalTok{, auc_bad)) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{theme_bw}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-158-1.pdf}
+
+\subsubsection{\texorpdfstring{What does ``better than guessing'' look
+like?}{What does better than guessing look like?}}\label{what-does-better-than-guessing-look-like}
+
+An ``OK'' classifier will appear above and to the left of the diagonal
+line we'd see if we were completely guessing. Such a model will have a c
+statistic above 0.5, and might have some value. The plot below shows a
+very fairly poor model, but at least it's better than guessing.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{pred_ok <-}\StringTok{ }\KeywordTok{prediction}\NormalTok{(sim.temp}\OperatorTok{$}\NormalTok{p_ok, sim.temp}\OperatorTok{$}\NormalTok{y)}
+\NormalTok{perf_ok <-}\StringTok{ }\KeywordTok{performance}\NormalTok{(pred_ok, }\DataTypeTok{measure =} \StringTok{"tpr"}\NormalTok{, }\DataTypeTok{x.measure =} \StringTok{"fpr"}\NormalTok{)}
+\NormalTok{auc_ok <-}\StringTok{ }\KeywordTok{performance}\NormalTok{(pred_ok, }\DataTypeTok{measure=}\StringTok{"auc"}\NormalTok{)}
+
+\NormalTok{auc_ok <-}\StringTok{ }\KeywordTok{round}\NormalTok{(auc_ok}\OperatorTok{@}\NormalTok{y.values[[}\DecValTok{1}\NormalTok{]],}\DecValTok{3}\NormalTok{)}
+\NormalTok{roc_ok <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{fpr=}\KeywordTok{unlist}\NormalTok{(perf_ok}\OperatorTok{@}\NormalTok{x.values),}
+                        \DataTypeTok{tpr=}\KeywordTok{unlist}\NormalTok{(perf_ok}\OperatorTok{@}\NormalTok{y.values),}
+                        \DataTypeTok{model=}\StringTok{"GLM"}\NormalTok{)}
+
+\KeywordTok{ggplot}\NormalTok{(roc_ok, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{fpr, }\DataTypeTok{ymin=}\DecValTok{0}\NormalTok{, }\DataTypeTok{ymax=}\NormalTok{tpr)) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_ribbon}\NormalTok{(}\DataTypeTok{alpha=}\FloatTok{0.2}\NormalTok{, }\DataTypeTok{fill =} \StringTok{"blue"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_line}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{y=}\NormalTok{tpr), }\DataTypeTok{col =} \StringTok{"blue"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_abline}\NormalTok{(}\DataTypeTok{intercept =} \DecValTok{0}\NormalTok{, }\DataTypeTok{slope =} \DecValTok{1}\NormalTok{, }\DataTypeTok{lty =} \StringTok{"dashed"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \KeywordTok{paste0}\NormalTok{(}\StringTok{"A Mediocre Model: ROC Curve w/ AUC="}\NormalTok{, auc_ok)) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{theme_bw}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-159-1.pdf}
+
+Sometimes people grasp for a rough guide as to the accuracy of a model's
+predictions based on the area under the ROC curve. A common thought is
+to assess the C statistic much like you would a class grade.
+
+\begin{longtable}[]{@{}rl@{}}
+\toprule
+\begin{minipage}[b]{0.16\columnwidth}\raggedleft\strut
+C statistic\strut
+\end{minipage} & \begin{minipage}[b]{0.60\columnwidth}\raggedright\strut
+Interpretation\strut
+\end{minipage}\tabularnewline
+\midrule
+\endhead
+\begin{minipage}[t]{0.16\columnwidth}\raggedleft\strut
+0.90 to 1.00\strut
+\end{minipage} & \begin{minipage}[t]{0.60\columnwidth}\raggedright\strut
+model does an excellent job at discriminating ``yes'' from ``no''
+(A)\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.16\columnwidth}\raggedleft\strut
+0.80 to 0.90\strut
+\end{minipage} & \begin{minipage}[t]{0.60\columnwidth}\raggedright\strut
+model does a good job (B)\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.16\columnwidth}\raggedleft\strut
+0.70 to 0.80\strut
+\end{minipage} & \begin{minipage}[t]{0.60\columnwidth}\raggedright\strut
+model does a fair job (C)\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.16\columnwidth}\raggedleft\strut
+0.60 to 0.70\strut
+\end{minipage} & \begin{minipage}[t]{0.60\columnwidth}\raggedright\strut
+model does a poor job (D)\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.16\columnwidth}\raggedleft\strut
+0.50 to 0.60\strut
+\end{minipage} & \begin{minipage}[t]{0.60\columnwidth}\raggedright\strut
+model fails (F)\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.16\columnwidth}\raggedleft\strut
+below 0.50\strut
+\end{minipage} & \begin{minipage}[t]{0.60\columnwidth}\raggedright\strut
+model is worse than random guessing\strut
+\end{minipage}\tabularnewline
+\bottomrule
+\end{longtable}
+
+\subsubsection{\texorpdfstring{What does ``pretty good'' look
+like?}{What does pretty good look like?}}\label{what-does-pretty-good-look-like}
+
+A strong and good classifier will appear above and to the left of the
+diagonal line we'd see if we were completely guessing, often with a nice
+curve that is continually increasing and appears to be pulled up towards
+the top left. Such a model will have a c statistic well above 0.5, but
+not as large as 1. The plot below shows a stronger model, which appears
+substantially better than guessing.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{pred_good <-}\StringTok{ }\KeywordTok{prediction}\NormalTok{(sim.temp}\OperatorTok{$}\NormalTok{p_good, sim.temp}\OperatorTok{$}\NormalTok{y)}
+\NormalTok{perf_good <-}\StringTok{ }\KeywordTok{performance}\NormalTok{(pred_good, }\DataTypeTok{measure =} \StringTok{"tpr"}\NormalTok{, }\DataTypeTok{x.measure =} \StringTok{"fpr"}\NormalTok{)}
+\NormalTok{auc_good <-}\StringTok{ }\KeywordTok{performance}\NormalTok{(pred_good, }\DataTypeTok{measure=}\StringTok{"auc"}\NormalTok{)}
+
+\NormalTok{auc_good <-}\StringTok{ }\KeywordTok{round}\NormalTok{(auc_good}\OperatorTok{@}\NormalTok{y.values[[}\DecValTok{1}\NormalTok{]],}\DecValTok{3}\NormalTok{)}
+\NormalTok{roc_good <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{fpr=}\KeywordTok{unlist}\NormalTok{(perf_good}\OperatorTok{@}\NormalTok{x.values),}
+                        \DataTypeTok{tpr=}\KeywordTok{unlist}\NormalTok{(perf_good}\OperatorTok{@}\NormalTok{y.values),}
+                        \DataTypeTok{model=}\StringTok{"GLM"}\NormalTok{)}
+
+\KeywordTok{ggplot}\NormalTok{(roc_good, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{fpr, }\DataTypeTok{ymin=}\DecValTok{0}\NormalTok{, }\DataTypeTok{ymax=}\NormalTok{tpr)) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_ribbon}\NormalTok{(}\DataTypeTok{alpha=}\FloatTok{0.2}\NormalTok{, }\DataTypeTok{fill =} \StringTok{"blue"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_line}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{y=}\NormalTok{tpr), }\DataTypeTok{col =} \StringTok{"blue"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_abline}\NormalTok{(}\DataTypeTok{intercept =} \DecValTok{0}\NormalTok{, }\DataTypeTok{slope =} \DecValTok{1}\NormalTok{, }\DataTypeTok{lty =} \StringTok{"dashed"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \KeywordTok{paste0}\NormalTok{(}\StringTok{"A Pretty Good Model: ROC Curve w/ AUC="}\NormalTok{, auc_good)) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{theme_bw}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-160-1.pdf}
+
+\section{\texorpdfstring{The ROC Plot for
+\texttt{res\_modA}}{The ROC Plot for res\_modA}}\label{the-roc-plot-for-res_moda}
+
+Let me show you the ROC curve for our \texttt{res\_modA} model.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{## requires ROCR package}
+\NormalTok{prob <-}\StringTok{ }\KeywordTok{predict}\NormalTok{(res_modA, resect, }\DataTypeTok{type=}\StringTok{"response"}\NormalTok{)}
+\NormalTok{pred <-}\StringTok{ }\KeywordTok{prediction}\NormalTok{(prob, resect}\OperatorTok{$}\NormalTok{died)}
+\NormalTok{perf <-}\StringTok{ }\KeywordTok{performance}\NormalTok{(pred, }\DataTypeTok{measure =} \StringTok{"tpr"}\NormalTok{, }\DataTypeTok{x.measure =} \StringTok{"fpr"}\NormalTok{)}
+\NormalTok{auc <-}\StringTok{ }\KeywordTok{performance}\NormalTok{(pred, }\DataTypeTok{measure=}\StringTok{"auc"}\NormalTok{)}
+\NormalTok{## the rest of this code is a little strange}
+\NormalTok{auc <-}\StringTok{ }\KeywordTok{round}\NormalTok{(auc}\OperatorTok{@}\NormalTok{y.values[[}\DecValTok{1}\NormalTok{]],}\DecValTok{3}\NormalTok{)}
+\NormalTok{roc.data <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{fpr=}\KeywordTok{unlist}\NormalTok{(perf}\OperatorTok{@}\NormalTok{x.values),}
+                       \DataTypeTok{tpr=}\KeywordTok{unlist}\NormalTok{(perf}\OperatorTok{@}\NormalTok{y.values),}
+                       \DataTypeTok{model=}\StringTok{"GLM"}\NormalTok{)}
+
+\KeywordTok{ggplot}\NormalTok{(roc.data, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{fpr, }\DataTypeTok{ymin=}\DecValTok{0}\NormalTok{, }\DataTypeTok{ymax=}\NormalTok{tpr)) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_ribbon}\NormalTok{(}\DataTypeTok{alpha=}\FloatTok{0.2}\NormalTok{, }\DataTypeTok{fill =} \StringTok{"blue"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_line}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{y=}\NormalTok{tpr), }\DataTypeTok{col =} \StringTok{"blue"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_abline}\NormalTok{(}\DataTypeTok{intercept =} \DecValTok{0}\NormalTok{, }\DataTypeTok{slope =} \DecValTok{1}\NormalTok{, }\DataTypeTok{lty =} \StringTok{"dashed"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \KeywordTok{paste0}\NormalTok{(}\StringTok{"ROC Curve w/ AUC="}\NormalTok{, auc)) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{theme_bw}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-161-1.pdf}
+
+Based on the C statistic (AUC = 0.771) this would rank somewhere near
+the high end of a ``fair'' predictive model by this standard, not quite
+to the level of a ``good'' model.
+
+\section{Assessing Residual Plots from Model
+A}\label{assessing-residual-plots-from-model-a}
+
+\begin{quote}
+Residuals are certainly less informative for logistic regression than
+they are for linear regression: not only do yes/no outcomes inherently
+contain less information than continuous ones, but the fact that the
+adjusted response depends on the fit hampers our ability to use
+residuals as external checks on the model.
+\end{quote}
+
+\begin{quote}
+This is mitigated to some extent, however, by the fact that we are also
+making fewer distributional assumptions in logistic regression, so there
+is no need to inspect residuals for, say, skewness or
+heteroskedasticity.
+\end{quote}
+
+\begin{itemize}
+\tightlist
+\item
+  Patrick Breheny, University of Kentucky,
+  \href{https://web.as.uky.edu/statistics/users/pbreheny/760/S13/notes/3-26.pdf}{Slides
+  on GLM Residuals and Diagnostics}
+\end{itemize}
+
+The usual residual plots are available in R for a logistic regression
+model, but most of them are irrelevant in the logistic regression
+setting. The residuals shouldn't follow a standard Normal distribution,
+and they will not show constant variance over the range of the predictor
+variables, so plots looking into those issues aren't helpful.
+
+The only plot from the standard set that we'll look at in many settings
+is plot 5, which helps us assess influence (via Cook's distance
+contours), and a measure related to leverage (how unusual an observation
+is in terms of the predictors) and standardized Pearson residuals.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plot}\NormalTok{(res_modA, }\DataTypeTok{which =} \DecValTok{5}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-162-1.pdf}
+
+In this case, I don't see any highly influential points, as no points
+fall outside of the Cook's distance (0.5 or 1) contours.
+
+\section{\texorpdfstring{Model B: A ``Kitchen Sink'' Logistic Regression
+Model}{Model B: A Kitchen Sink Logistic Regression Model}}\label{model-b-a-kitchen-sink-logistic-regression-model}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{res_modB <-}\StringTok{ }\KeywordTok{glm}\NormalTok{(died }\OperatorTok{~}\StringTok{ }\NormalTok{resection }\OperatorTok{+}\StringTok{ }\NormalTok{age }\OperatorTok{+}\StringTok{ }\NormalTok{prior }\OperatorTok{+}\StringTok{ }\NormalTok{intubated,}
+               \DataTypeTok{data =}\NormalTok{ resect, }\DataTypeTok{family =}\NormalTok{ binomial)}
+
+\NormalTok{res_modB}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+
+Call:  glm(formula = died ~ resection + age + prior + intubated, family = binomial, 
+    data = resect)
+
+Coefficients:
+(Intercept)    resection          age        prior    intubated  
+  -5.152886     0.612211     0.001173     0.814691     2.810797  
+
+Degrees of Freedom: 133 Total (i.e. Null);  129 Residual
+Null Deviance:      101.9 
+Residual Deviance: 67.36    AIC: 77.36
+\end{verbatim}
+
+\subsection{Comparing Model A to Model
+B}\label{comparing-model-a-to-model-b}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{anova}\NormalTok{(res_modA, res_modB)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Analysis of Deviance Table
+
+Model 1: died ~ resection
+Model 2: died ~ resection + age + prior + intubated
+  Resid. Df Resid. Dev Df Deviance
+1       132     89.493            
+2       129     67.359  3   22.134
+\end{verbatim}
+
+The addition of \texttt{age}, \texttt{prior} and \texttt{intubated}
+reduces the lack of fit by 22.134 points, at a cost of 3 degrees of
+freedom.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{glance}\NormalTok{(res_modA)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+  null.deviance df.null    logLik      AIC     BIC deviance df.residual
+1      101.9431     133 -44.74646 93.49292 99.2886 89.49292         132
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{glance}\NormalTok{(res_modB)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+  null.deviance df.null   logLik     AIC     BIC deviance df.residual
+1      101.9431     133 -33.6793 77.3586 91.8478  67.3586         129
+\end{verbatim}
+
+By either AIC or BIC, the larger model (\texttt{res\_modB}) looks more
+effective.
+
+\subsection{Interpreting Model B}\label{interpreting-model-b}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{summary}\NormalTok{(res_modB)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+
+Call:
+glm(formula = died ~ resection + age + prior + intubated, family = binomial, 
+    data = resect)
+
+Deviance Residuals: 
+    Min       1Q   Median       3Q      Max  
+-1.7831  -0.3741  -0.2386  -0.2014   2.5228  
+
+Coefficients:
+             Estimate Std. Error z value Pr(>|z|)    
+(Intercept) -5.152886   1.469453  -3.507 0.000454 ***
+resection    0.612211   0.282807   2.165 0.030406 *  
+age          0.001173   0.020646   0.057 0.954700    
+prior        0.814691   0.704785   1.156 0.247705    
+intubated    2.810797   0.658395   4.269 1.96e-05 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 101.943  on 133  degrees of freedom
+Residual deviance:  67.359  on 129  degrees of freedom
+AIC: 77.359
+
+Number of Fisher Scoring iterations: 6
+\end{verbatim}
+
+It appears that the \texttt{intubated} predictor adds significant value
+to the model, by the Wald test.
+
+Let's focus on the impact of these variables through odds ratios.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{exp}\NormalTok{(}\KeywordTok{coef}\NormalTok{(res_modB))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+ (Intercept)    resection          age        prior    intubated 
+ 0.005782692  1.844504859  1.001173503  2.258476846 16.623153519 
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{exp}\NormalTok{(}\KeywordTok{confint}\NormalTok{(res_modB))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Waiting for profiling to be done...
+\end{verbatim}
+
+\begin{verbatim}
+                   2.5 %     97.5 %
+(Intercept) 0.0002408626  0.0837263
+resection   1.0804548590  3.3495636
+age         0.9618416869  1.0442885
+prior       0.5485116610  9.1679931
+intubated   4.7473282453 64.6456919
+\end{verbatim}
+
+At a 5\% significance level, we might conclude that:
+
+\begin{itemize}
+\tightlist
+\item
+  larger sized \texttt{resection}s are associated with a meaningful rise
+  (est OR: 1.84, 95\% CI 1.08, 3.35) in the odds of death, holding all
+  other predictors constant,
+\item
+  the need for \texttt{intubation} at the end of surgery is associated
+  with a substantial rise (est OR: 16.6, 95\% CI 4.7, 64.7) in the odds
+  of death, holding all other predictors constant, but that
+\item
+  older \texttt{age} as well as having a \texttt{prior} tracheal surgery
+  appears to be associated with an increase in death risk, but not to an
+  extent that we can declare statistically significant.
+\end{itemize}
+
+\section{Plotting Model B}\label{plotting-model-b}
+
+Let's think about plotting the fitted values from our model, in terms of
+probabilities.
+
+\subsection{\texorpdfstring{Using \texttt{augment} to capture the fitted
+probabilities}{Using augment to capture the fitted probabilities}}\label{using-augment-to-capture-the-fitted-probabilities-1}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{res_B_aug <-}\StringTok{ }\KeywordTok{augment}\NormalTok{(res_modB, resect, }
+                     \DataTypeTok{type.predict =} \StringTok{"response"}\NormalTok{)}
+\KeywordTok{head}\NormalTok{(res_B_aug)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+  id age prior resection intubated died    .fitted    .se.fit     .resid
+1  1  34     1       2.5         0    0 0.05908963 0.03851118 -0.3490198
+2  2  57     0       5.0         0    0 0.11660492 0.06253774 -0.4979613
+3  3  60     1       4.0         1    1 0.72944600 0.15010423  0.7943172
+4  4  62     1       4.2         0    0 0.15522494 0.09607978 -0.5808354
+5  5  28     0       6.0         1    1 0.79641141 0.14588554  0.6747435
+6  6  52     0       3.0         0    0 0.03713809 0.01933270 -0.2751191
+        .hat    .sigma      .cooksd .std.resid
+1 0.02667562 0.7247491 0.0003536652 -0.3537702
+2 0.03796756 0.7240341 0.0010829917 -0.5076925
+3 0.11416656 0.7215778 0.0107925872  0.8439524
+4 0.07039819 0.7234665 0.0029937671 -0.6024273
+5 0.13126049 0.7225958 0.0088920280  0.7239256
+6 0.01045207 0.7250114 0.0000823406 -0.2765683
+\end{verbatim}
+
+\subsection{Plotting Model B Fits by Observed
+Mortality}\label{plotting-model-b-fits-by-observed-mortality}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{ggplot}\NormalTok{(res_B_aug, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =} \KeywordTok{factor}\NormalTok{(died), }\DataTypeTok{y =}\NormalTok{ .fitted, }\DataTypeTok{col =} \KeywordTok{factor}\NormalTok{(died))) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_boxplot}\NormalTok{() }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_jitter}\NormalTok{(}\DataTypeTok{width =} \FloatTok{0.1}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{    }\KeywordTok{guides}\NormalTok{(}\DataTypeTok{col =} \OtherTok{FALSE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-169-1.pdf}
+
+Certainly it appears as though most of our predicted probabilities (of
+death) for the subjects who actually survived are quite small, but not
+all of them. We also have at least 6 big ``misses'' among the 17
+subjects who actually died.
+
+\subsection{The ROC curve for Model B}\label{the-roc-curve-for-model-b}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{## requires ROCR package}
+\NormalTok{prob <-}\StringTok{ }\KeywordTok{predict}\NormalTok{(res_modB, resect, }\DataTypeTok{type=}\StringTok{"response"}\NormalTok{)}
+\NormalTok{pred <-}\StringTok{ }\KeywordTok{prediction}\NormalTok{(prob, resect}\OperatorTok{$}\NormalTok{died)}
+\NormalTok{perf <-}\StringTok{ }\KeywordTok{performance}\NormalTok{(pred, }\DataTypeTok{measure =} \StringTok{"tpr"}\NormalTok{, }\DataTypeTok{x.measure =} \StringTok{"fpr"}\NormalTok{)}
+\NormalTok{auc <-}\StringTok{ }\KeywordTok{performance}\NormalTok{(pred, }\DataTypeTok{measure=}\StringTok{"auc"}\NormalTok{)}
+\NormalTok{## the rest of this code is a little strange}
+\NormalTok{auc <-}\StringTok{ }\KeywordTok{round}\NormalTok{(auc}\OperatorTok{@}\NormalTok{y.values[[}\DecValTok{1}\NormalTok{]],}\DecValTok{3}\NormalTok{)}
+\NormalTok{roc.data <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{fpr=}\KeywordTok{unlist}\NormalTok{(perf}\OperatorTok{@}\NormalTok{x.values),}
+                       \DataTypeTok{tpr=}\KeywordTok{unlist}\NormalTok{(perf}\OperatorTok{@}\NormalTok{y.values),}
+                       \DataTypeTok{model=}\StringTok{"GLM"}\NormalTok{)}
+
+\KeywordTok{ggplot}\NormalTok{(roc.data, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{fpr, }\DataTypeTok{ymin=}\DecValTok{0}\NormalTok{, }\DataTypeTok{ymax=}\NormalTok{tpr)) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_ribbon}\NormalTok{(}\DataTypeTok{alpha=}\FloatTok{0.2}\NormalTok{, }\DataTypeTok{fill =} \StringTok{"blue"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_line}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{y=}\NormalTok{tpr), }\DataTypeTok{col =} \StringTok{"blue"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_abline}\NormalTok{(}\DataTypeTok{intercept =} \DecValTok{0}\NormalTok{, }\DataTypeTok{slope =} \DecValTok{1}\NormalTok{, }\DataTypeTok{lty =} \StringTok{"dashed"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \KeywordTok{paste0}\NormalTok{(}\StringTok{"Model B: ROC Curve w/ AUC="}\NormalTok{, auc)) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{theme_bw}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-170-1.pdf}
+
+The area under the curve (C-statistic) is 0.86, which certainly looks
+like a more discriminating fit than model A with resection alone.
+
+\subsection{Residuals, Leverage and
+Influence}\label{residuals-leverage-and-influence}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plot}\NormalTok{(res_modB, }\DataTypeTok{which =} \DecValTok{5}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-171-1.pdf}
+
+Again, we see no signs of deeply influential points in this model.
 
 \bibliography{text.bib}
 
