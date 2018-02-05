@@ -37,7 +37,7 @@ Most of this output should be familiar, but a few pieces are different.
 
 The **Model Likelihood Ratio Test** compares `newmod` to the null model with only an intercept term. It is a goodness-of-fit test that we'll use in several types of model settings this semester.
 
-- In many settings, the logarithm of the likelihood ratio, multiplied by -2, yields a value which can be compared to a $\chi^2$ distribution. So here, the value 72.02 is -2(log likelihood), and is compared to a $\chi^2$ distribution with 10 degrees of freedom. We reject the null hypothesis that `newmod` is no better than the null model, and conclude instead that at least of these predictors adds statistically significant value.
+- In many settings, the logarithm of the likelihood ratio, multiplied by -2, yields a value which can be compared to a $\chi^2$ distribution. So here, the value 72.02 is -2(log likelihood), and is compared to a $\chi^2$ distribution with 10 degrees of freedom. We reject the null hypothesis that `newmod` is no better than the null model, and conclude instead that at least one of these predictors adds statistically significant value.
     + For `ols`, interpret the model likelihood ratio test like the global (ANOVA) F test in `lm`.
     + The likelihood function is the probability of observing our data under the specified model.
     + We can compare two nested models by evaluating the difference in their likelihood ratios and degrees of freedom, then comparing the result to a $\chi^2$ distribution.

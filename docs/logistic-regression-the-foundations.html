@@ -31,8 +31,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   
   
-<link rel="prev" href="r-packages-used-in-these-notes.html">
-<link rel="next" href="special-functions-used-in-these-notes.html">
+<link rel="prev" href="other-variable-selection-strategies.html">
+<link rel="next" href="logistic-regression-and-the-resect-data.html">
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
@@ -491,26 +491,215 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="data-used-in-these-notes" class="section level1 unnumbered">
-<h1>Data used in these notes</h1>
-<p>Here, we’ll load in the data sets used in these notes.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">fakestroke &lt;-<span class="st"> </span><span class="kw">read.csv</span>(<span class="st">&quot;data/fakestroke.csv&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>tbl_df
-bloodbrain &lt;-<span class="st"> </span><span class="kw">read.csv</span>(<span class="st">&quot;data/bloodbrain.csv&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>tbl_df
-smartcle1 &lt;-<span class="st"> </span><span class="kw">read.csv</span>(<span class="st">&quot;data/smartcle1.csv&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>tbl_df
-bonding &lt;-<span class="st"> </span><span class="kw">read.csv</span>(<span class="st">&quot;data/bonding.csv&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>tbl_df
-cortisol &lt;-<span class="st"> </span><span class="kw">read.csv</span>(<span class="st">&quot;data/cortisol.csv&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>tbl_df
-emphysema &lt;-<span class="st"> </span><span class="kw">read.csv</span>(<span class="st">&quot;data/emphysema.csv&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>tbl_df
-prost &lt;-<span class="st"> </span><span class="kw">read.csv</span>(<span class="st">&quot;data/prost.csv&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>tbl_df
-pollution &lt;-<span class="st"> </span><span class="kw">read.csv</span>(<span class="st">&quot;data/pollution.csv&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>tbl_df
-resect &lt;-<span class="st"> </span><span class="kw">read.csv</span>(<span class="st">&quot;data/resect.csv&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>tbl_df</code></pre></div>
+<div id="logistic-regression-the-foundations" class="section level1">
+<h1><span class="header-section-number">Chapter 12</span> Logistic Regression: The Foundations</h1>
+<p>Sources for this material include <span class="citation">Harrell (<a href="#ref-Harrell2001">2001</a>)</span>, <span class="citation">Harrell (<a href="#ref-HarrellRMSnotes">2018</a>)</span>, <span class="citation">F. L. Ramsey and Schafer (<a href="#ref-RamseySchafer2002">2002</a>)</span> (chapters 20-21), <span class="citation">Vittinghoff et al. (<a href="#ref-Vittinghoff2012">2012</a>)</span> (chapter 5) and <span class="citation">Faraway (<a href="#ref-Faraway2006">2006</a>)</span> (chapter 2).</p>
+<div id="a-first-attempt-a-linear-probability-model" class="section level2">
+<h2><span class="header-section-number">12.1</span> A First Attempt: A Linear Probability Model</h2>
+<p>Suppose we want to predict a binary outcome which takes on the value 1 or 0, based on a single quantitative predictor. Let y be a 1/0 outcome, and x be a quantitative predictor in the following simulation.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">set.seed</span>(<span class="dv">432</span>)
+sim12 &lt;-<span class="st"> </span><span class="kw">data_frame</span>(<span class="dt">x =</span> <span class="kw">rnorm</span>(<span class="dv">100</span>, <span class="dv">10</span>, <span class="dv">3</span>),
+                   <span class="dt">err =</span> <span class="kw">rnorm</span>(<span class="dv">100</span>, <span class="dv">0</span>, <span class="dv">2</span>),
+                   <span class="dt">y =</span> <span class="kw">ifelse</span>(x <span class="op">+</span><span class="st"> </span>err <span class="op">&gt;</span><span class="st"> </span><span class="dv">10</span>, <span class="dv">1</span>, <span class="dv">0</span>))
+
+sim12 &lt;-<span class="st"> </span><span class="kw">select</span>(sim12, x, y)
+
+<span class="kw">ggplot</span>(sim12, <span class="kw">aes</span>(<span class="dt">x =</span> x, <span class="dt">y =</span> y)) <span class="op">+</span><span class="st"> </span><span class="kw">geom_point</span>()</code></pre></div>
+<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-141-1.png" width="672" /></p>
+<p>Now, we want to use our variable x here to predict our variable y (which takes on the values 0 and 1).</p>
+<p>One approach to doing this would be a linear probability model, as follows:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">mod12a &lt;-<span class="st"> </span><span class="kw">lm</span>(y <span class="op">~</span><span class="st"> </span>x, <span class="dt">data =</span> sim12) 
+
+<span class="kw">summary</span>(mod12a)</code></pre></div>
+<pre><code>
+Call:
+lm(formula = y ~ x, data = sim12)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-0.74104 -0.23411 -0.02894  0.23117  0.83153 
+
+Coefficients:
+            Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept) -0.72761    0.12272  -5.929 4.57e-08 ***
+x            0.12620    0.01219  10.349  &lt; 2e-16 ***
+---
+Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+
+Residual standard error: 0.3491 on 98 degrees of freedom
+Multiple R-squared:  0.5222,    Adjusted R-squared:  0.5173 
+F-statistic: 107.1 on 1 and 98 DF,  p-value: &lt; 2.2e-16</code></pre>
+<p>Here’s a picture of this model. What’s wrong here?</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">ggplot</span>(sim12, <span class="kw">aes</span>(<span class="dt">x =</span> x, <span class="dt">y =</span> y)) <span class="op">+</span><span class="st"> </span>
+<span class="st">    </span><span class="kw">geom_point</span>() <span class="op">+</span>
+<span class="st">    </span><span class="kw">geom_smooth</span>(<span class="dt">method =</span> <span class="st">&quot;lm&quot;</span>) <span class="op">+</span><span class="st"> </span>
+<span class="st">    </span><span class="kw">labs</span>(<span class="dt">title =</span> <span class="st">&quot;Linear Probability Model&quot;</span>)</code></pre></div>
+<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-143-1.png" width="672" /></p>
+<p>If y can only take the values 0 and 1 (or, more precisely, if we’re trying to predict the value <span class="math inline">\(\pi\)</span> = Pr(y = 1)) then what do we do with the predictions that are outside the range of (0, 1)?</p>
+</div>
+<div id="logistic-regression" class="section level2">
+<h2><span class="header-section-number">12.2</span> Logistic Regression</h2>
+<p>Logistic regression is the most common model used when the outcome is binary. Our response variable is assumed to take on two values, zero or one, and we then describe the probability of a “one” response, given a linear function of explanatory predictors. We use logistic regression rather than linear regression for predicting binary outcomes. Linear regression approaches to the problem of predicting probabilities are problematic for several reasons - not least of which being that they predict probabilities greater than one and less than zero. There are several available alternatives, including probit regression and binomial regression, for the problem of predicting a binary outcome.</p>
+<p>Logistic regression is part of a class called <strong>generalized linear models</strong> which extend the linear regression model in a variety of ways. There are also several extensions to the logistic regression model, including multinomial logistic regression (which is used for nominal categorical outcomes with more than two levels) and ordered logistic regression (used for ordered multi-categorical outcomes.) The methods involved in binary logistic regression may also be extended to the case where the outcomes are proportions based on counts, often through grouped binary responses (the proportion of cells with chromosomal aberrations, or the proportion of subjects who develop a particular condition.)</p>
+<p>Although the models are different in some crucial ways, the practical use of logistic regression tracks well with much of what we’ve learned about linear regression.</p>
+</div>
+<div id="the-logistic-regression-model" class="section level2">
+<h2><span class="header-section-number">12.3</span> The Logistic Regression Model</h2>
+<p>A generalized linear model (or GLM) is a probability model in which the mean of an outcome is related to predictors through a regression equation. A link function <em>g</em> is used to relate the mean, <span class="math inline">\(\mu\)</span>, to a linear regression of the predictors <span class="math inline">\(X_1, X_2, ..., X_k\)</span>.</p>
+<p><span class="math display">\[
+g(\mu) = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + ... + \beta_k X_k
+\]</span></p>
+<p>In the case of a logistic regression model,</p>
+<ul>
+<li>the mean <span class="math inline">\(\mu\)</span> of our 0/1 outcome is represented by <span class="math inline">\(\pi\)</span> which describes the probability of a “1” outcome.</li>
+<li>the linking function we use in logistic regression makes use of the logit function, which is built on the natural logarithm.</li>
+</ul>
+</div>
+<div id="the-link-function" class="section level2">
+<h2><span class="header-section-number">12.4</span> The Link Function</h2>
+<p>Logistic regression is a non-linear regression approach, since the equation for the mean of the 0/1 Y values conditioned on the values of our predictors <span class="math inline">\(X_1, X_2, ..., X_k\)</span> turns out to be non-linear in the <span class="math inline">\(\beta\)</span> coefficients. Its nonlinearity, however, is solely found in its link function, hence the term <em>generalized</em> linear model.</p>
+<p>The particular link function we use in logistic regression is called the <strong>logit link</strong>.</p>
+<p><span class="math display">\[
+logit(\pi) = log\left( \frac{\pi}{1 - \pi} \right) = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + ... + \beta_k X_k
+\]</span></p>
+<p>The inverse of the logit function is called the <strong>logistic function</strong>. If logit(<span class="math inline">\(\pi\)</span>) = <span class="math inline">\(\eta\)</span>, then <span class="math inline">\(\pi = \frac{exp(\eta)}{1 + exp(\eta)}\)</span></p>
+<p>The plot below displays the logistic function <span class="math inline">\(y = \frac{e^x}{1 + e^x}\)</span></p>
+<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-144-1.png" width="672" /></p>
+<p>As you can see in the figure above, the logistic function <span class="math inline">\(\frac{e^x}{1 + e^x}\)</span> takes any value <span class="math inline">\(x\)</span> in the real numbers and returns a value between 0 and 1.</p>
+</div>
+<div id="the-logit-or-log-odds" class="section level2">
+<h2><span class="header-section-number">12.5</span> The logit or log odds</h2>
+<p>We usually focus on the <strong>logit</strong> in statistical work, which is the inverse of the logistic function.</p>
+<ul>
+<li>If we have a probability <span class="math inline">\(\pi &lt; 0.5\)</span>, then <span class="math inline">\(logit(\pi) &lt; 0\)</span>.</li>
+<li>If our probability <span class="math inline">\(\pi &gt; 0.5\)</span>, then <span class="math inline">\(logit(\pi) &gt; 0\)</span>.</li>
+<li>Finally, if <span class="math inline">\(\pi = 0.5\)</span>, then <span class="math inline">\(logit(\pi) = 0\)</span>.</li>
+</ul>
+</div>
+<div id="interpreting-the-coefficients-of-a-logistic-regression-model" class="section level2">
+<h2><span class="header-section-number">12.6</span> Interpreting the Coefficients of a Logistic Regression Model</h2>
+<p>The critical thing to remember in interpreting a logistic regression model is that the logit is the log odds function. Exponentiating the logit yields the odds.</p>
+<p>So, suppose we have a yes/no outcome variable, where yes = 1, and no = 0, and <span class="math inline">\(\pi\)</span> = Pr(y = 1). Our model holds that:</p>
+<p><span class="math display">\[
+logit(\pi) = log\left( \frac{\pi}{1 - \pi} \right) = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + ... + \beta_k X_k
+\]</span></p>
+<p>The odds of a yes response (the odds that Y = 1) at the level <span class="math inline">\(X_1, X_2, ..., X_k\)</span> are:</p>
+<p><span class="math display">\[
+Odds(Y = 1) = exp(\beta_0 + \beta_1 X_1 + \beta_2 X_2 + ... + \beta_k X_k)
+\]</span></p>
+<p>The <strong>probability</strong> of a yes response (Pr(y = 1), or <span class="math inline">\(\pi\)</span>) is just</p>
+<p><span class="math display">\[
+\pi = Pr(Y = 1) = \frac{Odds(Y = 1)}{1 + Odds(Y = 1)} = \frac{exp(\beta_0 + \beta_1 X_1 + \beta_2 X_2 + ... + \beta_k X_k)}{1 + exp(\beta_0 + \beta_1 X_1 + \beta_2 X_2 + ... + \beta_k X_k)}
+\]</span></p>
+</div>
+<div id="the-logistic-regression-has-non-constant-variance" class="section level2">
+<h2><span class="header-section-number">12.7</span> The Logistic Regression has non-constant variance</h2>
+<p>In ordinary least squares regression, the variance <span class="math inline">\(Var(Y | X_1, X_2, ..., X_k) = \sigma^2\)</span> is a constant that does not depend on the predictor values. This is not the case in logistic regression. The mean and variance specifications of the logistic regression model are quite different.</p>
+<p><span class="math display">\[
+logit(\pi) = log\left( \frac{\pi}{1 - \pi} \right) = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + ... + \beta_k X_k \\
+\mu[Y | X_1, ..., X_k] = \pi, \\
+Var[Y | X_1, ..., X_k] = \pi(1 - \pi)
+\]</span></p>
+<p>The variance is now a function of the mean, and contains no additional parameter for us to estimate.</p>
+</div>
+<div id="fitting-a-logistic-regression-model-to-our-simulated-data" class="section level2">
+<h2><span class="header-section-number">12.8</span> Fitting a Logistic Regression Model to our Simulated Data</h2>
+<p>Recall the <code>sim12</code> data we built earlier.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">ggplot</span>(sim12, <span class="kw">aes</span>(<span class="dt">x =</span> x, <span class="dt">y =</span> y)) <span class="op">+</span><span class="st"> </span><span class="kw">geom_point</span>()</code></pre></div>
+<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-145-1.png" width="672" /></p>
+<p>Here is the fitted logistic regression model.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">model12b &lt;-<span class="st"> </span><span class="kw">glm</span>(y <span class="op">~</span><span class="st"> </span>x, <span class="dt">data =</span> sim12, <span class="dt">family =</span> binomial)
+
+model12b</code></pre></div>
+<pre><code>
+Call:  glm(formula = y ~ x, family = binomial, data = sim12)
+
+Coefficients:
+(Intercept)            x  
+    -9.1955       0.9566  
+
+Degrees of Freedom: 99 Total (i.e. Null);  98 Residual
+Null Deviance:      138.6 
+Residual Deviance: 70.03    AIC: 74.03</code></pre>
+<p>The logistic regression equation is:</p>
+<p><span class="math display">\[
+logit(Pr(y = 1)) = log\left( \frac{Pr(y = 1)}{1 - Pr(y = 1)} \right) = -9.1955 + 0.9566 x
+\]</span></p>
+<p>We can exponentiate the results of this model to get to an equation about odds, and eventually, a prediction about probabilities. Suppose, for instance, that we are interested in the prediction when x = 12.</p>
+<p><span class="math display">\[
+logit(Pr(y = 1) | X = 12) = log\left( \frac{Pr(y = 1)}{1 - Pr(y = 1)} \right) = -9.1955 + 0.9566 * 12 = 2.2837
+\]</span></p>
+<p>And we can also get this from the <code>predict</code> function applied to our model, although the <code>predict</code> approach retains a few more decimal places internally:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">predict</span>(model12b, <span class="dt">newdata =</span> <span class="kw">data.frame</span>(<span class="dt">x =</span> <span class="dv">12</span>))</code></pre></div>
+<pre><code>       1 
+2.284069 </code></pre>
+<p><span class="math display">\[
+Odds(Y = 1 | X = 12) = exp(-9.20 + 0.96 * 12) = exp(2.2837) = 9.812921
+\]</span></p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">exp</span>(<span class="kw">predict</span>(model12b, <span class="dt">newdata =</span> <span class="kw">data.frame</span>(<span class="dt">x =</span> <span class="dv">12</span>)))</code></pre></div>
+<pre><code>      1 
+9.81654 </code></pre>
+<p>The estimated <strong>probability</strong> of a yes response (Pr(y = 1), or <span class="math inline">\(\pi\)</span>) if x = 12 is just</p>
+<p><span class="math display">\[
+\pi = Pr(Y = 1 | X = 12) = \frac{Odds(Y = 1 | X = 12)}{1 + Odds(Y = 1 | X = 12)} = \frac{exp(-9.20 + 0.96 x)}{1 + exp(-9.20 + 0.96 x)} = \frac{9.812921}{1 + 9.812921} = 0.908
+\]</span></p>
+<p>Does this work out?</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">exp</span>(<span class="kw">predict</span>(model12b, <span class="dt">newdata =</span> <span class="kw">data.frame</span>(<span class="dt">x =</span> <span class="dv">12</span>))) <span class="op">/</span><span class="st"> </span>
+<span class="st">    </span>(<span class="dv">1</span> <span class="op">+</span><span class="st"> </span><span class="kw">exp</span>(<span class="kw">predict</span>(model12b, <span class="dt">newdata =</span> <span class="kw">data.frame</span>(<span class="dt">x =</span> <span class="dv">12</span>))))</code></pre></div>
+<pre><code>       1 
+0.907549 </code></pre>
+<p>which is also directly available by running <code>predict</code> with <code>type = &quot;response&quot;</code>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">predict</span>(model12b, <span class="dt">newdata =</span> <span class="kw">data.frame</span>(<span class="dt">x =</span> <span class="dv">12</span>), <span class="dt">type =</span> <span class="st">&quot;response&quot;</span>)</code></pre></div>
+<pre><code>       1 
+0.907549 </code></pre>
+</div>
+<div id="plotting-the-logistic-regression-model" class="section level2">
+<h2><span class="header-section-number">12.9</span> Plotting the Logistic Regression Model</h2>
+<p>We can use the <code>augment</code> function from the <code>broom</code> package to get our fitted probabilities included in the data.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m12b.aug &lt;-<span class="st"> </span><span class="kw">augment</span>(model12b, sim12, <span class="dt">type.predict =</span> <span class="st">&quot;response&quot;</span>)
+
+<span class="kw">ggplot</span>(m12b.aug, <span class="kw">aes</span>(<span class="dt">x =</span> x, <span class="dt">y =</span> y)) <span class="op">+</span>
+<span class="st">    </span><span class="kw">geom_point</span>() <span class="op">+</span>
+<span class="st">    </span><span class="kw">geom_line</span>(<span class="kw">aes</span>(<span class="dt">x =</span> x, <span class="dt">y =</span> .fitted), <span class="dt">col =</span> <span class="st">&quot;blue&quot;</span>) <span class="op">+</span>
+<span class="st">    </span><span class="kw">labs</span>(<span class="dt">title =</span> <span class="st">&quot;Fitted Logistic Regression Model for sim12&quot;</span>)</code></pre></div>
+<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-151-1.png" width="672" /></p>
+<p>I’ll add a little jitter on the vertical scale to the points, so we can avoid overlap, and also make the points a little bigger.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">ggplot</span>(m12b.aug, <span class="kw">aes</span>(<span class="dt">x =</span> x, <span class="dt">y =</span> y)) <span class="op">+</span>
+<span class="st">    </span><span class="kw">geom_jitter</span>(<span class="dt">height =</span> <span class="fl">0.05</span>, <span class="dt">size =</span> <span class="dv">2</span>, <span class="dt">pch =</span> <span class="dv">21</span>, 
+                <span class="dt">fill =</span> <span class="st">&quot;cornflowerblue&quot;</span>) <span class="op">+</span>
+<span class="st">    </span><span class="kw">geom_line</span>(<span class="kw">aes</span>(<span class="dt">x =</span> x, <span class="dt">y =</span> .fitted), <span class="dt">col =</span> <span class="st">&quot;blue&quot;</span>) <span class="op">+</span>
+<span class="st">    </span><span class="kw">labs</span>(<span class="dt">title =</span> <span class="st">&quot;Fitted Logistic Regression for sim12&quot;</span>) <span class="op">+</span>
+<span class="st">    </span><span class="kw">theme_bw</span>()</code></pre></div>
+<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-152-1.png" width="672" /></p>
+<p>All right, it’s time to move on to fitting models. We’ll do that in the next Chapter.</p>
+
+</div>
+</div>
+<h3>References</h3>
+<div id="refs" class="references">
+<div id="ref-Harrell2001">
+<p>Harrell, Frank E. 2001. <em>Regression Modeling Strategies</em>. New York: Springer.</p>
+</div>
+<div id="ref-HarrellRMSnotes">
+<p>Harrell, Frank E. 2018. <em>Regression Modeling Strategies Course Notes</em>. <a href="http://www.fharrell.com/#links" class="uri">http://www.fharrell.com/#links</a>.</p>
+</div>
+<div id="ref-RamseySchafer2002">
+<p>Ramsey, Fred L., and Daniel W. Schafer. 2002. <em>The Statistical Sleuth: A Course in Methods of Data Analysis</em>. Second Edition. Pacific Grove, CA: Duxbury.</p>
+</div>
+<div id="ref-Vittinghoff2012">
+<p>Vittinghoff, Eric, David V. Glidden, Stephen C. Shiboski, and Charles E. McCulloch. 2012. <em>Regression Methods in Biostatistics: Linear, Logistic, Survival, and Repeated Measures Models</em>. Second Edition. Springer-Verlag, Inc. <a href="http://www.biostat.ucsf.edu/vgsm/" class="uri">http://www.biostat.ucsf.edu/vgsm/</a>.</p>
+</div>
+<div id="ref-Faraway2006">
+<p>Faraway, Julian J. 2006. <em>Extending the Linear Model with R</em>. Boca Raton, FL: CRC Press.</p>
+</div>
 </div>
             </section>
 
           </div>
         </div>
       </div>
-<a href="r-packages-used-in-these-notes.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-<a href="special-functions-used-in-these-notes.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="other-variable-selection-strategies.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="logistic-regression-and-the-resect-data.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
@@ -539,7 +728,7 @@ gitbook.start({
 "size": 2
 },
 "edit": {
-"link": "https://github.com/rstudio/bookdown-demo/edit/master/00_setup.Rmd",
+"link": "https://github.com/rstudio/bookdown-demo/edit/master/12_logistic0.Rmd",
 "text": "Edit"
 },
 "download": ["bookdown-demo.pdf", "bookdown-demo.epub"],

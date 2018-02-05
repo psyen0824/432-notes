@@ -124,7 +124,7 @@
   \postauthor{\par}
   \predate{\centering\large\emph}
   \postdate{\par}
-  \date{Built 2018-02-05 10:22:24}
+  \date{Built 2018-02-05 18:07:21}
 
 \usepackage{booktabs}
 \usepackage{amsthm}
@@ -10206,8 +10206,8 @@ that we'll use in several types of model settings this semester.
   So here, the value 72.02 is -2(log likelihood), and is compared to a
   \(\chi^2\) distribution with 10 degrees of freedom. We reject the null
   hypothesis that \texttt{newmod} is no better than the null model, and
-  conclude instead that at least of these predictors adds statistically
-  significant value.
+  conclude instead that at least one of these predictors adds
+  statistically significant value.
 
   \begin{itemize}
   \tightlist
@@ -11583,6 +11583,382 @@ And now, here's a plot or residuals vs.~fitted values.
 
 \includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-140-1.pdf}
 
+\chapter{Logistic Regression: The
+Foundations}\label{logistic-regression-the-foundations}
+
+Sources for this material include \citet{Harrell2001},
+\citet{HarrellRMSnotes}, \citet{RamseySchafer2002} (chapters 20-21),
+\citet{Vittinghoff2012} (chapter 5) and \citet{Faraway2006} (chapter 2).
+
+\section{A First Attempt: A Linear Probability
+Model}\label{a-first-attempt-a-linear-probability-model}
+
+Suppose we want to predict a binary outcome which takes on the value 1
+or 0, based on a single quantitative predictor. Let y be a 1/0 outcome,
+and x be a quantitative predictor in the following simulation.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{432}\NormalTok{)}
+\NormalTok{sim12 <-}\StringTok{ }\KeywordTok{data_frame}\NormalTok{(}\DataTypeTok{x =} \KeywordTok{rnorm}\NormalTok{(}\DecValTok{100}\NormalTok{, }\DecValTok{10}\NormalTok{, }\DecValTok{3}\NormalTok{),}
+                   \DataTypeTok{err =} \KeywordTok{rnorm}\NormalTok{(}\DecValTok{100}\NormalTok{, }\DecValTok{0}\NormalTok{, }\DecValTok{2}\NormalTok{),}
+                   \DataTypeTok{y =} \KeywordTok{ifelse}\NormalTok{(x }\OperatorTok{+}\StringTok{ }\NormalTok{err }\OperatorTok{>}\StringTok{ }\DecValTok{10}\NormalTok{, }\DecValTok{1}\NormalTok{, }\DecValTok{0}\NormalTok{))}
+
+\NormalTok{sim12 <-}\StringTok{ }\KeywordTok{select}\NormalTok{(sim12, x, y)}
+
+\KeywordTok{ggplot}\NormalTok{(sim12, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x, }\DataTypeTok{y =}\NormalTok{ y)) }\OperatorTok{+}\StringTok{ }\KeywordTok{geom_point}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-141-1.pdf}
+
+Now, we want to use our variable x here to predict our variable y (which
+takes on the values 0 and 1).
+
+One approach to doing this would be a linear probability model, as
+follows:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{mod12a <-}\StringTok{ }\KeywordTok{lm}\NormalTok{(y }\OperatorTok{~}\StringTok{ }\NormalTok{x, }\DataTypeTok{data =}\NormalTok{ sim12) }
+
+\KeywordTok{summary}\NormalTok{(mod12a)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+
+Call:
+lm(formula = y ~ x, data = sim12)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-0.74104 -0.23411 -0.02894  0.23117  0.83153 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept) -0.72761    0.12272  -5.929 4.57e-08 ***
+x            0.12620    0.01219  10.349  < 2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 0.3491 on 98 degrees of freedom
+Multiple R-squared:  0.5222,    Adjusted R-squared:  0.5173 
+F-statistic: 107.1 on 1 and 98 DF,  p-value: < 2.2e-16
+\end{verbatim}
+
+Here's a picture of this model. What's wrong here?
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{ggplot}\NormalTok{(sim12, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x, }\DataTypeTok{y =}\NormalTok{ y)) }\OperatorTok{+}\StringTok{ }
+\StringTok{    }\KeywordTok{geom_point}\NormalTok{() }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_smooth}\NormalTok{(}\DataTypeTok{method =} \StringTok{"lm"}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{    }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \StringTok{"Linear Probability Model"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-143-1.pdf}
+
+If y can only take the values 0 and 1 (or, more precisely, if we're
+trying to predict the value \(\pi\) = Pr(y = 1)) then what do we do with
+the predictions that are outside the range of (0, 1)?
+
+\section{Logistic Regression}\label{logistic-regression}
+
+Logistic regression is the most common model used when the outcome is
+binary. Our response variable is assumed to take on two values, zero or
+one, and we then describe the probability of a ``one'' response, given a
+linear function of explanatory predictors. We use logistic regression
+rather than linear regression for predicting binary outcomes. Linear
+regression approaches to the problem of predicting probabilities are
+problematic for several reasons - not least of which being that they
+predict probabilities greater than one and less than zero. There are
+several available alternatives, including probit regression and binomial
+regression, for the problem of predicting a binary outcome.
+
+Logistic regression is part of a class called \textbf{generalized linear
+models} which extend the linear regression model in a variety of ways.
+There are also several extensions to the logistic regression model,
+including multinomial logistic regression (which is used for nominal
+categorical outcomes with more than two levels) and ordered logistic
+regression (used for ordered multi-categorical outcomes.) The methods
+involved in binary logistic regression may also be extended to the case
+where the outcomes are proportions based on counts, often through
+grouped binary responses (the proportion of cells with chromosomal
+aberrations, or the proportion of subjects who develop a particular
+condition.)
+
+Although the models are different in some crucial ways, the practical
+use of logistic regression tracks well with much of what we've learned
+about linear regression.
+
+\section{The Logistic Regression
+Model}\label{the-logistic-regression-model}
+
+A generalized linear model (or GLM) is a probability model in which the
+mean of an outcome is related to predictors through a regression
+equation. A link function \emph{g} is used to relate the mean, \(\mu\),
+to a linear regression of the predictors \(X_1, X_2, ..., X_k\).
+
+\[
+g(\mu) = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + ... + \beta_k X_k
+\]
+
+In the case of a logistic regression model,
+
+\begin{itemize}
+\tightlist
+\item
+  the mean \(\mu\) of our 0/1 outcome is represented by \(\pi\) which
+  describes the probability of a ``1'' outcome.
+\item
+  the linking function we use in logistic regression makes use of the
+  logit function, which is built on the natural logarithm.
+\end{itemize}
+
+\section{The Link Function}\label{the-link-function}
+
+Logistic regression is a non-linear regression approach, since the
+equation for the mean of the 0/1 Y values conditioned on the values of
+our predictors \(X_1, X_2, ..., X_k\) turns out to be non-linear in the
+\(\beta\) coefficients. Its nonlinearity, however, is solely found in
+its link function, hence the term \emph{generalized} linear model.
+
+The particular link function we use in logistic regression is called the
+\textbf{logit link}.
+
+\[
+logit(\pi) = log\left( \frac{\pi}{1 - \pi} \right) = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + ... + \beta_k X_k
+\]
+
+The inverse of the logit function is called the \textbf{logistic
+function}. If logit(\(\pi\)) = \(\eta\), then
+\(\pi = \frac{exp(\eta)}{1 + exp(\eta)}\)
+
+The plot below displays the logistic function
+\(y = \frac{e^x}{1 + e^x}\)
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-144-1.pdf}
+
+As you can see in the figure above, the logistic function
+\(\frac{e^x}{1 + e^x}\) takes any value \(x\) in the real numbers and
+returns a value between 0 and 1.
+
+\section{The logit or log odds}\label{the-logit-or-log-odds}
+
+We usually focus on the \textbf{logit} in statistical work, which is the
+inverse of the logistic function.
+
+\begin{itemize}
+\tightlist
+\item
+  If we have a probability \(\pi < 0.5\), then \(logit(\pi) < 0\).
+\item
+  If our probability \(\pi > 0.5\), then \(logit(\pi) > 0\).
+\item
+  Finally, if \(\pi = 0.5\), then \(logit(\pi) = 0\).
+\end{itemize}
+
+\section{Interpreting the Coefficients of a Logistic Regression
+Model}\label{interpreting-the-coefficients-of-a-logistic-regression-model}
+
+The critical thing to remember in interpreting a logistic regression
+model is that the logit is the log odds function. Exponentiating the
+logit yields the odds.
+
+So, suppose we have a yes/no outcome variable, where yes = 1, and no =
+0, and \(\pi\) = Pr(y = 1). Our model holds that:
+
+\[
+logit(\pi) = log\left( \frac{\pi}{1 - \pi} \right) = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + ... + \beta_k X_k
+\]
+
+The odds of a yes response (the odds that Y = 1) at the level
+\(X_1, X_2, ..., X_k\) are:
+
+\[
+Odds(Y = 1) = exp(\beta_0 + \beta_1 X_1 + \beta_2 X_2 + ... + \beta_k X_k)
+\]
+
+The \textbf{probability} of a yes response (Pr(y = 1), or \(\pi\)) is
+just
+
+\[
+\pi = Pr(Y = 1) = \frac{Odds(Y = 1)}{1 + Odds(Y = 1)} = \frac{exp(\beta_0 + \beta_1 X_1 + \beta_2 X_2 + ... + \beta_k X_k)}{1 + exp(\beta_0 + \beta_1 X_1 + \beta_2 X_2 + ... + \beta_k X_k)}
+\]
+
+\section{The Logistic Regression has non-constant
+variance}\label{the-logistic-regression-has-non-constant-variance}
+
+In ordinary least squares regression, the variance
+\(Var(Y | X_1, X_2, ..., X_k) = \sigma^2\) is a constant that does not
+depend on the predictor values. This is not the case in logistic
+regression. The mean and variance specifications of the logistic
+regression model are quite different.
+
+\[
+logit(\pi) = log\left( \frac{\pi}{1 - \pi} \right) = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + ... + \beta_k X_k \\
+\mu[Y | X_1, ..., X_k] = \pi, \\
+Var[Y | X_1, ..., X_k] = \pi(1 - \pi)
+\]
+
+The variance is now a function of the mean, and contains no additional
+parameter for us to estimate.
+
+\section{Fitting a Logistic Regression Model to our Simulated
+Data}\label{fitting-a-logistic-regression-model-to-our-simulated-data}
+
+Recall the \texttt{sim12} data we built earlier.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{ggplot}\NormalTok{(sim12, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x, }\DataTypeTok{y =}\NormalTok{ y)) }\OperatorTok{+}\StringTok{ }\KeywordTok{geom_point}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-145-1.pdf}
+
+Here is the fitted logistic regression model.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{model12b <-}\StringTok{ }\KeywordTok{glm}\NormalTok{(y }\OperatorTok{~}\StringTok{ }\NormalTok{x, }\DataTypeTok{data =}\NormalTok{ sim12, }\DataTypeTok{family =}\NormalTok{ binomial)}
+
+\NormalTok{model12b}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+
+Call:  glm(formula = y ~ x, family = binomial, data = sim12)
+
+Coefficients:
+(Intercept)            x  
+    -9.1955       0.9566  
+
+Degrees of Freedom: 99 Total (i.e. Null);  98 Residual
+Null Deviance:      138.6 
+Residual Deviance: 70.03    AIC: 74.03
+\end{verbatim}
+
+The logistic regression equation is:
+
+\[
+logit(Pr(y = 1)) = log\left( \frac{Pr(y = 1)}{1 - Pr(y = 1)} \right) = -9.1955 + 0.9566 x
+\]
+
+We can exponentiate the results of this model to get to an equation
+about odds, and eventually, a prediction about probabilities. Suppose,
+for instance, that we are interested in the prediction when x = 12.
+
+\[
+logit(Pr(y = 1) | X = 12) = log\left( \frac{Pr(y = 1)}{1 - Pr(y = 1)} \right) = -9.1955 + 0.9566 * 12 = 2.2837
+\]
+
+And we can also get this from the \texttt{predict} function applied to
+our model, although the \texttt{predict} approach retains a few more
+decimal places internally:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{predict}\NormalTok{(model12b, }\DataTypeTok{newdata =} \KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{x =} \DecValTok{12}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+       1 
+2.284069 
+\end{verbatim}
+
+\[
+Odds(Y = 1 | X = 12) = exp(-9.20 + 0.96 * 12) = exp(2.2837) = 9.812921
+\]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{exp}\NormalTok{(}\KeywordTok{predict}\NormalTok{(model12b, }\DataTypeTok{newdata =} \KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{x =} \DecValTok{12}\NormalTok{)))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+      1 
+9.81654 
+\end{verbatim}
+
+The estimated \textbf{probability} of a yes response (Pr(y = 1), or
+\(\pi\)) if x = 12 is just
+
+\[
+\pi = Pr(Y = 1 | X = 12) = \frac{Odds(Y = 1 | X = 12)}{1 + Odds(Y = 1 | X = 12)} = \frac{exp(-9.20 + 0.96 x)}{1 + exp(-9.20 + 0.96 x)} = \frac{9.812921}{1 + 9.812921} = 0.908
+\]
+
+Does this work out?
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{exp}\NormalTok{(}\KeywordTok{predict}\NormalTok{(model12b, }\DataTypeTok{newdata =} \KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{x =} \DecValTok{12}\NormalTok{))) }\OperatorTok{/}\StringTok{ }
+\StringTok{    }\NormalTok{(}\DecValTok{1} \OperatorTok{+}\StringTok{ }\KeywordTok{exp}\NormalTok{(}\KeywordTok{predict}\NormalTok{(model12b, }\DataTypeTok{newdata =} \KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{x =} \DecValTok{12}\NormalTok{))))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+       1 
+0.907549 
+\end{verbatim}
+
+which is also directly available by running \texttt{predict} with
+\texttt{type\ =\ "response"}.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{predict}\NormalTok{(model12b, }\DataTypeTok{newdata =} \KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{x =} \DecValTok{12}\NormalTok{), }\DataTypeTok{type =} \StringTok{"response"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+       1 
+0.907549 
+\end{verbatim}
+
+\section{Plotting the Logistic Regression
+Model}\label{plotting-the-logistic-regression-model}
+
+We can use the \texttt{augment} function from the \texttt{broom} package
+to get our fitted probabilities included in the data.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{m12b.aug <-}\StringTok{ }\KeywordTok{augment}\NormalTok{(model12b, sim12, }\DataTypeTok{type.predict =} \StringTok{"response"}\NormalTok{)}
+
+\KeywordTok{ggplot}\NormalTok{(m12b.aug, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x, }\DataTypeTok{y =}\NormalTok{ y)) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_point}\NormalTok{() }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_line}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x, }\DataTypeTok{y =}\NormalTok{ .fitted), }\DataTypeTok{col =} \StringTok{"blue"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \StringTok{"Fitted Logistic Regression Model for sim12"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-151-1.pdf}
+
+I'll add a little jitter on the vertical scale to the points, so we can
+avoid overlap, and also make the points a little bigger.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{ggplot}\NormalTok{(m12b.aug, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x, }\DataTypeTok{y =}\NormalTok{ y)) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_jitter}\NormalTok{(}\DataTypeTok{height =} \FloatTok{0.05}\NormalTok{, }\DataTypeTok{size =} \DecValTok{2}\NormalTok{, }\DataTypeTok{pch =} \DecValTok{21}\NormalTok{, }
+                \DataTypeTok{fill =} \StringTok{"cornflowerblue"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_line}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x, }\DataTypeTok{y =}\NormalTok{ .fitted), }\DataTypeTok{col =} \StringTok{"blue"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \StringTok{"Fitted Logistic Regression for sim12"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{theme_bw}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-152-1.pdf}
+
+All right, it's time to move on to fitting models. We'll do that in the
+next Chapter.
+
 \chapter{\texorpdfstring{Logistic Regression and the \texttt{resect}
 data}{Logistic Regression and the resect data}}\label{logistic-regression-and-the-resect-data}
 
@@ -11771,7 +12147,7 @@ Note that the \texttt{logit} link is the default approach with the
 which yields the same model.
 
 \subsection{Interpreting the Coefficients of a Logistic Regression
-Model}\label{interpreting-the-coefficients-of-a-logistic-regression-model}
+Model}\label{interpreting-the-coefficients-of-a-logistic-regression-model-1}
 
 Our model is:
 
@@ -12376,7 +12752,7 @@ Values}\label{plotting-a-logistic-regression-models-fitted-values}
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-153-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-165-1.pdf}
 
 \subsection{\texorpdfstring{Plotting a Simple Logistic Model using
 \texttt{binomial\_smooth}}{Plotting a Simple Logistic Model using binomial\_smooth}}\label{plotting-a-simple-logistic-model-using-binomial_smooth}
@@ -12396,7 +12772,7 @@ Values}\label{plotting-a-logistic-regression-models-fitted-values}
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-154-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-166-1.pdf}
 
 As expected, we see an increase in the model probability of death as the
 extent of the resection grows larger.
@@ -12593,7 +12969,7 @@ called \texttt{ROCR} to do the work. It comes from
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-159-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-171-1.pdf}
 
 \subsubsection{What if we classify things
 perfectly?}\label{what-if-we-classify-things-perfectly}
@@ -12625,7 +13001,7 @@ show how this model compares to random guessing.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-160-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-172-1.pdf}
 
 \subsubsection{\texorpdfstring{What does ``worse than guessing'' look
 like?}{What does worse than guessing look like?}}\label{what-does-worse-than-guessing-look-like}
@@ -12654,7 +13030,7 @@ statistic below 0.5, and will be valueless.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-161-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-173-1.pdf}
 
 \subsubsection{\texorpdfstring{What does ``better than guessing'' look
 like?}{What does better than guessing look like?}}\label{what-does-better-than-guessing-look-like}
@@ -12684,7 +13060,7 @@ very fairly poor model, but at least it's better than guessing.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-162-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-174-1.pdf}
 
 Sometimes people grasp for a rough guide as to the accuracy of a model's
 predictions based on the area under the ROC curve. A common thought is
@@ -12763,7 +13139,7 @@ substantially better than guessing.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-163-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-175-1.pdf}
 
 \section{\texorpdfstring{The ROC Plot for
 \texttt{res\_modA}}{The ROC Plot for res\_modA}}\label{the-roc-plot-for-res_moda}
@@ -12792,7 +13168,7 @@ Let me show you the ROC curve for our \texttt{res\_modA} model.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-164-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-176-1.pdf}
 
 Based on the C statistic (AUC = 0.771) this would rank somewhere near
 the high end of a ``fair'' predictive model by this standard, not quite
@@ -12833,7 +13209,7 @@ Area under the curve: 0.7707
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-165-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-177-1.pdf}
 
 \section{Assessing Residual Plots from Model
 A}\label{assessing-residual-plots-from-model-a}
@@ -12878,7 +13254,7 @@ is in terms of the predictors) and standardized Pearson residuals.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-166-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-178-1.pdf}
 
 In this case, I don't see any highly influential points, as no points
 fall outside of the Cook's distance (0.5 or 1) contours.
@@ -13092,7 +13468,7 @@ Mortality}\label{plotting-model-b-fits-by-observed-mortality}
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-173-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-185-1.pdf}
 
 Certainly it appears as though most of our predicted probabilities (of
 death) for the subjects who actually survived are quite small, but not
@@ -13123,7 +13499,7 @@ subjects who actually died.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-174-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-186-1.pdf}
 
 The area under the curve (C-statistic) is 0.86, which certainly looks
 like a more discriminating fit than model A with resection alone.
@@ -13137,7 +13513,7 @@ Influence}\label{residuals-leverage-and-influence}
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-175-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-187-1.pdf}
 
 Again, we see no signs of deeply influential points in this model.
 
@@ -13328,7 +13704,7 @@ same approach.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-177-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-189-1.pdf}
 
 \subsection{The C statistic and Somers'
 D}\label{the-c-statistic-and-somers-d}
@@ -13412,7 +13788,7 @@ effect size comparing the 25\textsuperscript{th} to the
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-179-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-191-1.pdf}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -13447,7 +13823,7 @@ on the log odds scale.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-180-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-192-1.pdf}
 
 By applying the \texttt{plogis} function within the \texttt{Predict}
 command, we can plot the effect of \texttt{resection} on the estimated
@@ -13462,7 +13838,7 @@ this logistic regression model.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-181-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-193-1.pdf}
 
 The \texttt{Predict} function itself provides the raw material being
 captured in this plot.
@@ -13565,7 +13941,7 @@ corresponding bias-corrected calibrated values.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-185-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-197-1.pdf}
 
 \begin{verbatim}
 
@@ -13591,7 +13967,7 @@ case.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-186-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-198-1.pdf}
 
 Since there's no non-linearity in the right hand side of our simple
 logistic regression model, the nomogram is straightforward. We calculate
@@ -13620,7 +13996,7 @@ predictors that look important in a Spearman \(\rho^2\) plot.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-187-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-199-1.pdf}
 
 The most important variable appears to be whether intubation was
 required, so I'll include \texttt{intubated}'s interaction with the
@@ -13747,7 +14123,7 @@ impact as a main effect.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-191-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-203-1.pdf}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -13790,7 +14166,7 @@ effect of resection implied by the use of a spline there.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-192-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-204-1.pdf}
 
 We can also capture and plot these results on the probability scale, as
 follows\footnote{Although I've yet to figure out how to get the y axis
@@ -13803,7 +14179,7 @@ follows\footnote{Although I've yet to figure out how to get the y axis
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-193-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-205-1.pdf}
 
 \subsection{Plotting the ROC curve for Model
 D}\label{plotting-the-roc-curve-for-model-d}
@@ -13833,7 +14209,7 @@ fit.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-194-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-206-1.pdf}
 
 The AUC fitted with \texttt{ROCR} (0.883) is slightly different than
 what \texttt{lrm} has told us (0.880), and this also happens if we use
@@ -13866,7 +14242,7 @@ Area under the curve: 0.8826
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-195-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-207-1.pdf}
 
 \subsection{Validation of Model D
 summaries}\label{validation-of-model-d-summaries}
@@ -13918,7 +14294,7 @@ D}\label{calibration-plot-for-model-d}
 Divergence or singularity in 5 samples
 \end{verbatim}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-197-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-209-1.pdf}
 
 \begin{verbatim}
 
@@ -14013,7 +14389,7 @@ groups}\label{a-plot-comparing-the-two-intubation-groups}
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-199-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-211-1.pdf}
 
 The effect of \texttt{intubation} appears to be very large, compared to
 the resection size effect.
@@ -14030,7 +14406,7 @@ A nomogram of the model would help, too.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-200-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-212-1.pdf}
 
 Again, we see that the effect of intubation is enormous, compared to the
 effect of resection. Another way to see this is to plot the effect sizes
@@ -14074,7 +14450,7 @@ Here are plots of the effects across the range of each predictor
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-201-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-213-1.pdf}
 
 We can also capture and plot these results on the probability scale, as
 follows.
@@ -14085,7 +14461,7 @@ follows.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-202-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-214-1.pdf}
 
 \subsection{ANOVA for Model E}\label{anova-for-model-e}
 
@@ -14177,7 +14553,7 @@ influence}{Fitting Model E using glm to get plots about influence}}\label{fittin
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-206-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-218-1.pdf}
 
 Using this \texttt{glm} residuals approach, we again see that points 84
 and 94 have the largest influence on our model E.
@@ -14255,7 +14631,7 @@ Here's the resulting plot.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-209-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-221-1.pdf}
 
 We could specify a particular rule, for example: if the predicted
 probability of death is 0.5 or greater, then predict ``Died''.
