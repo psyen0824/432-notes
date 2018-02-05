@@ -314,6 +314,35 @@ ggplot(resect, aes(x = resection, y = died)) +
 
 As expected, we see an increase in the model probability of death as the extent of the resection grows larger.
 
+## How well does Model A classify subjects?
+
+A natural question to ask is how well does our model classify patients in terms of likelihood of death.
+
+We could specify a particular rule, for example: if the predicted probability of death is 0.5 or greater, then predict "Died".
+
+```{r}
+res_A_aug$rule.5 <- ifelse(res_A_aug$.fitted >= 0.5, 
+                       "Predict Died", "Predict Alive")
+
+table(res_A_aug$rule.5, res_A_aug$died)
+```
+
+And perhaps build the linked table of row probabilities which tells us, for example, that 87.69% of the patients predicted by the model to be alive actually did survive.
+
+```{r}
+round(100*prop.table(
+    table(res_A_aug$rule.5, res_A_aug$died), 1), 2)
+```
+
+Or the table of column probabilities which tell us, for example, that 97.44% of those who actually survived were predicted by the model to be alive.
+
+```{r}
+round(100*prop.table(
+    table(res_A_aug$rule.5, res_A_aug$died), 2), 2)
+```
+
+We'll discuss various measures of concordance derived from this sort of classification later.
+
 ## Receiver Operating Characteristic Curve Analysis
 
 One way to assess the predictive accuracy within the model development sample in a logistic regression is to consider an analyses based on the receiver operating characteristic (ROC) curve. ROC curves are commonly used in assessing diagnoses in medical settings, and in signal detection applications.
@@ -753,6 +782,29 @@ summary(res_modC)
 
 So, a move from a resection of 2 cm to a resection of 4 cm is associated with an estimated effect on the log odds of death of 1.48 (with standard error 0.45), or with an estimated effect on the odds ratio for death of 4.41, with 95% CI (1.84, 10.56).
 
+### Plot In-Sample Predictions for Model C
+
+Here we plot the effect of `resection` (and 95% confidence intervals) across the range of observed values of `resection` on the log odds of death. Note the linear effect of `resection` size on the log odds scale.
+
+```{r}
+ggplot(Predict(res_modC))
+```
+
+By applying the `plogis` function within the `Predict` command, we can plot the effect of `resection` on the estimated probability of death. Note the non-linear effect on this probability in this logistic regression model.
+
+```{r}
+ggplot(Predict(res_modC, fun = plogis)) + 
+    labs(y = "Predicted probability from Model C",
+         title = "Model C with the resect data")
+```
+
+The `Predict` function itself provides the raw material being captured in this plot.
+
+```{r}
+head(Predict(res_modC, fun = plogis))
+```
+
+
 ### ANOVA from the `lrm` approach
 
 ```{r}
@@ -849,6 +901,20 @@ summary(res_modD)
 ```
 
 The effect sizes are perhaps best described in terms of odds ratios. The odds ratio for death isn't significantly different from 1 for any variable, but the impact of `resection` and `intubated`, though not strong enough to be significant, look more substantial (if poorly estimated) than the effects of `age` and `prior`.
+
+### Plot In-Sample Predictions for Model D
+
+Here are plots of the effects across the range of each predictor (holding the others constant) on the log odds scale. Note the non-linear effect of resection implied by the use of a spline there.
+
+```{r}
+ggplot(Predict(res_modD))
+```
+
+We can also capture and plot these results on the probability scale, as follows^[Although I've yet to figure out how to get the y axis relabeled properly without simply dumping the Predict results into a new tibble and starting over with creating the plots.].
+
+```{r}
+ggplot(Predict(res_modD, fun = plogis))
+```
 
 ### Plotting the ROC curve for Model D
 
@@ -968,6 +1034,20 @@ plot(summary(res_modE))
 summary(res_modE)
 ```
 
+### Plot In-Sample Predictions for Model E
+
+Here are plots of the effects across the range of each predictor (holding the other constant) on the log odds scale.
+
+```{r}
+ggplot(Predict(res_modE))
+```
+
+We can also capture and plot these results on the probability scale, as follows.
+
+```{r}
+ggplot(Predict(res_modE, fun = plogis))
+```
+
 ### ANOVA for Model E
 
 ```{r}
@@ -1005,6 +1085,68 @@ plot(res_modEglm, which=c(4:5))
 ```
 
 Using this `glm` residuals approach, we again see that points 84 and 94 have the largest influence on our model E.
+
+## Concordance: Comparing Model C, D and E's predictions
+
+To start, we'll gather the predictions fomade by each model (C, D and E) on the probability scale, in one place. Sadly, `augment` from `broom` doesn't work well with `lrm` fits, so we have to do this on our own.
+
+```{r}
+resect_preds <- resect %>%
+    mutate(C = predict(res_modC, type = "fitted"),
+           D = predict(res_modD, type = "fitted"),
+           E = predict(res_modE, type = "fitted"))
+
+head(resect_preds)
+```
+
+And now, we'll use the `gather` command to arrange the models and predicted probabilities in a more useful manner for plotting.
+
+```{r}
+res_p <- resect_preds %>%
+    gather("model", "prediction", 7:9) %>%
+    select(id, died, model, prediction)
+
+head(res_p)
+```
+
+Here's the resulting plot.
+
+```{r}
+ggplot(res_p, aes(x = factor(died), y = prediction, 
+                  group = model, col = model)) +
+    geom_jitter(width = 0.25) + 
+    geom_hline(yintercept = 0.5) +
+    facet_wrap( ~ model) + 
+    guides(color = FALSE) +
+    labs(title = "Comparing Predictions for our Three Models",
+         subtitle = "A graphical view of concordance",
+         x = "Actual mortality status (1 = died)",
+         y = "Predicted probability of death")
+```
+
+We could specify a particular rule, for example: if the predicted probability of death is 0.5 or greater, then predict "Died".
+
+```{r}
+res_p$rule.5 <- ifelse(res_p$prediction >= 0.5, 
+                       "Predict Died", "Predict Alive")
+
+ftable(table(res_p$model, res_p$rule.5, res_p$died))
+```
+
+And perhaps build the linked table of row probabilities...
+
+```{r}
+round(100*prop.table(
+    ftable(table(res_p$model, res_p$rule.5, res_p$died))
+    ,1),2)
+```
+
+For example, in model E, 93.44% of those predicted to be alive actually survived, and 75% of those predicted to die actually died.
+
+- Model D does a little better in one direction (94.17% of those predicted by Model D to be alive actually survived) but worse in the other (71.43% of those predicted by Model D to die actually died.)
+- Model C does worse than each of the others in both predicting those who survive and those who die.
+
+Note that the approaches discussed here would be useful if we had a new sample to predict on, as well. We could then compare the errors for that new data made by this sort of classification scheme either graphically or in a table.
 
 ## Conclusions
 

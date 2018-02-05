@@ -124,7 +124,7 @@
   \postauthor{\par}
   \predate{\centering\large\emph}
   \postdate{\par}
-  \date{Built 2018-02-05 09:17:03}
+  \date{Built 2018-02-05 10:22:24}
 
 \usepackage{booktabs}
 \usepackage{amsthm}
@@ -12401,6 +12401,70 @@ Values}\label{plotting-a-logistic-regression-models-fitted-values}
 As expected, we see an increase in the model probability of death as the
 extent of the resection grows larger.
 
+\section{How well does Model A classify
+subjects?}\label{how-well-does-model-a-classify-subjects}
+
+A natural question to ask is how well does our model classify patients
+in terms of likelihood of death.
+
+We could specify a particular rule, for example: if the predicted
+probability of death is 0.5 or greater, then predict ``Died''.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{res_A_aug}\OperatorTok{$}\NormalTok{rule.}\DecValTok{5}\NormalTok{ <-}\StringTok{ }\KeywordTok{ifelse}\NormalTok{(res_A_aug}\OperatorTok{$}\NormalTok{.fitted }\OperatorTok{>=}\StringTok{ }\FloatTok{0.5}\NormalTok{, }
+                       \StringTok{"Predict Died"}\NormalTok{, }\StringTok{"Predict Alive"}\NormalTok{)}
+
+\KeywordTok{table}\NormalTok{(res_A_aug}\OperatorTok{$}\NormalTok{rule.}\DecValTok{5}\NormalTok{, res_A_aug}\OperatorTok{$}\NormalTok{died)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+               
+                  0   1
+  Predict Alive 114  16
+  Predict Died    3   1
+\end{verbatim}
+
+And perhaps build the linked table of row probabilities which tells us,
+for example, that 87.69\% of the patients predicted by the model to be
+alive actually did survive.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{round}\NormalTok{(}\DecValTok{100}\OperatorTok{*}\KeywordTok{prop.table}\NormalTok{(}
+    \KeywordTok{table}\NormalTok{(res_A_aug}\OperatorTok{$}\NormalTok{rule.}\DecValTok{5}\NormalTok{, res_A_aug}\OperatorTok{$}\NormalTok{died), }\DecValTok{1}\NormalTok{), }\DecValTok{2}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+               
+                    0     1
+  Predict Alive 87.69 12.31
+  Predict Died  75.00 25.00
+\end{verbatim}
+
+Or the table of column probabilities which tell us, for example, that
+97.44\% of those who actually survived were predicted by the model to be
+alive.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{round}\NormalTok{(}\DecValTok{100}\OperatorTok{*}\KeywordTok{prop.table}\NormalTok{(}
+    \KeywordTok{table}\NormalTok{(res_A_aug}\OperatorTok{$}\NormalTok{rule.}\DecValTok{5}\NormalTok{, res_A_aug}\OperatorTok{$}\NormalTok{died), }\DecValTok{2}\NormalTok{), }\DecValTok{2}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+               
+                    0     1
+  Predict Alive 97.44 94.12
+  Predict Died   2.56  5.88
+\end{verbatim}
+
+We'll discuss various measures of concordance derived from this sort of
+classification later.
+
 \section{Receiver Operating Characteristic Curve
 Analysis}\label{receiver-operating-characteristic-curve-analysis}
 
@@ -12529,7 +12593,7 @@ called \texttt{ROCR} to do the work. It comes from
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-156-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-159-1.pdf}
 
 \subsubsection{What if we classify things
 perfectly?}\label{what-if-we-classify-things-perfectly}
@@ -12561,7 +12625,7 @@ show how this model compares to random guessing.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-157-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-160-1.pdf}
 
 \subsubsection{\texorpdfstring{What does ``worse than guessing'' look
 like?}{What does worse than guessing look like?}}\label{what-does-worse-than-guessing-look-like}
@@ -12590,7 +12654,7 @@ statistic below 0.5, and will be valueless.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-158-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-161-1.pdf}
 
 \subsubsection{\texorpdfstring{What does ``better than guessing'' look
 like?}{What does better than guessing look like?}}\label{what-does-better-than-guessing-look-like}
@@ -12620,7 +12684,7 @@ very fairly poor model, but at least it's better than guessing.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-159-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-162-1.pdf}
 
 Sometimes people grasp for a rough guide as to the accuracy of a model's
 predictions based on the area under the ROC curve. A common thought is
@@ -12699,7 +12763,7 @@ substantially better than guessing.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-160-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-163-1.pdf}
 
 \section{\texorpdfstring{The ROC Plot for
 \texttt{res\_modA}}{The ROC Plot for res\_modA}}\label{the-roc-plot-for-res_moda}
@@ -12728,7 +12792,7 @@ Let me show you the ROC curve for our \texttt{res\_modA} model.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-161-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-164-1.pdf}
 
 Based on the C statistic (AUC = 0.771) this would rank somewhere near
 the high end of a ``fair'' predictive model by this standard, not quite
@@ -12769,7 +12833,7 @@ Area under the curve: 0.7707
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-162-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-165-1.pdf}
 
 \section{Assessing Residual Plots from Model
 A}\label{assessing-residual-plots-from-model-a}
@@ -12814,7 +12878,7 @@ is in terms of the predictors) and standardized Pearson residuals.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-163-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-166-1.pdf}
 
 In this case, I don't see any highly influential points, as no points
 fall outside of the Cook's distance (0.5 or 1) contours.
@@ -13028,7 +13092,7 @@ Mortality}\label{plotting-model-b-fits-by-observed-mortality}
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-170-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-173-1.pdf}
 
 Certainly it appears as though most of our predicted probabilities (of
 death) for the subjects who actually survived are quite small, but not
@@ -13059,7 +13123,7 @@ subjects who actually died.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-171-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-174-1.pdf}
 
 The area under the curve (C-statistic) is 0.86, which certainly looks
 like a more discriminating fit than model A with resection alone.
@@ -13073,7 +13137,7 @@ Influence}\label{residuals-leverage-and-influence}
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-172-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-175-1.pdf}
 
 Again, we see no signs of deeply influential points in this model.
 
@@ -13264,7 +13328,7 @@ same approach.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-174-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-177-1.pdf}
 
 \subsection{The C statistic and Somers'
 D}\label{the-c-statistic-and-somers-d}
@@ -13348,7 +13412,7 @@ effect size comparing the 25\textsuperscript{th} to the
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-176-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-179-1.pdf}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -13368,6 +13432,60 @@ So, a move from a resection of 2 cm to a resection of 4 cm is associated
 with an estimated effect on the log odds of death of 1.48 (with standard
 error 0.45), or with an estimated effect on the odds ratio for death of
 4.41, with 95\% CI (1.84, 10.56).
+
+\subsection{Plot In-Sample Predictions for Model
+C}\label{plot-in-sample-predictions-for-model-c}
+
+Here we plot the effect of \texttt{resection} (and 95\% confidence
+intervals) across the range of observed values of \texttt{resection} on
+the log odds of death. Note the linear effect of \texttt{resection} size
+on the log odds scale.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{Predict}\NormalTok{(res_modC))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-180-1.pdf}
+
+By applying the \texttt{plogis} function within the \texttt{Predict}
+command, we can plot the effect of \texttt{resection} on the estimated
+probability of death. Note the non-linear effect on this probability in
+this logistic regression model.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{Predict}\NormalTok{(res_modC, }\DataTypeTok{fun =}\NormalTok{ plogis)) }\OperatorTok{+}\StringTok{ }
+\StringTok{    }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{y =} \StringTok{"Predicted probability from Model C"}\NormalTok{,}
+         \DataTypeTok{title =} \StringTok{"Model C with the resect data"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-181-1.pdf}
+
+The \texttt{Predict} function itself provides the raw material being
+captured in this plot.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{head}\NormalTok{(}\KeywordTok{Predict}\NormalTok{(res_modC, }\DataTypeTok{fun =}\NormalTok{ plogis))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+            resection       yhat       lower      upper .predictor.
+resection.1  1.000000 0.02431476 0.006636502 0.08505223   resection
+resection.2  1.020101 0.02467096 0.006789313 0.08559056   resection
+resection.3  1.040201 0.02503224 0.006945549 0.08613277   resection
+resection.4  1.060302 0.02539867 0.007105283 0.08667889   resection
+resection.5  1.080402 0.02577033 0.007268589 0.08722896   resection
+resection.6  1.100503 0.02614728 0.007435542 0.08778304   resection
+
+Response variable (y):  
+
+Limits are 0.95 confidence limits
+\end{verbatim}
 
 \subsection{\texorpdfstring{ANOVA from the \texttt{lrm}
 approach}{ANOVA from the lrm approach}}\label{anova-from-the-lrm-approach}
@@ -13447,7 +13565,7 @@ corresponding bias-corrected calibrated values.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-179-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-185-1.pdf}
 
 \begin{verbatim}
 
@@ -13473,7 +13591,7 @@ case.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-180-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-186-1.pdf}
 
 Since there's no non-linearity in the right hand side of our simple
 logistic regression model, the nomogram is straightforward. We calculate
@@ -13502,7 +13620,7 @@ predictors that look important in a Spearman \(\rho^2\) plot.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-181-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-187-1.pdf}
 
 The most important variable appears to be whether intubation was
 required, so I'll include \texttt{intubated}'s interaction with the
@@ -13629,7 +13747,7 @@ impact as a main effect.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-185-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-191-1.pdf}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -13659,6 +13777,34 @@ variable, but the impact of \texttt{resection} and \texttt{intubated},
 though not strong enough to be significant, look more substantial (if
 poorly estimated) than the effects of \texttt{age} and \texttt{prior}.
 
+\subsection{Plot In-Sample Predictions for Model
+D}\label{plot-in-sample-predictions-for-model-d}
+
+Here are plots of the effects across the range of each predictor
+(holding the others constant) on the log odds scale. Note the non-linear
+effect of resection implied by the use of a spline there.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{Predict}\NormalTok{(res_modD))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-192-1.pdf}
+
+We can also capture and plot these results on the probability scale, as
+follows\footnote{Although I've yet to figure out how to get the y axis
+  relabeled properly without simply dumping the Predict results into a
+  new tibble and starting over with creating the plots.}.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{Predict}\NormalTok{(res_modD, }\DataTypeTok{fun =}\NormalTok{ plogis))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-193-1.pdf}
+
 \subsection{Plotting the ROC curve for Model
 D}\label{plotting-the-roc-curve-for-model-d}
 
@@ -13687,7 +13833,7 @@ fit.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-186-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-194-1.pdf}
 
 The AUC fitted with \texttt{ROCR} (0.883) is slightly different than
 what \texttt{lrm} has told us (0.880), and this also happens if we use
@@ -13720,7 +13866,7 @@ Area under the curve: 0.8826
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-187-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-195-1.pdf}
 
 \subsection{Validation of Model D
 summaries}\label{validation-of-model-d-summaries}
@@ -13772,7 +13918,7 @@ D}\label{calibration-plot-for-model-d}
 Divergence or singularity in 5 samples
 \end{verbatim}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-189-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-197-1.pdf}
 
 \begin{verbatim}
 
@@ -13867,7 +14013,7 @@ groups}\label{a-plot-comparing-the-two-intubation-groups}
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-191-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-199-1.pdf}
 
 The effect of \texttt{intubation} appears to be very large, compared to
 the resection size effect.
@@ -13884,7 +14030,7 @@ A nomogram of the model would help, too.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-192-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-200-1.pdf}
 
 Again, we see that the effect of intubation is enormous, compared to the
 effect of resection. Another way to see this is to plot the effect sizes
@@ -13915,6 +14061,31 @@ directly.
  resection   2   4    2      1.0949 0.53783 0.04082     2.1491   
   Odds Ratio 2   4    2      2.9890      NA 1.04170     8.5769   
 \end{verbatim}
+
+\subsection{Plot In-Sample Predictions for Model
+E}\label{plot-in-sample-predictions-for-model-e}
+
+Here are plots of the effects across the range of each predictor
+(holding the other constant) on the log odds scale.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{Predict}\NormalTok{(res_modE))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-201-1.pdf}
+
+We can also capture and plot these results on the probability scale, as
+follows.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{Predict}\NormalTok{(res_modE, }\DataTypeTok{fun =}\NormalTok{ plogis))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-202-1.pdf}
 
 \subsection{ANOVA for Model E}\label{anova-for-model-e}
 
@@ -14006,10 +14177,148 @@ influence}{Fitting Model E using glm to get plots about influence}}\label{fittin
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-196-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-206-1.pdf}
 
 Using this \texttt{glm} residuals approach, we again see that points 84
 and 94 have the largest influence on our model E.
+
+\section{Concordance: Comparing Model C, D and E's
+predictions}\label{concordance-comparing-model-c-d-and-es-predictions}
+
+To start, we'll gather the predictions fomade by each model (C, D and E)
+on the probability scale, in one place. Sadly, \texttt{augment} from
+\texttt{broom} doesn't work well with \texttt{lrm} fits, so we have to
+do this on our own.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{resect_preds <-}\StringTok{ }\NormalTok{resect }\OperatorTok{%>%}
+\StringTok{    }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{C =} \KeywordTok{predict}\NormalTok{(res_modC, }\DataTypeTok{type =} \StringTok{"fitted"}\NormalTok{),}
+           \DataTypeTok{D =} \KeywordTok{predict}\NormalTok{(res_modD, }\DataTypeTok{type =} \StringTok{"fitted"}\NormalTok{),}
+           \DataTypeTok{E =} \KeywordTok{predict}\NormalTok{(res_modE, }\DataTypeTok{type =} \StringTok{"fitted"}\NormalTok{))}
+
+\KeywordTok{head}\NormalTok{(resect_preds)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+# A tibble: 6 x 9
+     id   age prior resection intubated  died      C      D      E
+  <int> <int> <int>     <dbl>     <int> <int>  <dbl>  <dbl>  <dbl>
+1     1    34     1      2.50         0     0 0.0705 0.0632 0.0367
+2     2    57     0      5.00         0     0 0.326  0.0620 0.130 
+3     3    60     1      4.00         1     1 0.187  0.791  0.603 
+4     4    62     1      4.20         0     0 0.211  0.158  0.0881
+5     5    28     0      6.00         1     1 0.504  0.711  0.819 
+6     6    52     0      3.00         0     0 0.0990 0.0737 0.0477
+\end{verbatim}
+
+And now, we'll use the \texttt{gather} command to arrange the models and
+predicted probabilities in a more useful manner for plotting.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{res_p <-}\StringTok{ }\NormalTok{resect_preds }\OperatorTok{%>%}
+\StringTok{    }\KeywordTok{gather}\NormalTok{(}\StringTok{"model"}\NormalTok{, }\StringTok{"prediction"}\NormalTok{, }\DecValTok{7}\OperatorTok{:}\DecValTok{9}\NormalTok{) }\OperatorTok{%>%}
+\StringTok{    }\KeywordTok{select}\NormalTok{(id, died, model, prediction)}
+
+\KeywordTok{head}\NormalTok{(res_p)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+# A tibble: 6 x 4
+     id  died model prediction
+  <int> <int> <chr>      <dbl>
+1     1     0 C         0.0705
+2     2     0 C         0.326 
+3     3     1 C         0.187 
+4     4     0 C         0.211 
+5     5     1 C         0.504 
+6     6     0 C         0.0990
+\end{verbatim}
+
+Here's the resulting plot.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{ggplot}\NormalTok{(res_p, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =} \KeywordTok{factor}\NormalTok{(died), }\DataTypeTok{y =}\NormalTok{ prediction, }
+                  \DataTypeTok{group =}\NormalTok{ model, }\DataTypeTok{col =}\NormalTok{ model)) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_jitter}\NormalTok{(}\DataTypeTok{width =} \FloatTok{0.25}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{    }\KeywordTok{geom_hline}\NormalTok{(}\DataTypeTok{yintercept =} \FloatTok{0.5}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{facet_wrap}\NormalTok{( }\OperatorTok{~}\StringTok{ }\NormalTok{model) }\OperatorTok{+}\StringTok{ }
+\StringTok{    }\KeywordTok{guides}\NormalTok{(}\DataTypeTok{color =} \OtherTok{FALSE}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \StringTok{"Comparing Predictions for our Three Models"}\NormalTok{,}
+         \DataTypeTok{subtitle =} \StringTok{"A graphical view of concordance"}\NormalTok{,}
+         \DataTypeTok{x =} \StringTok{"Actual mortality status (1 = died)"}\NormalTok{,}
+         \DataTypeTok{y =} \StringTok{"Predicted probability of death"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-209-1.pdf}
+
+We could specify a particular rule, for example: if the predicted
+probability of death is 0.5 or greater, then predict ``Died''.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{res_p}\OperatorTok{$}\NormalTok{rule.}\DecValTok{5}\NormalTok{ <-}\StringTok{ }\KeywordTok{ifelse}\NormalTok{(res_p}\OperatorTok{$}\NormalTok{prediction }\OperatorTok{>=}\StringTok{ }\FloatTok{0.5}\NormalTok{, }
+                       \StringTok{"Predict Died"}\NormalTok{, }\StringTok{"Predict Alive"}\NormalTok{)}
+
+\KeywordTok{ftable}\NormalTok{(}\KeywordTok{table}\NormalTok{(res_p}\OperatorTok{$}\NormalTok{model, res_p}\OperatorTok{$}\NormalTok{rule.}\DecValTok{5}\NormalTok{, res_p}\OperatorTok{$}\NormalTok{died))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+                   0   1
+                        
+C Predict Alive  114  16
+  Predict Died     3   1
+D Predict Alive  113   7
+  Predict Died     4  10
+E Predict Alive  114   8
+  Predict Died     3   9
+\end{verbatim}
+
+And perhaps build the linked table of row probabilities\ldots{}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{round}\NormalTok{(}\DecValTok{100}\OperatorTok{*}\KeywordTok{prop.table}\NormalTok{(}
+    \KeywordTok{ftable}\NormalTok{(}\KeywordTok{table}\NormalTok{(res_p}\OperatorTok{$}\NormalTok{model, res_p}\OperatorTok{$}\NormalTok{rule.}\DecValTok{5}\NormalTok{, res_p}\OperatorTok{$}\NormalTok{died))}
+\NormalTok{    ,}\DecValTok{1}\NormalTok{),}\DecValTok{2}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+                     0     1
+                            
+C Predict Alive  87.69 12.31
+  Predict Died   75.00 25.00
+D Predict Alive  94.17  5.83
+  Predict Died   28.57 71.43
+E Predict Alive  93.44  6.56
+  Predict Died   25.00 75.00
+\end{verbatim}
+
+For example, in model E, 93.44\% of those predicted to be alive actually
+survived, and 75\% of those predicted to die actually died.
+
+\begin{itemize}
+\tightlist
+\item
+  Model D does a little better in one direction (94.17\% of those
+  predicted by Model D to be alive actually survived) but worse in the
+  other (71.43\% of those predicted by Model D to die actually died.)
+\item
+  Model C does worse than each of the others in both predicting those
+  who survive and those who die.
+\end{itemize}
+
+Note that the approaches discussed here would be useful if we had a new
+sample to predict on, as well. We could then compare the errors for that
+new data made by this sort of classification scheme either graphically
+or in a table.
 
 \section{Conclusions}\label{conclusions}
 
