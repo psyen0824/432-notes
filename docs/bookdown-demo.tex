@@ -124,7 +124,7 @@
   \postauthor{\par}
   \predate{\centering\large\emph}
   \postdate{\par}
-  \date{Built 2018-02-05 18:07:21}
+  \date{Built 2018-02-06 00:45:40}
 
 \usepackage{booktabs}
 \usepackage{amsthm}
@@ -9013,13 +9013,11 @@ approach you like, we get exactly the same result.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{mod2a.aug <-}\StringTok{ }\KeywordTok{augment}\NormalTok{(mod2a)}
-\NormalTok{mod2a.aug}\OperatorTok{$}\NormalTok{x2 <-}\StringTok{ }\NormalTok{pollution}\OperatorTok{$}\NormalTok{x2}
+\NormalTok{mod2a.aug <-}\StringTok{ }\KeywordTok{augment}\NormalTok{(mod2a, pollution)}
 
-\KeywordTok{ggplot}\NormalTok{(pollution, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x2, }\DataTypeTok{y =}\NormalTok{ y)) }\OperatorTok{+}
+\KeywordTok{ggplot}\NormalTok{(mod2a.aug, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x2, }\DataTypeTok{y =}\NormalTok{ y)) }\OperatorTok{+}
 \StringTok{    }\KeywordTok{geom_point}\NormalTok{() }\OperatorTok{+}
-\StringTok{    }\KeywordTok{geom_line}\NormalTok{(}\DataTypeTok{data =}\NormalTok{ mod2a.aug, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x2, }\DataTypeTok{y =}\NormalTok{ .fitted), }
-              \DataTypeTok{col =} \StringTok{"red"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_line}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x2, }\DataTypeTok{y =}\NormalTok{ .fitted), }\DataTypeTok{col =} \StringTok{"red"}\NormalTok{) }\OperatorTok{+}
 \StringTok{    }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \StringTok{"Model 2a: Quadratic fit using x2 and x2^2"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
@@ -9028,22 +9026,18 @@ approach you like, we get exactly the same result.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{mod2b.aug <-}\StringTok{ }\KeywordTok{augment}\NormalTok{(mod2b)}
-\NormalTok{mod2b.aug}\OperatorTok{$}\NormalTok{x2 <-}\StringTok{ }\NormalTok{pollution}\OperatorTok{$}\NormalTok{x2}
+\NormalTok{mod2b.aug <-}\StringTok{ }\KeywordTok{augment}\NormalTok{(mod2b, pollution)}
 
-\NormalTok{mod2c.aug <-}\StringTok{ }\KeywordTok{augment}\NormalTok{(mod2c)}
-\NormalTok{mod2c.aug}\OperatorTok{$}\NormalTok{x2 <-}\StringTok{ }\NormalTok{pollution}\OperatorTok{$}\NormalTok{x2}
+\NormalTok{mod2c.aug <-}\StringTok{ }\KeywordTok{augment}\NormalTok{(mod2c, pollution)}
 
-\NormalTok{p1 <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(pollution, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x2, }\DataTypeTok{y =}\NormalTok{ y)) }\OperatorTok{+}
+\NormalTok{p1 <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(mod2b.aug, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x2, }\DataTypeTok{y =}\NormalTok{ y)) }\OperatorTok{+}
 \StringTok{    }\KeywordTok{geom_point}\NormalTok{() }\OperatorTok{+}
-\StringTok{    }\KeywordTok{geom_line}\NormalTok{(}\DataTypeTok{data =}\NormalTok{ mod2b.aug, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x2, }\DataTypeTok{y =}\NormalTok{ .fitted), }
-              \DataTypeTok{col =} \StringTok{"red"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_line}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x2, }\DataTypeTok{y =}\NormalTok{ .fitted), }\DataTypeTok{col =} \StringTok{"red"}\NormalTok{) }\OperatorTok{+}
 \StringTok{    }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \StringTok{"Model 2b: Quadratic fit"}\NormalTok{)}
 
-\NormalTok{p2 <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(pollution, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x2, }\DataTypeTok{y =}\NormalTok{ y)) }\OperatorTok{+}
+\NormalTok{p2 <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(mod2c.aug, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x2, }\DataTypeTok{y =}\NormalTok{ y)) }\OperatorTok{+}
 \StringTok{    }\KeywordTok{geom_point}\NormalTok{() }\OperatorTok{+}
-\StringTok{    }\KeywordTok{geom_line}\NormalTok{(}\DataTypeTok{data =}\NormalTok{ mod2c.aug, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x2, }\DataTypeTok{y =}\NormalTok{ .fitted), }
-              \DataTypeTok{col =} \StringTok{"blue"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_line}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x2, }\DataTypeTok{y =}\NormalTok{ .fitted), }\DataTypeTok{col =} \StringTok{"blue"}\NormalTok{) }\OperatorTok{+}
 \StringTok{    }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \StringTok{"Model 2c: Quadratic fit"}\NormalTok{)}
 
 \NormalTok{gridExtra}\OperatorTok{::}\KeywordTok{grid.arrange}\NormalTok{(p1, p2, }\DataTypeTok{nrow =} \DecValTok{1}\NormalTok{)}
@@ -9097,13 +9091,11 @@ the models we fit previously.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{mod2d.aug <-}\StringTok{ }\KeywordTok{augment}\NormalTok{(mod2d)}
-\NormalTok{mod2d.aug}\OperatorTok{$}\NormalTok{x2 <-}\StringTok{ }\NormalTok{pollution}\OperatorTok{$}\NormalTok{x2}
+\NormalTok{mod2d.aug <-}\StringTok{ }\KeywordTok{augment}\NormalTok{(mod2d, pollution)}
 
-\KeywordTok{ggplot}\NormalTok{(pollution, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x2, }\DataTypeTok{y =}\NormalTok{ y)) }\OperatorTok{+}
+\KeywordTok{ggplot}\NormalTok{(mod2d.aug, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x2, }\DataTypeTok{y =}\NormalTok{ y)) }\OperatorTok{+}
 \StringTok{    }\KeywordTok{geom_point}\NormalTok{() }\OperatorTok{+}
-\StringTok{    }\KeywordTok{geom_line}\NormalTok{(}\DataTypeTok{data =}\NormalTok{ mod2d.aug, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x2, }\DataTypeTok{y =}\NormalTok{ .fitted), }
-              \DataTypeTok{col =} \StringTok{"red"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_line}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x2, }\DataTypeTok{y =}\NormalTok{ .fitted), }\DataTypeTok{col =} \StringTok{"red"}\NormalTok{) }\OperatorTok{+}
 \StringTok{    }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \StringTok{"Model 2d: Quadratic fit using centered x2 and x2^2"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
@@ -9122,7 +9114,7 @@ another way.
 \begin{verbatim}
 Skim summary statistics
  n obs: 60 
- n variables: 10 
+ n variables: 24 
 
 Variable type: numeric 
  variable missing complete  n   mean    sd    p0    p25 median    p75
@@ -9140,7 +9132,7 @@ Variable type: numeric
 \begin{verbatim}
 Skim summary statistics
  n obs: 60 
- n variables: 10 
+ n variables: 24 
 
 Variable type: numeric 
  variable missing complete  n   mean    sd    p0    p25 median    p75
@@ -9158,7 +9150,7 @@ Variable type: numeric
 \begin{verbatim}
 Skim summary statistics
  n obs: 60 
- n variables: 10 
+ n variables: 24 
 
 Variable type: numeric 
  variable missing complete  n   mean    sd    p0    p25 median    p75
@@ -9176,7 +9168,7 @@ Variable type: numeric
 \begin{verbatim}
 Skim summary statistics
  n obs: 60 
- n variables: 11 
+ n variables: 25 
 
 Variable type: numeric 
  variable missing complete  n   mean    sd    p0    p25 median    p75
@@ -9228,15 +9220,14 @@ Model 2 with Orthogonal Polynomials as blue points.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{mod2orth.aug <-}\StringTok{ }\KeywordTok{augment}\NormalTok{(mod2_orth)}
-\NormalTok{mod2orth.aug}\OperatorTok{$}\NormalTok{x2 <-}\StringTok{ }\NormalTok{pollution}\OperatorTok{$}\NormalTok{x2}
+\NormalTok{mod2orth.aug <-}\StringTok{ }\KeywordTok{augment}\NormalTok{(mod2_orth, pollution)}
 
-\KeywordTok{ggplot}\NormalTok{(pollution, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x2, }\DataTypeTok{y =}\NormalTok{ y)) }\OperatorTok{+}
+\KeywordTok{ggplot}\NormalTok{(mod2orth.aug, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x2, }\DataTypeTok{y =}\NormalTok{ y)) }\OperatorTok{+}
 \StringTok{    }\KeywordTok{geom_point}\NormalTok{() }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_point}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x2, }\DataTypeTok{y =}\NormalTok{ .fitted), }
+               \DataTypeTok{col =} \StringTok{"blue"}\NormalTok{, }\DataTypeTok{size =} \DecValTok{2}\NormalTok{) }\OperatorTok{+}
 \StringTok{    }\KeywordTok{geom_line}\NormalTok{(}\DataTypeTok{data =}\NormalTok{ mod2a.aug, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x2, }\DataTypeTok{y =}\NormalTok{ .fitted),}
               \DataTypeTok{col =} \StringTok{"red"}\NormalTok{) }\OperatorTok{+}
-\StringTok{    }\KeywordTok{geom_point}\NormalTok{(}\DataTypeTok{data =}\NormalTok{ mod2orth.aug, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x2, }\DataTypeTok{y =}\NormalTok{ .fitted), }
-              \DataTypeTok{col =} \StringTok{"blue"}\NormalTok{) }\OperatorTok{+}
 \StringTok{    }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \StringTok{"Model 2 with Orthogonal Polynomial, degree 2"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
@@ -9296,15 +9287,14 @@ the plot below, the predictions don't actually change all that much.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{mod3.aug <-}\StringTok{ }\KeywordTok{augment}\NormalTok{(mod3)}
-\NormalTok{mod3.aug}\OperatorTok{$}\NormalTok{x2 <-}\StringTok{ }\NormalTok{pollution}\OperatorTok{$}\NormalTok{x2}
+\NormalTok{mod3.aug <-}\StringTok{ }\KeywordTok{augment}\NormalTok{(mod3, pollution)}
 
-\KeywordTok{ggplot}\NormalTok{(pollution, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x2, }\DataTypeTok{y =}\NormalTok{ y)) }\OperatorTok{+}
+\KeywordTok{ggplot}\NormalTok{(mod3.aug, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x2, }\DataTypeTok{y =}\NormalTok{ y)) }\OperatorTok{+}
 \StringTok{    }\KeywordTok{geom_point}\NormalTok{() }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_line}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x2, }\DataTypeTok{y =}\NormalTok{ .fitted), }
+              \DataTypeTok{col =} \StringTok{"blue"}\NormalTok{) }\OperatorTok{+}
 \StringTok{    }\KeywordTok{geom_line}\NormalTok{(}\DataTypeTok{data =}\NormalTok{ mod2orth.aug, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x2, }\DataTypeTok{y =}\NormalTok{ .fitted),}
               \DataTypeTok{col =} \StringTok{"red"}\NormalTok{) }\OperatorTok{+}
-\StringTok{    }\KeywordTok{geom_line}\NormalTok{(}\DataTypeTok{data =}\NormalTok{ mod3.aug, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x2, }\DataTypeTok{y =}\NormalTok{ .fitted), }
-              \DataTypeTok{col =} \StringTok{"blue"}\NormalTok{) }\OperatorTok{+}
 \StringTok{    }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \StringTok{"Quadratic (red) vs. Cubic (blue) Polynomial Fits"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
@@ -9426,14 +9416,11 @@ Do the linear, quadratic and cubic model fitted values look different?
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{mod4_L.aug <-}\StringTok{ }\KeywordTok{augment}\NormalTok{(mod4_L)}
-\NormalTok{mod4_L.aug}\OperatorTok{$}\NormalTok{x3 <-}\StringTok{ }\NormalTok{pollution}\OperatorTok{$}\NormalTok{x3}
+\NormalTok{mod4_L.aug <-}\StringTok{ }\KeywordTok{augment}\NormalTok{(mod4_L, pollution)}
 
-\NormalTok{mod4_Q.aug <-}\StringTok{ }\KeywordTok{augment}\NormalTok{(mod4_Q)}
-\NormalTok{mod4_Q.aug}\OperatorTok{$}\NormalTok{x3 <-}\StringTok{ }\NormalTok{pollution}\OperatorTok{$}\NormalTok{x3}
+\NormalTok{mod4_Q.aug <-}\StringTok{ }\KeywordTok{augment}\NormalTok{(mod4_Q, pollution)}
 
-\NormalTok{mod4_C.aug <-}\StringTok{ }\KeywordTok{augment}\NormalTok{(mod4_C)}
-\NormalTok{mod4_C.aug}\OperatorTok{$}\NormalTok{x3 <-}\StringTok{ }\NormalTok{pollution}\OperatorTok{$}\NormalTok{x3}
+\NormalTok{mod4_C.aug <-}\StringTok{ }\KeywordTok{augment}\NormalTok{(mod4_C, pollution)}
 
 \KeywordTok{ggplot}\NormalTok{(pollution, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x3, }\DataTypeTok{y =}\NormalTok{ y)) }\OperatorTok{+}
 \StringTok{    }\KeywordTok{geom_point}\NormalTok{() }\OperatorTok{+}
@@ -9554,14 +9541,11 @@ other summaries, for plotting.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{mod5a.aug <-}\StringTok{ }\KeywordTok{augment}\NormalTok{(mod5a_rcs)}
-\NormalTok{mod5a.aug}\OperatorTok{$}\NormalTok{x3 <-}\StringTok{ }\NormalTok{pollution}\OperatorTok{$}\NormalTok{x3}
+\NormalTok{mod5a.aug <-}\StringTok{ }\KeywordTok{augment}\NormalTok{(mod5a_rcs, pollution)}
 
-\NormalTok{mod5b.aug <-}\StringTok{ }\KeywordTok{augment}\NormalTok{(mod5b_rcs)}
-\NormalTok{mod5b.aug}\OperatorTok{$}\NormalTok{x3 <-}\StringTok{ }\NormalTok{pollution}\OperatorTok{$}\NormalTok{x3}
+\NormalTok{mod5b.aug <-}\StringTok{ }\KeywordTok{augment}\NormalTok{(mod5b_rcs, pollution)}
 
-\NormalTok{mod5c.aug <-}\StringTok{ }\KeywordTok{augment}\NormalTok{(mod5c_rcs)}
-\NormalTok{mod5c.aug}\OperatorTok{$}\NormalTok{x3 <-}\StringTok{ }\NormalTok{pollution}\OperatorTok{$}\NormalTok{x3}
+\NormalTok{mod5c.aug <-}\StringTok{ }\KeywordTok{augment}\NormalTok{(mod5c_rcs, pollution)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -9573,23 +9557,23 @@ other summaries, for plotting.
 \StringTok{    }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \StringTok{"Loess Smooth"}\NormalTok{) }\OperatorTok{+}
 \StringTok{    }\KeywordTok{theme_bw}\NormalTok{()}
 
-\NormalTok{p3 <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(pollution, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x3, }\DataTypeTok{y =}\NormalTok{ y)) }\OperatorTok{+}
+\NormalTok{p3 <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(mod5a.aug, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x3, }\DataTypeTok{y =}\NormalTok{ y)) }\OperatorTok{+}
 \StringTok{    }\KeywordTok{geom_point}\NormalTok{() }\OperatorTok{+}
-\StringTok{    }\KeywordTok{geom_line}\NormalTok{(}\DataTypeTok{data =}\NormalTok{ mod5a.aug, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x3, }\DataTypeTok{y =}\NormalTok{ .fitted), }
+\StringTok{    }\KeywordTok{geom_line}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x3, }\DataTypeTok{y =}\NormalTok{ .fitted), }
               \DataTypeTok{col =} \StringTok{"blue"}\NormalTok{, }\DataTypeTok{size =} \FloatTok{1.25}\NormalTok{) }\OperatorTok{+}
 \StringTok{    }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \StringTok{"RCS, 3 knots"}\NormalTok{) }\OperatorTok{+}
 \StringTok{    }\KeywordTok{theme_bw}\NormalTok{()}
 
-\NormalTok{p4 <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(pollution, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x3, }\DataTypeTok{y =}\NormalTok{ y)) }\OperatorTok{+}
+\NormalTok{p4 <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(mod5b.aug, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x3, }\DataTypeTok{y =}\NormalTok{ y)) }\OperatorTok{+}
 \StringTok{    }\KeywordTok{geom_point}\NormalTok{() }\OperatorTok{+}
-\StringTok{    }\KeywordTok{geom_line}\NormalTok{(}\DataTypeTok{data =}\NormalTok{ mod5b.aug, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x3, }\DataTypeTok{y =}\NormalTok{ .fitted), }
+\StringTok{    }\KeywordTok{geom_line}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x3, }\DataTypeTok{y =}\NormalTok{ .fitted), }
               \DataTypeTok{col =} \StringTok{"black"}\NormalTok{, }\DataTypeTok{size =} \FloatTok{1.25}\NormalTok{) }\OperatorTok{+}
 \StringTok{    }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \StringTok{"RCS, 4 knots"}\NormalTok{) }\OperatorTok{+}
 \StringTok{    }\KeywordTok{theme_bw}\NormalTok{()}
 
-\NormalTok{p5 <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(pollution, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x3, }\DataTypeTok{y =}\NormalTok{ y)) }\OperatorTok{+}
+\NormalTok{p5 <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(mod5c.aug, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x3, }\DataTypeTok{y =}\NormalTok{ y)) }\OperatorTok{+}
 \StringTok{    }\KeywordTok{geom_point}\NormalTok{() }\OperatorTok{+}
-\StringTok{    }\KeywordTok{geom_line}\NormalTok{(}\DataTypeTok{data =}\NormalTok{ mod5c.aug, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x3, }\DataTypeTok{y =}\NormalTok{ .fitted), }
+\StringTok{    }\KeywordTok{geom_line}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x3, }\DataTypeTok{y =}\NormalTok{ .fitted), }
               \DataTypeTok{col =} \StringTok{"red"}\NormalTok{, }\DataTypeTok{size =} \FloatTok{1.25}\NormalTok{) }\OperatorTok{+}
 \StringTok{    }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \StringTok{"RCS, 5 knots"}\NormalTok{) }\OperatorTok{+}
 \StringTok{    }\KeywordTok{theme_bw}\NormalTok{()}
@@ -12564,9 +12548,10 @@ column.
   The interesting result is \texttt{resection}, which has a Wald Z =
   3.327, yielding a \emph{p} value of 0.00088.
 \item
-  The hypotheses being tested here are H\_0\_: \texttt{resection} does
-  not have an effect on the log odds of \texttt{died} vs.~H\_A\_:
-  \texttt{resection} does have such an effect.
+  The hypotheses being tested here are H\textsubscript{0}:
+  \texttt{resection} does not have an effect on the log odds of
+  \texttt{died} vs.~H\textsubscript{A}: \texttt{resection} does have
+  such an effect.
 \item
   Another way of stating this is that the \emph{p} value assesses
   whether the estimated coefficient of \texttt{resection}, 0.7417, is

@@ -652,31 +652,25 @@ Residual standard error: 60.83 on 57 degrees of freedom
 Multiple R-squared:  0.07623,   Adjusted R-squared:  0.04382 
 F-statistic: 2.352 on 2 and 57 DF,  p-value: 0.1044</code></pre>
 <p>And if we plot the fitted values for this <code>mod2</code> using whatever approach you like, we get exactly the same result.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">mod2a.aug &lt;-<span class="st"> </span><span class="kw">augment</span>(mod2a)
-mod2a.aug<span class="op">$</span>x2 &lt;-<span class="st"> </span>pollution<span class="op">$</span>x2
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">mod2a.aug &lt;-<span class="st"> </span><span class="kw">augment</span>(mod2a, pollution)
 
-<span class="kw">ggplot</span>(pollution, <span class="kw">aes</span>(<span class="dt">x =</span> x2, <span class="dt">y =</span> y)) <span class="op">+</span>
+<span class="kw">ggplot</span>(mod2a.aug, <span class="kw">aes</span>(<span class="dt">x =</span> x2, <span class="dt">y =</span> y)) <span class="op">+</span>
 <span class="st">    </span><span class="kw">geom_point</span>() <span class="op">+</span>
-<span class="st">    </span><span class="kw">geom_line</span>(<span class="dt">data =</span> mod2a.aug, <span class="kw">aes</span>(<span class="dt">x =</span> x2, <span class="dt">y =</span> .fitted), 
-              <span class="dt">col =</span> <span class="st">&quot;red&quot;</span>) <span class="op">+</span>
+<span class="st">    </span><span class="kw">geom_line</span>(<span class="kw">aes</span>(<span class="dt">x =</span> x2, <span class="dt">y =</span> .fitted), <span class="dt">col =</span> <span class="st">&quot;red&quot;</span>) <span class="op">+</span>
 <span class="st">    </span><span class="kw">labs</span>(<span class="dt">title =</span> <span class="st">&quot;Model 2a: Quadratic fit using x2 and x2^2&quot;</span>)</code></pre></div>
 <p><img src="bookdown-demo_files/figure-html/unnamed-chunk-94-1.png" width="672" /></p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">mod2b.aug &lt;-<span class="st"> </span><span class="kw">augment</span>(mod2b)
-mod2b.aug<span class="op">$</span>x2 &lt;-<span class="st"> </span>pollution<span class="op">$</span>x2
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">mod2b.aug &lt;-<span class="st"> </span><span class="kw">augment</span>(mod2b, pollution)
 
-mod2c.aug &lt;-<span class="st"> </span><span class="kw">augment</span>(mod2c)
-mod2c.aug<span class="op">$</span>x2 &lt;-<span class="st"> </span>pollution<span class="op">$</span>x2
+mod2c.aug &lt;-<span class="st"> </span><span class="kw">augment</span>(mod2c, pollution)
 
-p1 &lt;-<span class="st"> </span><span class="kw">ggplot</span>(pollution, <span class="kw">aes</span>(<span class="dt">x =</span> x2, <span class="dt">y =</span> y)) <span class="op">+</span>
+p1 &lt;-<span class="st"> </span><span class="kw">ggplot</span>(mod2b.aug, <span class="kw">aes</span>(<span class="dt">x =</span> x2, <span class="dt">y =</span> y)) <span class="op">+</span>
 <span class="st">    </span><span class="kw">geom_point</span>() <span class="op">+</span>
-<span class="st">    </span><span class="kw">geom_line</span>(<span class="dt">data =</span> mod2b.aug, <span class="kw">aes</span>(<span class="dt">x =</span> x2, <span class="dt">y =</span> .fitted), 
-              <span class="dt">col =</span> <span class="st">&quot;red&quot;</span>) <span class="op">+</span>
+<span class="st">    </span><span class="kw">geom_line</span>(<span class="kw">aes</span>(<span class="dt">x =</span> x2, <span class="dt">y =</span> .fitted), <span class="dt">col =</span> <span class="st">&quot;red&quot;</span>) <span class="op">+</span>
 <span class="st">    </span><span class="kw">labs</span>(<span class="dt">title =</span> <span class="st">&quot;Model 2b: Quadratic fit&quot;</span>)
 
-p2 &lt;-<span class="st"> </span><span class="kw">ggplot</span>(pollution, <span class="kw">aes</span>(<span class="dt">x =</span> x2, <span class="dt">y =</span> y)) <span class="op">+</span>
+p2 &lt;-<span class="st"> </span><span class="kw">ggplot</span>(mod2c.aug, <span class="kw">aes</span>(<span class="dt">x =</span> x2, <span class="dt">y =</span> y)) <span class="op">+</span>
 <span class="st">    </span><span class="kw">geom_point</span>() <span class="op">+</span>
-<span class="st">    </span><span class="kw">geom_line</span>(<span class="dt">data =</span> mod2c.aug, <span class="kw">aes</span>(<span class="dt">x =</span> x2, <span class="dt">y =</span> .fitted), 
-              <span class="dt">col =</span> <span class="st">&quot;blue&quot;</span>) <span class="op">+</span>
+<span class="st">    </span><span class="kw">geom_line</span>(<span class="kw">aes</span>(<span class="dt">x =</span> x2, <span class="dt">y =</span> .fitted), <span class="dt">col =</span> <span class="st">&quot;blue&quot;</span>) <span class="op">+</span>
 <span class="st">    </span><span class="kw">labs</span>(<span class="dt">title =</span> <span class="st">&quot;Model 2c: Quadratic fit&quot;</span>)
 
 gridExtra<span class="op">::</span><span class="kw">grid.arrange</span>(p1, p2, <span class="dt">nrow =</span> <span class="dv">1</span>)</code></pre></div>
@@ -711,20 +705,18 @@ Residual standard error: 60.83 on 57 degrees of freedom
 Multiple R-squared:  0.07623,   Adjusted R-squared:  0.04382 
 F-statistic: 2.352 on 2 and 57 DF,  p-value: 0.1044</code></pre>
 <p>Note that this model looks very different, with the exception of the second order quadratic term. But, it produces the same fitted values as the models we fit previously.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">mod2d.aug &lt;-<span class="st"> </span><span class="kw">augment</span>(mod2d)
-mod2d.aug<span class="op">$</span>x2 &lt;-<span class="st"> </span>pollution<span class="op">$</span>x2
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">mod2d.aug &lt;-<span class="st"> </span><span class="kw">augment</span>(mod2d, pollution)
 
-<span class="kw">ggplot</span>(pollution, <span class="kw">aes</span>(<span class="dt">x =</span> x2, <span class="dt">y =</span> y)) <span class="op">+</span>
+<span class="kw">ggplot</span>(mod2d.aug, <span class="kw">aes</span>(<span class="dt">x =</span> x2, <span class="dt">y =</span> y)) <span class="op">+</span>
 <span class="st">    </span><span class="kw">geom_point</span>() <span class="op">+</span>
-<span class="st">    </span><span class="kw">geom_line</span>(<span class="dt">data =</span> mod2d.aug, <span class="kw">aes</span>(<span class="dt">x =</span> x2, <span class="dt">y =</span> .fitted), 
-              <span class="dt">col =</span> <span class="st">&quot;red&quot;</span>) <span class="op">+</span>
+<span class="st">    </span><span class="kw">geom_line</span>(<span class="kw">aes</span>(<span class="dt">x =</span> x2, <span class="dt">y =</span> .fitted), <span class="dt">col =</span> <span class="st">&quot;red&quot;</span>) <span class="op">+</span>
 <span class="st">    </span><span class="kw">labs</span>(<span class="dt">title =</span> <span class="st">&quot;Model 2d: Quadratic fit using centered x2 and x2^2&quot;</span>)</code></pre></div>
 <p><img src="bookdown-demo_files/figure-html/unnamed-chunk-97-1.png" width="672" /></p>
 <p>Or, if you don’t believe me yet, look at the four sets of fitted values another way.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">mod2a.aug <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">skim</span>(.fitted)</code></pre></div>
 <pre><code>Skim summary statistics
  n obs: 60 
- n variables: 10 
+ n variables: 24 
 
 Variable type: numeric 
  variable missing complete  n   mean    sd    p0    p25 median    p75
@@ -734,7 +726,7 @@ Variable type: numeric
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">mod2b.aug <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">skim</span>(.fitted)</code></pre></div>
 <pre><code>Skim summary statistics
  n obs: 60 
- n variables: 10 
+ n variables: 24 
 
 Variable type: numeric 
  variable missing complete  n   mean    sd    p0    p25 median    p75
@@ -744,7 +736,7 @@ Variable type: numeric
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">mod2c.aug <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">skim</span>(.fitted)</code></pre></div>
 <pre><code>Skim summary statistics
  n obs: 60 
- n variables: 10 
+ n variables: 24 
 
 Variable type: numeric 
  variable missing complete  n   mean    sd    p0    p25 median    p75
@@ -754,7 +746,7 @@ Variable type: numeric
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">mod2d.aug <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">skim</span>(.fitted)</code></pre></div>
 <pre><code>Skim summary statistics
  n obs: 60 
- n variables: 11 
+ n variables: 25 
 
 Variable type: numeric 
  variable missing complete  n   mean    sd    p0    p25 median    p75
@@ -789,15 +781,14 @@ Residual standard error: 60.83 on 57 degrees of freedom
 Multiple R-squared:  0.07623,   Adjusted R-squared:  0.04382 
 F-statistic: 2.352 on 2 and 57 DF,  p-value: 0.1044</code></pre>
 <p>Now this looks very different in the equation, but, again, we can see that this produces exactly the same fitted values as our previous models, and the same model fit summaries. Is it, in fact, the same model? Here, we’ll plot the fitted Model 2a in a red line, and this new Model 2 with Orthogonal Polynomials as blue points.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">mod2orth.aug &lt;-<span class="st"> </span><span class="kw">augment</span>(mod2_orth)
-mod2orth.aug<span class="op">$</span>x2 &lt;-<span class="st"> </span>pollution<span class="op">$</span>x2
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">mod2orth.aug &lt;-<span class="st"> </span><span class="kw">augment</span>(mod2_orth, pollution)
 
-<span class="kw">ggplot</span>(pollution, <span class="kw">aes</span>(<span class="dt">x =</span> x2, <span class="dt">y =</span> y)) <span class="op">+</span>
+<span class="kw">ggplot</span>(mod2orth.aug, <span class="kw">aes</span>(<span class="dt">x =</span> x2, <span class="dt">y =</span> y)) <span class="op">+</span>
 <span class="st">    </span><span class="kw">geom_point</span>() <span class="op">+</span>
+<span class="st">    </span><span class="kw">geom_point</span>(<span class="kw">aes</span>(<span class="dt">x =</span> x2, <span class="dt">y =</span> .fitted), 
+               <span class="dt">col =</span> <span class="st">&quot;blue&quot;</span>, <span class="dt">size =</span> <span class="dv">2</span>) <span class="op">+</span>
 <span class="st">    </span><span class="kw">geom_line</span>(<span class="dt">data =</span> mod2a.aug, <span class="kw">aes</span>(<span class="dt">x =</span> x2, <span class="dt">y =</span> .fitted),
               <span class="dt">col =</span> <span class="st">&quot;red&quot;</span>) <span class="op">+</span>
-<span class="st">    </span><span class="kw">geom_point</span>(<span class="dt">data =</span> mod2orth.aug, <span class="kw">aes</span>(<span class="dt">x =</span> x2, <span class="dt">y =</span> .fitted), 
-              <span class="dt">col =</span> <span class="st">&quot;blue&quot;</span>) <span class="op">+</span>
 <span class="st">    </span><span class="kw">labs</span>(<span class="dt">title =</span> <span class="st">&quot;Model 2 with Orthogonal Polynomial, degree 2&quot;</span>)</code></pre></div>
 <p><img src="bookdown-demo_files/figure-html/unnamed-chunk-100-1.png" width="672" /></p>
 <p>Yes, it is again the same model in terms of the predictions it makes for <code>y</code>.</p>
@@ -826,15 +817,14 @@ Residual standard error: 61.33 on 56 degrees of freedom
 Multiple R-squared:  0.07748,   Adjusted R-squared:  0.02806 
 F-statistic: 1.568 on 3 and 56 DF,  p-value: 0.2073</code></pre>
 <p>It doesn’t appear that the cubic term adds much here, if anything. The <em>p</em> value is not significant for the third degree polynomial, the summaries of fit quality aren’t much improved, and as we can see from the plot below, the predictions don’t actually change all that much.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">mod3.aug &lt;-<span class="st"> </span><span class="kw">augment</span>(mod3)
-mod3.aug<span class="op">$</span>x2 &lt;-<span class="st"> </span>pollution<span class="op">$</span>x2
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">mod3.aug &lt;-<span class="st"> </span><span class="kw">augment</span>(mod3, pollution)
 
-<span class="kw">ggplot</span>(pollution, <span class="kw">aes</span>(<span class="dt">x =</span> x2, <span class="dt">y =</span> y)) <span class="op">+</span>
+<span class="kw">ggplot</span>(mod3.aug, <span class="kw">aes</span>(<span class="dt">x =</span> x2, <span class="dt">y =</span> y)) <span class="op">+</span>
 <span class="st">    </span><span class="kw">geom_point</span>() <span class="op">+</span>
+<span class="st">    </span><span class="kw">geom_line</span>(<span class="kw">aes</span>(<span class="dt">x =</span> x2, <span class="dt">y =</span> .fitted), 
+              <span class="dt">col =</span> <span class="st">&quot;blue&quot;</span>) <span class="op">+</span>
 <span class="st">    </span><span class="kw">geom_line</span>(<span class="dt">data =</span> mod2orth.aug, <span class="kw">aes</span>(<span class="dt">x =</span> x2, <span class="dt">y =</span> .fitted),
               <span class="dt">col =</span> <span class="st">&quot;red&quot;</span>) <span class="op">+</span>
-<span class="st">    </span><span class="kw">geom_line</span>(<span class="dt">data =</span> mod3.aug, <span class="kw">aes</span>(<span class="dt">x =</span> x2, <span class="dt">y =</span> .fitted), 
-              <span class="dt">col =</span> <span class="st">&quot;blue&quot;</span>) <span class="op">+</span>
 <span class="st">    </span><span class="kw">labs</span>(<span class="dt">title =</span> <span class="st">&quot;Quadratic (red) vs. Cubic (blue) Polynomial Fits&quot;</span>)</code></pre></div>
 <p><img src="bookdown-demo_files/figure-html/unnamed-chunk-102-1.png" width="672" /></p>
 </div>
@@ -910,14 +900,11 @@ Residual standard error: 54.73 on 56 degrees of freedom
 Multiple R-squared:  0.2654,    Adjusted R-squared:  0.226 
 F-statistic: 6.742 on 3 and 56 DF,  p-value: 0.0005799</code></pre>
 <p>It looks like the cubic polynomial term is of some real importance here. Do the linear, quadratic and cubic model fitted values look different?</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">mod4_L.aug &lt;-<span class="st"> </span><span class="kw">augment</span>(mod4_L)
-mod4_L.aug<span class="op">$</span>x3 &lt;-<span class="st"> </span>pollution<span class="op">$</span>x3
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">mod4_L.aug &lt;-<span class="st"> </span><span class="kw">augment</span>(mod4_L, pollution)
 
-mod4_Q.aug &lt;-<span class="st"> </span><span class="kw">augment</span>(mod4_Q)
-mod4_Q.aug<span class="op">$</span>x3 &lt;-<span class="st"> </span>pollution<span class="op">$</span>x3
+mod4_Q.aug &lt;-<span class="st"> </span><span class="kw">augment</span>(mod4_Q, pollution)
 
-mod4_C.aug &lt;-<span class="st"> </span><span class="kw">augment</span>(mod4_C)
-mod4_C.aug<span class="op">$</span>x3 &lt;-<span class="st"> </span>pollution<span class="op">$</span>x3
+mod4_C.aug &lt;-<span class="st"> </span><span class="kw">augment</span>(mod4_C, pollution)
 
 <span class="kw">ggplot</span>(pollution, <span class="kw">aes</span>(<span class="dt">x =</span> x3, <span class="dt">y =</span> y)) <span class="op">+</span>
 <span class="st">    </span><span class="kw">geom_point</span>() <span class="op">+</span>
@@ -983,37 +970,34 @@ Residual standard error: 54.35 on 55 degrees of freedom
 Multiple R-squared:  0.2883,    Adjusted R-squared:  0.2366 
 F-statistic: 5.571 on 4 and 55 DF,  p-value: 0.0007734</code></pre>
 <p>We’ll begin by storing the fitted values from these three models and other summaries, for plotting.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">mod5a.aug &lt;-<span class="st"> </span><span class="kw">augment</span>(mod5a_rcs)
-mod5a.aug<span class="op">$</span>x3 &lt;-<span class="st"> </span>pollution<span class="op">$</span>x3
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">mod5a.aug &lt;-<span class="st"> </span><span class="kw">augment</span>(mod5a_rcs, pollution)
 
-mod5b.aug &lt;-<span class="st"> </span><span class="kw">augment</span>(mod5b_rcs)
-mod5b.aug<span class="op">$</span>x3 &lt;-<span class="st"> </span>pollution<span class="op">$</span>x3
+mod5b.aug &lt;-<span class="st"> </span><span class="kw">augment</span>(mod5b_rcs, pollution)
 
-mod5c.aug &lt;-<span class="st"> </span><span class="kw">augment</span>(mod5c_rcs)
-mod5c.aug<span class="op">$</span>x3 &lt;-<span class="st"> </span>pollution<span class="op">$</span>x3</code></pre></div>
+mod5c.aug &lt;-<span class="st"> </span><span class="kw">augment</span>(mod5c_rcs, pollution)</code></pre></div>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">p2 &lt;-<span class="st"> </span><span class="kw">ggplot</span>(pollution, <span class="kw">aes</span>(<span class="dt">x =</span> x3, <span class="dt">y =</span> y)) <span class="op">+</span>
 <span class="st">    </span><span class="kw">geom_point</span>() <span class="op">+</span>
 <span class="st">    </span><span class="kw">geom_smooth</span>(<span class="dt">method =</span> <span class="st">&quot;loess&quot;</span>, <span class="dt">col =</span> <span class="st">&quot;purple&quot;</span>, <span class="dt">se =</span> F) <span class="op">+</span>
 <span class="st">    </span><span class="kw">labs</span>(<span class="dt">title =</span> <span class="st">&quot;Loess Smooth&quot;</span>) <span class="op">+</span>
 <span class="st">    </span><span class="kw">theme_bw</span>()
 
-p3 &lt;-<span class="st"> </span><span class="kw">ggplot</span>(pollution, <span class="kw">aes</span>(<span class="dt">x =</span> x3, <span class="dt">y =</span> y)) <span class="op">+</span>
+p3 &lt;-<span class="st"> </span><span class="kw">ggplot</span>(mod5a.aug, <span class="kw">aes</span>(<span class="dt">x =</span> x3, <span class="dt">y =</span> y)) <span class="op">+</span>
 <span class="st">    </span><span class="kw">geom_point</span>() <span class="op">+</span>
-<span class="st">    </span><span class="kw">geom_line</span>(<span class="dt">data =</span> mod5a.aug, <span class="kw">aes</span>(<span class="dt">x =</span> x3, <span class="dt">y =</span> .fitted), 
+<span class="st">    </span><span class="kw">geom_line</span>(<span class="kw">aes</span>(<span class="dt">x =</span> x3, <span class="dt">y =</span> .fitted), 
               <span class="dt">col =</span> <span class="st">&quot;blue&quot;</span>, <span class="dt">size =</span> <span class="fl">1.25</span>) <span class="op">+</span>
 <span class="st">    </span><span class="kw">labs</span>(<span class="dt">title =</span> <span class="st">&quot;RCS, 3 knots&quot;</span>) <span class="op">+</span>
 <span class="st">    </span><span class="kw">theme_bw</span>()
 
-p4 &lt;-<span class="st"> </span><span class="kw">ggplot</span>(pollution, <span class="kw">aes</span>(<span class="dt">x =</span> x3, <span class="dt">y =</span> y)) <span class="op">+</span>
+p4 &lt;-<span class="st"> </span><span class="kw">ggplot</span>(mod5b.aug, <span class="kw">aes</span>(<span class="dt">x =</span> x3, <span class="dt">y =</span> y)) <span class="op">+</span>
 <span class="st">    </span><span class="kw">geom_point</span>() <span class="op">+</span>
-<span class="st">    </span><span class="kw">geom_line</span>(<span class="dt">data =</span> mod5b.aug, <span class="kw">aes</span>(<span class="dt">x =</span> x3, <span class="dt">y =</span> .fitted), 
+<span class="st">    </span><span class="kw">geom_line</span>(<span class="kw">aes</span>(<span class="dt">x =</span> x3, <span class="dt">y =</span> .fitted), 
               <span class="dt">col =</span> <span class="st">&quot;black&quot;</span>, <span class="dt">size =</span> <span class="fl">1.25</span>) <span class="op">+</span>
 <span class="st">    </span><span class="kw">labs</span>(<span class="dt">title =</span> <span class="st">&quot;RCS, 4 knots&quot;</span>) <span class="op">+</span>
 <span class="st">    </span><span class="kw">theme_bw</span>()
 
-p5 &lt;-<span class="st"> </span><span class="kw">ggplot</span>(pollution, <span class="kw">aes</span>(<span class="dt">x =</span> x3, <span class="dt">y =</span> y)) <span class="op">+</span>
+p5 &lt;-<span class="st"> </span><span class="kw">ggplot</span>(mod5c.aug, <span class="kw">aes</span>(<span class="dt">x =</span> x3, <span class="dt">y =</span> y)) <span class="op">+</span>
 <span class="st">    </span><span class="kw">geom_point</span>() <span class="op">+</span>
-<span class="st">    </span><span class="kw">geom_line</span>(<span class="dt">data =</span> mod5c.aug, <span class="kw">aes</span>(<span class="dt">x =</span> x3, <span class="dt">y =</span> .fitted), 
+<span class="st">    </span><span class="kw">geom_line</span>(<span class="kw">aes</span>(<span class="dt">x =</span> x3, <span class="dt">y =</span> .fitted), 
               <span class="dt">col =</span> <span class="st">&quot;red&quot;</span>, <span class="dt">size =</span> <span class="fl">1.25</span>) <span class="op">+</span>
 <span class="st">    </span><span class="kw">labs</span>(<span class="dt">title =</span> <span class="st">&quot;RCS, 5 knots&quot;</span>) <span class="op">+</span>
 <span class="st">    </span><span class="kw">theme_bw</span>()

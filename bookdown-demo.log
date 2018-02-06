@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.1415926-2.5-0.9999.3 (MiKTeX 2.9) (preloaded format=xelatex 2016.8.27)  5 FEB 2018 18:08
+This is XeTeX, Version 3.1415926-2.5-0.9999.3 (MiKTeX 2.9) (preloaded format=xelatex 2016.8.27)  6 FEB 2018 00:46
 entering extended mode
 **bookdown-demo.tex
 (C:\Users\Thomas\Dropbox\2018-432\432-notes\bookdown-demo.tex
@@ -1315,7 +1315,10 @@ e QTm)
 <use  "bookdown-demo_files/figure-latex/unnamed-chunk-97-1.pdf" > [161] [162]
 File: bookdown-demo_files/figure-latex/unnamed-chunk-100-1.pdf Graphic file (ty
 pe QTm)
-<use  "bookdown-demo_files/figure-latex/unnamed-chunk-100-1.pdf" > [163]
+<use  "bookdown-demo_files/figure-latex/unnamed-chunk-100-1.pdf" >
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+[163]
 File: bookdown-demo_files/figure-latex/unnamed-chunk-102-1.pdf Graphic file (ty
 pe QTm)
 <use  "bookdown-demo_files/figure-latex/unnamed-chunk-102-1.pdf" >
@@ -1336,19 +1339,19 @@ pe QTm)
 <use  "bookdown-demo_files/figure-latex/unnamed-chunk-105-1.pdf" > [168] [169]
 File: bookdown-demo_files/figure-latex/unnamed-chunk-109-1.pdf Graphic file (ty
 pe QTm)
-<use  "bookdown-demo_files/figure-latex/unnamed-chunk-109-1.pdf" >
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-[170] [171] [172] [173]
+<use  "bookdown-demo_files/figure-latex/unnamed-chunk-109-1.pdf" > [170] [171] 
+[172] [173]
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <14.4> on input line 9972.
+(Font)              <14.4> on input line 9956.
 File: bookdown-demo_files/figure-latex/unnamed-chunk-114-1.pdf Graphic file (ty
 pe QTm)
-<use  "bookdown-demo_files/figure-latex/unnamed-chunk-114-1.pdf" > [174] [175] 
-[176]
+<use  "bookdown-demo_files/figure-latex/unnamed-chunk-114-1.pdf" >
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+[174] [175] [176]
 Chapter 10.
 LaTeX Font Info:    Font shape `EU1/lmtt/bx/n' in size <24.88> not available
-(Font)              Font shape `EU1/lmtt/b/n' tried instead on input line 10101
+(Font)              Font shape `EU1/lmtt/b/n' tried instead on input line 10085
 .
 [177
 
@@ -1477,7 +1480,7 @@ pe QTm)
 ]
 Chapter 13.
 [219] [220] [221]
-Overfull \hbox (58.66814pt too wide) detected at line 12274
+Overfull \hbox (58.66814pt too wide) detected at line 12258
 \OML/lmm/m/it/10 log [] \OT1/lmr/m/n/10 = \OMS/lmsy/m/n/10 ^^@\OT1/lmr/m/n/10 4
 \OML/lmm/m/it/10 :\OT1/lmr/m/n/10 4337 + 0\OML/lmm/m/it/10 :\OT1/lmr/m/n/10 741
 7 \OMS/lmsy/m/n/10 ^^B \OT1/lmr/m/n/10 5 = \OMS/lmsy/m/n/10 ^^@\OT1/lmr/m/n/10 
@@ -1489,7 +1492,7 @@ n/10 = \OMS/lmsy/m/n/10 ^^@\OT1/lmr/m/n/10 4\OML/lmm/m/it/10 :\OT1/lmr/m/n/10 4
  []
 
 
-Overfull \hbox (226.01213pt too wide) detected at line 12281
+Overfull \hbox (226.01213pt too wide) detected at line 12265
 \OML/lmm/m/it/10 Odds\OT1/lmr/m/n/10 (\OML/lmm/m/it/10 Harrydied\OT1/lmr/m/n/10
  ) = [] = \OML/lmm/m/it/10 e[] \OT1/lmr/m/n/10 = \OML/lmm/m/it/10 e[] \OT1/lmr/
 m/n/10 = 0\OML/lmm/m/it/10 :\OT1/lmr/m/n/10 4842[] \OML/lmm/m/it/10 Odds\OT1/lm
@@ -1541,7 +1544,7 @@ pe QTm)
 File: bookdown-demo_files/figure-latex/unnamed-chunk-176-1.pdf Graphic file (ty
 pe QTm)
 <use  "bookdown-demo_files/figure-latex/unnamed-chunk-176-1.pdf" >
-Overfull \hbox (41.24498pt too wide) in paragraph at lines 13204--13204
+Overfull \hbox (41.24498pt too wide) in paragraph at lines 13189--13189
 []\EU1/lmtt/m/n/10 Data: predict(res_modA, type = "response") in 117 controls (
 resect$died 0) < 17 cases (resect$died 1).[] 
  []
@@ -1617,7 +1620,7 @@ pe QTm)
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
 [258]
-Overfull \hbox (30.74498pt too wide) in paragraph at lines 14237--14237
+Overfull \hbox (30.74498pt too wide) in paragraph at lines 14222--14222
 []\EU1/lmtt/m/n/10 Data: predict(res_modD, type = "fitted") in 117 controls (re
 sect$died 0) < 17 cases (resect$died 1).[] 
  []
@@ -1670,12 +1673,12 @@ Underfull \vbox (badness 10000) has occurred while \output is active []
 [272
 
 ] [273])
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 14711.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 14696.
 [274]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 14711.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 14696.
 (C:\Users\Thomas\Dropbox\2018-432\432-notes\bookdown-demo.aux)
-Package atveryend Info: Empty hook `AtVeryEndDocument' on input line 14711.
-Package atveryend Info: Empty hook `AtEndAfterFileList' on input line 14711.
+Package atveryend Info: Empty hook `AtVeryEndDocument' on input line 14696.
+Package atveryend Info: Empty hook `AtEndAfterFileList' on input line 14696.
 
 LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
 

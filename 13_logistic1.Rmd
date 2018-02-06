@@ -222,7 +222,7 @@ Let's walk through each of these elements.
 The coefficients output provides the estimated coefficients, and their standard errors, plus a Wald Z statistic, which is just the estimated coefficient divided by its standard error. This is compared to a standard Normal distribution to obtain the two-tailed p values summarized in the `Pr(>|z|)` column.
 
 - The interesting result is `resection`, which has a Wald Z = 3.327, yielding a *p* value of 0.00088. 
-- The hypotheses being tested here are H_0_: `resection` does not have an effect on the log odds of `died` vs. H_A_: `resection` does have such an effect.
+- The hypotheses being tested here are H~0~: `resection` does not have an effect on the log odds of `died` vs. H~A~: `resection` does have such an effect.
 - Another way of stating this is that the *p* value assesses whether the estimated coefficient of `resection`, 0.7417, is statistically detectably different from 0. If the coefficient (on the logit scale) for `resection` was truly 0, this would mean that:
     + the log odds of death did not change based on the `resection` size,
     + the odds of death were unchanged based on the `resection` size (the odds ratio would be 1), and

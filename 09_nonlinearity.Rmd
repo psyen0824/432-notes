@@ -92,33 +92,27 @@ summary(mod2a)
 And if we plot the fitted values for this `mod2` using whatever approach you like, we get exactly the same result.
 
 ```{r}
-mod2a.aug <- augment(mod2a)
-mod2a.aug$x2 <- pollution$x2
+mod2a.aug <- augment(mod2a, pollution)
 
-ggplot(pollution, aes(x = x2, y = y)) +
+ggplot(mod2a.aug, aes(x = x2, y = y)) +
     geom_point() +
-    geom_line(data = mod2a.aug, aes(x = x2, y = .fitted), 
-              col = "red") +
+    geom_line(aes(x = x2, y = .fitted), col = "red") +
     labs(title = "Model 2a: Quadratic fit using x2 and x2^2")
 ```
 
 ```{r}
-mod2b.aug <- augment(mod2b)
-mod2b.aug$x2 <- pollution$x2
+mod2b.aug <- augment(mod2b, pollution)
 
-mod2c.aug <- augment(mod2c)
-mod2c.aug$x2 <- pollution$x2
+mod2c.aug <- augment(mod2c, pollution)
 
-p1 <- ggplot(pollution, aes(x = x2, y = y)) +
+p1 <- ggplot(mod2b.aug, aes(x = x2, y = y)) +
     geom_point() +
-    geom_line(data = mod2b.aug, aes(x = x2, y = .fitted), 
-              col = "red") +
+    geom_line(aes(x = x2, y = .fitted), col = "red") +
     labs(title = "Model 2b: Quadratic fit")
 
-p2 <- ggplot(pollution, aes(x = x2, y = y)) +
+p2 <- ggplot(mod2c.aug, aes(x = x2, y = y)) +
     geom_point() +
-    geom_line(data = mod2c.aug, aes(x = x2, y = .fitted), 
-              col = "blue") +
+    geom_line(aes(x = x2, y = .fitted), col = "blue") +
     labs(title = "Model 2c: Quadratic fit")
 
 gridExtra::grid.arrange(p1, p2, nrow = 1)
@@ -140,13 +134,11 @@ summary(mod2d)
 Note that this model looks very different, with the exception of the second order quadratic term. But, it produces the same fitted values as the models we fit previously.
 
 ```{r}
-mod2d.aug <- augment(mod2d)
-mod2d.aug$x2 <- pollution$x2
+mod2d.aug <- augment(mod2d, pollution)
 
-ggplot(pollution, aes(x = x2, y = y)) +
+ggplot(mod2d.aug, aes(x = x2, y = y)) +
     geom_point() +
-    geom_line(data = mod2d.aug, aes(x = x2, y = .fitted), 
-              col = "red") +
+    geom_line(aes(x = x2, y = .fitted), col = "red") +
     labs(title = "Model 2d: Quadratic fit using centered x2 and x2^2")
 ```
 
@@ -172,15 +164,14 @@ summary(mod2_orth)
 Now this looks very different in the equation, but, again, we can see that this produces exactly the same fitted values as our previous models, and the same model fit summaries. Is it, in fact, the same model? Here, we'll plot the fitted Model 2a in a red line, and this new Model 2 with Orthogonal Polynomials as blue points.
 
 ```{r}
-mod2orth.aug <- augment(mod2_orth)
-mod2orth.aug$x2 <- pollution$x2
+mod2orth.aug <- augment(mod2_orth, pollution)
 
-ggplot(pollution, aes(x = x2, y = y)) +
+ggplot(mod2orth.aug, aes(x = x2, y = y)) +
     geom_point() +
+    geom_point(aes(x = x2, y = .fitted), 
+               col = "blue", size = 2) +
     geom_line(data = mod2a.aug, aes(x = x2, y = .fitted),
               col = "red") +
-    geom_point(data = mod2orth.aug, aes(x = x2, y = .fitted), 
-              col = "blue") +
     labs(title = "Model 2 with Orthogonal Polynomial, degree 2")
 ```
 
@@ -198,15 +189,14 @@ summary(mod3)
 It doesn't appear that the cubic term adds much here, if anything. The *p* value is not significant for the third degree polynomial, the summaries of fit quality aren't much improved, and as we can see from the plot below, the predictions don't actually change all that much.
 
 ```{r}
-mod3.aug <- augment(mod3)
-mod3.aug$x2 <- pollution$x2
+mod3.aug <- augment(mod3, pollution)
 
-ggplot(pollution, aes(x = x2, y = y)) +
+ggplot(mod3.aug, aes(x = x2, y = y)) +
     geom_point() +
+    geom_line(aes(x = x2, y = .fitted), 
+              col = "blue") +
     geom_line(data = mod2orth.aug, aes(x = x2, y = .fitted),
               col = "red") +
-    geom_line(data = mod3.aug, aes(x = x2, y = .fitted), 
-              col = "blue") +
     labs(title = "Quadratic (red) vs. Cubic (blue) Polynomial Fits")
 ```
 
@@ -236,14 +226,11 @@ summary(mod4_C)
 It looks like the cubic polynomial term is of some real importance here. Do the linear, quadratic and cubic model fitted values look different?
 
 ```{r}
-mod4_L.aug <- augment(mod4_L)
-mod4_L.aug$x3 <- pollution$x3
+mod4_L.aug <- augment(mod4_L, pollution)
 
-mod4_Q.aug <- augment(mod4_Q)
-mod4_Q.aug$x3 <- pollution$x3
+mod4_Q.aug <- augment(mod4_Q, pollution)
 
-mod4_C.aug <- augment(mod4_C)
-mod4_C.aug$x3 <- pollution$x3
+mod4_C.aug <- augment(mod4_C, pollution)
 
 ggplot(pollution, aes(x = x3, y = y)) +
     geom_point() +
@@ -296,14 +283,11 @@ summary(mod5c_rcs)
 We'll begin by storing the fitted values from these three models and other summaries, for plotting.
 
 ```{r}
-mod5a.aug <- augment(mod5a_rcs)
-mod5a.aug$x3 <- pollution$x3
+mod5a.aug <- augment(mod5a_rcs, pollution)
 
-mod5b.aug <- augment(mod5b_rcs)
-mod5b.aug$x3 <- pollution$x3
+mod5b.aug <- augment(mod5b_rcs, pollution)
 
-mod5c.aug <- augment(mod5c_rcs)
-mod5c.aug$x3 <- pollution$x3
+mod5c.aug <- augment(mod5c_rcs, pollution)
 ```
 
 ```{r}
@@ -313,23 +297,23 @@ p2 <- ggplot(pollution, aes(x = x3, y = y)) +
     labs(title = "Loess Smooth") +
     theme_bw()
 
-p3 <- ggplot(pollution, aes(x = x3, y = y)) +
+p3 <- ggplot(mod5a.aug, aes(x = x3, y = y)) +
     geom_point() +
-    geom_line(data = mod5a.aug, aes(x = x3, y = .fitted), 
+    geom_line(aes(x = x3, y = .fitted), 
               col = "blue", size = 1.25) +
     labs(title = "RCS, 3 knots") +
     theme_bw()
 
-p4 <- ggplot(pollution, aes(x = x3, y = y)) +
+p4 <- ggplot(mod5b.aug, aes(x = x3, y = y)) +
     geom_point() +
-    geom_line(data = mod5b.aug, aes(x = x3, y = .fitted), 
+    geom_line(aes(x = x3, y = .fitted), 
               col = "black", size = 1.25) +
     labs(title = "RCS, 4 knots") +
     theme_bw()
 
-p5 <- ggplot(pollution, aes(x = x3, y = y)) +
+p5 <- ggplot(mod5c.aug, aes(x = x3, y = y)) +
     geom_point() +
-    geom_line(data = mod5c.aug, aes(x = x3, y = .fitted), 
+    geom_line(aes(x = x3, y = .fitted), 
               col = "red", size = 1.25) +
     labs(title = "RCS, 5 knots") +
     theme_bw()
