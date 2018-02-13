@@ -88,7 +88,7 @@ The plot shows the point estimate (arrow head) and then the 90\% (narrowest bar)
 
 ### Simultaneous Confidence Intervals
 
-These confidence intervals make no effort to deal with the multiple comparisons problem, but just fit individual 95\% (or whatever level you choose) confidence intervals for each predictor. The natural alternative is to make an adjustment for multiple comparisons in fitting the confidence intervals, so that the set of (in this case, 2) confidence intervals for effect sizes has a family-wise 95% confidence level. You'll note that the effect estimates and standard errors are unchanged, but the confidence limits are a bit wider.
+These confidence intervals make no effort to deal with the multiple comparisons problem, but just fit individual 95\% (or whatever level you choose) confidence intervals for each predictor. The natural alternative is to make an adjustment for multiple comparisons in fitting the confidence intervals, so that the set of (in this case, five - one for each predictor) confidence intervals for effect sizes has a family-wise 95% confidence level. You'll note that the effect estimates and standard errors are unchanged from those shown above, but the confidence limits are a bit wider.
 
 ```{r}
 summary(newmod, conf.type=c('simultaneous'))

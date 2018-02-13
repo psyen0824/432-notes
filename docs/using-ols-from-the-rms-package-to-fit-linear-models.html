@@ -614,7 +614,7 @@ newmod</code></pre></div>
 </ul>
 <div id="simultaneous-confidence-intervals" class="section level3">
 <h3><span class="header-section-number">10.3.1</span> Simultaneous Confidence Intervals</h3>
-<p>These confidence intervals make no effort to deal with the multiple comparisons problem, but just fit individual 95% (or whatever level you choose) confidence intervals for each predictor. The natural alternative is to make an adjustment for multiple comparisons in fitting the confidence intervals, so that the set of (in this case, 2) confidence intervals for effect sizes has a family-wise 95% confidence level. You’ll note that the effect estimates and standard errors are unchanged, but the confidence limits are a bit wider.</p>
+<p>These confidence intervals make no effort to deal with the multiple comparisons problem, but just fit individual 95% (or whatever level you choose) confidence intervals for each predictor. The natural alternative is to make an adjustment for multiple comparisons in fitting the confidence intervals, so that the set of (in this case, five - one for each predictor) confidence intervals for effect sizes has a family-wise 95% confidence level. You’ll note that the effect estimates and standard errors are unchanged from those shown above, but the confidence limits are a bit wider.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(newmod, <span class="dt">conf.type=</span><span class="kw">c</span>(<span class="st">&#39;simultaneous&#39;</span>))</code></pre></div>
 <pre><code>             Effects              Response : y 
 
