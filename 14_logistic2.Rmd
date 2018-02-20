@@ -1,0 +1,462 @@
+# Logistic Regression and the `smartcle1` data
+
+## The `smartcle1` data
+
+Recall that the `smartcle1.csv` data file available on the Data and Code page of [our website](https://github.com/THOMASELOVE/432-2018) describes information on `r ncol(smartcle1)` variables for `r nrow(smartcle1)` respondents to the BRFSS 2016, who live in the Cleveland-Elyria, OH, Metropolitan Statistical Area. As we've discussed in previous work, the variables in the `smartcle1.csv` file are listed below, along with (in some cases) the BRFSS items that generate these responses.
+
+Variable | Description
+---------: | --------------------------------------------------------
+`SEQNO` | respondent identification number (all begin with 2016)
+`physhealth` | Now thinking about your physical health, which includes physical illness and injury, for how many days during the past 30 days was your physical health not good?
+`menthealth` | Now thinking about your mental health, which includes stress, depression, and problems with emotions, for how many days during the past 30 days was your mental health not good?
+`poorhealth` | During the past 30 days, for about how many days did poor physical or mental health keep you from doing your usual activities, such as self-care, work, or recreation?
+`genhealth` | Would you say that in general, your health is ... (five categories: Excellent, Very Good, Good, Fair or Poor)
+`bmi` | Body mass index, in kg/m^2^
+`female` | Sex, 1 = female, 0 = male
+`internet30` | Have you used the internet in the past 30 days? (1 = yes, 0 = no)
+`exerany` | During the past month, other than your regular job, did you participate in any physical activities or exercises such as running, calisthenics, golf, gardening, or walking for exercise? (1 = yes, 0 = no)
+`sleephrs` | On average, how many hours of sleep do you get in a 24-hour period?
+`alcdays` | How many days during the past 30 days did you have at least one drink of any alcoholic beverage such as beer, wine, a malt beverage or liquor?
+
+In this section, we'll use some of the variables described above to predict the binary outcome: `exerany`.
+
+## Thinking About Non-Linear Terms
+
+We have enough observations here to consider some non-linearity for our model.
+
+In addition, since the `genhealth` variable is an ordinal variable and multi-categorical, we should consider how to model it. We have three options:
+
+1. include it as a factor in the model (the default approach)
+2. build a numeric version of that variable, and then restrict our model to treat that numeric variable as ordinal (forcing the categories to affect the `exerany` probabilities in an ordinal way), rather than as a simple nominal factor (so that if the effect of fair vs. good was to decrease the probability of 'exerany', then the effect of poor vs. good would have to decrease the probability at least as much as fair vs. good did.) Treating the `genhealth` variable as ordinal could be accomplished with the `scored` function in the `rms` package. 
+3. build a numeric version of `genhealth` and then use the `catg` function to specify the predictor as nominal and categorical, but this will lead to essentially the same model as choice 1.
+
+Suppose we've decided to treat the `genhealth` data as categorical, without restricting the effect of its various levels to be ordinal. Suppose also that we've decided to include the following seven variables in our model for `exerany`:
+
+- `physhealth`
+- `menthealth`
+- `genhealth`
+- `bmi`
+- `female`
+- `internet30`
+- `sleephrs`
+
+Suppose we have a subject matter understanding that:
+
+- the impact of `bmi` on `exerany` is affected by `female`, so we plan a `female` x `bmi` interaction term
+- we're using `internet30` as a proxy for poverty, and we think that an interaction with self-reported `genhealth` will be helpful in our model as well.
+
+Note that we do have some missing values in some of these predictors, so we'll have to deal with that soon.
+
+```{r}
+smartcle1 %>% select(exerany, physhealth, menthealth, 
+                     genhealth, bmi, female, internet30, 
+                     sleephrs) %>%
+    skim()
+```
+
+## A First Model for `exerany` (Complete Case Analysis)
+
+Suppose we develop a main-effects kitchen sink model (model `m1` below) fitted to these predictors without the benefit of any non-linear terms except the two pre-planned interactions. We'll run the model quickly here to ensure that the code runs, in a complete case analysis, without drawing any conclusions, really.
+
+```{r}
+m1 <- lrm(exerany ~ internet30 * genhealth + bmi * female +
+              physhealth + menthealth + sleephrs, 
+          data = smartcle1)
+m1
+
+plot(anova(m1))
+```
+
+## Building a Larger Model: Spearman $\rho^2$ Plot
+
+Before we impute, we might also consider the use of a Spearman $\rho^2$ plot to decide how best to spend degrees of freedom on non-linear terms in our model for `exerany` using these predictors. Since we're already planning some interaction terms, I'll keep them in mind as I look at this plot.
+
+```{r}
+sp_smart <- spearman2(exerany ~ physhealth + menthealth + 
+                          genhealth + internet30 + 
+                          bmi + female + sleephrs, 
+                      data = smartcle1)
+plot(sp_smart)
+```
+
+We see that the best candidate for a non-linear term is the `genhealth` variable, according to this plot, followed by the `physhealth` and `internet30` predictors, then `bmi`. I will wind up fitting a model including the following non-linear terms...
+
+- our pre-planned `female` x `bmi` and `internet30` x `genhealth` interaction terms,
+- a new `genhealth` x `physhealth` interaction term,
+- a restricted cubic spline with 5 knots for `physhealth`
+- a restricted cubic spline with 4 knots for `bmi` (so the interaction term with `female` will need to account for this and restrict our interaction to the linear piece of `bmi`)
+
+## A Second Model for `exerany` (Complete Cases)
+
+Here's the resulting model fit without worrying about imputation yet. This is just to make sure our code works. Note that I'm inserting the main effects of our interaction terms explicitly before including the interaction terms themselves, and that I need to use `%ia%` to include the interaction terms where one of the terms is included in the model with a spline. Again, I won't draw any serious conclusions yet.
+
+```{r}
+m2 <- lrm(exerany ~ rcs(bmi, 4) + rcs(physhealth, 5) + 
+              female + internet30 * genhealth + 
+              genhealth %ia% physhealth + female %ia% bmi + 
+              menthealth + sleephrs, 
+          data = smartcle1)
+m2
+
+plot(anova(m2))
+```
+
+## Dealing with Missing Data via Simple Imputation
+
+One approach we might take in this problem is to use simple imputation to deal with our missing values. I will proceed as follows:
+
+1. Omit all cases where the outcome `exerany` is missing.
+2. Determine (and plot) the remaining missingness.
+3. Use simple imputation for all predictors, and build a new data set with "complete" data.
+4. Re-fit the proposed models using this new data set.
+
+### Omit cases where the outcome is missing
+
+We need to drop the cases where `exerany` is missing in `smartcle1`. We'll begin creating an imputed data set, called `smartcle_imp0`, by filtering on complete data for `exerany`, as follows.
+
+```{r}
+Hmisc::describe(smartcle1$exerany)
+
+smartcle_imp0 <- smartcle1 %>%
+    filter(complete.cases(exerany)) %>%
+    select(SEQNO, exerany, physhealth, menthealth, 
+           genhealth, bmi, female, internet30, sleephrs)
+
+Hmisc::describe(smartcle_imp0$exerany)
+```
+
+### Plot the remaining missingness
+
+We'll look at the missing values (excluding the subject ID: SEQNO) in our new data set. Of course, we can get a count of missing values within each variable with `skim` or with:
+
+```{r}
+colSums(is.na(smartcle_imp0))
+```
+
+The `Hmisc` package has a plotting approach which can help identify missingness, too.
+
+```{r, fig.height = 6}
+naplot(naclus(select(smartcle_imp0, -SEQNO)))
+```
+
+We can also get a useful accounting of missing data patterns, with the `md.pattern` function in the `mice` package.
+
+```{r}
+mice::md.pattern(smartcle_imp0)
+```
+
+We can also do this with `na.pattern` in the `Hmisc` package, but then we have to get the names of the columns, too, so that we can read off the values.
+
+```{r}
+na.pattern(smartcle_imp0)
+names(smartcle_imp0)
+```
+
+### Use simple imputation, build a new data set
+
+The only variables that require no imputation are `exerany` and `female`. In this case, we need to impute:
+
+- 83 `bmi` values (which are quantitative)
+- 16 `physhealth` values (quantitative, must fall between 0 and 30)
+- 11 `menthealth` values (quantitative, must fall between 0 and 30)
+- 7 `sleephrs` values (quantitative, must fall between 0 and 24)
+- 6 `internet30` values (which are 1/0)
+- and 3 `genhealth` values (which are multi-categorical, so we need to convert them to numbers in order to get the imputation process to work properly)
+
+```{r}
+smartcle_imp0 <- smartcle_imp0 %>%
+    mutate(genh_n = as.numeric(genhealth))
+
+smartcle_imp0 %>% count(genhealth, genh_n)
+```
+
+I'll work from the bottom up, using various `simputation` functions to accomplish the imputations I want. In this case, I'll use predictive mean matching for the categorical data, and linear models or elastic net approaches for the quantitative data. Be sure to set a seed beforehand so you can replicate your work. 
+
+```{r}
+set.seed(432234)
+
+smartcle_imp1 <- smartcle_imp0 %>%
+    impute_pmm(genh_n ~ female) %>%
+    impute_pmm(internet30 ~ female + genh_n) %>%
+    impute_lm(sleephrs ~ female + genh_n) %>%
+    impute_lm(menthealth ~ female + sleephrs) %>%
+    impute_en(physhealth ~ female + genh_n + sleephrs) %>%
+    impute_en(bmi ~ physhealth + genh_n)
+```
+
+After the imputations are complete, I'll back out of the numeric version of `genhealth`, called `genh_n` back to my original variable, then check to be sure I now have no missing values.
+
+```{r}
+smartcle_imp1 <- smartcle_imp1 %>%
+    mutate(genhealth = fct_recode(factor(genh_n), 
+                                  "1_Excellent" = "1",
+                                  "2_VeryGood" = "2",
+                                  "3_Good" = "3",
+                                  "4_Fair" = "4",
+                                  "5_Poor" = "5"))
+
+smartcle_imp1 %>% count(genhealth, genh_n)
+
+colSums(is.na(smartcle_imp1))
+```
+
+OK. Looks good. I now have a data frame called `smartcle_imp1` with no missingness, which I can use to fit my logistic regression models. Let's do that next, and then return to the problem of accounting for missingness through multiple imputation.
+
+## Refitting Model 1 with simply imputed data
+
+Using the numeric version of the `genhealth` data, called `genh_n`, will ease the reviewing of later output, so we'll do that here, making sure R knows that `genh_n` describes a categorical factor.
+
+```{r}
+d <- datadist(smartcle_imp1)
+options(datadist = "d")
+
+m1_a <- lrm(exerany ~ internet30 * catg(genh_n) + bmi * female +
+              physhealth + menthealth + sleephrs, 
+          data = smartcle_imp1, x = TRUE, y = TRUE)
+m1_a
+```
+
+All right. We've used 1033 observations, which is correct (after deleting the three with missing `exerany`. The model shows a Nagelkerke R^2^ value of 0.204, and a C statistic of 0.741 after imputation. The likelihood ratio (drop in deviance) test is highly significant. 
+
+### Validating Summary Statistics
+
+```{r}
+set.seed(432099)
+validate(m1_a)
+```
+
+It appears that the model's description of summary statistics is a little optimistic for both the C statistic (remember that C = 0.5 + Dxy/2) and the Nagelkerke R^2^. This output suggests that in a new sample of data, our model might be better expected to show a C statistic near ...
+
+$$ 
+C = 0.5 + \frac{Dxy}{2} = 0.5 + \frac{0.4444}{2} = 0.7222
+$$ 
+
+rather than the 0.741 we saw initially, and that the Nagelkerke R^2^ in new data will be closer to 0.17, than to the nominal 0.204 we saw above. So, as we walk through some other output for this model, remember that the C statistic wasn't great here (0.72 after validation), so our ability to discriminate exercisers from non-exercisers is still a problem.
+
+### ANOVA for the model
+
+Next, let's look at the ANOVA comparisons for this model.
+
+```{r}
+anova(m1_a)
+plot(anova(m1_a))
+```
+
+It looks like several of the variables (`genhealth`, `internet30`, `female`, `bmi` and `physhealth`) are carrying statistically significant predictive value here.
+
+### Summarizing Effect Size
+
+How big are the effects we see?
+
+```{r}
+plot(summary(m1_a))
+summary(m1_a)
+```
+
+This output is easier to read as a result of using small *numeric* labels in `genh_n`, rather than the lengthy labels in `genhealth`. The sensible things to interpret are the odds ratios.
+
+- holding all other predictors constant, the effect of moving from `internet30` = 0 to `internet30` = 1 is that the odds of `exerany` increase by a factor of 2.77. 
+    - Suppose Harry and Steve have the same values of all predictors in this model except that Harry used the internet and Steve did not.
+    - So the odds of exercising for Harry (who used the internet) are 2.77 times higher than the odds of exercising for Steve (who didn't use the internet), assuming that all other predictors are the same.
+    - We also have a 95% confidence interval for this odds ratio, which is (1.26, 6.07). Since 1 is not in that interval, the data don't seem to be consistent with `internet30` having no effect on `exerany`.
+- the odds ratio comparing two subjects with the same predictors except that Harry has a BMI of 30.31 (the 75th percentile of observed BMIs in our sample) and Marty has a BMI of 23.9 (the 25th percentile) is that Harry has 0.767 times the odds of exercising that Marty does. So Harry's probability of exercise will also be lower than Marty's.
+    - The 95% confidence interval in this case is (0.58, 1.01), and because 1 is in that interval, we cannot conclude that the effect of `bmi` meets the standard for statistical significance at the 5% level.
+- A similar approach can be used to describe the odds ratios associated with each predictor.
+- Note that each of the categories in `genh_n` is compared to a single baseline category. Here, that's category 2. R will pick the modal category: the one that appears most often in the data. The comparisons of each category against category 2 are not significant in each case, at the 5% level.
+
+### Plotting the Model with `ggplot` and `Predict`
+
+Let's look at a series of plots describing the model on the probability scale.
+
+```{r}
+ggplot(Predict(m1_a, fun = plogis))
+```
+
+This helps us describe what is happening in terms of direction at least. For example,
+
+- As `bmi` increases, predicted Pr(`exerany`) decreases.
+- People who accessed the internet in the past 30 days have higher morel probabilities of exercising.
+
+Do any of these plots fail to make sense to you? Is anything moving in a surprising direction? 
+
+
+### Plotting the model with a nomogram
+
+```{r, fig.height = 6}
+plot(nomogram(m1_a, fun = plogis))
+```
+
+Note the impact of our interaction terms, and how we have two lines for `bmi` and five lines for `internet30` that come out of our product terms. As with any nomogram, to make a prediction we:
+
+1. find the values of each of our predictors in the scales, and travel vertically up to the Points line to read off the Points for that predictor.
+2. sum up the Points across all predictors, and find that location in the Total Points line.
+3. move vertically down from the total points line to find the estimated "linear predictor" (log odds ratio) and finally the "predicted value" (probability of our outcome `exerany` = 1.)
+
+### Checking the Calibration of our model
+
+```{r}
+plot(calibrate(m1_a))
+```
+
+The model appears better calibrated for predicted probabilities above 0.5 or so than it does for lower predicted probabilities. This isn't surprising given the rug plot at the top, which shows we make many more predictions at the high end of the scale.
+
+To test the goodness of fit, we can use the following omnibus test:
+
+```{r}
+round(residuals(m1_a, type = "gof"),3)
+```
+
+Our non-significant *p* value suggests that we cannot detect anything that's obviously wrong in the model in terms of goodness of fit. That's comforting.
+
+## Refitting Model 2 with simply imputed data
+
+I'll walk through the same tasks for Model `m2` that I did above for Model `m1`. Again, we're running this model after simple imputation of missing values.
+
+Using the numeric version of the `genhealth` data, called `genh_n`, will ease the reviewing of later output, so we'll do that here, making sure R knows that `genh_n` describes a categorical factor.
+
+```{r}
+d <- datadist(smartcle_imp1)
+options(datadist = "d")
+
+m2_a <- lrm(exerany ~ rcs(bmi, 4) + rcs(physhealth, 5) + 
+              female + internet30 * catg(genh_n) + 
+              catg(genh_n) %ia% physhealth + female %ia% bmi + 
+              menthealth + sleephrs, 
+          data = smartcle_imp1, x = TRUE, y = TRUE)
+m2_a
+```
+
+All right. We've again used 1033 observations, which is correct (after deleting the three with missing `exerany`. The model shows a Nagelkerke R^2^ value of 0.214, and a C statistic of 0.744 after imputation. Each of these results are a little better than what we saw with `m1_a` but only a little. The likelihood ratio (drop in deviance) test is still highly significant. 
+
+### Validating Summary Statistics
+
+```{r}
+set.seed(432009)
+validate(m2_a)
+```
+
+Again, the model's description of summary statistics is a little optimistic for both the C statistic and the Nagelkerke R^2^. In a new sample of data, model `m2_a` might be better expected to show a C statistic near ...
+
+$$ 
+C = 0.5 + \frac{Dxy}{2} = 0.5 + \frac{0.4402}{2} = 0.7201
+$$ 
+
+rather than the 0.744 we saw initially, and that the Nagelkerke R^2^ in new data will be closer to 0.165, than to the nominal 0.215 we saw above. So, after validation, this model actually looks worse than model `m1_a`.
+
+Model | nominal C | nominal R^2^ | validated C | validated R^2^
+----: | ----: | ----: | ----: | ----:
+`m1_a` | 0.741 | 0.204 | 0.722 | 0.170
+`m2_a` | 0.744 | 0.214 | 0.720 | 0.165
+
+Again, as we walk through other output for model `m2_a`, remember that the our ability to discriminate exercisers from non-exercisers is still very much in question using either model.
+
+### ANOVA for the model
+
+Next, let's look at the ANOVA comparisons for this model.
+
+```{r}
+anova(m2_a)
+plot(anova(m2_a))
+```
+
+Here, it looks like just three of the variables (`genhealth`, `internet30`, and `female`) are carrying statistically significant predictive value.
+
+### Summarizing Effect Size
+
+How big are the effects we see?
+
+```{r}
+plot(summary(m2_a))
+summary(m2_a)
+```
+
+This output is easier to read as a result of using small *numeric* labels in `genh_n`, rather than the lengthy labels in `genhealth`. The sensible things to interpret are the odds ratios. For example,
+
+- holding all other predictors constant, the effect of moving from `internet30` = 0 to `internet30` = 1 is that the odds of `exerany` increase by a factor of 2.80. 
+- the odds ratio comparing two subjects with the same predictors except that Harry has a BMI of 30.31 (the 75th percentile of observed BMIs in our sample) and Marty has a BMI of 23.9 (the 25th percentile) is that Harry has 0.619 times the odds of exercising that Marty does. So Harry's probability of exercise will also be lower.
+
+By sex, which group has a larger probability of `exerany`, holding all other predictors constant, by this model? Females or Males?
+
+### Plotting the Model with `ggplot` and `Predict`
+
+Again, consider a series of plots describing the model `m2_a` on the probability scale.
+
+```{r}
+ggplot(Predict(m2_a, fun = plogis))
+```
+
+Note the small `kink` in the `bmi` plot. To what do you attribute this?
+
+### Plotting the model with a nomogram
+
+```{r, fig.height = 8}
+plot(nomogram(m2_a, fun = plogis))
+```
+
+Note the impact of our interaction terms, **and** the cubic splines in `bmi` and `physhealth`. As with any nomogram, to make a prediction we:
+
+1. find the values of each of our predictors in the scales, and travel vertically up to the Points line to read off the Points for that predictor.
+2. sum up the Points across all predictors, and find that location in the Total Points line.
+3. move vertically down from the total points line to find the estimated "linear predictor" (log odds ratio) and finally the "predicted value" (probability of our outcome `exerany` = 1.)
+
+### Checking the Calibration of our model
+
+```{r}
+plot(calibrate(m2_a))
+```
+
+The model appears to be a bit less well calibrated than `m1_a` was. 
+
+To test the goodness of fit, we can use the following omnibus test:
+
+```{r}
+round(residuals(m2_a, type = "gof"),3)
+```
+
+Our non-significant *p* value suggests that we cannot detect anything that's obviously wrong in the model in terms of goodness of fit.
+
+## Comparing Model 2 to Model 1 after simple imputation
+
+We can refit the models with `glm` and then compare them with `anova`, `aic` and `bic` approaches, if we like.
+
+```{r}
+m1_a_glm <- glm(exerany ~ internet30 * factor(genh_n) + 
+                    bmi * female + physhealth + menthealth +
+                    sleephrs, 
+                data = smartcle_imp1, 
+                family = binomial)
+
+m2_a_glm <- glm(exerany ~ rcs(bmi, 4) + rcs(physhealth, 5) + 
+              female + internet30 * factor(genh_n) + 
+              factor(genh_n) %ia% physhealth + female %ia% bmi + 
+              menthealth + sleephrs, 
+          data = smartcle_imp1,
+          family = binomial)
+```
+
+### Comparison by Analysis of Deviance
+
+```{r}
+anova(m1_a_glm, m2_a_glm)
+```
+
+To obtain a *p* value, we can compare this drop in deviance to a $\chi^2$ distribution with 7 df, as follows:
+
+```{r}
+pchisq(8.4245, 7, lower.tail = FALSE)
+```
+
+So there's no statistically significant advantage apparent from fitting the larger `m2_a` model.
+
+### Comparing AIC and BIC
+
+```{r}
+glance(m1_a_glm)
+glance(m2_a_glm)
+```
+
+Model `m1_a_glm` shows lower AIC and BIC than does `m2_a_glm`, again suggesting no meaningful advantage for the larger model.
+
+## Dealing with Missing Data via Multiple Imputation
+
+Coming soon.
