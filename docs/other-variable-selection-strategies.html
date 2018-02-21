@@ -7,7 +7,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>Data Science for Biological, Medical and Health Research: Notes for 432</title>
   <meta name="description" content="These are the Course Notes for 432.">
-  <meta name="generator" content="bookdown 0.6 and GitBook 2.6.7">
+  <meta name="generator" content="bookdown 0.7 and GitBook 2.6.7">
 
   <meta property="og:title" content="Data Science for Biological, Medical and Health Research: Notes for 432" />
   <meta property="og:type" content="book" />
@@ -501,7 +501,14 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li class="chapter" data-level="14.9.1" data-path="logistic-regression-and-the-smartcle1-data.html"><a href="logistic-regression-and-the-smartcle1-data.html#comparison-by-analysis-of-deviance"><i class="fa fa-check"></i><b>14.9.1</b> Comparison by Analysis of Deviance</a></li>
 <li class="chapter" data-level="14.9.2" data-path="logistic-regression-and-the-smartcle1-data.html"><a href="logistic-regression-and-the-smartcle1-data.html#comparing-aic-and-bic"><i class="fa fa-check"></i><b>14.9.2</b> Comparing AIC and BIC</a></li>
 </ul></li>
-<li class="chapter" data-level="14.10" data-path="logistic-regression-and-the-smartcle1-data.html"><a href="logistic-regression-and-the-smartcle1-data.html#dealing-with-missing-data-via-multiple-imputation"><i class="fa fa-check"></i><b>14.10</b> Dealing with Missing Data via Multiple Imputation</a></li>
+<li class="chapter" data-level="14.10" data-path="logistic-regression-and-the-smartcle1-data.html"><a href="logistic-regression-and-the-smartcle1-data.html#dealing-with-missing-data-via-multiple-imputation"><i class="fa fa-check"></i><b>14.10</b> Dealing with Missing Data via Multiple Imputation</a><ul>
+<li class="chapter" data-level="14.10.1" data-path="logistic-regression-and-the-smartcle1-data.html"><a href="logistic-regression-and-the-smartcle1-data.html#using-aregimpute-to-fit-a-multiple-imputation-model"><i class="fa fa-check"></i><b>14.10.1</b> Using <code>aregImpute</code> to fit a multiple imputation model</a></li>
+</ul></li>
+<li class="chapter" data-level="14.11" data-path="logistic-regression-and-the-smartcle1-data.html"><a href="logistic-regression-and-the-smartcle1-data.html#combining-the-imputation-and-outcome-models"><i class="fa fa-check"></i><b>14.11</b> Combining the Imputation and Outcome Models</a><ul>
+<li class="chapter" data-level="14.11.1" data-path="logistic-regression-and-the-smartcle1-data.html"><a href="logistic-regression-and-the-smartcle1-data.html#model-1-with-multiple-imputation"><i class="fa fa-check"></i><b>14.11.1</b> Model 1 with Multiple Imputation</a></li>
+<li class="chapter" data-level="14.11.2" data-path="logistic-regression-and-the-smartcle1-data.html"><a href="logistic-regression-and-the-smartcle1-data.html#model-2-with-multiple-imputation"><i class="fa fa-check"></i><b>14.11.2</b> Model 2 with Multiple Imputation</a></li>
+</ul></li>
+<li class="chapter" data-level="14.12" data-path="logistic-regression-and-the-smartcle1-data.html"><a href="logistic-regression-and-the-smartcle1-data.html#models-with-and-without-imputation"><i class="fa fa-check"></i><b>14.12</b> Models with and without Imputation</a></li>
 </ul></li>
 <li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>References</a></li>
 <li class="divider"></li>
@@ -942,10 +949,11 @@ gitbook.start({
 "facebook": true,
 "twitter": true,
 "google": false,
+"linkedin": false,
 "weibo": false,
 "instapper": false,
 "vk": false,
-"all": ["facebook", "google", "twitter", "weibo", "instapaper"]
+"all": ["facebook", "google", "twitter", "linkedin", "weibo", "instapaper"]
 },
 "fontsettings": {
 "theme": "white",

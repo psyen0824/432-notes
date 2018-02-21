@@ -244,6 +244,12 @@ plot(anova(m1_a))
 
 It looks like several of the variables (`genhealth`, `internet30`, `female`, `bmi` and `physhealth`) are carrying statistically significant predictive value here.
 
+We can also build a plot of the AIC values attributable to each piece of the model.
+
+```{r}
+plot(anova(m1_a), what="aic")
+```
+
 ### Summarizing Effect Size
 
 How big are the effects we see?
@@ -282,7 +288,7 @@ Do any of these plots fail to make sense to you? Is anything moving in a surpris
 
 ### Plotting the model with a nomogram
 
-```{r, fig.height = 6}
+```{r, fig.height = 9}
 plot(nomogram(m1_a, fun = plogis))
 ```
 
@@ -361,6 +367,13 @@ plot(anova(m2_a))
 
 Here, it looks like just three of the variables (`genhealth`, `internet30`, and `female`) are carrying statistically significant predictive value.
 
+Here is the AIC plot.
+
+```{r}
+plot(anova(m2_a), what="aic")
+```
+
+
 ### Summarizing Effect Size
 
 How big are the effects we see?
@@ -389,7 +402,7 @@ Note the small `kink` in the `bmi` plot. To what do you attribute this?
 
 ### Plotting the model with a nomogram
 
-```{r, fig.height = 8}
+```{r, fig.height = 12}
 plot(nomogram(m2_a, fun = plogis))
 ```
 
@@ -459,4 +472,201 @@ Model `m1_a_glm` shows lower AIC and BIC than does `m2_a_glm`, again suggesting 
 
 ## Dealing with Missing Data via Multiple Imputation
 
-Coming soon.
+Next, we'll use the `aregImpute` function within the `Hmisc` package to predict all missing values for all of our variables, using additive regression bootstrapping and predictive mean matching. The steps for this work are as follows:
+
+1. `aregImpute` draws a sample with replacement from the observations where the target variable is observed, not missing. 
+2. `aregImpute` then fits a flexible additive model to predict this target variable while finding the optimum transformation of it. 
+3. `aregImpute` then uses this fitted flexible model to predict the target variable in all of the original observations.
+4. Finally, `aregImpute` imputes each missing value of the target variable with the observed value whose predicted transformed value is closest to the predicted transformed value of the missing value.
+
+We'll start with the `smartcle_imp0` data set, which contains only the subjects in the original `smartcle1` data where `exerany` is available, and which includes only the variables of interest to us, including both the factor (`genhealth`) and numeric (`genh_n`) versions of the genhealth data.
+
+```{r}
+summary(smartcle_imp0)
+```
+
+The `smartcle_imp0` data set contains `r dim(smartcle_imp0)[1]` rows (subjects) and `r dim(smartcle_imp0)[2]` columns (variables.) 
+
+### Using `aregImpute` to fit a multiple imputation model
+
+To set up `aregImpute` here, we'll need to specify:
+
+- a suitable random seed with `set.seed` so we can replicate our work later
+- a data set via the `datadist` stuff shown below
+- the variables we want to include in the imputation process, which should include, at a minimum, any variables with missing values, and any variables we want to include in our outcome models
+- `n.impute` = number of imputations, we'll run 20 here^[100 is generally safe but time-consuming. In the old days, we used to say 5. A reasonable idea is to identify the fraction of missingness in your variable with the most missingness, and if that's 0.10, then you should run at least 100(0.10) = 10 sets of imputations.]
+- `nk` = number of knots to describe level of complexity, with our choice `nk = c(0, 3)` we'll fit both linear models and models with restricted cubic splines with 3 knots (this approach will wind up throwing some warnings here because some of our variables with missing values have only a few options so fitting splines is tough.)
+- `tlinear = FALSE` allows the target variable for imputation to have a non-linear transformation when `nk` is 3 or more. Here, I'll use `tlinear = TRUE`, the default.
+- `B = 10` specifies 10 bootstrap samples will be used
+- `pr = FALSE` tells the machine not to print out which iteration is running as it goes.
+- `data` specifies the source of the variables
+
+
+```{r, warning = FALSE}
+set.seed(432074)
+dd <- datadist(smartcle_imp0)
+options(datadist = "dd")
+
+imp_fit <- aregImpute(~ exerany + physhealth + menthealth +
+                          genh_n + bmi + female + 
+                          internet30 + sleephrs, 
+                   nk = c(0, 3), tlinear = TRUE,
+                   data = smartcle_imp0, B = 10, 
+                   n.impute = 20, pr = FALSE) 
+```
+
+OK. Here is the imputation model. The summary here isn't especially critical. We want to see what was run, but to see what the results look like, we'll need a plot, to come.
+
+```{r}
+imp_fit
+```
+
+OK, let's plot these imputed values. Note that we had six predictors with missing values in our data set, and so if we plot each of those, we'll wind up with six plots. I'll arrange them in a grid with three rows and two columns.
+
+```{r, fig.height = 6}
+par(mfrow = c(3,2))
+plot(imp_fit)
+par(mfrow = c(1,1))
+```
+
+From these cumulative distribution functions, we can see that, for example, 
+
+- we imputed `bmi` values mostly between 20 and 35, with a few values below 20 or above 40.
+- most of our imputed `sleephrs` were between 5 and 10
+- we imputed 1 for `internet30` for about 70% of the subjects, and 0 for the other 30%.
+
+This predictive mean matching method never imputes a value for a variable that does not already exist in the data.
+
+## Combining the Imputation and Outcome Models
+
+So, now we have an imputation model, called `imp_fit`. and two outcome models: `m1` and `m2`. What do we do with them?
+
+### Model 1 with Multiple Imputation
+
+To build the `m1_imp` multiple imputation fit for model `m1`, we use the `fit.mult.impute` command, and specify the model, the fitter (here, `lrm`), the imputation model (`xtrans = imp_fit`) and the data set prior to imputation (`smartcle_imp0`).
+
+```{r}
+m1_imp <- fit.mult.impute(exerany ~ 
+            internet30 * catg(genh_n) + bmi * female +
+            physhealth + menthealth + sleephrs,
+            fitter = lrm, xtrans = imp_fit,
+            data = smartcle_imp0, x = TRUE, y = TRUE)
+```
+
+OK. Let's get the familiar description of an `lrm` model, after this multiple imputation.
+
+```{r}
+m1_imp
+```
+
+We can obtain an ANOVA plot and an AIC plot to look at the predictors:
+
+```{r, fig.height = 7}
+par(mfrow = c(2,1))
+plot(anova(m1_imp))
+plot(anova(m1_imp), what="aic")
+par(mfrow = c(1,1))
+```
+
+Here's the summary of effect sizes.
+
+```{r}
+summary(m1_imp)
+plot(summary(m1_imp))
+```
+
+And here is the nomogram.
+
+```{r, fig.height = 9}
+plot(nomogram(m1_imp, fun = plogis))
+```
+
+Here are the descriptive model plots, on the original probability scale for our `exerany` outcome:
+
+```{r}
+ggplot(Predict(m1_imp), fun = plogis)
+```
+
+We can still do things like validate the summary statistics, too.
+
+```{r}
+validate(m1_imp)
+```
+
+And we can look at calibration curves.
+
+```{r}
+plot(calibrate(m1_imp))
+```
+
+### Model 2 with Multiple Imputation
+
+The same approach is used to build the `m2_imp` multiple imputation fit for model `m2`, using the `fit.mult.impute` command, and specifying the model, the fitter (here, `lrm`), the imputation model (`xtrans = imp_fit`) and the data set prior to imputation (`smartcle_imp0`).
+
+```{r}
+m2_imp <- fit.mult.impute(exerany ~ 
+            rcs(bmi, 4) + rcs(physhealth, 5) + 
+            female + internet30 * catg(genh_n) + 
+            catg(genh_n) %ia% physhealth + female %ia% bmi + 
+            menthealth + sleephrs,
+            fitter = lrm, xtrans = imp_fit,
+            data = smartcle_imp0, x = TRUE, y = TRUE)
+```
+
+OK. Let's get the familiar description of an `lrm` model, after this multiple imputation.
+
+```{r}
+m2_imp
+```
+
+We can obtain an ANOVA plot and an AIC plot to look at the predictors:
+
+```{r, fig.height = 7}
+par(mfrow = c(2,1))
+plot(anova(m2_imp))
+plot(anova(m2_imp), what="aic")
+par(mfrow = c(1,1))
+```
+
+Here's the summary of effect sizes.
+
+```{r}
+summary(m2_imp)
+plot(summary(m2_imp))
+```
+
+And here is the nomogram.
+
+```{r, fig.height = 12}
+plot(nomogram(m2_imp, fun = plogis))
+```
+
+Here are the descriptive model plots, on the scale of Pr(exerany = 1):
+
+```{r}
+ggplot(Predict(m2_imp), fun = plogis)
+```
+
+Validation of summary statistics:
+
+```{r}
+validate(m2_imp)
+```
+
+And the calibration curves.
+
+```{r}
+plot(calibrate(m2_imp))
+```
+
+## Models with and without Imputation
+
+Model | 1 | 1 | 2 | 2
+-----------: | ---------: | ---------: | -----: | -----:
+Imputation | Simple | Multiple | Sim. | Mult.
+nominal R^2^ | 0.204 | 0.204 | 0.214 | 0.218
+nominal C | 0.741 | 0.741 | 0.744 | 0.746
+validated R^2^ | 0.170 | 0.168 | 0.165 |  0.160 
+validated C | 0.722 | 0.724 | 0.720 | 0.722
+
+So, what can we conclude about the discrimination results?
