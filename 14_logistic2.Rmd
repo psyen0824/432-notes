@@ -281,7 +281,7 @@ ggplot(Predict(m1_a, fun = plogis))
 This helps us describe what is happening in terms of direction at least. For example,
 
 - As `bmi` increases, predicted Pr(`exerany`) decreases.
-- People who accessed the internet in the past 30 days have higher morel probabilities of exercising.
+- People who accessed the internet in the past 30 days have higher model probabilities of exercising.
 
 Do any of these plots fail to make sense to you? Is anything moving in a surprising direction? 
 

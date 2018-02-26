@@ -1,0 +1,541 @@
+# Linear Regression and the `smartcle1` data
+
+## The `smartcle1` data
+
+Recall that the `smartcle1.csv` data file available on the Data and Code page of [our website](https://github.com/THOMASELOVE/432-2018) describes information on `r ncol(smartcle1)` variables for `r nrow(smartcle1)` respondents to the BRFSS 2016, who live in the Cleveland-Elyria, OH, Metropolitan Statistical Area. As we've discussed in previous work, the variables in the `smartcle1.csv` file are listed below, along with (in some cases) the BRFSS items that generate these responses.
+
+Variable | Description
+---------: | --------------------------------------------------------
+`SEQNO` | respondent identification number (all begin with 2016)
+`physhealth` | Now thinking about your physical health, which includes physical illness and injury, for how many days during the past 30 days was your physical health not good?
+`menthealth` | Now thinking about your mental health, which includes stress, depression, and problems with emotions, for how many days during the past 30 days was your mental health not good?
+`poorhealth` | During the past 30 days, for about how many days did poor physical or mental health keep you from doing your usual activities, such as self-care, work, or recreation?
+`genhealth` | Would you say that in general, your health is ... (five categories: Excellent, Very Good, Good, Fair or Poor)
+`bmi` | Body mass index, in kg/m^2^
+`female` | Sex, 1 = female, 0 = male
+`internet30` | Have you used the internet in the past 30 days? (1 = yes, 0 = no)
+`exerany` | During the past month, other than your regular job, did you participate in any physical activities or exercises such as running, calisthenics, golf, gardening, or walking for exercise? (1 = yes, 0 = no)
+`sleephrs` | On average, how many hours of sleep do you get in a 24-hour period?
+`alcdays` | How many days during the past 30 days did you have at least one drink of any alcoholic beverage such as beer, wine, a malt beverage or liquor?
+
+In this section, we'll use some of the variables described above to predict the quantitative outcome: `sleephrs`.
+
+## Thinking About Non-Linear Terms
+
+We have enough observations here to consider some non-linearity for our model.
+
+In addition, since the `genhealth` variable is an ordinal variable and multi-categorical, we should consider how to model it. We have three options:
+
+1. include it as a factor in the model (the default approach)
+2. build a numeric version of that variable, and then restrict our model to treat that numeric variable as ordinal (forcing the categories to affect the `exerany` probabilities in an ordinal way), rather than as a simple nominal factor (so that if the effect of fair vs. good was to decrease the probability of 'exerany', then the effect of poor vs. good would have to decrease the probability at least as much as fair vs. good did.) Treating the `genhealth` variable as ordinal could be accomplished with the `scored` function in the `rms` package. 
+3. build a numeric version of `genhealth` and then use the `catg` function to specify the predictor as nominal and categorical, but this will lead to essentially the same model as choice 1.
+
+Suppose we've decided to treat the `genhealth` data as categorical, without restricting the effect of its various levels to be ordinal. Suppose also that we've decided to include the following eight variables in our model for `sleephrs`:
+
+- `genhealth`
+- `menthealth`
+- `bmi`
+- `female`
+- `internet30`
+- `exerany`
+- `alcdays`
+
+Suppose we have a subject matter understanding that:
+
+- the impact of `bmi` on `sleephrs` is affected by `female`, so we plan a `female` x `bmi` interaction term
+- we're using `internet30` as a proxy for poverty, and we think that an interaction with `menthealth` will be helpful in our model as well.
+
+Note that we do have some missing values in some of these predictors and in our outcome, so we'll have to deal with that soon.
+
+```{r}
+smartcle1 %>% select(sleephrs, alcdays, bmi, exerany, female, genhealth, internet30, menthealth) %>%
+    skim()
+```
+
+## A First Model for `sleephrs` (Complete Case Analysis)
+
+Suppose we develop a main-effects kitchen sink model (model `mod.A` below) fitted to these predictors without the benefit of any non-linear terms except the two pre-planned interactions. We'll run the model quickly here to ensure that the code runs, in a complete case analysis, without drawing any conclusions, really.
+
+```{r}
+mod.A <- ols(sleephrs ~ alcdays + bmi*female + exerany + 
+              genhealth + internet30*menthealth, 
+             data = smartcle1)
+mod.A
+
+plot(anova(mod.A))
+```
+
+## Building a Larger Model: Spearman $\rho^2$ Plot
+
+Before we impute, we might also consider the use of a Spearman $\rho^2$ plot to decide how best to spend degrees of freedom on non-linear terms in our model for `sleephrs` using these predictors. Since we're already planning some interaction terms, I'll keep them in mind as I look at this plot.
+
+```{r}
+sp_smart2 <- spearman2(sleephrs ~ genhealth + exerany + 
+                          female + internet30 + menthealth + 
+                          bmi + alcdays, data = smartcle1)
+plot(sp_smart2)
+```
+
+We see that the best candidate for a non-linear term is the `menthealth` variable, according to this plot, followed by the `genhealth` and `bmi` predictors. I will wind up fitting a model including the following non-linear terms...
+
+- our pre-planned `female` x `bmi` and `internet30` x `menthealth` interaction terms,
+- a restricted cubic spline with 5 knots for `menthealth`
+- an interaction between `genhealth` and the linear part of `menthealth`
+- a restricted cubic spline with 4 knots for `bmi` (so the interaction term with `female` will need to account for this and restrict our interaction to the linear piece of `bmi`)
+
+## A Second Model for `sleephrs` (Complete Cases)
+
+Here's the resulting model fit without worrying about imputation yet. This is just to make sure our code works. Note that I'm inserting the main effects of our interaction terms explicitly before including the interaction terms themselves, and that I need to use `%ia%` to include the interaction terms where one of the terms is included in the model with a spline. Again, I won't draw any serious conclusions yet.
+
+```{r}
+mod.B <- ols(sleephrs ~ rcs(menthealth, 5) + genhealth + 
+                 genhealth %ia% menthealth + rcs(bmi, 4) +
+                 female + female %ia% bmi + internet30 +
+                 internet30 %ia% menthealth + alcdays + 
+                 exerany, data = smartcle1)
+mod.B
+
+plot(anova(mod.B))
+```
+
+It looks like `menthealth` may be the only significant term.
+
+## Dealing with Missing Data via Simple Imputation
+
+One approach we might take in this problem is to use simple imputation to deal with our missing values. I will proceed as follows:
+
+1. Omit all cases where the outcome `sleephrs` is missing.
+2. Determine (and plot) the remaining missingness.
+3. Use simple imputation for all predictors, and build a new data set with "complete" data.
+4. Re-fit the proposed models using this new data set.
+
+### Omit cases where the outcome is missing
+
+We need to drop the cases where `sleephrs` is missing in `smartcle1`. We'll begin creating an imputed data set, called `smartcle2_imp0`, by filtering on complete data for `sleephrs`, as follows. Note that the `describe` function in `Hmisc` specifies the number of non-missing observations in `n`.
+
+```{r}
+Hmisc::describe(smartcle1$sleephrs)
+
+smartcle2_imp0 <- smartcle1 %>%
+    filter(complete.cases(sleephrs)) %>%
+    select(SEQNO, sleephrs, alcdays, bmi, exerany, female, 
+           genhealth, internet30, menthealth)
+
+Hmisc::describe(smartcle2_imp0$sleephrs)
+```
+
+### Plot the remaining missingness
+
+We'll look at the missing values (excluding the subject ID: SEQNO) in our new data set. Of course, we can get a count of missing values within each variable with `skim` or with:
+
+```{r}
+colSums(is.na(smartcle2_imp0))
+```
+
+The `Hmisc` package has a plotting approach which can help identify missingness, too.
+
+```{r, fig.height = 6}
+naplot(naclus(select(smartcle2_imp0, -SEQNO)))
+```
+
+We can also get a useful accounting of missing data patterns, with the `md.pattern` function in the `mice` package.
+
+```{r}
+mice::md.pattern(smartcle2_imp0)
+```
+
+We can also do this with `na.pattern` in the `Hmisc` package, but then we have to get the names of the columns, too, so that we can read off the values.
+
+```{r}
+na.pattern(smartcle2_imp0)
+names(smartcle2_imp0)
+```
+
+### Use simple imputation, build a new data set
+
+The only variables that require no imputation are `sleephrs` and `female`. In this case, we need to impute:
+
+- 82 `bmi` values (which are quantitative)
+- 45 `alcdays` values (quantitative, must fall between 0 and 30)
+- 11 `menthealth` values (quantitative, must fall between 0 and 30)
+- 6 `internet30` values (which are 1/0)
+- 2 `exerany` values (which are also 1/0)
+- and 2 `genhealth` values (which are multi-categorical, so we need to convert them to numbers in order to get the imputation process to work properly)
+
+```{r}
+smartcle2_imp0 <- smartcle2_imp0 %>%
+    mutate(genh_n = as.numeric(genhealth))
+
+smartcle2_imp0 %>% count(genhealth, genh_n)
+```
+
+I'll work from the bottom up, using various `simputation` functions to accomplish the imputations I want. In this case, I'll use predictive mean matching for the categorical data, and linear models or elastic net approaches for the quantitative data. Be sure to set a seed beforehand so you can replicate your work. 
+
+```{r}
+set.seed(432109)
+
+smartcle2_imp1 <- smartcle2_imp0 %>%
+    impute_pmm(genh_n ~ female) %>%
+    impute_pmm(exerany + internet30 ~ female + genh_n) %>%
+    impute_lm(menthealth ~ female + genh_n + exerany) %>%
+    impute_en(alcdays ~ female + genh_n + menthealth) %>%
+    impute_en(bmi ~ alcdays + exerany + genh_n)
+```
+
+After the imputations are complete, I'll back out of the numeric version of `genhealth`, called `genh_n` back to my original variable, then check to be sure I now have no missing values.
+
+```{r}
+smartcle2_imp1 <- smartcle2_imp1 %>%
+    mutate(genhealth = fct_recode(factor(genh_n), 
+                                  "1_Excellent" = "1",
+                                  "2_VeryGood" = "2",
+                                  "3_Good" = "3",
+                                  "4_Fair" = "4",
+                                  "5_Poor" = "5"))
+
+smartcle2_imp1 %>% count(genhealth, genh_n)
+
+colSums(is.na(smartcle2_imp1))
+```
+
+OK. Looks good. I now have a data frame called `smartcle2_imp1` with no missingness, which I can use to fit my logistic regression models. Let's do that next, and then return to the problem of accounting for missingness through multiple imputation.
+
+## Refitting Model A with simply imputed data
+
+Using the numeric version of the `genhealth` data, called `genh_n`, will ease the reviewing of later output, so we'll do that here, making sure R knows that `genh_n` describes a categorical factor.
+
+```{r}
+d <- datadist(smartcle2_imp1)
+options(datadist = "d")
+
+mod.A2 <- ols(sleephrs ~ alcdays + bmi*female + exerany + 
+                  genhealth + internet30*menthealth, 
+              data = smartcle2_imp1, x = TRUE, y = TRUE)
+mod.A2
+```
+
+All right. We've used 1028 observations, which is correct (after deleting the eight with missing `sleephrs`. The model shows a lousy R^2^ value of 0.024 after imputation.  
+
+### Validating Summary Statistics
+
+```{r}
+set.seed(432487)
+validate(mod.A2)
+```
+
+As poor as the nominal R^2^ value is, it appears that the model's description of summary statistics is still optimistic. After validation, we cannot claim any meaningful predictive value at all, with a negative (impossible) R^2^ value. This output suggests that in a new sample of data, our model shouldn't be expected to do anything useful at all.
+
+### ANOVA for the model
+
+Next, let's look at the ANOVA comparisons for this (admittedly terrible) prediction model.
+
+```{r}
+anova(mod.A2)
+plot(anova(mod.A2))
+```
+
+Only `menthealth` appears to carry statistically significant predictive value here.
+
+We can also build a plot of the AIC values attributable to each piece of the model.
+
+```{r}
+plot(anova(mod.A2), what="aic")
+```
+
+We can also plot the Partial R^2^ values for each predictor. The partial R^2^ for `internet30`, for instance, is the R^2^ value that you would obtain if you first regress `internet30` on every other predictor in the model, take the residuals, and then regress those on `internet30`. It simply tells you, then, how much of the tiny amount of variation explained by the model as a whole is accounted for by each predictor after all of the other ones have already been accounted for. The partial R^2^ values, therefore, do not sum up to the total R^2^ explained by the model. In our case, the `menthealth` variable is again far and away the most "useful" variable.
+
+```{r}
+plot(anova(mod.A2), what="partial")
+```
+
+### Summarizing Effect Size
+
+How big are the effects we see?
+
+```{r}
+plot(summary(mod.A2))
+summary(mod.A2)
+```
+
+This output is easier to read as a result of using small *numeric* labels in `genh_n`, rather than the lengthy labels in `genhealth`. Interpret the results as differences in our outcome `sleephrs` associated with the expressed changes in predictors, holding the others constant.
+
+- holding all other predictors constant, the effect of moving from `alcdays` = 0 to `alcdays` = 5 is -0.05 hours of sleep. 
+    - We also have a 95% confidence interval for this estimate, which is (-0.11, 0.01). Since 0 is in that interval, we cannot conclude that the effect of `alcdays` on `sleephrs` is either definitely positive or definitely negative.
+- A similar approach can be used to describe the effects on `sleephrs` associated with each predictor.
+- Note that each of the categories in `genh_n` is compared to a single baseline category. Here, that's category 2. R will pick the modal category: the one that appears most often in the data. The comparisons of each category against category 2 are not significant in each case, at the 5% level.
+
+### Plotting the Model with `ggplot` and `Predict`
+
+Let's look at a series of plots describing the model for `sleephrs`.
+
+```{r}
+ggplot(Predict(mod.A2))
+```
+
+This helps us describe what is happening in terms of direction at least. For example,
+
+- As `menthealth` increases, predicted `sleephrs` actually decreases.
+- In general, though, the impact of these predictors on `sleephrs` appears minimal.
+
+### Plotting the model with a nomogram
+
+```{r, fig.height = 8}
+plot(nomogram(mod.A2))
+```
+
+Note the impact of our interaction terms, and how we have two lines for `bmi` and two lines for `menthealth` that ` that come out of our product terms. As with any nomogram, to make a prediction we:
+
+1. find the values of each of our predictors in the scales, and travel vertically up to the Points line to read off the Points for that predictor.
+2. sum up the Points across all predictors, and find that location in the Total Points line.
+3. move vertically down from the total points line to find the estimated "linear predictor" (`sleephrs`)
+
+### Checking the Calibration of our model
+
+There isn't any reason why we shouldn't be able to check the calibration of an `ols` fit, but the `plot(calibrate())` function doesn't seem to be working as I'd expect it to for `ols` fits, at the moment. This may be because we have only a limited number of potential predictions (over a fairly tight interval of predicted values) that we obtain from our model.
+
+Instead, I'll focus on residual plots.
+
+### Residual Plots for mod.A2
+
+We can obtain our usual residual plots for a linear model. Or, we can obtain things like the residuals and fitted values directly, to produce a plot. For example,
+
+```{r}
+plot(mod.A2$residuals ~ mod.A2$fitted.values)
+```
+
+Or we can get the same residuals vs. fitted values plot with:
+
+```{r}
+plot(mod.A2, "ordinary", which = 1)
+```
+
+## Refitting Model B with simply imputed data
+
+I'll walk through the same tasks for Model `m2` that I did above for Model `m1`. Again, we're running this model after simple imputation of missing values.
+
+Using the numeric version of the `genhealth` data, called `genh_n`, will ease the reviewing of later output, so we'll do that here, making sure R knows that `genh_n` describes a categorical factor.
+
+```{r}
+d <- datadist(smartcle2_imp1)
+options(datadist = "d")
+
+mod.B2 <- ols(sleephrs ~ rcs(menthealth, 5) + genhealth + 
+                 genhealth %ia% menthealth + internet30 +
+                 internet30 %ia% menthealth + rcs(bmi, 4) +
+                 female + female %ia% bmi  + alcdays + 
+                 exerany, 
+             data = smartcle2_imp1, x = TRUE, y = TRUE)
+mod.B2
+```
+
+The model still uses 1028 observations, and shows an R^2^ value of 0.031, marginally better than what we saw in `mod.A2.` The likelihood ratio (drop in deviance) test is still highly significant. 
+
+### Validating Summary Statistics
+
+```{r}
+set.seed(432989)
+validate(mod.B2)
+```
+
+Again, the model's description of summary statistics is optimistic and we have no reason to expect the model is of any predictive value at all.
+
+### ANOVA for the model
+
+Next, let's look at the ANOVA comparisons for this model.
+
+```{r}
+anova(mod.B2)
+plot(anova(mod.B2))
+```
+
+Again, only `menthealth` (and that just barely) is carrying statistically significant predictive value.
+
+Here is the AIC plot.
+
+```{r}
+plot(anova(mod.B2), what="aic")
+```
+
+### Summarizing Effect Size
+
+How big are the effects we see?
+
+```{r}
+summary(mod.B2)
+plot(summary(mod.B2))
+```
+
+This output is easier to read as a result of using small *numeric* labels in `genh_n`, rather than the lengthy labels in `genhealth`. The results are, again, interpreted as differences in predicted `sleephrs`. For example,
+
+- holding all other predictors constant, the effect of moving from `menthealth` = 0 to `menthealth` = 2 is a decline of 0.18 in predicted `sleephrs`, with 95% CI (-0.33, -0.03) hours.
+
+### Plotting the Model with `ggplot` and `Predict`
+
+Again, consider a series of plots describing the model `mod.B2`.
+
+```{r}
+ggplot(Predict(mod.B2))
+```
+
+Note the small `kink` in the `bmi` plot. To what do you attribute this?
+
+## Comparing Model B.2 to Model A.2 after simple imputation
+
+We can refit the models with `glm` and then compare them with `anova`, `aic` and `bic` approaches, if we like.
+
+```{r}
+mA2_lm <- lm(sleephrs ~ alcdays + bmi*female + exerany + 
+                  genhealth + internet30*menthealth, 
+              data = smartcle2_imp1)
+
+mB2_lm <- lm(sleephrs ~ rcs(menthealth, 5) + genhealth + 
+                 genhealth %ia% menthealth + internet30 +
+                 internet30 %ia% menthealth + rcs(bmi, 4) +
+                 female + female %ia% bmi  + alcdays + 
+                 exerany, 
+             data = smartcle2_imp1)
+```
+
+### Comparison by Analysis of Variance
+
+```{r}
+anova(mA2_lm, mB2_lm)
+```
+
+The additional terms in model B2 don't seem to improve the fit significantly.
+
+### Comparing AIC and BIC
+
+```{r}
+glance(mA2_lm)
+glance(mB2_lm)
+```
+
+Model `mA2_lm` shows lower AIC and BIC than does `mB2_lm`, but as we see in the R^2^ values, they are both terrible models.
+
+## Dealing with Missing Data via Multiple Imputation
+
+Next, we'll use the `aregImpute` function within the `Hmisc` package to predict all missing values for all of our variables, using additive regression bootstrapping and predictive mean matching. The steps for this work are as follows:
+
+1. `aregImpute` draws a sample with replacement from the observations where the target variable is observed, not missing. 
+2. `aregImpute` then fits a flexible additive model to predict this target variable while finding the optimum transformation of it. 
+3. `aregImpute` then uses this fitted flexible model to predict the target variable in all of the original observations.
+4. Finally, `aregImpute` imputes each missing value of the target variable with the observed value whose predicted transformed value is closest to the predicted transformed value of the missing value.
+
+We'll start with the `smartcle2_imp0` data set, which contains only the subjects in the original `smartcle1` data where `sleephrs` is available, and which includes only the variables of interest to us, including both the factor (`genhealth`) and numeric (`genh_n`) versions of the genhealth data.
+
+```{r}
+summary(smartcle2_imp0)
+```
+
+The `smartcle2_imp0` data set contains `r dim(smartcle2_imp0)[1]` rows (subjects) and `r dim(smartcle2_imp0)[2]` columns (variables.) 
+
+### Using `aregImpute` to fit a multiple imputation model
+
+To set up `aregImpute` here, we'll need to specify:
+
+- a suitable random seed with `set.seed` so we can replicate our work later
+- a data set via the `datadist` stuff shown below
+- the variables we want to include in the imputation process, which should include, at a minimum, any variables with missing values, and any variables we want to include in our outcome models
+- `n.impute` = number of imputations, we'll run 20 here^[100 is generally safe but time-consuming. In the old days, we used to say 5. A reasonable idea is to identify the fraction of missingness in your variable with the most missingness, and if that's 0.10, then you should run at least 100(0.10) = 10 sets of imputations.]
+- `nk` = number of knots to describe level of complexity, with our choice `nk = c(0, 3)` we'll fit both linear models and models with restricted cubic splines with 3 knots (this approach will wind up throwing some warnings here because some of our variables with missing values have only a few options so fitting splines is tough.)
+- `tlinear = FALSE` allows the target variable for imputation to have a non-linear transformation when `nk` is 3 or more. Here, I'll use `tlinear = TRUE`, the default.
+- `B = 10` specifies 10 bootstrap samples will be used
+- `pr = FALSE` tells the machine not to print out which iteration is running as it goes.
+- `data` specifies the source of the variables
+
+
+```{r, warning = FALSE}
+set.seed(432365)
+dd <- datadist(smartcle2_imp0)
+options(datadist = "dd")
+
+imp_fit <- aregImpute(~ sleephrs + alcdays + bmi + exerany +
+                          female + genh_n + internet30 +
+                          menthealth, 
+                   nk = c(0, 3), tlinear = TRUE,
+                   data = smartcle2_imp0, B = 10, 
+                   n.impute = 20, pr = FALSE) 
+```
+
+OK. Here is the imputation model. The summary here isn't especially critical. We want to see what was run, but to see what the results look like, we'll need a plot, to come.
+
+```{r}
+imp_fit
+```
+
+OK, let's plot these imputed values. Note that we had six predictors with missing values in our data set, and so if we plot each of those, we'll wind up with six plots. I'll arrange them in a grid with three rows and two columns.
+
+```{r, fig.height = 6}
+par(mfrow = c(3,2))
+plot(imp_fit)
+par(mfrow = c(1,1))
+```
+
+From these cumulative distribution functions, we can see that, for example, 
+
+- we imputed `bmi` values mostly between 20 and 35, with a few values below 20 or above 40.
+- most of our imputed `alcdays` were between 0 and 5
+- we imputed 1 for `internet30` for about 70% of the subjects, and 0 for the other 30%.
+
+This predictive mean matching method never imputes a value for a variable that does not already exist in the data.
+
+## Combining the Imputation and Outcome Models
+
+So, now we have an imputation model, called `imp_fit`. and two outcome models: `mod.A` and `mod.B`. What do we do with them?
+
+### Model A with Multiple Imputation
+
+To build the `mA_imp` multiple imputation fit for model `mod.A`, we use the `fit.mult.impute` command, and specify the model, the fitter (here, `lrm`), the imputation model (`xtrans = imp_fit`) and the data set prior to imputation (`smartcle2_imp0`).
+
+```{r}
+mA_imp <- fit.mult.impute(sleephrs ~ alcdays + bmi*female + 
+                              exerany + catg(genh_n) + 
+                              internet30*menthealth,
+                          fitter = ols, xtrans = imp_fit,
+                          data = smartcle2_imp0, 
+                          x = TRUE, y = TRUE)
+```
+
+OK. Let's get the familiar description of an `ols` model, after this multiple imputation.
+
+```{r}
+mA_imp
+```
+
+We can obtain an ANOVA plot and an AIC plot to look at the predictors:
+
+```{r, fig.height = 7}
+par(mfrow = c(2,1))
+plot(anova(mA_imp))
+plot(anova(mA_imp), what="aic")
+par(mfrow = c(1,1))
+```
+
+Here's the summary of effect sizes.
+
+```{r}
+summary(mA_imp)
+plot(summary(mA_imp))
+```
+
+And here is the nomogram.
+
+```{r, fig.height = 9}
+plot(nomogram(mA_imp))
+```
+
+Here are the descriptive model plots:
+
+```{r}
+ggplot(Predict(mA_imp))
+```
+
+We can still do things like validate the summary statistics, too.
+
+```{r}
+validate(mA_imp)
+```
+
+The same approach can be used to build a `mB_imp` multiple imputation fit for `mod.B`, using the `fit.mult.impute` command, and specifying the model, the fitter (here, `ols`), the imputation model (`xtrans = imp_fit`) and the data set prior to imputation (`smartcle2_imp0`). We'll skip it for now. The model remains terrible.
+

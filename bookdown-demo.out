@@ -152,3 +152,15 @@
 \BOOKMARK [1][-]{section.14.10}{Dealing\040with\040Missing\040Data\040via\040Multiple\040Imputation}{chapter.14}% 152
 \BOOKMARK [1][-]{section.14.11}{Combining\040the\040Imputation\040and\040Outcome\040Models}{chapter.14}% 153
 \BOOKMARK [1][-]{section.14.12}{Models\040with\040and\040without\040Imputation}{chapter.14}% 154
+\BOOKMARK [0][-]{chapter.15}{Linear\040Regression\040and\040the\040smartcle1\040data}{}% 155
+\BOOKMARK [1][-]{section.15.1}{The\040smartcle1\040data}{chapter.15}% 156
+\BOOKMARK [1][-]{section.15.2}{Thinking\040About\040Non-Linear\040Terms}{chapter.15}% 157
+\BOOKMARK [1][-]{section.15.3}{A\040First\040Model\040for\040sleephrs\040\(Complete\040Case\040Analysis\)}{chapter.15}% 158
+\BOOKMARK [1][-]{section.15.4}{Building\040a\040Larger\040Model:\040Spearman\040\\rho^2\040Plot}{chapter.15}% 159
+\BOOKMARK [1][-]{section.15.5}{A\040Second\040Model\040for\040sleephrs\040\(Complete\040Cases\)}{chapter.15}% 160
+\BOOKMARK [1][-]{section.15.6}{Dealing\040with\040Missing\040Data\040via\040Simple\040Imputation}{chapter.15}% 161
+\BOOKMARK [1][-]{section.15.7}{Refitting\040Model\040A\040with\040simply\040imputed\040data}{chapter.15}% 162
+\BOOKMARK [1][-]{section.15.8}{Refitting\040Model\040B\040with\040simply\040imputed\040data}{chapter.15}% 163
+\BOOKMARK [1][-]{section.15.9}{Comparing\040Model\040B.2\040to\040Model\040A.2\040after\040simple\040imputation}{chapter.15}% 164
+\BOOKMARK [1][-]{section.15.10}{Dealing\040with\040Missing\040Data\040via\040Multiple\040Imputation}{chapter.15}% 165
+\BOOKMARK [1][-]{section.15.11}{Combining\040the\040Imputation\040and\040Outcome\040Models}{chapter.15}% 166

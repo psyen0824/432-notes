@@ -124,7 +124,7 @@
   \postauthor{\par}
   \predate{\centering\large\emph}
   \postdate{\par}
-  \date{Built 2018-02-20 22:45:45}
+  \date{Built 2018-02-26 10:47:11}
 
 \usepackage{booktabs}
 \usepackage{amsthm}
@@ -15642,7 +15642,7 @@ For example,
 \item
   As \texttt{bmi} increases, predicted Pr(\texttt{exerany}) decreases.
 \item
-  People who accessed the internet in the past 30 days have higher morel
+  People who accessed the internet in the past 30 days have higher model
   probabilities of exercising.
 \end{itemize}
 
@@ -16938,6 +16938,1850 @@ validated C & 0.722 & 0.724 & 0.720 & 0.722\tabularnewline
 \end{longtable}
 
 So, what can we conclude about the discrimination results?
+
+\chapter{\texorpdfstring{Linear Regression and the \texttt{smartcle1}
+data}{Linear Regression and the smartcle1 data}}\label{linear-regression-and-the-smartcle1-data}
+
+\section{\texorpdfstring{The \texttt{smartcle1}
+data}{The smartcle1 data}}\label{the-smartcle1-data-1}
+
+Recall that the \texttt{smartcle1.csv} data file available on the Data
+and Code page of \href{https://github.com/THOMASELOVE/432-2018}{our
+website} describes information on 11 variables for 1036 respondents to
+the BRFSS 2016, who live in the Cleveland-Elyria, OH, Metropolitan
+Statistical Area. As we've discussed in previous work, the variables in
+the \texttt{smartcle1.csv} file are listed below, along with (in some
+cases) the BRFSS items that generate these responses.
+
+\begin{longtable}[]{@{}rl@{}}
+\toprule
+\begin{minipage}[b]{0.14\columnwidth}\raggedleft\strut
+Variable\strut
+\end{minipage} & \begin{minipage}[b]{0.74\columnwidth}\raggedright\strut
+Description\strut
+\end{minipage}\tabularnewline
+\midrule
+\endhead
+\begin{minipage}[t]{0.14\columnwidth}\raggedleft\strut
+\texttt{SEQNO}\strut
+\end{minipage} & \begin{minipage}[t]{0.74\columnwidth}\raggedright\strut
+respondent identification number (all begin with 2016)\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedleft\strut
+\texttt{physhealth}\strut
+\end{minipage} & \begin{minipage}[t]{0.74\columnwidth}\raggedright\strut
+Now thinking about your physical health, which includes physical illness
+and injury, for how many days during the past 30 days was your physical
+health not good?\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedleft\strut
+\texttt{menthealth}\strut
+\end{minipage} & \begin{minipage}[t]{0.74\columnwidth}\raggedright\strut
+Now thinking about your mental health, which includes stress,
+depression, and problems with emotions, for how many days during the
+past 30 days was your mental health not good?\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedleft\strut
+\texttt{poorhealth}\strut
+\end{minipage} & \begin{minipage}[t]{0.74\columnwidth}\raggedright\strut
+During the past 30 days, for about how many days did poor physical or
+mental health keep you from doing your usual activities, such as
+self-care, work, or recreation?\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedleft\strut
+\texttt{genhealth}\strut
+\end{minipage} & \begin{minipage}[t]{0.74\columnwidth}\raggedright\strut
+Would you say that in general, your health is \ldots{} (five categories:
+Excellent, Very Good, Good, Fair or Poor)\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedleft\strut
+\texttt{bmi}\strut
+\end{minipage} & \begin{minipage}[t]{0.74\columnwidth}\raggedright\strut
+Body mass index, in kg/m\textsuperscript{2}\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedleft\strut
+\texttt{female}\strut
+\end{minipage} & \begin{minipage}[t]{0.74\columnwidth}\raggedright\strut
+Sex, 1 = female, 0 = male\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedleft\strut
+\texttt{internet30}\strut
+\end{minipage} & \begin{minipage}[t]{0.74\columnwidth}\raggedright\strut
+Have you used the internet in the past 30 days? (1 = yes, 0 = no)\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedleft\strut
+\texttt{exerany}\strut
+\end{minipage} & \begin{minipage}[t]{0.74\columnwidth}\raggedright\strut
+During the past month, other than your regular job, did you participate
+in any physical activities or exercises such as running, calisthenics,
+golf, gardening, or walking for exercise? (1 = yes, 0 = no)\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedleft\strut
+\texttt{sleephrs}\strut
+\end{minipage} & \begin{minipage}[t]{0.74\columnwidth}\raggedright\strut
+On average, how many hours of sleep do you get in a 24-hour
+period?\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedleft\strut
+\texttt{alcdays}\strut
+\end{minipage} & \begin{minipage}[t]{0.74\columnwidth}\raggedright\strut
+How many days during the past 30 days did you have at least one drink of
+any alcoholic beverage such as beer, wine, a malt beverage or
+liquor?\strut
+\end{minipage}\tabularnewline
+\bottomrule
+\end{longtable}
+
+In this section, we'll use some of the variables described above to
+predict the quantitative outcome: \texttt{sleephrs}.
+
+\section{Thinking About Non-Linear
+Terms}\label{thinking-about-non-linear-terms-1}
+
+We have enough observations here to consider some non-linearity for our
+model.
+
+In addition, since the \texttt{genhealth} variable is an ordinal
+variable and multi-categorical, we should consider how to model it. We
+have three options:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  include it as a factor in the model (the default approach)
+\item
+  build a numeric version of that variable, and then restrict our model
+  to treat that numeric variable as ordinal (forcing the categories to
+  affect the \texttt{exerany} probabilities in an ordinal way), rather
+  than as a simple nominal factor (so that if the effect of fair
+  vs.~good was to decrease the probability of `exerany', then the effect
+  of poor vs.~good would have to decrease the probability at least as
+  much as fair vs.~good did.) Treating the \texttt{genhealth} variable
+  as ordinal could be accomplished with the \texttt{scored} function in
+  the \texttt{rms} package.
+\item
+  build a numeric version of \texttt{genhealth} and then use the
+  \texttt{catg} function to specify the predictor as nominal and
+  categorical, but this will lead to essentially the same model as
+  choice 1.
+\end{enumerate}
+
+Suppose we've decided to treat the \texttt{genhealth} data as
+categorical, without restricting the effect of its various levels to be
+ordinal. Suppose also that we've decided to include the following eight
+variables in our model for \texttt{sleephrs}:
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{genhealth}
+\item
+  \texttt{menthealth}
+\item
+  \texttt{bmi}
+\item
+  \texttt{female}
+\item
+  \texttt{internet30}
+\item
+  \texttt{exerany}
+\item
+  \texttt{alcdays}
+\end{itemize}
+
+Suppose we have a subject matter understanding that:
+
+\begin{itemize}
+\tightlist
+\item
+  the impact of \texttt{bmi} on \texttt{sleephrs} is affected by
+  \texttt{female}, so we plan a \texttt{female} x \texttt{bmi}
+  interaction term
+\item
+  we're using \texttt{internet30} as a proxy for poverty, and we think
+  that an interaction with \texttt{menthealth} will be helpful in our
+  model as well.
+\end{itemize}
+
+Note that we do have some missing values in some of these predictors and
+in our outcome, so we'll have to deal with that soon.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{smartcle1 }\OperatorTok{%>%}\StringTok{ }\KeywordTok{select}\NormalTok{(sleephrs, alcdays, bmi, exerany, female, genhealth, internet30, menthealth) }\OperatorTok{%>%}
+\StringTok{    }\KeywordTok{skim}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Skim summary statistics
+ n obs: 1036 
+ n variables: 8 
+
+Variable type: factor 
+  variable missing complete    n n_unique
+ genhealth       3     1033 1036        5
+                             top_counts ordered
+ 2_V: 350, 3_G: 344, 1_E: 173, 4_F: 122   FALSE
+
+Variable type: integer 
+   variable missing complete    n mean   sd p0 p25 median p75 p100
+    alcdays      46      990 1036 4.65 8.05  0   0      1   4   30
+    exerany       3     1033 1036 0.76 0.43  0   1      1   1    1
+     female       0     1036 1036 0.6  0.49  0   0      1   1    1
+ internet30       6     1030 1036 0.81 0.39  0   1      1   1    1
+ menthealth      11     1025 1036 2.72 6.82  0   0      0   2   30
+   sleephrs       8     1028 1036 7.02 1.53  1   6      7   8   20
+
+Variable type: numeric 
+ variable missing complete    n  mean   sd    p0  p25 median   p75  p100
+      bmi      84      952 1036 27.89 6.47 12.71 23.7  26.68 30.53 66.06
+\end{verbatim}
+
+\section{\texorpdfstring{A First Model for \texttt{sleephrs} (Complete
+Case
+Analysis)}{A First Model for sleephrs (Complete Case Analysis)}}\label{a-first-model-for-sleephrs-complete-case-analysis}
+
+Suppose we develop a main-effects kitchen sink model (model
+\texttt{mod.A} below) fitted to these predictors without the benefit of
+any non-linear terms except the two pre-planned interactions. We'll run
+the model quickly here to ensure that the code runs, in a complete case
+analysis, without drawing any conclusions, really.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{mod.A <-}\StringTok{ }\KeywordTok{ols}\NormalTok{(sleephrs }\OperatorTok{~}\StringTok{ }\NormalTok{alcdays }\OperatorTok{+}\StringTok{ }\NormalTok{bmi}\OperatorTok{*}\NormalTok{female }\OperatorTok{+}\StringTok{ }\NormalTok{exerany }\OperatorTok{+}\StringTok{ }
+\StringTok{              }\NormalTok{genhealth }\OperatorTok{+}\StringTok{ }\NormalTok{internet30}\OperatorTok{*}\NormalTok{menthealth, }
+             \DataTypeTok{data =}\NormalTok{ smartcle1)}
+\NormalTok{mod.A}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Frequencies of Missing Values Due to Each Variable
+  sleephrs    alcdays        bmi     female    exerany  genhealth 
+         8         46         84          0          3          3 
+internet30 menthealth 
+         6         11 
+
+Linear Regression Model
+ 
+ ols(formula = sleephrs ~ alcdays + bmi * female + exerany + genhealth + 
+     internet30 * menthealth, data = smartcle1)
+ 
+ 
+                Model Likelihood     Discrimination    
+                   Ratio Test           Indexes        
+ Obs     903    LR chi2     16.80    R2       0.018    
+ sigma1.4784    d.f.           12    R2 adj   0.005    
+ d.f.    890    Pr(> chi2) 0.1571    g        0.209    
+ 
+ Residuals
+ 
+      Min       1Q   Median       3Q      Max 
+ -6.10511 -0.96284 -0.02392  0.89816 13.66445 
+ 
+ 
+                         Coef    S.E.   t     Pr(>|t|)
+ Intercept                6.8562 0.4336 15.81 <0.0001 
+ alcdays                 -0.0077 0.0063 -1.22 0.2240  
+ bmi                      0.0075 0.0135  0.56 0.5784  
+ female                   0.6701 0.4729  1.42 0.1569  
+ exerany                 -0.0185 0.1250 -0.15 0.8822  
+ genhealth=2_VeryGood     0.1267 0.1474  0.86 0.3903  
+ genhealth=3_Good         0.0930 0.1530  0.61 0.5433  
+ genhealth=4_Fair        -0.1099 0.2019 -0.54 0.5864  
+ genhealth=5_Poor        -0.1118 0.2828 -0.40 0.6927  
+ internet30              -0.0768 0.1434 -0.54 0.5926  
+ menthealth              -0.0171 0.0161 -1.06 0.2902  
+ bmi * female            -0.0207 0.0165 -1.26 0.2092  
+ internet30 * menthealth -0.0027 0.0179 -0.15 0.8793  
+ 
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plot}\NormalTok{(}\KeywordTok{anova}\NormalTok{(mod.A))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-279-1.pdf}
+
+\section{\texorpdfstring{Building a Larger Model: Spearman \(\rho^2\)
+Plot}{Building a Larger Model: Spearman \textbackslash{}rho\^{}2 Plot}}\label{building-a-larger-model-spearman-rho2-plot-1}
+
+Before we impute, we might also consider the use of a Spearman
+\(\rho^2\) plot to decide how best to spend degrees of freedom on
+non-linear terms in our model for \texttt{sleephrs} using these
+predictors. Since we're already planning some interaction terms, I'll
+keep them in mind as I look at this plot.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{sp_smart2 <-}\StringTok{ }\KeywordTok{spearman2}\NormalTok{(sleephrs }\OperatorTok{~}\StringTok{ }\NormalTok{genhealth }\OperatorTok{+}\StringTok{ }\NormalTok{exerany }\OperatorTok{+}\StringTok{ }
+\StringTok{                          }\NormalTok{female }\OperatorTok{+}\StringTok{ }\NormalTok{internet30 }\OperatorTok{+}\StringTok{ }\NormalTok{menthealth }\OperatorTok{+}\StringTok{ }
+\StringTok{                          }\NormalTok{bmi }\OperatorTok{+}\StringTok{ }\NormalTok{alcdays, }\DataTypeTok{data =}\NormalTok{ smartcle1)}
+\KeywordTok{plot}\NormalTok{(sp_smart2)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-280-1.pdf}
+
+We see that the best candidate for a non-linear term is the
+\texttt{menthealth} variable, according to this plot, followed by the
+\texttt{genhealth} and \texttt{bmi} predictors. I will wind up fitting a
+model including the following non-linear terms\ldots{}
+
+\begin{itemize}
+\tightlist
+\item
+  our pre-planned \texttt{female} x \texttt{bmi} and \texttt{internet30}
+  x \texttt{menthealth} interaction terms,
+\item
+  a restricted cubic spline with 5 knots for \texttt{menthealth}
+\item
+  an interaction between \texttt{genhealth} and the linear part of
+  \texttt{menthealth}
+\item
+  a restricted cubic spline with 4 knots for \texttt{bmi} (so the
+  interaction term with \texttt{female} will need to account for this
+  and restrict our interaction to the linear piece of \texttt{bmi})
+\end{itemize}
+
+\section{\texorpdfstring{A Second Model for \texttt{sleephrs} (Complete
+Cases)}{A Second Model for sleephrs (Complete Cases)}}\label{a-second-model-for-sleephrs-complete-cases}
+
+Here's the resulting model fit without worrying about imputation yet.
+This is just to make sure our code works. Note that I'm inserting the
+main effects of our interaction terms explicitly before including the
+interaction terms themselves, and that I need to use \texttt{\%ia\%} to
+include the interaction terms where one of the terms is included in the
+model with a spline. Again, I won't draw any serious conclusions yet.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{mod.B <-}\StringTok{ }\KeywordTok{ols}\NormalTok{(sleephrs }\OperatorTok{~}\StringTok{ }\KeywordTok{rcs}\NormalTok{(menthealth, }\DecValTok{5}\NormalTok{) }\OperatorTok{+}\StringTok{ }\NormalTok{genhealth }\OperatorTok{+}\StringTok{ }
+\StringTok{                 }\NormalTok{genhealth }\OperatorTok{%ia%}\StringTok{ }\NormalTok{menthealth }\OperatorTok{+}\StringTok{ }\KeywordTok{rcs}\NormalTok{(bmi, }\DecValTok{4}\NormalTok{) }\OperatorTok{+}
+\StringTok{                 }\NormalTok{female }\OperatorTok{+}\StringTok{ }\NormalTok{female }\OperatorTok{%ia%}\StringTok{ }\NormalTok{bmi }\OperatorTok{+}\StringTok{ }\NormalTok{internet30 }\OperatorTok{+}
+\StringTok{                 }\NormalTok{internet30 }\OperatorTok{%ia%}\StringTok{ }\NormalTok{menthealth }\OperatorTok{+}\StringTok{ }\NormalTok{alcdays }\OperatorTok{+}\StringTok{ }
+\StringTok{                 }\NormalTok{exerany, }\DataTypeTok{data =}\NormalTok{ smartcle1)}
+\NormalTok{mod.B}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Frequencies of Missing Values Due to Each Variable
+  sleephrs menthealth  genhealth        bmi     female internet30 
+         8         11          3         84          0          6 
+   alcdays    exerany 
+        46          3 
+
+Linear Regression Model
+ 
+ ols(formula = sleephrs ~ rcs(menthealth, 5) + genhealth + genhealth %ia% 
+     menthealth + rcs(bmi, 4) + female + female %ia% bmi + internet30 + 
+     internet30 %ia% menthealth + alcdays + exerany, data = smartcle1)
+ 
+ 
+                Model Likelihood     Discrimination    
+                   Ratio Test           Indexes        
+ Obs     903    LR chi2     27.03    R2       0.029    
+ sigma1.4759    d.f.           19    R2 adj   0.009    
+ d.f.    883    Pr(> chi2) 0.1040    g        0.258    
+ 
+ Residuals
+ 
+      Min       1Q   Median       3Q      Max 
+ -6.11835 -0.93539 -0.02598  0.87085 13.68653 
+ 
+ 
+                                   Coef    S.E.   t     Pr(>|t|)
+ Intercept                          5.9217 1.0518  5.63 <0.0001 
+ menthealth                        -0.0759 0.0424 -1.79 0.0736  
+ menthealth'                        0.5218 0.3285  1.59 0.1126  
+ genhealth=2_VeryGood               0.1716 0.1554  1.10 0.2699  
+ genhealth=3_Good                   0.0630 0.1624  0.39 0.6982  
+ genhealth=4_Fair                  -0.0269 0.2216 -0.12 0.9035  
+ genhealth=5_Poor                  -0.1593 0.3468 -0.46 0.6461  
+ genhealth=2_VeryGood * menthealth -0.0382 0.0287 -1.33 0.1836  
+ genhealth=3_Good * menthealth      0.0157 0.0227  0.69 0.4893  
+ genhealth=4_Fair * menthealth     -0.0112 0.0239 -0.47 0.6415  
+ genhealth=5_Poor * menthealth      0.0109 0.0286  0.38 0.7044  
+ bmi                                0.0469 0.0449  1.05 0.2962  
+ bmi'                              -0.1237 0.2050 -0.60 0.5463  
+ bmi''                              0.2755 0.5607  0.49 0.6233  
+ female                             0.7588 0.4796  1.58 0.1140  
+ female * bmi                      -0.0228 0.0166 -1.37 0.1707  
+ internet30                        -0.0765 0.1443 -0.53 0.5962  
+ internet30 * menthealth            0.0023 0.0184  0.12 0.9006  
+ alcdays                           -0.0069 0.0063 -1.10 0.2726  
+ exerany                            0.0080 0.1254  0.06 0.9488  
+ 
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plot}\NormalTok{(}\KeywordTok{anova}\NormalTok{(mod.B))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-281-1.pdf}
+
+It looks like \texttt{menthealth} may be the only significant term.
+
+\section{Dealing with Missing Data via Simple
+Imputation}\label{dealing-with-missing-data-via-simple-imputation-1}
+
+One approach we might take in this problem is to use simple imputation
+to deal with our missing values. I will proceed as follows:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Omit all cases where the outcome \texttt{sleephrs} is missing.
+\item
+  Determine (and plot) the remaining missingness.
+\item
+  Use simple imputation for all predictors, and build a new data set
+  with ``complete'' data.
+\item
+  Re-fit the proposed models using this new data set.
+\end{enumerate}
+
+\subsection{Omit cases where the outcome is
+missing}\label{omit-cases-where-the-outcome-is-missing-1}
+
+We need to drop the cases where \texttt{sleephrs} is missing in
+\texttt{smartcle1}. We'll begin creating an imputed data set, called
+\texttt{smartcle2\_imp0}, by filtering on complete data for
+\texttt{sleephrs}, as follows. Note that the \texttt{describe} function
+in \texttt{Hmisc} specifies the number of non-missing observations in
+\texttt{n}.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{Hmisc}\OperatorTok{::}\KeywordTok{describe}\NormalTok{(smartcle1}\OperatorTok{$}\NormalTok{sleephrs)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+smartcle1$sleephrs 
+       n  missing distinct     Info     Mean      Gmd      .05      .10 
+    1028        8       14    0.935    7.018    1.505        5        5 
+     .25      .50      .75      .90      .95 
+       6        7        8        8        9 
+                                                                      
+Value          1     2     3     4     5     6     7     8     9    10
+Frequency      5     1     9    25    72   221   318   301    42    24
+Proportion 0.005 0.001 0.009 0.024 0.070 0.215 0.309 0.293 0.041 0.023
+                                  
+Value         11    12    16    20
+Frequency      2     4     2     2
+Proportion 0.002 0.004 0.002 0.002
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{smartcle2_imp0 <-}\StringTok{ }\NormalTok{smartcle1 }\OperatorTok{%>%}
+\StringTok{    }\KeywordTok{filter}\NormalTok{(}\KeywordTok{complete.cases}\NormalTok{(sleephrs)) }\OperatorTok{%>%}
+\StringTok{    }\KeywordTok{select}\NormalTok{(SEQNO, sleephrs, alcdays, bmi, exerany, female, }
+\NormalTok{           genhealth, internet30, menthealth)}
+
+\NormalTok{Hmisc}\OperatorTok{::}\KeywordTok{describe}\NormalTok{(smartcle2_imp0}\OperatorTok{$}\NormalTok{sleephrs)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+smartcle2_imp0$sleephrs 
+       n  missing distinct     Info     Mean      Gmd      .05      .10 
+    1028        0       14    0.935    7.018    1.505        5        5 
+     .25      .50      .75      .90      .95 
+       6        7        8        8        9 
+                                                                      
+Value          1     2     3     4     5     6     7     8     9    10
+Frequency      5     1     9    25    72   221   318   301    42    24
+Proportion 0.005 0.001 0.009 0.024 0.070 0.215 0.309 0.293 0.041 0.023
+                                  
+Value         11    12    16    20
+Frequency      2     4     2     2
+Proportion 0.002 0.004 0.002 0.002
+\end{verbatim}
+
+\subsection{Plot the remaining
+missingness}\label{plot-the-remaining-missingness-1}
+
+We'll look at the missing values (excluding the subject ID: SEQNO) in
+our new data set. Of course, we can get a count of missing values within
+each variable with \texttt{skim} or with:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{colSums}\NormalTok{(}\KeywordTok{is.na}\NormalTok{(smartcle2_imp0))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+     SEQNO   sleephrs    alcdays        bmi    exerany     female 
+         0          0         45         82          2          0 
+ genhealth internet30 menthealth 
+         2          6         11 
+\end{verbatim}
+
+The \texttt{Hmisc} package has a plotting approach which can help
+identify missingness, too.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{naplot}\NormalTok{(}\KeywordTok{naclus}\NormalTok{(}\KeywordTok{select}\NormalTok{(smartcle2_imp0, }\OperatorTok{-}\NormalTok{SEQNO)))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-284-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-284-2.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-284-3.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-284-4.pdf}
+
+We can also get a useful accounting of missing data patterns, with the
+\texttt{md.pattern} function in the \texttt{mice} package.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{mice}\OperatorTok{::}\KeywordTok{md.pattern}\NormalTok{(smartcle2_imp0)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+    SEQNO sleephrs female exerany genhealth internet30 menthealth alcdays
+903     1        1      1       1         1          1          1       1
+ 29     1        1      1       1         1          1          1       0
+ 67     1        1      1       1         1          1          1       1
+  2     1        1      1       0         1          1          1       1
+  1     1        1      1       1         1          0          1       1
+  9     1        1      1       1         1          1          0       1
+ 10     1        1      1       1         1          1          1       0
+  1     1        1      1       1         0          1          0       1
+  5     1        1      1       1         1          0          1       0
+  1     1        1      1       1         0          1          0       0
+        0        0      0       2         2          6         11      45
+    bmi    
+903   1   0
+ 29   1   1
+ 67   0   1
+  2   1   1
+  1   1   1
+  9   1   1
+ 10   0   2
+  1   1   2
+  5   0   3
+  1   1   3
+     82 148
+\end{verbatim}
+
+We can also do this with \texttt{na.pattern} in the \texttt{Hmisc}
+package, but then we have to get the names of the columns, too, so that
+we can read off the values.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{na.pattern}\NormalTok{(smartcle2_imp0)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+pattern
+000000000 000000001 000000010 000000101 000010000 000100000 001000000 
+      903         9         1         1         2        67        29 
+001000101 001100000 001100010 
+        1        10         5 
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{names}\NormalTok{(smartcle2_imp0)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+[1] "SEQNO"      "sleephrs"   "alcdays"    "bmi"        "exerany"   
+[6] "female"     "genhealth"  "internet30" "menthealth"
+\end{verbatim}
+
+\subsection{Use simple imputation, build a new data
+set}\label{use-simple-imputation-build-a-new-data-set-1}
+
+The only variables that require no imputation are \texttt{sleephrs} and
+\texttt{female}. In this case, we need to impute:
+
+\begin{itemize}
+\tightlist
+\item
+  82 \texttt{bmi} values (which are quantitative)
+\item
+  45 \texttt{alcdays} values (quantitative, must fall between 0 and 30)
+\item
+  11 \texttt{menthealth} values (quantitative, must fall between 0 and
+  30)
+\item
+  6 \texttt{internet30} values (which are 1/0)
+\item
+  2 \texttt{exerany} values (which are also 1/0)
+\item
+  and 2 \texttt{genhealth} values (which are multi-categorical, so we
+  need to convert them to numbers in order to get the imputation process
+  to work properly)
+\end{itemize}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{smartcle2_imp0 <-}\StringTok{ }\NormalTok{smartcle2_imp0 }\OperatorTok{%>%}
+\StringTok{    }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{genh_n =} \KeywordTok{as.numeric}\NormalTok{(genhealth))}
+
+\NormalTok{smartcle2_imp0 }\OperatorTok{%>%}\StringTok{ }\KeywordTok{count}\NormalTok{(genhealth, genh_n)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+# A tibble: 6 x 3
+  genhealth   genh_n     n
+  <fct>        <dbl> <int>
+1 1_Excellent   1.00   172
+2 2_VeryGood    2.00   349
+3 3_Good        3.00   341
+4 4_Fair        4.00   120
+5 5_Poor        5.00    44
+6 <NA>         NA        2
+\end{verbatim}
+
+I'll work from the bottom up, using various \texttt{simputation}
+functions to accomplish the imputations I want. In this case, I'll use
+predictive mean matching for the categorical data, and linear models or
+elastic net approaches for the quantitative data. Be sure to set a seed
+beforehand so you can replicate your work.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{432109}\NormalTok{)}
+
+\NormalTok{smartcle2_imp1 <-}\StringTok{ }\NormalTok{smartcle2_imp0 }\OperatorTok{%>%}
+\StringTok{    }\KeywordTok{impute_pmm}\NormalTok{(genh_n }\OperatorTok{~}\StringTok{ }\NormalTok{female) }\OperatorTok{%>%}
+\StringTok{    }\KeywordTok{impute_pmm}\NormalTok{(exerany }\OperatorTok{+}\StringTok{ }\NormalTok{internet30 }\OperatorTok{~}\StringTok{ }\NormalTok{female }\OperatorTok{+}\StringTok{ }\NormalTok{genh_n) }\OperatorTok{%>%}
+\StringTok{    }\KeywordTok{impute_lm}\NormalTok{(menthealth }\OperatorTok{~}\StringTok{ }\NormalTok{female }\OperatorTok{+}\StringTok{ }\NormalTok{genh_n }\OperatorTok{+}\StringTok{ }\NormalTok{exerany) }\OperatorTok{%>%}
+\StringTok{    }\KeywordTok{impute_en}\NormalTok{(alcdays }\OperatorTok{~}\StringTok{ }\NormalTok{female }\OperatorTok{+}\StringTok{ }\NormalTok{genh_n }\OperatorTok{+}\StringTok{ }\NormalTok{menthealth) }\OperatorTok{%>%}
+\StringTok{    }\KeywordTok{impute_en}\NormalTok{(bmi }\OperatorTok{~}\StringTok{ }\NormalTok{alcdays }\OperatorTok{+}\StringTok{ }\NormalTok{exerany }\OperatorTok{+}\StringTok{ }\NormalTok{genh_n)}
+\end{Highlighting}
+\end{Shaded}
+
+After the imputations are complete, I'll back out of the numeric version
+of \texttt{genhealth}, called \texttt{genh\_n} back to my original
+variable, then check to be sure I now have no missing values.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{smartcle2_imp1 <-}\StringTok{ }\NormalTok{smartcle2_imp1 }\OperatorTok{%>%}
+\StringTok{    }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{genhealth =} \KeywordTok{fct_recode}\NormalTok{(}\KeywordTok{factor}\NormalTok{(genh_n), }
+                                  \StringTok{"1_Excellent"}\NormalTok{ =}\StringTok{ "1"}\NormalTok{,}
+                                  \StringTok{"2_VeryGood"}\NormalTok{ =}\StringTok{ "2"}\NormalTok{,}
+                                  \StringTok{"3_Good"}\NormalTok{ =}\StringTok{ "3"}\NormalTok{,}
+                                  \StringTok{"4_Fair"}\NormalTok{ =}\StringTok{ "4"}\NormalTok{,}
+                                  \StringTok{"5_Poor"}\NormalTok{ =}\StringTok{ "5"}\NormalTok{))}
+
+\NormalTok{smartcle2_imp1 }\OperatorTok{%>%}\StringTok{ }\KeywordTok{count}\NormalTok{(genhealth, genh_n)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+# A tibble: 5 x 3
+  genhealth   genh_n     n
+  <fct>        <dbl> <int>
+1 1_Excellent   1.00   172
+2 2_VeryGood    2.00   350
+3 3_Good        3.00   342
+4 4_Fair        4.00   120
+5 5_Poor        5.00    44
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{colSums}\NormalTok{(}\KeywordTok{is.na}\NormalTok{(smartcle2_imp1))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+     SEQNO   sleephrs    alcdays        bmi    exerany     female 
+         0          0          0          0          0          0 
+ genhealth internet30 menthealth     genh_n 
+         0          0          0          0 
+\end{verbatim}
+
+OK. Looks good. I now have a data frame called \texttt{smartcle2\_imp1}
+with no missingness, which I can use to fit my logistic regression
+models. Let's do that next, and then return to the problem of accounting
+for missingness through multiple imputation.
+
+\section{Refitting Model A with simply imputed
+data}\label{refitting-model-a-with-simply-imputed-data}
+
+Using the numeric version of the \texttt{genhealth} data, called
+\texttt{genh\_n}, will ease the reviewing of later output, so we'll do
+that here, making sure R knows that \texttt{genh\_n} describes a
+categorical factor.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{d <-}\StringTok{ }\KeywordTok{datadist}\NormalTok{(smartcle2_imp1)}
+\KeywordTok{options}\NormalTok{(}\DataTypeTok{datadist =} \StringTok{"d"}\NormalTok{)}
+
+\NormalTok{mod.A2 <-}\StringTok{ }\KeywordTok{ols}\NormalTok{(sleephrs }\OperatorTok{~}\StringTok{ }\NormalTok{alcdays }\OperatorTok{+}\StringTok{ }\NormalTok{bmi}\OperatorTok{*}\NormalTok{female }\OperatorTok{+}\StringTok{ }\NormalTok{exerany }\OperatorTok{+}\StringTok{ }
+\StringTok{                  }\NormalTok{genhealth }\OperatorTok{+}\StringTok{ }\NormalTok{internet30}\OperatorTok{*}\NormalTok{menthealth, }
+              \DataTypeTok{data =}\NormalTok{ smartcle2_imp1, }\DataTypeTok{x =} \OtherTok{TRUE}\NormalTok{, }\DataTypeTok{y =} \OtherTok{TRUE}\NormalTok{)}
+\NormalTok{mod.A2}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Linear Regression Model
+ 
+ ols(formula = sleephrs ~ alcdays + bmi * female + exerany + genhealth + 
+     internet30 * menthealth, data = smartcle2_imp1, x = TRUE, 
+     y = TRUE)
+ 
+                Model Likelihood     Discrimination    
+                   Ratio Test           Indexes        
+ Obs    1028    LR chi2     24.61    R2       0.024    
+ sigma1.5193    d.f.           12    R2 adj   0.012    
+ d.f.   1015    Pr(> chi2) 0.0168    g        0.245    
+ 
+ Residuals
+ 
+      Min       1Q   Median       3Q      Max 
+ -6.15720 -0.95552 -0.03011  0.86804 13.80609 
+ 
+ 
+                         Coef    S.E.   t     Pr(>|t|)
+ Intercept                6.9916 0.4305 16.24 <0.0001 
+ alcdays                 -0.0101 0.0062 -1.62 0.1048  
+ bmi                      0.0080 0.0135  0.59 0.5558  
+ female                   0.7360 0.4682  1.57 0.1162  
+ exerany                 -0.0898 0.1201 -0.75 0.4550  
+ genhealth=2_VeryGood     0.1248 0.1430  0.87 0.3832  
+ genhealth=3_Good         0.0912 0.1483  0.62 0.5386  
+ genhealth=4_Fair        -0.2083 0.1945 -1.07 0.2844  
+ genhealth=5_Poor         0.1361 0.2722  0.50 0.6173  
+ internet30              -0.1282 0.1374 -0.93 0.3510  
+ menthealth              -0.0228 0.0164 -1.39 0.1635  
+ bmi * female            -0.0248 0.0163 -1.52 0.1284  
+ internet30 * menthealth  0.0004 0.0180  0.02 0.9811  
+ 
+\end{verbatim}
+
+All right. We've used 1028 observations, which is correct (after
+deleting the eight with missing \texttt{sleephrs}. The model shows a
+lousy R\textsuperscript{2} value of 0.024 after imputation.
+
+\subsection{Validating Summary
+Statistics}\label{validating-summary-statistics-2}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{432487}\NormalTok{)}
+\KeywordTok{validate}\NormalTok{(mod.A2)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+          index.orig training   test optimism index.corrected  n
+R-square      0.0237   0.0402 0.0067   0.0335         -0.0099 40
+MSE           2.2791   2.2812 2.3186  -0.0374          2.3165 40
+g             0.2453   0.3112 0.1902   0.1210          0.1243 40
+Intercept     0.0000   0.0000 2.5979  -2.5979          2.5979 40
+Slope         1.0000   1.0000 0.6302   0.3698          0.6302 40
+\end{verbatim}
+
+As poor as the nominal R\textsuperscript{2} value is, it appears that
+the model's description of summary statistics is still optimistic. After
+validation, we cannot claim any meaningful predictive value at all, with
+a negative (impossible) R\textsuperscript{2} value. This output suggests
+that in a new sample of data, our model shouldn't be expected to do
+anything useful at all.
+
+\subsection{ANOVA for the model}\label{anova-for-the-model-2}
+
+Next, let's look at the ANOVA comparisons for this (admittedly terrible)
+prediction model.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{anova}\NormalTok{(mod.A2)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+                Analysis of Variance          Response: sleephrs 
+
+ Factor                                                 d.f. Partial SS  
+ alcdays                                                   1 6.083831e+00
+ bmi  (Factor+Higher Order Factors)                        2 7.844991e+00
+  All Interactions                                         1 5.345522e+00
+ female  (Factor+Higher Order Factors)                     2 5.715093e+00
+  All Interactions                                         1 5.345522e+00
+ exerany                                                   1 1.289411e+00
+ genhealth                                                 4 1.075881e+01
+ internet30  (Factor+Higher Order Factors)                 2 2.264350e+00
+  All Interactions                                         1 1.301337e-03
+ menthealth  (Factor+Higher Order Factors)                 2 2.124566e+01
+  All Interactions                                         1 1.301337e-03
+ bmi * female  (Factor+Higher Order Factors)               1 5.345522e+00
+ internet30 * menthealth  (Factor+Higher Order Factors)    1 1.301337e-03
+ TOTAL INTERACTION                                         2 5.350214e+00
+ REGRESSION                                               12 5.676073e+01
+ ERROR                                                  1015 2.342924e+03
+ MS           F    P     
+  6.083830768 2.64 0.1048
+  3.922495636 1.70 0.1833
+  5.345521775 2.32 0.1284
+  2.857546649 1.24 0.2904
+  5.345521775 2.32 0.1284
+  1.289411070 0.56 0.4550
+  2.689702722 1.17 0.3246
+  1.132174866 0.49 0.6125
+  0.001301337 0.00 0.9811
+ 10.622828725 4.60 0.0102
+  0.001301337 0.00 0.9811
+  5.345521775 2.32 0.1284
+  0.001301337 0.00 0.9811
+  2.675106916 1.16 0.3142
+  4.730061148 2.05 0.0178
+  2.308299597            
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plot}\NormalTok{(}\KeywordTok{anova}\NormalTok{(mod.A2))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-292-1.pdf}
+
+Only \texttt{menthealth} appears to carry statistically significant
+predictive value here.
+
+We can also build a plot of the AIC values attributable to each piece of
+the model.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plot}\NormalTok{(}\KeywordTok{anova}\NormalTok{(mod.A2), }\DataTypeTok{what=}\StringTok{"aic"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-293-1.pdf}
+
+We can also plot the Partial R\textsuperscript{2} values for each
+predictor. The partial R\textsuperscript{2} for \texttt{internet30}, for
+instance, is the R\textsuperscript{2} value that you would obtain if you
+first regress \texttt{internet30} on every other predictor in the model,
+take the residuals, and then regress those on \texttt{internet30}. It
+simply tells you, then, how much of the tiny amount of variation
+explained by the model as a whole is accounted for by each predictor
+after all of the other ones have already been accounted for. The partial
+R\textsuperscript{2} values, therefore, do not sum up to the total
+R\textsuperscript{2} explained by the model. In our case, the
+\texttt{menthealth} variable is again far and away the most ``useful''
+variable.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plot}\NormalTok{(}\KeywordTok{anova}\NormalTok{(mod.A2), }\DataTypeTok{what=}\StringTok{"partial"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-294-1.pdf}
+
+\subsection{Summarizing Effect Size}\label{summarizing-effect-size-2}
+
+How big are the effects we see?
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plot}\NormalTok{(}\KeywordTok{summary}\NormalTok{(mod.A2))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-295-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{summary}\NormalTok{(mod.A2)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+             Effects              Response : sleephrs 
+
+ Factor                             Low  High  Diff. Effect    S.E.    
+ alcdays                             0.0  5.00 5.00  -0.050632 0.031188
+ bmi                                23.9 30.31 6.41   0.051110 0.086734
+ female                              0.0  1.00 1.00   0.063083 0.101450
+ exerany                             0.0  1.00 1.00  -0.089786 0.120130
+ internet30                          0.0  1.00 1.00  -0.128250 0.137430
+ menthealth                          0.0  2.00 2.00  -0.045668 0.032753
+ genhealth - 1_Excellent:2_VeryGood  2.0  1.00   NA  -0.124770 0.143030
+ genhealth - 3_Good:2_VeryGood       2.0  3.00   NA  -0.033557 0.118930
+ genhealth - 4_Fair:2_VeryGood       2.0  4.00   NA  -0.333090 0.172000
+ genhealth - 5_Poor:2_VeryGood       2.0  5.00   NA   0.011282 0.258040
+ Lower 0.95 Upper 0.95
+ -0.11183   0.0105680 
+ -0.11909   0.2213100 
+ -0.13600   0.2621600 
+ -0.32552   0.1459500 
+ -0.39792   0.1414300 
+ -0.10994   0.0186030 
+ -0.40544   0.1558900 
+ -0.26694   0.1998200 
+ -0.67059   0.0044216 
+ -0.49508   0.5176400 
+
+Adjusted to: bmi=27.09563 female=0 internet30=0 menthealth=0  
+\end{verbatim}
+
+This output is easier to read as a result of using small \emph{numeric}
+labels in \texttt{genh\_n}, rather than the lengthy labels in
+\texttt{genhealth}. Interpret the results as differences in our outcome
+\texttt{sleephrs} associated with the expressed changes in predictors,
+holding the others constant.
+
+\begin{itemize}
+\tightlist
+\item
+  holding all other predictors constant, the effect of moving from
+  \texttt{alcdays} = 0 to \texttt{alcdays} = 5 is -0.05 hours of sleep.
+
+  \begin{itemize}
+  \tightlist
+  \item
+    We also have a 95\% confidence interval for this estimate, which is
+    (-0.11, 0.01). Since 0 is in that interval, we cannot conclude that
+    the effect of \texttt{alcdays} on \texttt{sleephrs} is either
+    definitely positive or definitely negative.
+  \end{itemize}
+\item
+  A similar approach can be used to describe the effects on
+  \texttt{sleephrs} associated with each predictor.
+\item
+  Note that each of the categories in \texttt{genh\_n} is compared to a
+  single baseline category. Here, that's category 2. R will pick the
+  modal category: the one that appears most often in the data. The
+  comparisons of each category against category 2 are not significant in
+  each case, at the 5\% level.
+\end{itemize}
+
+\subsection{\texorpdfstring{Plotting the Model with \texttt{ggplot} and
+\texttt{Predict}}{Plotting the Model with ggplot and Predict}}\label{plotting-the-model-with-ggplot-and-predict-2}
+
+Let's look at a series of plots describing the model for
+\texttt{sleephrs}.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{Predict}\NormalTok{(mod.A2))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-296-1.pdf}
+
+This helps us describe what is happening in terms of direction at least.
+For example,
+
+\begin{itemize}
+\tightlist
+\item
+  As \texttt{menthealth} increases, predicted \texttt{sleephrs} actually
+  decreases.
+\item
+  In general, though, the impact of these predictors on
+  \texttt{sleephrs} appears minimal.
+\end{itemize}
+
+\subsection{Plotting the model with a
+nomogram}\label{plotting-the-model-with-a-nomogram-2}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plot}\NormalTok{(}\KeywordTok{nomogram}\NormalTok{(mod.A2))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-297-1.pdf}
+
+Note the impact of our interaction terms, and how we have two lines for
+\texttt{bmi} and two lines for \texttt{menthealth} that ` that come out
+of our product terms. As with any nomogram, to make a prediction we:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  find the values of each of our predictors in the scales, and travel
+  vertically up to the Points line to read off the Points for that
+  predictor.
+\item
+  sum up the Points across all predictors, and find that location in the
+  Total Points line.
+\item
+  move vertically down from the total points line to find the estimated
+  ``linear predictor'' (\texttt{sleephrs})
+\end{enumerate}
+
+\subsection{Checking the Calibration of our
+model}\label{checking-the-calibration-of-our-model-2}
+
+There isn't any reason why we shouldn't be able to check the calibration
+of an \texttt{ols} fit, but the \texttt{plot(calibrate())} function
+doesn't seem to be working as I'd expect it to for \texttt{ols} fits, at
+the moment. This may be because we have only a limited number of
+potential predictions (over a fairly tight interval of predicted values)
+that we obtain from our model.
+
+Instead, I'll focus on residual plots.
+
+\subsection{Residual Plots for mod.A2}\label{residual-plots-for-mod.a2}
+
+We can obtain our usual residual plots for a linear model. Or, we can
+obtain things like the residuals and fitted values directly, to produce
+a plot. For example,
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plot}\NormalTok{(mod.A2}\OperatorTok{$}\NormalTok{residuals }\OperatorTok{~}\StringTok{ }\NormalTok{mod.A2}\OperatorTok{$}\NormalTok{fitted.values)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-298-1.pdf}
+
+Or we can get the same residuals vs.~fitted values plot with:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plot}\NormalTok{(mod.A2, }\StringTok{"ordinary"}\NormalTok{, }\DataTypeTok{which =} \DecValTok{1}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-299-1.pdf}
+
+\section{Refitting Model B with simply imputed
+data}\label{refitting-model-b-with-simply-imputed-data}
+
+I'll walk through the same tasks for Model \texttt{m2} that I did above
+for Model \texttt{m1}. Again, we're running this model after simple
+imputation of missing values.
+
+Using the numeric version of the \texttt{genhealth} data, called
+\texttt{genh\_n}, will ease the reviewing of later output, so we'll do
+that here, making sure R knows that \texttt{genh\_n} describes a
+categorical factor.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{d <-}\StringTok{ }\KeywordTok{datadist}\NormalTok{(smartcle2_imp1)}
+\KeywordTok{options}\NormalTok{(}\DataTypeTok{datadist =} \StringTok{"d"}\NormalTok{)}
+
+\NormalTok{mod.B2 <-}\StringTok{ }\KeywordTok{ols}\NormalTok{(sleephrs }\OperatorTok{~}\StringTok{ }\KeywordTok{rcs}\NormalTok{(menthealth, }\DecValTok{5}\NormalTok{) }\OperatorTok{+}\StringTok{ }\NormalTok{genhealth }\OperatorTok{+}\StringTok{ }
+\StringTok{                 }\NormalTok{genhealth }\OperatorTok{%ia%}\StringTok{ }\NormalTok{menthealth }\OperatorTok{+}\StringTok{ }\NormalTok{internet30 }\OperatorTok{+}
+\StringTok{                 }\NormalTok{internet30 }\OperatorTok{%ia%}\StringTok{ }\NormalTok{menthealth }\OperatorTok{+}\StringTok{ }\KeywordTok{rcs}\NormalTok{(bmi, }\DecValTok{4}\NormalTok{) }\OperatorTok{+}
+\StringTok{                 }\NormalTok{female }\OperatorTok{+}\StringTok{ }\NormalTok{female }\OperatorTok{%ia%}\StringTok{ }\NormalTok{bmi  }\OperatorTok{+}\StringTok{ }\NormalTok{alcdays }\OperatorTok{+}\StringTok{ }
+\StringTok{                 }\NormalTok{exerany, }
+             \DataTypeTok{data =}\NormalTok{ smartcle2_imp1, }\DataTypeTok{x =} \OtherTok{TRUE}\NormalTok{, }\DataTypeTok{y =} \OtherTok{TRUE}\NormalTok{)}
+\NormalTok{mod.B2}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Linear Regression Model
+ 
+ ols(formula = sleephrs ~ rcs(menthealth, 5) + genhealth + genhealth %ia% 
+     menthealth + internet30 + internet30 %ia% menthealth + rcs(bmi, 
+     4) + female + female %ia% bmi + alcdays + exerany, data = smartcle2_imp1, 
+     x = TRUE, y = TRUE)
+ 
+                Model Likelihood     Discrimination    
+                   Ratio Test           Indexes        
+ Obs    1028    LR chi2     31.84    R2       0.031    
+ sigma1.5192    d.f.           19    R2 adj   0.012    
+ d.f.   1008    Pr(> chi2) 0.0325    g        0.274    
+ 
+ Residuals
+ 
+      Min       1Q   Median       3Q      Max 
+ -6.12337 -0.95462 -0.03322  0.86403 13.69249 
+ 
+ 
+                                   Coef    S.E.   t     Pr(>|t|)
+ Intercept                          6.5183 1.0161  6.41 <0.0001 
+ menthealth                        -0.0605 0.0412 -1.47 0.1417  
+ menthealth'                        0.3943 0.3175  1.24 0.2146  
+ genhealth=2_VeryGood               0.1637 0.1513  1.08 0.2793  
+ genhealth=3_Good                   0.0691 0.1580  0.44 0.6618  
+ genhealth=4_Fair                  -0.1475 0.2140 -0.69 0.4908  
+ genhealth=5_Poor                   0.2443 0.3336  0.73 0.4641  
+ genhealth=2_VeryGood * menthealth -0.0333 0.0270 -1.23 0.2177  
+ genhealth=3_Good * menthealth      0.0065 0.0217  0.30 0.7636  
+ genhealth=4_Fair * menthealth     -0.0113 0.0233 -0.48 0.6292  
+ genhealth=5_Poor * menthealth     -0.0137 0.0275 -0.50 0.6190  
+ internet30                        -0.1221 0.1386 -0.88 0.3788  
+ internet30 * menthealth            0.0034 0.0185  0.18 0.8544  
+ bmi                                0.0253 0.0430  0.59 0.5563  
+ bmi'                               0.0129 0.1925  0.07 0.9467  
+ bmi''                             -0.1314 0.5808 -0.23 0.8210  
+ female                             0.7775 0.4746  1.64 0.1017  
+ female * bmi                      -0.0255 0.0165 -1.54 0.1228  
+ alcdays                           -0.0094 0.0063 -1.50 0.1334  
+ exerany                           -0.0713 0.1206 -0.59 0.5545  
+ 
+\end{verbatim}
+
+The model still uses 1028 observations, and shows an
+R\textsuperscript{2} value of 0.031, marginally better than what we saw
+in \texttt{mod.A2.} The likelihood ratio (drop in deviance) test is
+still highly significant.
+
+\subsection{Validating Summary
+Statistics}\label{validating-summary-statistics-3}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{432989}\NormalTok{)}
+\KeywordTok{validate}\NormalTok{(mod.B2)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+          index.orig training    test optimism index.corrected  n
+R-square      0.0305   0.0616 -0.0006   0.0622         -0.0317 40
+MSE           2.2631   2.1637  2.3358  -0.1721          2.4352 40
+g             0.2738   0.3691  0.1919   0.1772          0.0966 40
+Intercept     0.0000   0.0000  3.3422  -3.3422          3.3422 40
+Slope         1.0000   1.0000  0.5243   0.4757          0.5243 40
+\end{verbatim}
+
+Again, the model's description of summary statistics is optimistic and
+we have no reason to expect the model is of any predictive value at all.
+
+\subsection{ANOVA for the model}\label{anova-for-the-model-3}
+
+Next, let's look at the ANOVA comparisons for this model.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{anova}\NormalTok{(mod.B2)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+                Analysis of Variance          Response: sleephrs 
+
+ Factor                                                 d.f. Partial SS  
+ menthealth  (Factor+Higher Order Factors)                 7 3.270460e+01
+  All Interactions                                         5 7.342058e+00
+  Nonlinear                                                1 3.559092e+00
+ genhealth  (Factor+Higher Order Factors)                  8 1.680021e+01
+  All Interactions                                         4 7.340686e+00
+ genhealth * menthealth  (Factor+Higher Order Factors)     4 7.340686e+00
+ internet30  (Factor+Higher Order Factors)                 2 1.844060e+00
+  All Interactions                                         1 7.778417e-02
+ internet30 * menthealth  (Factor+Higher Order Factors)    1 7.778417e-02
+ bmi  (Factor+Higher Order Factors)                        4 1.210885e+01
+  All Interactions                                         1 5.505060e+00
+  Nonlinear                                                2 4.530786e+00
+ female  (Factor+Higher Order Factors)                     2 6.352010e+00
+  All Interactions                                         1 5.505060e+00
+ female * bmi  (Factor+Higher Order Factors)               1 5.505060e+00
+ alcdays                                                   1 5.207146e+00
+ exerany                                                   1 8.067239e-01
+ TOTAL NONLINEAR                                           3 8.358126e+00
+ TOTAL INTERACTION                                         6 1.310220e+01
+ TOTAL NONLINEAR + INTERACTION                             9 2.178490e+01
+ REGRESSION                                               19 7.319542e+01
+ ERROR                                                  1008 2.326489e+03
+ MS         F    P     
+ 4.67208631 2.02 0.0493
+ 1.46841162 0.64 0.6721
+ 3.55909180 1.54 0.2146
+ 2.10002607 0.91 0.5073
+ 1.83517159 0.80 0.5284
+ 1.83517159 0.80 0.5284
+ 0.92203018 0.40 0.6708
+ 0.07778417 0.03 0.8544
+ 0.07778417 0.03 0.8544
+ 3.02721254 1.31 0.2637
+ 5.50505988 2.39 0.1228
+ 2.26539276 0.98 0.3751
+ 3.17600485 1.38 0.2530
+ 5.50505988 2.39 0.1228
+ 5.50505988 2.39 0.1228
+ 5.20714639 2.26 0.1334
+ 0.80672393 0.35 0.5545
+ 2.78604205 1.21 0.3059
+ 2.18370069 0.95 0.4609
+ 2.42054479 1.05 0.3988
+ 3.85239069 1.67 0.0357
+ 2.30802520            
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plot}\NormalTok{(}\KeywordTok{anova}\NormalTok{(mod.B2))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-302-1.pdf}
+
+Again, only \texttt{menthealth} (and that just barely) is carrying
+statistically significant predictive value.
+
+Here is the AIC plot.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plot}\NormalTok{(}\KeywordTok{anova}\NormalTok{(mod.B2), }\DataTypeTok{what=}\StringTok{"aic"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-303-1.pdf}
+
+\subsection{Summarizing Effect Size}\label{summarizing-effect-size-3}
+
+How big are the effects we see?
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{summary}\NormalTok{(mod.B2)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+             Effects              Response : sleephrs 
+
+ Factor                             Low  High  Diff. Effect    S.E.    
+ menthealth                          0.0  2.00 2.00  -0.180800 0.075371
+ internet30                          0.0  1.00 1.00  -0.122060 0.138610
+ bmi                                23.9 30.31 6.41   0.152360 0.132460
+ female                              0.0  1.00 1.00   0.086907 0.102950
+ alcdays                             0.0  5.00 5.00  -0.047077 0.031342
+ exerany                             0.0  1.00 1.00  -0.071311 0.120620
+ genhealth - 1_Excellent:2_VeryGood  2.0  1.00   NA  -0.163750 0.151290
+ genhealth - 3_Good:2_VeryGood       2.0  3.00   NA  -0.094635 0.126260
+ genhealth - 4_Fair:2_VeryGood       2.0  4.00   NA  -0.311280 0.190520
+ genhealth - 5_Poor:2_VeryGood       2.0  5.00   NA   0.080564 0.319140
+ Lower 0.95 Upper 0.95
+ -0.32870   -0.032900 
+ -0.39406    0.149940 
+ -0.10757    0.412290 
+ -0.11511    0.288920 
+ -0.10858    0.014427 
+ -0.30800    0.165380 
+ -0.46062    0.133120 
+ -0.34239    0.153120 
+ -0.68515    0.062577 
+ -0.54569    0.706820 
+
+Adjusted to: menthealth=0 genhealth=2_VeryGood internet30=0 bmi=27.09563 female=0  
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plot}\NormalTok{(}\KeywordTok{summary}\NormalTok{(mod.B2))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-304-1.pdf}
+
+This output is easier to read as a result of using small \emph{numeric}
+labels in \texttt{genh\_n}, rather than the lengthy labels in
+\texttt{genhealth}. The results are, again, interpreted as differences
+in predicted \texttt{sleephrs}. For example,
+
+\begin{itemize}
+\tightlist
+\item
+  holding all other predictors constant, the effect of moving from
+  \texttt{menthealth} = 0 to \texttt{menthealth} = 2 is a decline of
+  0.18 in predicted \texttt{sleephrs}, with 95\% CI (-0.33, -0.03)
+  hours.
+\end{itemize}
+
+\subsection{\texorpdfstring{Plotting the Model with \texttt{ggplot} and
+\texttt{Predict}}{Plotting the Model with ggplot and Predict}}\label{plotting-the-model-with-ggplot-and-predict-3}
+
+Again, consider a series of plots describing the model \texttt{mod.B2}.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{Predict}\NormalTok{(mod.B2))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-305-1.pdf}
+
+Note the small \texttt{kink} in the \texttt{bmi} plot. To what do you
+attribute this?
+
+\section{Comparing Model B.2 to Model A.2 after simple
+imputation}\label{comparing-model-b.2-to-model-a.2-after-simple-imputation}
+
+We can refit the models with \texttt{glm} and then compare them with
+\texttt{anova}, \texttt{aic} and \texttt{bic} approaches, if we like.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{mA2_lm <-}\StringTok{ }\KeywordTok{lm}\NormalTok{(sleephrs }\OperatorTok{~}\StringTok{ }\NormalTok{alcdays }\OperatorTok{+}\StringTok{ }\NormalTok{bmi}\OperatorTok{*}\NormalTok{female }\OperatorTok{+}\StringTok{ }\NormalTok{exerany }\OperatorTok{+}\StringTok{ }
+\StringTok{                  }\NormalTok{genhealth }\OperatorTok{+}\StringTok{ }\NormalTok{internet30}\OperatorTok{*}\NormalTok{menthealth, }
+              \DataTypeTok{data =}\NormalTok{ smartcle2_imp1)}
+
+\NormalTok{mB2_lm <-}\StringTok{ }\KeywordTok{lm}\NormalTok{(sleephrs }\OperatorTok{~}\StringTok{ }\KeywordTok{rcs}\NormalTok{(menthealth, }\DecValTok{5}\NormalTok{) }\OperatorTok{+}\StringTok{ }\NormalTok{genhealth }\OperatorTok{+}\StringTok{ }
+\StringTok{                 }\NormalTok{genhealth }\OperatorTok{%ia%}\StringTok{ }\NormalTok{menthealth }\OperatorTok{+}\StringTok{ }\NormalTok{internet30 }\OperatorTok{+}
+\StringTok{                 }\NormalTok{internet30 }\OperatorTok{%ia%}\StringTok{ }\NormalTok{menthealth }\OperatorTok{+}\StringTok{ }\KeywordTok{rcs}\NormalTok{(bmi, }\DecValTok{4}\NormalTok{) }\OperatorTok{+}
+\StringTok{                 }\NormalTok{female }\OperatorTok{+}\StringTok{ }\NormalTok{female }\OperatorTok{%ia%}\StringTok{ }\NormalTok{bmi  }\OperatorTok{+}\StringTok{ }\NormalTok{alcdays }\OperatorTok{+}\StringTok{ }
+\StringTok{                 }\NormalTok{exerany, }
+             \DataTypeTok{data =}\NormalTok{ smartcle2_imp1)}
+\end{Highlighting}
+\end{Shaded}
+
+\subsection{Comparison by Analysis of
+Variance}\label{comparison-by-analysis-of-variance}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{anova}\NormalTok{(mA2_lm, mB2_lm)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Analysis of Variance Table
+
+Model 1: sleephrs ~ alcdays + bmi * female + exerany + genhealth + internet30 * 
+    menthealth
+Model 2: sleephrs ~ rcs(menthealth, 5) + genhealth + genhealth %ia% menthealth + 
+    internet30 + internet30 %ia% menthealth + rcs(bmi, 4) + female + 
+    female %ia% bmi + alcdays + exerany
+  Res.Df    RSS Df Sum of Sq      F Pr(>F)
+1   1015 2342.9                           
+2   1008 2326.5  7    16.435 1.0172 0.4172
+\end{verbatim}
+
+The additional terms in model B2 don't seem to improve the fit
+significantly.
+
+\subsection{Comparing AIC and BIC}\label{comparing-aic-and-bic-1}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{glance}\NormalTok{(mA2_lm)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+   r.squared adj.r.squared    sigma statistic    p.value df    logLik
+1 0.02365341     0.0121104 1.519309  2.049154 0.01784591 13 -1882.094
+       AIC      BIC deviance df.residual
+1 3792.188 3861.283 2342.924        1015
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{glance}\NormalTok{(mB2_lm)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+  r.squared adj.r.squared    sigma statistic    p.value df    logLik
+1 0.0305021    0.01222783 1.519219  1.669129 0.03567068 20 -1878.476
+       AIC      BIC deviance df.residual
+1 3798.952 3902.595 2326.489        1008
+\end{verbatim}
+
+Model \texttt{mA2\_lm} shows lower AIC and BIC than does
+\texttt{mB2\_lm}, but as we see in the R\textsuperscript{2} values, they
+are both terrible models.
+
+\section{Dealing with Missing Data via Multiple
+Imputation}\label{dealing-with-missing-data-via-multiple-imputation-1}
+
+Next, we'll use the \texttt{aregImpute} function within the
+\texttt{Hmisc} package to predict all missing values for all of our
+variables, using additive regression bootstrapping and predictive mean
+matching. The steps for this work are as follows:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \texttt{aregImpute} draws a sample with replacement from the
+  observations where the target variable is observed, not missing.
+\item
+  \texttt{aregImpute} then fits a flexible additive model to predict
+  this target variable while finding the optimum transformation of it.
+\item
+  \texttt{aregImpute} then uses this fitted flexible model to predict
+  the target variable in all of the original observations.
+\item
+  Finally, \texttt{aregImpute} imputes each missing value of the target
+  variable with the observed value whose predicted transformed value is
+  closest to the predicted transformed value of the missing value.
+\end{enumerate}
+
+We'll start with the \texttt{smartcle2\_imp0} data set, which contains
+only the subjects in the original \texttt{smartcle1} data where
+\texttt{sleephrs} is available, and which includes only the variables of
+interest to us, including both the factor (\texttt{genhealth}) and
+numeric (\texttt{genh\_n}) versions of the genhealth data.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{summary}\NormalTok{(smartcle2_imp0)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+     SEQNO              sleephrs         alcdays            bmi       
+ Min.   :2.016e+09   Min.   : 1.000   Min.   : 0.000   Min.   :12.71  
+ 1st Qu.:2.016e+09   1st Qu.: 6.000   1st Qu.: 0.000   1st Qu.:23.70  
+ Median :2.016e+09   Median : 7.000   Median : 1.000   Median :26.68  
+ Mean   :2.016e+09   Mean   : 7.018   Mean   : 4.672   Mean   :27.86  
+ 3rd Qu.:2.016e+09   3rd Qu.: 8.000   3rd Qu.: 4.000   3rd Qu.:30.53  
+ Max.   :2.016e+09   Max.   :20.000   Max.   :30.000   Max.   :66.06  
+                                      NA's   :45       NA's   :82     
+    exerany           female             genhealth     internet30    
+ Min.   :0.0000   Min.   :0.0000   1_Excellent:172   Min.   :0.0000  
+ 1st Qu.:1.0000   1st Qu.:0.0000   2_VeryGood :349   1st Qu.:1.0000  
+ Median :1.0000   Median :1.0000   3_Good     :341   Median :1.0000  
+ Mean   :0.7622   Mean   :0.6012   4_Fair     :120   Mean   :0.8112  
+ 3rd Qu.:1.0000   3rd Qu.:1.0000   5_Poor     : 44   3rd Qu.:1.0000  
+ Max.   :1.0000   Max.   :1.0000   NA's       :  2   Max.   :1.0000  
+ NA's   :2                                           NA's   :6       
+   menthealth         genh_n     
+ Min.   : 0.000   Min.   :1.000  
+ 1st Qu.: 0.000   1st Qu.:2.000  
+ Median : 0.000   Median :2.000  
+ Mean   : 2.707   Mean   :2.527  
+ 3rd Qu.: 2.000   3rd Qu.:3.000  
+ Max.   :30.000   Max.   :5.000  
+ NA's   :11       NA's   :2      
+\end{verbatim}
+
+The \texttt{smartcle2\_imp0} data set contains 1028 rows (subjects) and
+10 columns (variables.)
+
+\subsection{\texorpdfstring{Using \texttt{aregImpute} to fit a multiple
+imputation
+model}{Using aregImpute to fit a multiple imputation model}}\label{using-aregimpute-to-fit-a-multiple-imputation-model-1}
+
+To set up \texttt{aregImpute} here, we'll need to specify:
+
+\begin{itemize}
+\tightlist
+\item
+  a suitable random seed with \texttt{set.seed} so we can replicate our
+  work later
+\item
+  a data set via the \texttt{datadist} stuff shown below
+\item
+  the variables we want to include in the imputation process, which
+  should include, at a minimum, any variables with missing values, and
+  any variables we want to include in our outcome models
+\item
+  \texttt{n.impute} = number of imputations, we'll run 20 here\footnote{100
+    is generally safe but time-consuming. In the old days, we used to
+    say 5. A reasonable idea is to identify the fraction of missingness
+    in your variable with the most missingness, and if that's 0.10, then
+    you should run at least 100(0.10) = 10 sets of imputations.}
+\item
+  \texttt{nk} = number of knots to describe level of complexity, with
+  our choice \texttt{nk\ =\ c(0,\ 3)} we'll fit both linear models and
+  models with restricted cubic splines with 3 knots (this approach will
+  wind up throwing some warnings here because some of our variables with
+  missing values have only a few options so fitting splines is tough.)
+\item
+  \texttt{tlinear\ =\ FALSE} allows the target variable for imputation
+  to have a non-linear transformation when \texttt{nk} is 3 or more.
+  Here, I'll use \texttt{tlinear\ =\ TRUE}, the default.
+\item
+  \texttt{B\ =\ 10} specifies 10 bootstrap samples will be used
+\item
+  \texttt{pr\ =\ FALSE} tells the machine not to print out which
+  iteration is running as it goes.
+\item
+  \texttt{data} specifies the source of the variables
+\end{itemize}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{432365}\NormalTok{)}
+\NormalTok{dd <-}\StringTok{ }\KeywordTok{datadist}\NormalTok{(smartcle2_imp0)}
+\KeywordTok{options}\NormalTok{(}\DataTypeTok{datadist =} \StringTok{"dd"}\NormalTok{)}
+
+\NormalTok{imp_fit <-}\StringTok{ }\KeywordTok{aregImpute}\NormalTok{(}\OperatorTok{~}\StringTok{ }\NormalTok{sleephrs }\OperatorTok{+}\StringTok{ }\NormalTok{alcdays }\OperatorTok{+}\StringTok{ }\NormalTok{bmi }\OperatorTok{+}\StringTok{ }\NormalTok{exerany }\OperatorTok{+}
+\StringTok{                          }\NormalTok{female }\OperatorTok{+}\StringTok{ }\NormalTok{genh_n }\OperatorTok{+}\StringTok{ }\NormalTok{internet30 }\OperatorTok{+}
+\StringTok{                          }\NormalTok{menthealth, }
+                   \DataTypeTok{nk =} \KeywordTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{3}\NormalTok{), }\DataTypeTok{tlinear =} \OtherTok{TRUE}\NormalTok{,}
+                   \DataTypeTok{data =}\NormalTok{ smartcle2_imp0, }\DataTypeTok{B =} \DecValTok{10}\NormalTok{, }
+                   \DataTypeTok{n.impute =} \DecValTok{20}\NormalTok{, }\DataTypeTok{pr =} \OtherTok{FALSE}\NormalTok{) }
+\end{Highlighting}
+\end{Shaded}
+
+OK. Here is the imputation model. The summary here isn't especially
+critical. We want to see what was run, but to see what the results look
+like, we'll need a plot, to come.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{imp_fit}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+
+Multiple Imputation using Bootstrap and PMM
+
+aregImpute(formula = ~sleephrs + alcdays + bmi + exerany + female + 
+    genh_n + internet30 + menthealth, data = smartcle2_imp0, 
+    n.impute = 20, nk = c(0, 3), tlinear = TRUE, pr = FALSE, 
+    B = 10)
+
+n: 1028     p: 8    Imputations: 20     nk: 0 
+
+Number of NAs:
+  sleephrs    alcdays        bmi    exerany     female     genh_n 
+         0         45         82          2          0          2 
+internet30 menthealth 
+         6         11 
+
+           type d.f.
+sleephrs      s    1
+alcdays       s    1
+bmi           s    1
+exerany       l    1
+female        l    1
+genh_n        s    1
+internet30    l    1
+menthealth    s    1
+
+Transformation of Target Variables Forced to be Linear
+
+R-squares for Predicting Non-Missing Values for Each Variable
+Using Last Imputations of Predictors
+   alcdays        bmi    exerany     genh_n internet30 menthealth 
+     0.071      0.094      0.166      0.212      0.151      0.083 
+
+Resampling results for determining the complexity of imputation models
+
+Variable being imputed: alcdays 
+                                          nk=0   nk=3
+Bootstrap bias-corrected R^2            0.0687 0.0612
+10-fold cross-validated  R^2            0.0706 0.0678
+Bootstrap bias-corrected mean   |error| 5.3804 5.2618
+10-fold cross-validated  mean   |error| 4.9122 4.9570
+Bootstrap bias-corrected median |error| 3.7094 3.7051
+10-fold cross-validated  median |error| 1.6790 1.7335
+
+Variable being imputed: bmi 
+                                           nk=0   nk=3
+Bootstrap bias-corrected R^2             0.0904  0.100
+10-fold cross-validated  R^2             0.1061  0.103
+Bootstrap bias-corrected mean   |error|  4.3705  4.400
+10-fold cross-validated  mean   |error| 27.8053 27.767
+Bootstrap bias-corrected median |error|  3.2927  3.409
+10-fold cross-validated  median |error| 26.8306 26.687
+
+Variable being imputed: exerany 
+                                         nk=0  nk=3
+Bootstrap bias-corrected R^2            0.135 0.116
+10-fold cross-validated  R^2            0.135 0.125
+Bootstrap bias-corrected mean   |error| 0.317 0.317
+10-fold cross-validated  mean   |error| 0.930 0.899
+Bootstrap bias-corrected median |error| 0.248 0.231
+10-fold cross-validated  median |error| 0.740 0.671
+
+Variable being imputed: genh_n 
+                                         nk=0  nk=3
+Bootstrap bias-corrected R^2            0.198 0.236
+10-fold cross-validated  R^2            0.200 0.225
+Bootstrap bias-corrected mean   |error| 0.744 0.731
+10-fold cross-validated  mean   |error| 2.538 2.531
+Bootstrap bias-corrected median |error| 0.646 0.650
+10-fold cross-validated  median |error| 2.532 2.524
+
+Variable being imputed: internet30 
+                                         nk=0  nk=3
+Bootstrap bias-corrected R^2            0.101 0.125
+10-fold cross-validated  R^2            0.109 0.121
+Bootstrap bias-corrected mean   |error| 0.279 0.272
+10-fold cross-validated  mean   |error| 0.992 0.983
+Bootstrap bias-corrected median |error| 0.190 0.190
+10-fold cross-validated  median |error| 0.817 0.819
+
+Variable being imputed: menthealth 
+                                          nk=0  nk=3
+Bootstrap bias-corrected R^2            0.0573 0.102
+10-fold cross-validated  R^2            0.0969 0.116
+Bootstrap bias-corrected mean   |error| 3.8132 3.712
+10-fold cross-validated  mean   |error| 3.1552 3.112
+Bootstrap bias-corrected median |error| 2.3749 1.979
+10-fold cross-validated  median |error| 0.9384 0.783
+\end{verbatim}
+
+OK, let's plot these imputed values. Note that we had six predictors
+with missing values in our data set, and so if we plot each of those,
+we'll wind up with six plots. I'll arrange them in a grid with three
+rows and two columns.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{par}\NormalTok{(}\DataTypeTok{mfrow =} \KeywordTok{c}\NormalTok{(}\DecValTok{3}\NormalTok{,}\DecValTok{2}\NormalTok{))}
+\KeywordTok{plot}\NormalTok{(imp_fit)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-312-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{par}\NormalTok{(}\DataTypeTok{mfrow =} \KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{1}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+From these cumulative distribution functions, we can see that, for
+example,
+
+\begin{itemize}
+\tightlist
+\item
+  we imputed \texttt{bmi} values mostly between 20 and 35, with a few
+  values below 20 or above 40.
+\item
+  most of our imputed \texttt{alcdays} were between 0 and 5
+\item
+  we imputed 1 for \texttt{internet30} for about 70\% of the subjects,
+  and 0 for the other 30\%.
+\end{itemize}
+
+This predictive mean matching method never imputes a value for a
+variable that does not already exist in the data.
+
+\section{Combining the Imputation and Outcome
+Models}\label{combining-the-imputation-and-outcome-models-1}
+
+So, now we have an imputation model, called \texttt{imp\_fit}. and two
+outcome models: \texttt{mod.A} and \texttt{mod.B}. What do we do with
+them?
+
+\subsection{Model A with Multiple
+Imputation}\label{model-a-with-multiple-imputation}
+
+To build the \texttt{mA\_imp} multiple imputation fit for model
+\texttt{mod.A}, we use the \texttt{fit.mult.impute} command, and specify
+the model, the fitter (here, \texttt{lrm}), the imputation model
+(\texttt{xtrans\ =\ imp\_fit}) and the data set prior to imputation
+(\texttt{smartcle2\_imp0}).
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{mA_imp <-}\StringTok{ }\KeywordTok{fit.mult.impute}\NormalTok{(sleephrs }\OperatorTok{~}\StringTok{ }\NormalTok{alcdays }\OperatorTok{+}\StringTok{ }\NormalTok{bmi}\OperatorTok{*}\NormalTok{female }\OperatorTok{+}\StringTok{ }
+\StringTok{                              }\NormalTok{exerany }\OperatorTok{+}\StringTok{ }\KeywordTok{catg}\NormalTok{(genh_n) }\OperatorTok{+}\StringTok{ }
+\StringTok{                              }\NormalTok{internet30}\OperatorTok{*}\NormalTok{menthealth,}
+                          \DataTypeTok{fitter =}\NormalTok{ ols, }\DataTypeTok{xtrans =}\NormalTok{ imp_fit,}
+                          \DataTypeTok{data =}\NormalTok{ smartcle2_imp0, }
+                          \DataTypeTok{x =} \OtherTok{TRUE}\NormalTok{, }\DataTypeTok{y =} \OtherTok{TRUE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+
+Variance Inflation Factors Due to Imputation:
+
+              Intercept                 alcdays                     bmi 
+                   1.22                    1.02                    1.29 
+                 female                 exerany                genh_n=2 
+                   1.21                    1.01                    1.00 
+               genh_n=3                genh_n=4                genh_n=5 
+                   1.01                    1.01                    1.00 
+             internet30              menthealth            bmi * female 
+                   1.01                    1.01                    1.22 
+internet30 * menthealth 
+                   1.01 
+
+Rate of Missing Information:
+
+              Intercept                 alcdays                     bmi 
+                   0.18                    0.02                    0.22 
+                 female                 exerany                genh_n=2 
+                   0.18                    0.01                    0.00 
+               genh_n=3                genh_n=4                genh_n=5 
+                   0.01                    0.01                    0.00 
+             internet30              menthealth            bmi * female 
+                   0.01                    0.01                    0.18 
+internet30 * menthealth 
+                   0.01 
+
+d.f. for t-distribution for Tests of Single Coefficients:
+
+              Intercept                 alcdays                     bmi 
+                 593.81                56125.67                  384.31 
+                 female                 exerany                genh_n=2 
+                 618.43               204840.97              2743445.99 
+               genh_n=3                genh_n=4                genh_n=5 
+              197711.45               230304.96               812145.77 
+             internet30              menthealth            bmi * female 
+              573166.43               100933.56                  582.27 
+internet30 * menthealth 
+              149596.38 
+
+The following fit components were averaged over the 20 model fits:
+
+  fitted.values stats linear.predictors 
+\end{verbatim}
+
+OK. Let's get the familiar description of an \texttt{ols} model, after
+this multiple imputation.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{mA_imp}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Linear Regression Model
+ 
+ fit.mult.impute(formula = sleephrs ~ alcdays + bmi * female + 
+     exerany + catg(genh_n) + internet30 * menthealth, fitter = ols, 
+     xtrans = imp_fit, data = smartcle2_imp0, x = TRUE, y = TRUE)
+ 
+                Model Likelihood     Discrimination    
+                   Ratio Test           Indexes        
+ Obs    1028    LR chi2     25.38    R2       0.024    
+ sigma1.5187    d.f.           12    R2 adj   0.013    
+ d.f.   1015    Pr(> chi2) 0.0131    g        0.249    
+ 
+ Residuals
+ 
+     Min      1Q  Median      3Q     Max 
+ -6.1580 -0.9603 -0.0241  0.8660 13.8147 
+ 
+ 
+                         Coef    S.E.   t     Pr(>|t|)
+ Intercept                7.0186 0.4653 15.09 <0.0001 
+ alcdays                 -0.0098 0.0062 -1.59 0.1125  
+ bmi                      0.0065 0.0150  0.43 0.6642  
+ female                   0.6880 0.5007  1.37 0.1697  
+ exerany                 -0.0879 0.1207 -0.73 0.4665  
+ genh_n=2                 0.1274 0.1431  0.89 0.3735  
+ genh_n=3                 0.0966 0.1487  0.65 0.5160  
+ genh_n=4                -0.2022 0.1950 -1.04 0.3000  
+ genh_n=5                 0.1381 0.2727  0.51 0.6126  
+ internet30              -0.1200 0.1375 -0.87 0.3829  
+ menthealth              -0.0212 0.0162 -1.31 0.1915  
+ bmi * female            -0.0231 0.0175 -1.32 0.1875  
+ internet30 * menthealth -0.0018 0.0178 -0.10 0.9216  
+ 
+\end{verbatim}
+
+We can obtain an ANOVA plot and an AIC plot to look at the predictors:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{par}\NormalTok{(}\DataTypeTok{mfrow =} \KeywordTok{c}\NormalTok{(}\DecValTok{2}\NormalTok{,}\DecValTok{1}\NormalTok{))}
+\KeywordTok{plot}\NormalTok{(}\KeywordTok{anova}\NormalTok{(mA_imp))}
+\KeywordTok{plot}\NormalTok{(}\KeywordTok{anova}\NormalTok{(mA_imp), }\DataTypeTok{what=}\StringTok{"aic"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-315-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{par}\NormalTok{(}\DataTypeTok{mfrow =} \KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{1}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+Here's the summary of effect sizes.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{summary}\NormalTok{(mA_imp)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+             Effects              Response : sleephrs 
+
+ Factor       Low  High  Diff. Effect    S.E.     Lower 0.95 Upper 0.95
+ alcdays       0.0  4.00 4.00  -0.039305 0.024745 -0.087862  0.0092510 
+ bmi          23.7 30.53 6.83   0.044453 0.102380 -0.156450  0.2453600 
+ female        0.0  1.00 1.00   0.072470 0.103040 -0.129720  0.2746600 
+ exerany       0.0  1.00 1.00  -0.087925 0.120690 -0.324760  0.1489100 
+ internet30    0.0  1.00 1.00  -0.120040 0.137520 -0.389900  0.1498100 
+ menthealth    0.0  2.00 2.00  -0.042465 0.032493 -0.106230  0.0212970 
+ genh_n - 1:2  2.0  1.00   NA  -0.127370 0.143050 -0.408080  0.1533300 
+ genh_n - 3:2  2.0  3.00   NA  -0.030744 0.119400 -0.265030  0.2035500 
+ genh_n - 4:2  2.0  4.00   NA  -0.329540 0.172410 -0.667870  0.0087869 
+ genh_n - 5:2  2.0  5.00   NA   0.010733 0.258480 -0.496490  0.5179500 
+
+Adjusted to: bmi=26.68 female=0 internet30=0 menthealth=0  
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plot}\NormalTok{(}\KeywordTok{summary}\NormalTok{(mA_imp))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-316-1.pdf}
+
+And here is the nomogram.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plot}\NormalTok{(}\KeywordTok{nomogram}\NormalTok{(mA_imp))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-317-1.pdf}
+
+Here are the descriptive model plots:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{Predict}\NormalTok{(mA_imp))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-318-1.pdf}
+
+We can still do things like validate the summary statistics, too.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{validate}\NormalTok{(mA_imp)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+          index.orig training   test optimism index.corrected  n
+R-square      0.0249   0.0434 0.0041   0.0394         -0.0145 40
+MSE           2.2762   2.2940 2.3249  -0.0309          2.3071 40
+g             0.2458   0.3247 0.1889   0.1358          0.1100 40
+Intercept     0.0000   0.0000 2.8426  -2.8426          2.8426 40
+Slope         1.0000   1.0000 0.5940   0.4060          0.5940 40
+\end{verbatim}
+
+The same approach can be used to build a \texttt{mB\_imp} multiple
+imputation fit for \texttt{mod.B}, using the \texttt{fit.mult.impute}
+command, and specifying the model, the fitter (here, \texttt{ols}), the
+imputation model (\texttt{xtrans\ =\ imp\_fit}) and the data set prior
+to imputation (\texttt{smartcle2\_imp0}). We'll skip it for now. The
+model remains terrible.
 
 \bibliography{text.bib}
 
