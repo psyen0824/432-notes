@@ -821,7 +821,7 @@ summary(c2_m7)
     + Can the available data answer our question reliably?
 2. Additivity and linearity - most important assumption of a regression model is that its deterministic component is a linear function of the predictors. We often think about transformations in this setting.
 3. Independence of errors - errors from the prediction line are independent of each other
-4. Equal variance of errors - if this is violated, we can more efficiently estimate paramaters using *weighted least squares* approaches, where each point is weighted inversely proportional to its variance, but this doesn't affect the coefficients much, if at all.
+4. Equal variance of errors - if this is violated, we can more efficiently estimate parameters using *weighted least squares* approaches, where each point is weighted inversely proportional to its variance, but this doesn't affect the coefficients much, if at all.
 5. Normality of errors - not generally important for estimating the regression line
 
 ### Checking Assumptions in model `c2_m7`
