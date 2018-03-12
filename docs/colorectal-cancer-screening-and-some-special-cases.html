@@ -31,8 +31,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   
   
-<link rel="prev" href="logistic-regression-and-the-resect-data.html">
-<link rel="next" href="linear-regression-and-the-smartcle1-data.html">
+<link rel="prev" href="linear-regression-and-the-smartcle1-data.html">
+<link rel="next" href="references.html">
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
@@ -584,16 +584,20 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="logistic-regression-and-the-smartcle1-data" class="section level1">
-<h1><span class="header-section-number">Chapter 14</span> Logistic Regression and the <code>smartcle1</code> data</h1>
-<div id="the-smartcle1-data" class="section level2">
-<h2><span class="header-section-number">14.1</span> The <code>smartcle1</code> data</h2>
-<p>Recall that the <code>smartcle1.csv</code> data file available on the Data and Code page of <a href="https://github.com/THOMASELOVE/432-2018">our website</a> describes information on 11 variables for 1036 respondents to the BRFSS 2016, who live in the Cleveland-Elyria, OH, Metropolitan Statistical Area. As we’ve discussed in previous work, the variables in the <code>smartcle1.csv</code> file are listed below, along with (in some cases) the BRFSS items that generate these responses.</p>
-<table style="width:94%;">
-<colgroup>
-<col width="15%" />
-<col width="79%" />
-</colgroup>
+<div id="colorectal-cancer-screening-and-some-special-cases" class="section level1">
+<h1><span class="header-section-number">Chapter 16</span> Colorectal Cancer Screening and Some Special Cases</h1>
+<p>In this Chapter, we discuss two issues as yet unraised regarding regression on a binary outcome.</p>
+<ol style="list-style-type: decimal">
+<li><p>What do we do if our binary outcome is not available for each subject individually, but instead aggregated?</p></li>
+<li><p>What is probit regression, and how can we use it as an alternative to logistic regression on a binary outcome?</p></li>
+</ol>
+<div id="logistic-regression-for-aggregated-data" class="section level2">
+<h2><span class="header-section-number">16.1</span> Logistic Regression for Aggregated Data</h2>
+<div id="colorectal-cancer-screening-data" class="section level3">
+<h3><span class="header-section-number">16.1.1</span> Colorectal Cancer Screening Data</h3>
+<p>The <code>screening.csv</code> data (imported into the R tibble <code>colscr</code> are simulated. They mirror a subset of the actual results from the <a href="http://www.betterhealthpartnership.org/data_center/">Better Health Partnership</a>’s pilot study of colorectal cancer screening in primary care clinics in Northeast Ohio, but the numbers have been fuzzed slightly, and the clinics have been de-identified and moved around from system to system.</p>
+<p>Available to us are the following variables:</p>
+<table>
 <thead>
 <tr class="header">
 <th align="right">Variable</th>
@@ -602,1374 +606,412 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </thead>
 <tbody>
 <tr class="odd">
-<td align="right"><code>SEQNO</code></td>
-<td>respondent identification number (all begin with 2016)</td>
+<td align="right"><code>location</code></td>
+<td>clinic code</td>
 </tr>
 <tr class="even">
-<td align="right"><code>physhealth</code></td>
-<td>Now thinking about your physical health, which includes physical illness and injury, for how many days during the past 30 days was your physical health not good?</td>
+<td align="right"><code>subjects</code></td>
+<td>number of subjects reported by clinic</td>
 </tr>
 <tr class="odd">
-<td align="right"><code>menthealth</code></td>
-<td>Now thinking about your mental health, which includes stress, depression, and problems with emotions, for how many days during the past 30 days was your mental health not good?</td>
+<td align="right"><code>screen_rate</code></td>
+<td>proportion of <code>subjects</code> who were screened</td>
 </tr>
 <tr class="even">
-<td align="right"><code>poorhealth</code></td>
-<td>During the past 30 days, for about how many days did poor physical or mental health keep you from doing your usual activities, such as self-care, work, or recreation?</td>
+<td align="right"><code>screened</code></td>
+<td>number of <code>subjects</code> who were screened</td>
 </tr>
 <tr class="odd">
-<td align="right"><code>genhealth</code></td>
-<td>Would you say that in general, your health is … (five categories: Excellent, Very Good, Good, Fair or Poor)</td>
+<td align="right"><code>notscreened</code></td>
+<td>number of <code>subjects</code> not screened</td>
 </tr>
 <tr class="even">
-<td align="right"><code>bmi</code></td>
-<td>Body mass index, in kg/m<sup>2</sup></td>
+<td align="right"><code>meanage</code></td>
+<td>mean age of clinic’s subjects, years</td>
 </tr>
 <tr class="odd">
 <td align="right"><code>female</code></td>
-<td>Sex, 1 = female, 0 = male</td>
+<td>% of clinic’s subjects who are female</td>
 </tr>
 <tr class="even">
-<td align="right"><code>internet30</code></td>
-<td>Have you used the internet in the past 30 days? (1 = yes, 0 = no)</td>
+<td align="right"><code>pct_lowins</code></td>
+<td>% of clinic’s subjects who have Medicaid or are uninsured</td>
 </tr>
 <tr class="odd">
-<td align="right"><code>exerany</code></td>
-<td>During the past month, other than your regular job, did you participate in any physical activities or exercises such as running, calisthenics, golf, gardening, or walking for exercise? (1 = yes, 0 = no)</td>
-</tr>
-<tr class="even">
-<td align="right"><code>sleephrs</code></td>
-<td>On average, how many hours of sleep do you get in a 24-hour period?</td>
-</tr>
-<tr class="odd">
-<td align="right"><code>alcdays</code></td>
-<td>How many days during the past 30 days did you have at least one drink of any alcoholic beverage such as beer, wine, a malt beverage or liquor?</td>
+<td align="right"><code>system</code></td>
+<td>system code</td>
 </tr>
 </tbody>
 </table>
-<p>In this section, we’ll use some of the variables described above to predict the binary outcome: <code>exerany</code>.</p>
-</div>
-<div id="thinking-about-non-linear-terms" class="section level2">
-<h2><span class="header-section-number">14.2</span> Thinking About Non-Linear Terms</h2>
-<p>We have enough observations here to consider some non-linearity for our model.</p>
-<p>In addition, since the <code>genhealth</code> variable is an ordinal variable and multi-categorical, we should consider how to model it. We have three options:</p>
-<ol style="list-style-type: decimal">
-<li>include it as a factor in the model (the default approach)</li>
-<li>build a numeric version of that variable, and then restrict our model to treat that numeric variable as ordinal (forcing the categories to affect the <code>exerany</code> probabilities in an ordinal way), rather than as a simple nominal factor (so that if the effect of fair vs. good was to decrease the probability of ‘exerany’, then the effect of poor vs. good would have to decrease the probability at least as much as fair vs. good did.) Treating the <code>genhealth</code> variable as ordinal could be accomplished with the <code>scored</code> function in the <code>rms</code> package.</li>
-<li>build a numeric version of <code>genhealth</code> and then use the <code>catg</code> function to specify the predictor as nominal and categorical, but this will lead to essentially the same model as choice 1.</li>
-</ol>
-<p>Suppose we’ve decided to treat the <code>genhealth</code> data as categorical, without restricting the effect of its various levels to be ordinal. Suppose also that we’ve decided to include the following seven variables in our model for <code>exerany</code>:</p>
-<ul>
-<li><code>physhealth</code></li>
-<li><code>menthealth</code></li>
-<li><code>genhealth</code></li>
-<li><code>bmi</code></li>
-<li><code>female</code></li>
-<li><code>internet30</code></li>
-<li><code>sleephrs</code></li>
-</ul>
-<p>Suppose we have a subject matter understanding that:</p>
-<ul>
-<li>the impact of <code>bmi</code> on <code>exerany</code> is affected by <code>female</code>, so we plan a <code>female</code> x <code>bmi</code> interaction term</li>
-<li>we’re using <code>internet30</code> as a proxy for poverty, and we think that an interaction with self-reported <code>genhealth</code> will be helpful in our model as well.</li>
-</ul>
-<p>Note that we do have some missing values in some of these predictors, so we’ll have to deal with that soon.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">smartcle1 <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">select</span>(exerany, physhealth, menthealth, 
-                     genhealth, bmi, female, internet30, 
-                     sleephrs) <span class="op">%&gt;%</span>
-<span class="st">    </span><span class="kw">skim</span>()</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">colscr <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">skim</span>()</code></pre></div>
 <pre><code>Skim summary statistics
- n obs: 1036 
- n variables: 8 
+ n obs: 26 
+ n variables: 9 
 
 Variable type: factor 
-  variable missing complete    n n_unique
- genhealth       3     1033 1036        5
-                             top_counts ordered
- 2_V: 350, 3_G: 344, 1_E: 173, 4_F: 122   FALSE
+ variable missing complete  n n_unique                     top_counts
+ location       0       26 26       26         A: 1, B: 1, C: 1, D: 1
+   system       0       26 26        4 Sys: 7, Sys: 7, Sys: 6, Sys: 6
+ ordered
+   FALSE
+   FALSE
 
 Variable type: integer 
-   variable missing complete    n mean   sd p0 p25 median p75 p100
-    exerany       3     1033 1036 0.76 0.43  0   1      1   1    1
-     female       0     1036 1036 0.6  0.49  0   0      1   1    1
- internet30       6     1030 1036 0.81 0.39  0   1      1   1    1
- menthealth      11     1025 1036 2.72 6.82  0   0      0   2   30
- physhealth      17     1019 1036 3.97 8.67  0   0      0   2   30
-   sleephrs       8     1028 1036 7.02 1.53  1   6      7   8   20
+    variable missing complete  n    mean      sd  p0     p25 median
+ notscreened       0       26 26  663.23  271.17 231  508.75  611  
+    screened       0       26 26 2584.04 1765.11 572 1395.25 2169.5
+    subjects       0       26 26 3247.27 1945.83 803 1914.75 2765.5
+     p75 p100
+  791    1356
+ 2716    6947
+ 3607.75 7677
 
 Variable type: numeric 
- variable missing complete    n  mean   sd    p0  p25 median   p75  p100
-      bmi      84      952 1036 27.89 6.47 12.71 23.7  26.68 30.53 66.06</code></pre>
+    variable missing complete  n  mean     sd    p0   p25 median   p75
+      female       0       26 26 58.72  6.29  46.2  55.42  60.05 62.62
+     meanage       0       26 26 60.58  1.93  58    58.82  60.5  61.98
+  pct_lowins       0       26 26 24.47 19.13   0.3   4.8   23.95 44.03
+ screen_rate       0       26 26  0.77  0.072  0.64  0.72   0.76  0.81
+ p100
+ 70.3
+ 65.9
+ 51.3
+  0.9</code></pre>
 </div>
-<div id="a-first-model-for-exerany-complete-case-analysis" class="section level2">
-<h2><span class="header-section-number">14.3</span> A First Model for <code>exerany</code> (Complete Case Analysis)</h2>
-<p>Suppose we develop a main-effects kitchen sink model (model <code>m1</code> below) fitted to these predictors without the benefit of any non-linear terms except the two pre-planned interactions. We’ll run the model quickly here to ensure that the code runs, in a complete case analysis, without drawing any conclusions, really.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m1 &lt;-<span class="st"> </span><span class="kw">lrm</span>(exerany <span class="op">~</span><span class="st"> </span>internet30 <span class="op">*</span><span class="st"> </span>genhealth <span class="op">+</span><span class="st"> </span>bmi <span class="op">*</span><span class="st"> </span>female <span class="op">+</span>
-<span class="st">              </span>physhealth <span class="op">+</span><span class="st"> </span>menthealth <span class="op">+</span><span class="st"> </span>sleephrs, 
-          <span class="dt">data =</span> smartcle1)
-m1</code></pre></div>
-<pre><code>Frequencies of Missing Values Due to Each Variable
-   exerany internet30  genhealth        bmi     female physhealth 
-         3          6          3         84          0         17 
-menthealth   sleephrs 
-        11          8 
+<div id="fitting-a-logistic-regression-model-to-proportion-data" class="section level3">
+<h3><span class="header-section-number">16.1.2</span> Fitting a Logistic Regression Model to Proportion Data</h3>
+<p>Here, we have a binary outcome (was the subject screened or not?) but we have aggregated results. We can use the counts of the numbers of subjects at each clinic (in <code>subjects</code>) and the proportion who were screened (in <code>screen_rate</code>) to fit a logistic regression model, as follows:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m_screen1 &lt;-<span class="st">  </span><span class="kw">glm</span>(screen_rate <span class="op">~</span><span class="st"> </span>meanage <span class="op">+</span><span class="st"> </span>female <span class="op">+</span><span class="st"> </span>
+<span class="st">                    </span>pct_lowins <span class="op">+</span><span class="st"> </span>system, <span class="dt">family =</span> binomial, 
+                  <span class="dt">weights =</span> subjects, <span class="dt">data =</span> colscr)
 
-Logistic Regression Model
- 
- lrm(formula = exerany ~ internet30 * genhealth + bmi * female + 
-     physhealth + menthealth + sleephrs, data = smartcle1)
- 
- 
-                       Model Likelihood     Discrimination    Rank Discrim.    
-                          Ratio Test           Indexes           Indexes       
- Obs           924    LR chi2     134.17    R2       0.203    C       0.739    
-  0            219    d.f.            15    g        1.021    Dxy     0.479    
-  1            705    Pr(&gt; chi2) &lt;0.0001    gr       2.776    gamma   0.479    
- max |deriv| 6e-13                          gp       0.174    tau-a   0.173    
-                                            Brier    0.153                     
- 
-                                   Coef    S.E.   Wald Z Pr(&gt;|Z|)
- Intercept                          2.9284 0.9951  2.94  0.0033  
- internet30                         0.7234 0.7095  1.02  0.3079  
- genhealth=2_VeryGood              -0.2267 0.7653 -0.30  0.7671  
- genhealth=3_Good                  -0.7950 0.7100 -1.12  0.2629  
- genhealth=4_Fair                  -1.2818 0.7482 -1.71  0.0867  
- genhealth=5_Poor                  -0.5215 0.8590 -0.61  0.5438  
- bmi                               -0.0323 0.0220 -1.47  0.1427  
- female                            -0.5789 0.7883 -0.73  0.4627  
- physhealth                        -0.0208 0.0109 -1.92  0.0552  
- menthealth                        -0.0142 0.0122 -1.16  0.2449  
- sleephrs                          -0.0338 0.0547 -0.62  0.5357  
- internet30 * genhealth=2_VeryGood  0.1524 0.8295  0.18  0.8542  
- internet30 * genhealth=3_Good     -0.0064 0.7702 -0.01  0.9934  
- internet30 * genhealth=4_Fair     -0.3235 0.8272 -0.39  0.6957  
- internet30 * genhealth=5_Poor     -1.7847 0.9994 -1.79  0.0741  
- bmi * female                      -0.0022 0.0266 -0.08  0.9350  
- </code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(<span class="kw">anova</span>(m1))</code></pre></div>
-<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-225-1.png" width="672" /></p>
-</div>
-<div id="building-a-larger-model-spearman-rho2-plot" class="section level2">
-<h2><span class="header-section-number">14.4</span> Building a Larger Model: Spearman <span class="math inline">\(\rho^2\)</span> Plot</h2>
-<p>Before we impute, we might also consider the use of a Spearman <span class="math inline">\(\rho^2\)</span> plot to decide how best to spend degrees of freedom on non-linear terms in our model for <code>exerany</code> using these predictors. Since we’re already planning some interaction terms, I’ll keep them in mind as I look at this plot.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">sp_smart &lt;-<span class="st"> </span><span class="kw">spearman2</span>(exerany <span class="op">~</span><span class="st"> </span>physhealth <span class="op">+</span><span class="st"> </span>menthealth <span class="op">+</span><span class="st"> </span>
-<span class="st">                          </span>genhealth <span class="op">+</span><span class="st"> </span>internet30 <span class="op">+</span><span class="st"> </span>
-<span class="st">                          </span>bmi <span class="op">+</span><span class="st"> </span>female <span class="op">+</span><span class="st"> </span>sleephrs, 
-                      <span class="dt">data =</span> smartcle1)
-<span class="kw">plot</span>(sp_smart)</code></pre></div>
-<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-226-1.png" width="672" /></p>
-<p>We see that the best candidate for a non-linear term is the <code>genhealth</code> variable, according to this plot, followed by the <code>physhealth</code> and <code>internet30</code> predictors, then <code>bmi</code>. I will wind up fitting a model including the following non-linear terms…</p>
-<ul>
-<li>our pre-planned <code>female</code> x <code>bmi</code> and <code>internet30</code> x <code>genhealth</code> interaction terms,</li>
-<li>a new <code>genhealth</code> x <code>physhealth</code> interaction term,</li>
-<li>a restricted cubic spline with 5 knots for <code>physhealth</code></li>
-<li>a restricted cubic spline with 4 knots for <code>bmi</code> (so the interaction term with <code>female</code> will need to account for this and restrict our interaction to the linear piece of <code>bmi</code>)</li>
-</ul>
-</div>
-<div id="a-second-model-for-exerany-complete-cases" class="section level2">
-<h2><span class="header-section-number">14.5</span> A Second Model for <code>exerany</code> (Complete Cases)</h2>
-<p>Here’s the resulting model fit without worrying about imputation yet. This is just to make sure our code works. Note that I’m inserting the main effects of our interaction terms explicitly before including the interaction terms themselves, and that I need to use <code>%ia%</code> to include the interaction terms where one of the terms is included in the model with a spline. Again, I won’t draw any serious conclusions yet.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m2 &lt;-<span class="st"> </span><span class="kw">lrm</span>(exerany <span class="op">~</span><span class="st"> </span><span class="kw">rcs</span>(bmi, <span class="dv">4</span>) <span class="op">+</span><span class="st"> </span><span class="kw">rcs</span>(physhealth, <span class="dv">5</span>) <span class="op">+</span><span class="st"> </span>
-<span class="st">              </span>female <span class="op">+</span><span class="st"> </span>internet30 <span class="op">*</span><span class="st"> </span>genhealth <span class="op">+</span><span class="st"> </span>
-<span class="st">              </span>genhealth <span class="op">%ia%</span><span class="st"> </span>physhealth <span class="op">+</span><span class="st"> </span>female <span class="op">%ia%</span><span class="st"> </span>bmi <span class="op">+</span><span class="st"> </span>
-<span class="st">              </span>menthealth <span class="op">+</span><span class="st"> </span>sleephrs, 
-          <span class="dt">data =</span> smartcle1)
-m2</code></pre></div>
-<pre><code>Frequencies of Missing Values Due to Each Variable
-   exerany        bmi physhealth     female internet30  genhealth 
-         3         84         17          0          6          3 
-menthealth   sleephrs 
-        11          8 
-
-Logistic Regression Model
- 
- lrm(formula = exerany ~ rcs(bmi, 4) + rcs(physhealth, 5) + female + 
-     internet30 * genhealth + genhealth %ia% physhealth + female %ia% 
-     bmi + menthealth + sleephrs, data = smartcle1)
- 
- 
-                       Model Likelihood     Discrimination    Rank Discrim.    
-                          Ratio Test           Indexes           Indexes       
- Obs           924    LR chi2     142.51    R2       0.215    C       0.743    
-  0            219    d.f.            22    g        1.053    Dxy     0.485    
-  1            705    Pr(&gt; chi2) &lt;0.0001    gr       2.867    gamma   0.485    
- max |deriv| 6e-13                          gp       0.178    tau-a   0.176    
-                                            Brier    0.151                     
- 
-                                   Coef    S.E.   Wald Z Pr(&gt;|Z|)
- Intercept                          2.2998 1.9789  1.16  0.2452  
- bmi                                0.0052 0.0801  0.06  0.9482  
- bmi&#39;                              -0.2988 0.3555 -0.84  0.4006  
- bmi&#39;&#39;                              0.8809 0.9615  0.92  0.3596  
- physhealth                         0.0410 0.0868  0.47  0.6362  
- physhealth&#39;                       -0.2944 0.3888 -0.76  0.4489  
- female                            -0.6307 0.8228 -0.77  0.4434  
- internet30                         0.6722 0.7134  0.94  0.3460  
- genhealth=2_VeryGood              -0.3092 0.7700 -0.40  0.6880  
- genhealth=3_Good                  -0.7559 0.7194 -1.05  0.2934  
- genhealth=4_Fair                  -1.1611 0.7646 -1.52  0.1289  
- genhealth=5_Poor                  -2.3680 1.2846 -1.84  0.0653  
- genhealth=2_VeryGood * physhealth  0.0099 0.0824  0.12  0.9043  
- genhealth=3_Good * physhealth     -0.0406 0.0772 -0.53  0.5992  
- genhealth=4_Fair * physhealth     -0.0407 0.0773 -0.53  0.5988  
- genhealth=5_Poor * physhealth      0.0534 0.0868  0.62  0.5382  
- female * bmi                      -0.0023 0.0275 -0.08  0.9324  
- menthealth                        -0.0143 0.0125 -1.15  0.2522  
- sleephrs                          -0.0457 0.0561 -0.81  0.4153  
- internet30 * genhealth=2_VeryGood  0.2174 0.8330  0.26  0.7941  
- internet30 * genhealth=3_Good      0.0375 0.7767  0.05  0.9615  
- internet30 * genhealth=4_Fair     -0.3080 0.8371 -0.37  0.7129  
- internet30 * genhealth=5_Poor     -1.9411 1.0150 -1.91  0.0558  
- </code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(<span class="kw">anova</span>(m2))</code></pre></div>
-<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-227-1.png" width="672" /></p>
-</div>
-<div id="dealing-with-missing-data-via-simple-imputation" class="section level2">
-<h2><span class="header-section-number">14.6</span> Dealing with Missing Data via Simple Imputation</h2>
-<p>One approach we might take in this problem is to use simple imputation to deal with our missing values. I will proceed as follows:</p>
-<ol style="list-style-type: decimal">
-<li>Omit all cases where the outcome <code>exerany</code> is missing.</li>
-<li>Determine (and plot) the remaining missingness.</li>
-<li>Use simple imputation for all predictors, and build a new data set with “complete” data.</li>
-<li>Re-fit the proposed models using this new data set.</li>
-</ol>
-<div id="omit-cases-where-the-outcome-is-missing" class="section level3">
-<h3><span class="header-section-number">14.6.1</span> Omit cases where the outcome is missing</h3>
-<p>We need to drop the cases where <code>exerany</code> is missing in <code>smartcle1</code>. We’ll begin creating an imputed data set, called <code>smartcle_imp0</code>, by filtering on complete data for <code>exerany</code>, as follows.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Hmisc<span class="op">::</span><span class="kw">describe</span>(smartcle1<span class="op">$</span>exerany)</code></pre></div>
-<pre><code>smartcle1$exerany 
-       n  missing distinct     Info      Sum     Mean      Gmd 
-    1033        3        2    0.546      786   0.7609   0.3642 </code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">smartcle_imp0 &lt;-<span class="st"> </span>smartcle1 <span class="op">%&gt;%</span>
-<span class="st">    </span><span class="kw">filter</span>(<span class="kw">complete.cases</span>(exerany)) <span class="op">%&gt;%</span>
-<span class="st">    </span><span class="kw">select</span>(SEQNO, exerany, physhealth, menthealth, 
-           genhealth, bmi, female, internet30, sleephrs)
-
-Hmisc<span class="op">::</span><span class="kw">describe</span>(smartcle_imp0<span class="op">$</span>exerany)</code></pre></div>
-<pre><code>smartcle_imp0$exerany 
-       n  missing distinct     Info      Sum     Mean      Gmd 
-    1033        0        2    0.546      786   0.7609   0.3642 </code></pre>
-</div>
-<div id="plot-the-remaining-missingness" class="section level3">
-<h3><span class="header-section-number">14.6.2</span> Plot the remaining missingness</h3>
-<p>We’ll look at the missing values (excluding the subject ID: SEQNO) in our new data set. Of course, we can get a count of missing values within each variable with <code>skim</code> or with:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">colSums</span>(<span class="kw">is.na</span>(smartcle_imp0))</code></pre></div>
-<pre><code>     SEQNO    exerany physhealth menthealth  genhealth        bmi 
-         0          0         16         11          3         83 
-    female internet30   sleephrs 
-         0          6          7 </code></pre>
-<p>The <code>Hmisc</code> package has a plotting approach which can help identify missingness, too.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">naplot</span>(<span class="kw">naclus</span>(<span class="kw">select</span>(smartcle_imp0, <span class="op">-</span>SEQNO)))</code></pre></div>
-<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-230-1.png" width="672" /><img src="bookdown-demo_files/figure-html/unnamed-chunk-230-2.png" width="672" /><img src="bookdown-demo_files/figure-html/unnamed-chunk-230-3.png" width="672" /><img src="bookdown-demo_files/figure-html/unnamed-chunk-230-4.png" width="672" /></p>
-<p>We can also get a useful accounting of missing data patterns, with the <code>md.pattern</code> function in the <code>mice</code> package.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">mice<span class="op">::</span><span class="kw">md.pattern</span>(smartcle_imp0)</code></pre></div>
-<pre><code>    SEQNO exerany female genhealth internet30 sleephrs menthealth
-924     1       1      1         1          1        1          1
-  8     1       1      1         1          1        1          1
-  6     1       1      1         1          1        1          0
- 76     1       1      1         1          1        1          1
-  1     1       1      1         1          0        1          1
-  4     1       1      1         1          1        0          1
-  3     1       1      1         1          1        1          0
-  1     1       1      1         0          1        1          0
-  1     1       1      1         1          1        1          1
-  4     1       1      1         1          0        1          1
-  1     1       1      1         1          1        0          1
-  1     1       1      1         1          1        0          1
-  1     1       1      1         0          1        1          0
-  1     1       1      1         1          0        1          1
-  1     1       1      1         0          1        0          1
-        0       0      0         3          6        7         11
-    physhealth bmi    
-924          1   1   0
-  8          0   1   1
-  6          1   1   1
- 76          1   0   1
-  1          1   1   1
-  4          1   1   1
-  3          0   1   2
-  1          1   1   2
-  1          0   0   2
-  4          1   0   2
-  1          0   1   2
-  1          1   0   2
-  1          0   1   3
-  1          0   0   3
-  1          0   1   3
-            16  83 126</code></pre>
-<p>We can also do this with <code>na.pattern</code> in the <code>Hmisc</code> package, but then we have to get the names of the columns, too, so that we can read off the values.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">na.pattern</span>(smartcle_imp0)</code></pre></div>
-<pre><code>pattern
-000000000 000000001 000000010 000001000 000001001 000001010 000100000 
-      924         4         1        76         1         4         6 
-000110000 001000000 001000001 001001000 001001010 001010001 001100000 
-        1         8         1         1         1         1         3 
-001110000 
-        1 </code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">names</span>(smartcle_imp0)</code></pre></div>
-<pre><code>[1] &quot;SEQNO&quot;      &quot;exerany&quot;    &quot;physhealth&quot; &quot;menthealth&quot; &quot;genhealth&quot; 
-[6] &quot;bmi&quot;        &quot;female&quot;     &quot;internet30&quot; &quot;sleephrs&quot;  </code></pre>
-</div>
-<div id="use-simple-imputation-build-a-new-data-set" class="section level3">
-<h3><span class="header-section-number">14.6.3</span> Use simple imputation, build a new data set</h3>
-<p>The only variables that require no imputation are <code>exerany</code> and <code>female</code>. In this case, we need to impute:</p>
-<ul>
-<li>83 <code>bmi</code> values (which are quantitative)</li>
-<li>16 <code>physhealth</code> values (quantitative, must fall between 0 and 30)</li>
-<li>11 <code>menthealth</code> values (quantitative, must fall between 0 and 30)</li>
-<li>7 <code>sleephrs</code> values (quantitative, must fall between 0 and 24)</li>
-<li>6 <code>internet30</code> values (which are 1/0)</li>
-<li>and 3 <code>genhealth</code> values (which are multi-categorical, so we need to convert them to numbers in order to get the imputation process to work properly)</li>
-</ul>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">smartcle_imp0 &lt;-<span class="st"> </span>smartcle_imp0 <span class="op">%&gt;%</span>
-<span class="st">    </span><span class="kw">mutate</span>(<span class="dt">genh_n =</span> <span class="kw">as.numeric</span>(genhealth))
-
-smartcle_imp0 <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">count</span>(genhealth, genh_n)</code></pre></div>
-<pre><code># A tibble: 6 x 3
-  genhealth   genh_n     n
-  &lt;fct&gt;        &lt;dbl&gt; &lt;int&gt;
-1 1_Excellent   1.00   172
-2 2_VeryGood    2.00   350
-3 3_Good        3.00   344
-4 4_Fair        4.00   121
-5 5_Poor        5.00    43
-6 &lt;NA&gt;         NA        3</code></pre>
-<p>I’ll work from the bottom up, using various <code>simputation</code> functions to accomplish the imputations I want. In this case, I’ll use predictive mean matching for the categorical data, and linear models or elastic net approaches for the quantitative data. Be sure to set a seed beforehand so you can replicate your work.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">set.seed</span>(<span class="dv">432234</span>)
-
-smartcle_imp1 &lt;-<span class="st"> </span>smartcle_imp0 <span class="op">%&gt;%</span>
-<span class="st">    </span><span class="kw">impute_pmm</span>(genh_n <span class="op">~</span><span class="st"> </span>female) <span class="op">%&gt;%</span>
-<span class="st">    </span><span class="kw">impute_pmm</span>(internet30 <span class="op">~</span><span class="st"> </span>female <span class="op">+</span><span class="st"> </span>genh_n) <span class="op">%&gt;%</span>
-<span class="st">    </span><span class="kw">impute_lm</span>(sleephrs <span class="op">~</span><span class="st"> </span>female <span class="op">+</span><span class="st"> </span>genh_n) <span class="op">%&gt;%</span>
-<span class="st">    </span><span class="kw">impute_lm</span>(menthealth <span class="op">~</span><span class="st"> </span>female <span class="op">+</span><span class="st"> </span>sleephrs) <span class="op">%&gt;%</span>
-<span class="st">    </span><span class="kw">impute_en</span>(physhealth <span class="op">~</span><span class="st"> </span>female <span class="op">+</span><span class="st"> </span>genh_n <span class="op">+</span><span class="st"> </span>sleephrs) <span class="op">%&gt;%</span>
-<span class="st">    </span><span class="kw">impute_en</span>(bmi <span class="op">~</span><span class="st"> </span>physhealth <span class="op">+</span><span class="st"> </span>genh_n)</code></pre></div>
-<p>After the imputations are complete, I’ll back out of the numeric version of <code>genhealth</code>, called <code>genh_n</code> back to my original variable, then check to be sure I now have no missing values.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">smartcle_imp1 &lt;-<span class="st"> </span>smartcle_imp1 <span class="op">%&gt;%</span>
-<span class="st">    </span><span class="kw">mutate</span>(<span class="dt">genhealth =</span> <span class="kw">fct_recode</span>(<span class="kw">factor</span>(genh_n), 
-                                  <span class="st">&quot;1_Excellent&quot;</span> =<span class="st"> &quot;1&quot;</span>,
-                                  <span class="st">&quot;2_VeryGood&quot;</span> =<span class="st"> &quot;2&quot;</span>,
-                                  <span class="st">&quot;3_Good&quot;</span> =<span class="st"> &quot;3&quot;</span>,
-                                  <span class="st">&quot;4_Fair&quot;</span> =<span class="st"> &quot;4&quot;</span>,
-                                  <span class="st">&quot;5_Poor&quot;</span> =<span class="st"> &quot;5&quot;</span>))
-
-smartcle_imp1 <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">count</span>(genhealth, genh_n)</code></pre></div>
-<pre><code># A tibble: 5 x 3
-  genhealth   genh_n     n
-  &lt;fct&gt;        &lt;dbl&gt; &lt;int&gt;
-1 1_Excellent   1.00   172
-2 2_VeryGood    2.00   351
-3 3_Good        3.00   346
-4 4_Fair        4.00   121
-5 5_Poor        5.00    43</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">colSums</span>(<span class="kw">is.na</span>(smartcle_imp1))</code></pre></div>
-<pre><code>     SEQNO    exerany physhealth menthealth  genhealth        bmi 
-         0          0          0          0          0          0 
-    female internet30   sleephrs     genh_n 
-         0          0          0          0 </code></pre>
-<p>OK. Looks good. I now have a data frame called <code>smartcle_imp1</code> with no missingness, which I can use to fit my logistic regression models. Let’s do that next, and then return to the problem of accounting for missingness through multiple imputation.</p>
-</div>
-</div>
-<div id="refitting-model-1-with-simply-imputed-data" class="section level2">
-<h2><span class="header-section-number">14.7</span> Refitting Model 1 with simply imputed data</h2>
-<p>Using the numeric version of the <code>genhealth</code> data, called <code>genh_n</code>, will ease the reviewing of later output, so we’ll do that here, making sure R knows that <code>genh_n</code> describes a categorical factor.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">d &lt;-<span class="st"> </span><span class="kw">datadist</span>(smartcle_imp1)
-<span class="kw">options</span>(<span class="dt">datadist =</span> <span class="st">&quot;d&quot;</span>)
-
-m1_a &lt;-<span class="st"> </span><span class="kw">lrm</span>(exerany <span class="op">~</span><span class="st"> </span>internet30 <span class="op">*</span><span class="st"> </span><span class="kw">catg</span>(genh_n) <span class="op">+</span><span class="st"> </span>bmi <span class="op">*</span><span class="st"> </span>female <span class="op">+</span>
-<span class="st">              </span>physhealth <span class="op">+</span><span class="st"> </span>menthealth <span class="op">+</span><span class="st"> </span>sleephrs, 
-          <span class="dt">data =</span> smartcle_imp1, <span class="dt">x =</span> <span class="ot">TRUE</span>, <span class="dt">y =</span> <span class="ot">TRUE</span>)
-m1_a</code></pre></div>
-<pre><code>Logistic Regression Model
- 
- lrm(formula = exerany ~ internet30 * catg(genh_n) + bmi * female + 
-     physhealth + menthealth + sleephrs, data = smartcle_imp1, 
-     x = TRUE, y = TRUE)
- 
-                       Model Likelihood     Discrimination    Rank Discrim.    
-                          Ratio Test           Indexes           Indexes       
- Obs          1033    LR chi2     151.09    R2       0.204    C       0.741    
-  0            247    d.f.            15    g        1.023    Dxy     0.482    
-  1            786    Pr(&gt; chi2) &lt;0.0001    gr       2.780    gamma   0.483    
- max |deriv| 5e-14                          gp       0.175    tau-a   0.176    
-                                            Brier    0.154                     
- 
-                       Coef    S.E.   Wald Z Pr(&gt;|Z|)
- Intercept              3.3390 0.9731  3.43  0.0006  
- internet30             0.6487 0.7010  0.93  0.3548  
- genh_n=2              -0.4938 0.7459 -0.66  0.5080  
- genh_n=3              -0.9270 0.6972 -1.33  0.1836  
- genh_n=4              -1.3060 0.7378 -1.77  0.0767  
- genh_n=5              -0.8093 0.8329 -0.97  0.3312  
- bmi                   -0.0412 0.0217 -1.90  0.0570  
- female                -0.9473 0.7722 -1.23  0.2199  
- physhealth            -0.0229 0.0102 -2.25  0.0246  
- menthealth            -0.0200 0.0114 -1.76  0.0784  
- sleephrs              -0.0415 0.0492 -0.84  0.3994  
- internet30 * genh_n=2  0.3701 0.8065  0.46  0.6463  
- internet30 * genh_n=3  0.1295 0.7543  0.17  0.8637  
- internet30 * genh_n=4 -0.2194 0.8108 -0.27  0.7867  
- internet30 * genh_n=5 -1.4080 0.9636 -1.46  0.1440  
- bmi * female           0.0118 0.0261  0.45  0.6497  
- </code></pre>
-<p>All right. We’ve used 1033 observations, which is correct (after deleting the three with missing <code>exerany</code>. The model shows a Nagelkerke R<sup>2</sup> value of 0.204, and a C statistic of 0.741 after imputation. The likelihood ratio (drop in deviance) test is highly significant.</p>
-<div id="validating-summary-statistics" class="section level3">
-<h3><span class="header-section-number">14.7.1</span> Validating Summary Statistics</h3>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">set.seed</span>(<span class="dv">432099</span>)
-<span class="kw">validate</span>(m1_a)</code></pre></div>
-<pre><code>          index.orig training   test optimism index.corrected  n
-Dxy           0.4823   0.5012 0.4632   0.0380          0.4444 40
-R2            0.2039   0.2218 0.1878   0.0340          0.1699 40
-Intercept     0.0000   0.0000 0.0936  -0.0936          0.0936 40
-Slope         1.0000   1.0000 0.9001   0.0999          0.9001 40
-Emax          0.0000   0.0000 0.0401   0.0401          0.0401 40
-D             0.1453   0.1592 0.1329   0.0264          0.1189 40
-U            -0.0019  -0.0019 0.0013  -0.0032          0.0013 40
-Q             0.1472   0.1612 0.1316   0.0295          0.1177 40
-B             0.1539   0.1507 0.1566  -0.0058          0.1597 40
-g             1.0226   1.0868 0.9722   0.1146          0.9080 40
-gp            0.1751   0.1818 0.1673   0.0145          0.1606 40</code></pre>
-<p>It appears that the model’s description of summary statistics is a little optimistic for both the C statistic (remember that C = 0.5 + Dxy/2) and the Nagelkerke R<sup>2</sup>. This output suggests that in a new sample of data, our model might be better expected to show a C statistic near …</p>
-<p><span class="math display">\[ 
-C = 0.5 + \frac{Dxy}{2} = 0.5 + \frac{0.4444}{2} = 0.7222
-\]</span></p>
-<p>rather than the 0.741 we saw initially, and that the Nagelkerke R<sup>2</sup> in new data will be closer to 0.17, than to the nominal 0.204 we saw above. So, as we walk through some other output for this model, remember that the C statistic wasn’t great here (0.72 after validation), so our ability to discriminate exercisers from non-exercisers is still a problem.</p>
-</div>
-<div id="anova-for-the-model" class="section level3">
-<h3><span class="header-section-number">14.7.2</span> ANOVA for the model</h3>
-<p>Next, let’s look at the ANOVA comparisons for this model.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">anova</span>(m1_a)</code></pre></div>
-<pre><code>                Wald Statistics          Response: exerany 
-
- Factor                                             Chi-Square d.f. P     
- internet30  (Factor+Higher Order Factors)           17.28      5   0.0040
-  All Interactions                                    5.84      4   0.2116
- genh_n  (Factor+Higher Order Factors)               35.81      8   &lt;.0001
-  All Interactions                                    5.84      4   0.2116
- bmi  (Factor+Higher Order Factors)                   7.36      2   0.0252
-  All Interactions                                    0.21      1   0.6497
- female  (Factor+Higher Order Factors)               12.72      2   0.0017
-  All Interactions                                    0.21      1   0.6497
- physhealth                                           5.05      1   0.0246
- menthealth                                           3.10      1   0.0784
- sleephrs                                             0.71      1   0.3994
- internet30 * genh_n  (Factor+Higher Order Factors)   5.84      4   0.2116
- bmi * female  (Factor+Higher Order Factors)          0.21      1   0.6497
- TOTAL INTERACTION                                    6.15      5   0.2917
- TOTAL                                              126.95     15   &lt;.0001</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(<span class="kw">anova</span>(m1_a))</code></pre></div>
-<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-238-1.png" width="672" /></p>
-<p>It looks like several of the variables (<code>genhealth</code>, <code>internet30</code>, <code>female</code>, <code>bmi</code> and <code>physhealth</code>) are carrying statistically significant predictive value here.</p>
-<p>We can also build a plot of the AIC values attributable to each piece of the model.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(<span class="kw">anova</span>(m1_a), <span class="dt">what=</span><span class="st">&quot;aic&quot;</span>)</code></pre></div>
-<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-239-1.png" width="672" /></p>
-</div>
-<div id="summarizing-effect-size" class="section level3">
-<h3><span class="header-section-number">14.7.3</span> Summarizing Effect Size</h3>
-<p>How big are the effects we see?</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(<span class="kw">summary</span>(m1_a))</code></pre></div>
-<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-240-1.png" width="672" /></p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(m1_a)</code></pre></div>
-<pre><code>             Effects              Response : exerany 
-
- Factor       Low  High  Diff. Effect    S.E.     Lower 0.95 Upper 0.95
- internet30    0.0  1.00 1.00   1.018800 0.400350  0.234160   1.8035000
-  Odds Ratio   0.0  1.00 1.00   2.770000       NA  1.263800   6.0710000
- bmi          23.9 30.31 6.41  -0.264180 0.138810 -0.536240   0.0078783
-  Odds Ratio  23.9 30.31 6.41   0.767840       NA  0.584950   1.0079000
- female        0.0  1.00 1.00  -0.627270 0.177840 -0.975830  -0.2787200
-  Odds Ratio   0.0  1.00 1.00   0.534050       NA  0.376880   0.7567500
- physhealth    0.0  2.00 2.00  -0.045843 0.020393 -0.085813  -0.0058727
-  Odds Ratio   0.0  2.00 2.00   0.955190       NA  0.917770   0.9941400
- menthealth    0.0  2.00 2.00  -0.040089 0.022778 -0.084733   0.0045549
-  Odds Ratio   0.0  2.00 2.00   0.960700       NA  0.918760   1.0046000
- sleephrs      6.0  8.00 2.00  -0.082947 0.098439 -0.275880   0.1099900
-  Odds Ratio   6.0  8.00 2.00   0.920400       NA  0.758900   1.1163000
- genh_n - 1:2  2.0  1.00   NA   0.493760 0.745930 -0.968240   1.9558000
-  Odds Ratio   2.0  1.00   NA   1.638500       NA  0.379750   7.0693000
- genh_n - 3:2  2.0  3.00   NA  -0.433290 0.431840 -1.279700   0.4131100
-  Odds Ratio   2.0  3.00   NA   0.648370       NA  0.278120   1.5115000
- genh_n - 4:2  2.0  4.00   NA  -0.812200 0.490270 -1.773100   0.1487200
-  Odds Ratio   2.0  4.00   NA   0.443880       NA  0.169800   1.1603000
- genh_n - 5:2  2.0  5.00   NA  -0.315510 0.620110 -1.530900   0.8998700
-  Odds Ratio   2.0  5.00   NA   0.729420       NA  0.216340   2.4593000
-
-Adjusted to: internet30=0 genh_n=2 bmi=27.03416 female=0  </code></pre>
-<p>This output is easier to read as a result of using small <em>numeric</em> labels in <code>genh_n</code>, rather than the lengthy labels in <code>genhealth</code>. The sensible things to interpret are the odds ratios.</p>
-<ul>
-<li>holding all other predictors constant, the effect of moving from <code>internet30</code> = 0 to <code>internet30</code> = 1 is that the odds of <code>exerany</code> increase by a factor of 2.77.
-<ul>
-<li>Suppose Harry and Steve have the same values of all predictors in this model except that Harry used the internet and Steve did not.</li>
-<li>So the odds of exercising for Harry (who used the internet) are 2.77 times higher than the odds of exercising for Steve (who didn’t use the internet), assuming that all other predictors are the same.</li>
-<li>We also have a 95% confidence interval for this odds ratio, which is (1.26, 6.07). Since 1 is not in that interval, the data don’t seem to be consistent with <code>internet30</code> having no effect on <code>exerany</code>.</li>
-</ul></li>
-<li>the odds ratio comparing two subjects with the same predictors except that Harry has a BMI of 30.31 (the 75th percentile of observed BMIs in our sample) and Marty has a BMI of 23.9 (the 25th percentile) is that Harry has 0.767 times the odds of exercising that Marty does. So Harry’s probability of exercise will also be lower than Marty’s.
-<ul>
-<li>The 95% confidence interval in this case is (0.58, 1.01), and because 1 is in that interval, we cannot conclude that the effect of <code>bmi</code> meets the standard for statistical significance at the 5% level.</li>
-</ul></li>
-<li>A similar approach can be used to describe the odds ratios associated with each predictor.</li>
-<li>Note that each of the categories in <code>genh_n</code> is compared to a single baseline category. Here, that’s category 2. R will pick the modal category: the one that appears most often in the data. The comparisons of each category against category 2 are not significant in each case, at the 5% level.</li>
-</ul>
-</div>
-<div id="plotting-the-model-with-ggplot-and-predict" class="section level3">
-<h3><span class="header-section-number">14.7.4</span> Plotting the Model with <code>ggplot</code> and <code>Predict</code></h3>
-<p>Let’s look at a series of plots describing the model on the probability scale.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">ggplot</span>(<span class="kw">Predict</span>(m1_a, <span class="dt">fun =</span> plogis))</code></pre></div>
-<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-241-1.png" width="672" /></p>
-<p>This helps us describe what is happening in terms of direction at least. For example,</p>
-<ul>
-<li>As <code>bmi</code> increases, predicted Pr(<code>exerany</code>) decreases.</li>
-<li>People who accessed the internet in the past 30 days have higher model probabilities of exercising.</li>
-</ul>
-<p>Do any of these plots fail to make sense to you? Is anything moving in a surprising direction?</p>
-</div>
-<div id="plotting-the-model-with-a-nomogram" class="section level3">
-<h3><span class="header-section-number">14.7.5</span> Plotting the model with a nomogram</h3>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(<span class="kw">nomogram</span>(m1_a, <span class="dt">fun =</span> plogis))</code></pre></div>
-<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-242-1.png" width="672" /></p>
-<p>Note the impact of our interaction terms, and how we have two lines for <code>bmi</code> and five lines for <code>internet30</code> that come out of our product terms. As with any nomogram, to make a prediction we:</p>
-<ol style="list-style-type: decimal">
-<li>find the values of each of our predictors in the scales, and travel vertically up to the Points line to read off the Points for that predictor.</li>
-<li>sum up the Points across all predictors, and find that location in the Total Points line.</li>
-<li>move vertically down from the total points line to find the estimated “linear predictor” (log odds ratio) and finally the “predicted value” (probability of our outcome <code>exerany</code> = 1.)</li>
-</ol>
-</div>
-<div id="checking-the-calibration-of-our-model" class="section level3">
-<h3><span class="header-section-number">14.7.6</span> Checking the Calibration of our model</h3>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(<span class="kw">calibrate</span>(m1_a))</code></pre></div>
-<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-243-1.png" width="672" /></p>
+<span class="kw">summary</span>(m_screen1)</code></pre></div>
 <pre><code>
-n=1033   Mean absolute error=0.012   Mean squared error=0.00022
-0.9 Quantile of absolute error=0.02</code></pre>
-<p>The model appears better calibrated for predicted probabilities above 0.5 or so than it does for lower predicted probabilities. This isn’t surprising given the rug plot at the top, which shows we make many more predictions at the high end of the scale.</p>
-<p>To test the goodness of fit, we can use the following omnibus test:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">round</span>(<span class="kw">residuals</span>(m1_a, <span class="dt">type =</span> <span class="st">&quot;gof&quot;</span>),<span class="dv">3</span>)</code></pre></div>
-<pre><code>Sum of squared errors     Expected value|H0                    SD 
-              158.955               158.740                 0.525 
-                    Z                     P 
-                0.408                 0.683 </code></pre>
-<p>Our non-significant <em>p</em> value suggests that we cannot detect anything that’s obviously wrong in the model in terms of goodness of fit. That’s comforting.</p>
+Call:
+glm(formula = screen_rate ~ meanage + female + pct_lowins + system, 
+    family = binomial, data = colscr, weights = subjects)
+
+Deviance Residuals: 
+   Min      1Q  Median      3Q     Max  
+-9.017  -3.705  -2.000   1.380  11.500  
+
+Coefficients:
+              Estimate Std. Error z value Pr(&gt;|z|)    
+(Intercept) -1.3270393  0.5530782  -2.399   0.0164 *  
+meanage      0.0679866  0.0089754   7.575 3.60e-14 ***
+female      -0.0193142  0.0015831 -12.200  &lt; 2e-16 ***
+pct_lowins  -0.0134547  0.0008585 -15.672  &lt; 2e-16 ***
+systemSys_2 -0.1382189  0.0246591  -5.605 2.08e-08 ***
+systemSys_3 -0.0400170  0.0254505  -1.572   0.1159    
+systemSys_4  0.0229273  0.0294207   0.779   0.4358    
+---
+Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 2825.28  on 25  degrees of freedom
+Residual deviance:  816.39  on 19  degrees of freedom
+AIC: 1037.9
+
+Number of Fisher Scoring iterations: 4</code></pre>
 </div>
+<div id="fitting-a-logistic-regression-model-to-counts-of-successes-and-failures" class="section level3">
+<h3><span class="header-section-number">16.1.3</span> Fitting a Logistic Regression Model to Counts of Successes and Failures</h3>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m_screen2 &lt;-<span class="st">  </span><span class="kw">glm</span>(<span class="kw">cbind</span>(screened, notscreened) <span class="op">~</span><span class="st"> </span>
+<span class="st">                    </span>meanage <span class="op">+</span><span class="st"> </span>female <span class="op">+</span><span class="st"> </span>pct_lowins <span class="op">+</span><span class="st"> </span>system, 
+           <span class="dt">family =</span> binomial, <span class="dt">data =</span> colscr)
+<span class="kw">summary</span>(m_screen2)</code></pre></div>
+<pre><code>
+Call:
+glm(formula = cbind(screened, notscreened) ~ meanage + female + 
+    pct_lowins + system, family = binomial, data = colscr)
+
+Deviance Residuals: 
+   Min      1Q  Median      3Q     Max  
+-9.017  -3.705  -2.000   1.380  11.500  
+
+Coefficients:
+              Estimate Std. Error z value Pr(&gt;|z|)    
+(Intercept) -1.3270392  0.5530782  -2.399   0.0164 *  
+meanage      0.0679866  0.0089754   7.575 3.60e-14 ***
+female      -0.0193142  0.0015831 -12.200  &lt; 2e-16 ***
+pct_lowins  -0.0134547  0.0008585 -15.672  &lt; 2e-16 ***
+systemSys_2 -0.1382189  0.0246591  -5.605 2.08e-08 ***
+systemSys_3 -0.0400170  0.0254505  -1.572   0.1159    
+systemSys_4  0.0229273  0.0294207   0.779   0.4358    
+---
+Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 2825.28  on 25  degrees of freedom
+Residual deviance:  816.39  on 19  degrees of freedom
+AIC: 1037.9
+
+Number of Fisher Scoring iterations: 4</code></pre>
 </div>
-<div id="refitting-model-2-with-simply-imputed-data" class="section level2">
-<h2><span class="header-section-number">14.8</span> Refitting Model 2 with simply imputed data</h2>
-<p>I’ll walk through the same tasks for Model <code>m2</code> that I did above for Model <code>m1</code>. Again, we’re running this model after simple imputation of missing values.</p>
-<p>Using the numeric version of the <code>genhealth</code> data, called <code>genh_n</code>, will ease the reviewing of later output, so we’ll do that here, making sure R knows that <code>genh_n</code> describes a categorical factor.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">d &lt;-<span class="st"> </span><span class="kw">datadist</span>(smartcle_imp1)
+<div id="how-does-one-address-this-problem-in-rms" class="section level3">
+<h3><span class="header-section-number">16.1.4</span> How does one address this problem in <code>rms</code>?</h3>
+<p>We can use <code>Glm</code>. As an example to mirror <code>m_screen1</code>, we have the following…</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">d &lt;-<span class="st"> </span><span class="kw">datadist</span>(colscr)
 <span class="kw">options</span>(<span class="dt">datadist =</span> <span class="st">&quot;d&quot;</span>)
 
-m2_a &lt;-<span class="st"> </span><span class="kw">lrm</span>(exerany <span class="op">~</span><span class="st"> </span><span class="kw">rcs</span>(bmi, <span class="dv">4</span>) <span class="op">+</span><span class="st"> </span><span class="kw">rcs</span>(physhealth, <span class="dv">5</span>) <span class="op">+</span><span class="st"> </span>
-<span class="st">              </span>female <span class="op">+</span><span class="st"> </span>internet30 <span class="op">*</span><span class="st"> </span><span class="kw">catg</span>(genh_n) <span class="op">+</span><span class="st"> </span>
-<span class="st">              </span><span class="kw">catg</span>(genh_n) <span class="op">%ia%</span><span class="st"> </span>physhealth <span class="op">+</span><span class="st"> </span>female <span class="op">%ia%</span><span class="st"> </span>bmi <span class="op">+</span><span class="st"> </span>
-<span class="st">              </span>menthealth <span class="op">+</span><span class="st"> </span>sleephrs, 
-          <span class="dt">data =</span> smartcle_imp1, <span class="dt">x =</span> <span class="ot">TRUE</span>, <span class="dt">y =</span> <span class="ot">TRUE</span>)
-m2_a</code></pre></div>
-<pre><code>Logistic Regression Model
+mod_screen_<span class="dv">1</span> &lt;-<span class="st">  </span><span class="kw">Glm</span>(screen_rate <span class="op">~</span><span class="st"> </span>meanage <span class="op">+</span><span class="st"> </span>female <span class="op">+</span><span class="st"> </span>
+<span class="st">                         </span>pct_lowins <span class="op">+</span><span class="st"> </span>system, 
+                     <span class="dt">family =</span> binomial, <span class="dt">weights =</span> subjects, 
+                     <span class="dt">data =</span> colscr, <span class="dt">x =</span> T, <span class="dt">y =</span> T)
+
+mod_screen_<span class="dv">1</span></code></pre></div>
+<pre><code>General Linear Model
  
- lrm(formula = exerany ~ rcs(bmi, 4) + rcs(physhealth, 5) + female + 
-     internet30 * catg(genh_n) + catg(genh_n) %ia% physhealth + 
-     female %ia% bmi + menthealth + sleephrs, data = smartcle_imp1, 
-     x = TRUE, y = TRUE)
+ Glm(formula = screen_rate ~ meanage + female + pct_lowins + system, 
+     family = binomial, data = colscr, weights = subjects, x = T, 
+     y = T)
  
-                       Model Likelihood     Discrimination    Rank Discrim.    
-                          Ratio Test           Indexes           Indexes       
- Obs          1033    LR chi2     159.51    R2       0.214    C       0.744    
-  0            247    d.f.            22    g        1.051    Dxy     0.487    
-  1            786    Pr(&gt; chi2) &lt;0.0001    gr       2.860    gamma   0.487    
- max |deriv| 5e-12                          gp       0.179    tau-a   0.177    
-                                            Brier    0.152                     
+                     Model Likelihood     
+                        Ratio Test        
+ Obs      26        LR chi2    2008.90    
+ Residual d.f.19    d.f.             6    
+ g 0.4614539        Pr(&gt; chi2) &lt;0.0001    
  
-                       Coef    S.E.   Wald Z Pr(&gt;|Z|)
- Intercept              2.7525 1.9074  1.44  0.1490  
- bmi                   -0.0072 0.0763 -0.09  0.9250  
- bmi&#39;                  -0.2772 0.3288 -0.84  0.3992  
- bmi&#39;&#39;                  0.9199 0.9873  0.93  0.3515  
- physhealth             0.0287 0.0905  0.32  0.7514  
- physhealth&#39;           -0.1396 0.3555 -0.39  0.6946  
- female                -0.9550 0.8017 -1.19  0.2336  
- internet30             0.6099 0.7040  0.87  0.3863  
- genh_n=2              -0.5059 0.7507 -0.67  0.5004  
- genh_n=3              -0.8611 0.7053 -1.22  0.2221  
- genh_n=4              -1.1827 0.7535 -1.57  0.1165  
- genh_n=5              -2.6842 1.1987 -2.24  0.0251  
- genh_n=2 * physhealth -0.0253 0.0864 -0.29  0.7698  
- genh_n=3 * physhealth -0.0475 0.0842 -0.56  0.5723  
- genh_n=4 * physhealth -0.0471 0.0842 -0.56  0.5758  
- genh_n=5 * physhealth  0.0497 0.0917  0.54  0.5879  
- female * bmi           0.0111 0.0268  0.41  0.6803  
- menthealth            -0.0200 0.0116 -1.72  0.0859  
- sleephrs              -0.0536 0.0503 -1.07  0.2868  
- internet30 * genh_n=2  0.4193 0.8091  0.52  0.6043  
- internet30 * genh_n=3  0.1624 0.7592  0.21  0.8306  
- internet30 * genh_n=4 -0.1802 0.8176 -0.22  0.8255  
- internet30 * genh_n=5 -1.6615 0.9820 -1.69  0.0907  
+              Coef    S.E.   Wald Z Pr(&gt;|Z|)
+ Intercept    -1.3270 0.5531  -2.40 0.0164  
+ meanage       0.0680 0.0090   7.57 &lt;0.0001 
+ female       -0.0193 0.0016 -12.20 &lt;0.0001 
+ pct_lowins   -0.0135 0.0009 -15.67 &lt;0.0001 
+ system=Sys_2 -0.1382 0.0247  -5.61 &lt;0.0001 
+ system=Sys_3 -0.0400 0.0255  -1.57 0.1159  
+ system=Sys_4  0.0229 0.0294   0.78 0.4358  
  </code></pre>
-<p>All right. We’ve again used 1033 observations, which is correct (after deleting the three with missing <code>exerany</code>. The model shows a Nagelkerke R<sup>2</sup> value of 0.214, and a C statistic of 0.744 after imputation. Each of these results are a little better than what we saw with <code>m1_a</code> but only a little. The likelihood ratio (drop in deviance) test is still highly significant.</p>
-<div id="validating-summary-statistics-1" class="section level3">
-<h3><span class="header-section-number">14.8.1</span> Validating Summary Statistics</h3>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">set.seed</span>(<span class="dv">432009</span>)
-<span class="kw">validate</span>(m2_a)</code></pre></div>
-<pre><code>          index.orig training   test optimism index.corrected  n
-Dxy           0.4870   0.5058 0.4590   0.0468          0.4402 40
-R2            0.2145   0.2340 0.1849   0.0491          0.1654 40
-Intercept     0.0000   0.0000 0.1729  -0.1729          0.1729 40
-Slope         1.0000   1.0000 0.8473   0.1527          0.8473 40
-Emax          0.0000   0.0000 0.0692   0.0692          0.0692 40
-D             0.1534   0.1695 0.1307   0.0387          0.1147 40
-U            -0.0019  -0.0019 0.0041  -0.0060          0.0041 40
-Q             0.1554   0.1714 0.1266   0.0448          0.1106 40
-B             0.1521   0.1502 0.1567  -0.0065          0.1585 40
-g             1.0507   1.1335 0.9626   0.1708          0.8799 40
-gp            0.1786   0.1866 0.1642   0.0224          0.1562 40</code></pre>
-<p>Again, the model’s description of summary statistics is a little optimistic for both the C statistic and the Nagelkerke R<sup>2</sup>. In a new sample of data, model <code>m2_a</code> might be better expected to show a C statistic near …</p>
-<p><span class="math display">\[ 
-C = 0.5 + \frac{Dxy}{2} = 0.5 + \frac{0.4402}{2} = 0.7201
-\]</span></p>
-<p>rather than the 0.744 we saw initially, and that the Nagelkerke R<sup>2</sup> in new data will be closer to 0.165, than to the nominal 0.215 we saw above. So, after validation, this model actually looks worse than model <code>m1_a</code>.</p>
+</div>
+</div>
+<div id="probit-regression" class="section level2">
+<h2><span class="header-section-number">16.2</span> Probit Regression</h2>
+<div id="colorectal-cancer-screening-data-on-individuals" class="section level3">
+<h3><span class="header-section-number">16.2.1</span> Colorectal Cancer Screening Data on Individuals</h3>
+<p>The data in the <code>colscr2</code> data frame describe (disguised) data on the status of 172 adults who were eligible for colon cancer screening, with the following information included:</p>
 <table>
 <thead>
 <tr class="header">
-<th align="right">Model</th>
-<th align="right">nominal C</th>
-<th align="right">nominal R<sup>2</sup></th>
-<th align="right">validated C</th>
-<th align="right">validated R<sup>2</sup></th>
+<th align="right">Variable</th>
+<th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td align="right"><code>m1_a</code></td>
-<td align="right">0.741</td>
-<td align="right">0.204</td>
-<td align="right">0.722</td>
-<td align="right">0.170</td>
+<td align="right"><code>subject</code></td>
+<td>subject ID code</td>
 </tr>
 <tr class="even">
-<td align="right"><code>m2_a</code></td>
-<td align="right">0.744</td>
-<td align="right">0.214</td>
-<td align="right">0.720</td>
-<td align="right">0.165</td>
+<td align="right"><code>age</code></td>
+<td>subject’s age (years)</td>
+</tr>
+<tr class="odd">
+<td align="right"><code>race</code></td>
+<td>subject’s race (White/Black/Other)</td>
+</tr>
+<tr class="even">
+<td align="right"><code>hispanic</code></td>
+<td>subject of Hispanic ethnicity (1 = yes / 0 = no)</td>
+</tr>
+<tr class="odd">
+<td align="right"><code>insurance</code></td>
+<td>Commercial, Medicaid, Medicare, Uninsured</td>
+</tr>
+<tr class="even">
+<td align="right"><code>bmi</code></td>
+<td>body mass index at most recent visit</td>
+</tr>
+<tr class="odd">
+<td align="right"><code>sbp</code></td>
+<td>systolic blood pressure at most recent visit</td>
+</tr>
+<tr class="even">
+<td align="right"><code>up_to_date</code></td>
+<td>meets colon cancer screening standards</td>
 </tr>
 </tbody>
 </table>
-<p>Again, as we walk through other output for model <code>m2_a</code>, remember that the our ability to discriminate exercisers from non-exercisers is still very much in question using either model.</p>
+<p>The goal is to use the other variables (besides subject ID) to predict whether or not a subject is up to date.</p>
 </div>
-<div id="anova-for-the-model-1" class="section level3">
-<h3><span class="header-section-number">14.8.2</span> ANOVA for the model</h3>
-<p>Next, let’s look at the ANOVA comparisons for this model.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">anova</span>(m2_a)</code></pre></div>
-<pre><code>                Wald Statistics          Response: exerany 
+<div id="a-logistic-regression-model" class="section level3">
+<h3><span class="header-section-number">16.2.2</span> A logistic regression model</h3>
+<p>Here is a logistic regression model.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">colscr2 <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">summary</span>()</code></pre></div>
+<pre><code>    subject           age           race        hispanic      
+ Min.   :101.0   Min.   :51.00   Black:118   Min.   :0.00000  
+ 1st Qu.:143.8   1st Qu.:54.00   Other:  9   1st Qu.:0.00000  
+ Median :186.5   Median :57.00   White: 45   Median :0.00000  
+ Mean   :186.5   Mean   :57.80               Mean   :0.06395  
+ 3rd Qu.:229.2   3rd Qu.:61.25               3rd Qu.:0.00000  
+ Max.   :272.0   Max.   :69.00               Max.   :1.00000  
+      insurance       bmi             sbp          up_to_date    
+ Commercial:32   Min.   :17.20   Min.   : 89.0   Min.   :0.0000  
+ Medicaid  :81   1st Qu.:25.48   1st Qu.:118.0   1st Qu.:0.0000  
+ Medicare  :46   Median :30.05   Median :127.0   Median :1.0000  
+ Uninsured :13   Mean   :31.24   Mean   :128.9   Mean   :0.6047  
+                 3rd Qu.:36.03   3rd Qu.:138.0   3rd Qu.:1.0000  
+                 Max.   :55.41   Max.   :198.0   Max.   :1.0000  </code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m_scr2_logistic &lt;-<span class="st"> </span><span class="kw">glm</span>(up_to_date <span class="op">~</span><span class="st"> </span>age <span class="op">+</span><span class="st"> </span>race <span class="op">+</span><span class="st"> </span>hispanic <span class="op">+</span><span class="st"> </span>
+<span class="st">                    </span>insurance <span class="op">+</span><span class="st"> </span>bmi <span class="op">+</span><span class="st"> </span>sbp, 
+                <span class="dt">family =</span> binomial, <span class="dt">data =</span> colscr2)
 
- Factor                                             Chi-Square d.f. P     
- bmi  (Factor+Higher Order Factors)                   9.39      4   0.0521
-  All Interactions                                    0.17      1   0.6803
-  Nonlinear                                           1.46      2   0.4831
- physhealth  (Factor+Higher Order Factors)           11.74      6   0.0680
-  All Interactions                                    6.33      4   0.1760
-  Nonlinear                                           0.15      1   0.6946
- female  (Factor+Higher Order Factors)               13.25      2   0.0013
-  All Interactions                                    0.17      1   0.6803
- internet30  (Factor+Higher Order Factors)           18.03      5   0.0029
-  All Interactions                                    7.49      4   0.1121
- genh_n  (Factor+Higher Order Factors)               39.00     12   0.0001
-  All Interactions                                   11.80      8   0.1604
- genh_n * physhealth  (Factor+Higher Order Factors)   6.33      4   0.1760
- female * bmi  (Factor+Higher Order Factors)          0.17      1   0.6803
- menthealth                                           2.95      1   0.0859
- sleephrs                                             1.13      1   0.2868
- internet30 * genh_n  (Factor+Higher Order Factors)   7.49      4   0.1121
- TOTAL NONLINEAR                                      1.65      3   0.6474
- TOTAL INTERACTION                                   12.10      9   0.2075
- TOTAL NONLINEAR + INTERACTION                       13.40     12   0.3409
- TOTAL                                              131.03     22   &lt;.0001</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(<span class="kw">anova</span>(m2_a))</code></pre></div>
-<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-247-1.png" width="672" /></p>
-<p>Here, it looks like just three of the variables (<code>genhealth</code>, <code>internet30</code>, and <code>female</code>) are carrying statistically significant predictive value.</p>
-<p>Here is the AIC plot.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(<span class="kw">anova</span>(m2_a), <span class="dt">what=</span><span class="st">&quot;aic&quot;</span>)</code></pre></div>
-<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-248-1.png" width="672" /></p>
+<span class="kw">summary</span>(m_scr2_logistic)</code></pre></div>
+<pre><code>
+Call:
+glm(formula = up_to_date ~ age + race + hispanic + insurance + 
+    bmi + sbp, family = binomial, data = colscr2)
+
+Deviance Residuals: 
+    Min       1Q   Median       3Q      Max  
+-1.8604  -1.1540   0.6933   0.9564   1.6108  
+
+Coefficients:
+                     Estimate Std. Error z value Pr(&gt;|z|)  
+(Intercept)         2.7040470  2.7418625   0.986   0.3240  
+age                 0.0204901  0.0396920   0.516   0.6057  
+raceOther          -1.9722351  1.0023237  -1.968   0.0491 *
+raceWhite          -0.3210458  0.4001744  -0.802   0.4224  
+hispanic            0.0005855  0.7953482   0.001   0.9994  
+insuranceMedicaid  -1.0151860  0.4945169  -2.053   0.0401 *
+insuranceMedicare  -0.5216006  0.5629935  -0.926   0.3542  
+insuranceUninsured  0.1099966  0.7906196   0.139   0.8893  
+bmi                 0.0155894  0.0213547   0.730   0.4654  
+sbp                -0.0241777  0.0099138  -2.439   0.0147 *
+---
+Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 230.85  on 171  degrees of freedom
+Residual deviance: 210.55  on 162  degrees of freedom
+AIC: 230.55
+
+Number of Fisher Scoring iterations: 4</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">confint</span>(m_scr2_logistic)</code></pre></div>
+<pre><code>Waiting for profiling to be done...</code></pre>
+<pre><code>                         2.5 %       97.5 %
+(Intercept)        -2.64274441  8.157738367
+age                -0.05703934  0.099298904
+raceOther          -4.24604744 -0.175953229
+raceWhite          -1.10800168  0.469396096
+hispanic           -1.53691431  1.688738936
+insuranceMedicaid  -2.03640881 -0.079142467
+insuranceMedicare  -1.66246932  0.564088260
+insuranceUninsured -1.40110091  1.759391281
+bmi                -0.02568426  0.058563761
+sbp                -0.04436143 -0.005282686</code></pre>
+<p>In this model, there appears to be some link between <code>sbp</code> and screening, as well as, perhaps, some statistically significant differences between some race groups and some insurance groups. We won’t look at this much further for now, though. Instead, we’ll simply describe predictions for two subjects, Harry and Sally.</p>
 </div>
-<div id="summarizing-effect-size-1" class="section level3">
-<h3><span class="header-section-number">14.8.3</span> Summarizing Effect Size</h3>
-<p>How big are the effects we see?</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(<span class="kw">summary</span>(m2_a))</code></pre></div>
-<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-249-1.png" width="672" /></p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(m2_a)</code></pre></div>
-<pre><code>             Effects              Response : exerany 
-
- Factor       Low  High  Diff. Effect     S.E.     Lower 0.95 Upper 0.95
- bmi          23.9 30.31 6.41  -0.4797500 0.221460 -0.913810  -0.045691 
-  Odds Ratio  23.9 30.31 6.41   0.6189400       NA  0.400990   0.955340 
- physhealth    0.0  2.00 2.00   0.0055399 0.095955 -0.182530   0.193610 
-  Odds Ratio   0.0  2.00 2.00   1.0056000       NA  0.833160   1.213600 
- female        0.0  1.00 1.00  -0.6558700 0.183810 -1.016100  -0.295600 
-  Odds Ratio   0.0  1.00 1.00   0.5189900       NA  0.361990   0.744080 
- internet30    0.0  1.00 1.00   1.0291000 0.401140  0.242910   1.815300 
-  Odds Ratio   0.0  1.00 1.00   2.7986000       NA  1.275000   6.143200 
- menthealth    0.0  2.00 2.00  -0.0399460 0.023258 -0.085530   0.005638 
-  Odds Ratio   0.0  2.00 2.00   0.9608400       NA  0.918030   1.005700 
- sleephrs      6.0  8.00 2.00  -0.1072500 0.100690 -0.304600   0.090096 
-  Odds Ratio   6.0  8.00 2.00   0.8983000       NA  0.737420   1.094300 
- genh_n - 1:2  2.0  1.00   NA   0.5059000 0.750690 -0.965430   1.977200 
-  Odds Ratio   2.0  1.00   NA   1.6585000       NA  0.380820   7.222700 
- genh_n - 3:2  2.0  3.00   NA  -0.3552100 0.447130 -1.231600   0.521140 
-  Odds Ratio   2.0  3.00   NA   0.7010200       NA  0.291830   1.684000 
- genh_n - 4:2  2.0  4.00   NA  -0.6768400 0.517450 -1.691000   0.337350 
-  Odds Ratio   2.0  4.00   NA   0.5082200       NA  0.184330   1.401200 
- genh_n - 5:2  2.0  5.00   NA  -2.1783000 1.066000 -4.267700  -0.089045 
-  Odds Ratio   2.0  5.00   NA   0.1132300       NA  0.014015   0.914800 
-
-Adjusted to: bmi=27.03416 physhealth=0 female=0 internet30=0 genh_n=2  </code></pre>
-<p>This output is easier to read as a result of using small <em>numeric</em> labels in <code>genh_n</code>, rather than the lengthy labels in <code>genhealth</code>. The sensible things to interpret are the odds ratios. For example,</p>
+<div id="predicting-status-for-harry-and-sally" class="section level3">
+<h3><span class="header-section-number">16.2.3</span> Predicting status for Harry and Sally</h3>
 <ul>
-<li>holding all other predictors constant, the effect of moving from <code>internet30</code> = 0 to <code>internet30</code> = 1 is that the odds of <code>exerany</code> increase by a factor of 2.80.</li>
-<li>the odds ratio comparing two subjects with the same predictors except that Harry has a BMI of 30.31 (the 75th percentile of observed BMIs in our sample) and Marty has a BMI of 23.9 (the 25th percentile) is that Harry has 0.619 times the odds of exercising that Marty does. So Harry’s probability of exercise will also be lower.</li>
+<li>Harry is age 65, White, non-Hispanic, with Medicare insurance, a BMI of 28 and SBP of 135.</li>
+<li>Sally is age 60, Black, Hispanic, with Medicaid insurance, a BMI of 22 and SBP of 148.</li>
 </ul>
-<p>By sex, which group has a larger probability of <code>exerany</code>, holding all other predictors constant, by this model? Females or Males?</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">newdat_s2 &lt;-<span class="st"> </span><span class="kw">data_frame</span>(<span class="dt">subject =</span> <span class="kw">c</span>(<span class="st">&quot;Harry&quot;</span>, <span class="st">&quot;Sally&quot;</span>),
+                     <span class="dt">age =</span> <span class="kw">c</span>(<span class="dv">65</span>, <span class="dv">60</span>),
+                     <span class="dt">race =</span> <span class="kw">c</span>(<span class="st">&quot;White&quot;</span>, <span class="st">&quot;Black&quot;</span>),
+                     <span class="dt">hispanic =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">1</span>),
+                     <span class="dt">insurance =</span> <span class="kw">c</span>(<span class="st">&quot;Medicare&quot;</span>, <span class="st">&quot;Medicaid&quot;</span>),
+                     <span class="dt">bmi =</span> <span class="kw">c</span>(<span class="dv">28</span>, <span class="dv">22</span>),
+                     <span class="dt">sbp =</span> <span class="kw">c</span>(<span class="dv">135</span>, <span class="dv">148</span>))
+
+<span class="kw">predict</span>(m_scr2_logistic, <span class="dt">newdata =</span> newdat_s2, 
+        <span class="dt">type =</span> <span class="st">&quot;response&quot;</span>)</code></pre></div>
+<pre><code>        1         2 
+0.5904364 0.4215335 </code></pre>
+<p>The prediction for Harry is 0.59, and for Sally, 0.42, by this logistic regression model.</p>
 </div>
-<div id="plotting-the-model-with-ggplot-and-predict-1" class="section level3">
-<h3><span class="header-section-number">14.8.4</span> Plotting the Model with <code>ggplot</code> and <code>Predict</code></h3>
-<p>Again, consider a series of plots describing the model <code>m2_a</code> on the probability scale.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">ggplot</span>(<span class="kw">Predict</span>(m2_a, <span class="dt">fun =</span> plogis))</code></pre></div>
-<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-250-1.png" width="672" /></p>
-<p>Note the small <code>kink</code> in the <code>bmi</code> plot. To what do you attribute this?</p>
-</div>
-<div id="plotting-the-model-with-a-nomogram-1" class="section level3">
-<h3><span class="header-section-number">14.8.5</span> Plotting the model with a nomogram</h3>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(<span class="kw">nomogram</span>(m2_a, <span class="dt">fun =</span> plogis))</code></pre></div>
-<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-251-1.png" width="672" /></p>
-<p>Note the impact of our interaction terms, <strong>and</strong> the cubic splines in <code>bmi</code> and <code>physhealth</code>. As with any nomogram, to make a prediction we:</p>
-<ol style="list-style-type: decimal">
-<li>find the values of each of our predictors in the scales, and travel vertically up to the Points line to read off the Points for that predictor.</li>
-<li>sum up the Points across all predictors, and find that location in the Total Points line.</li>
-<li>move vertically down from the total points line to find the estimated “linear predictor” (log odds ratio) and finally the “predicted value” (probability of our outcome <code>exerany</code> = 1.)</li>
-</ol>
-</div>
-<div id="checking-the-calibration-of-our-model-1" class="section level3">
-<h3><span class="header-section-number">14.8.6</span> Checking the Calibration of our model</h3>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(<span class="kw">calibrate</span>(m2_a))</code></pre></div>
-<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-252-1.png" width="672" /></p>
+<div id="a-probit-regression-model" class="section level3">
+<h3><span class="header-section-number">16.2.4</span> A probit regression model</h3>
+<p>Now, consider a probit regression, fit by changing the default link for the <code>binomial</code> family as follows:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m_scr2_probit &lt;-<span class="st"> </span><span class="kw">glm</span>(up_to_date <span class="op">~</span><span class="st"> </span>age <span class="op">+</span><span class="st"> </span>race <span class="op">+</span><span class="st"> </span>hispanic <span class="op">+</span><span class="st"> </span>
+<span class="st">                    </span>insurance <span class="op">+</span><span class="st"> </span>bmi <span class="op">+</span><span class="st"> </span>sbp, 
+                <span class="dt">family =</span> <span class="kw">binomial</span>(<span class="dt">link =</span> <span class="st">&quot;probit&quot;</span>), 
+                <span class="dt">data =</span> colscr2)
+
+<span class="kw">summary</span>(m_scr2_probit)</code></pre></div>
 <pre><code>
-n=1033   Mean absolute error=0.019   Mean squared error=0.00048
-0.9 Quantile of absolute error=0.027</code></pre>
-<p>The model appears to be a bit less well calibrated than <code>m1_a</code> was.</p>
-<p>To test the goodness of fit, we can use the following omnibus test:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">round</span>(<span class="kw">residuals</span>(m2_a, <span class="dt">type =</span> <span class="st">&quot;gof&quot;</span>),<span class="dv">3</span>)</code></pre></div>
-<pre><code>Sum of squared errors     Expected value|H0                    SD 
-              157.102               157.011                 0.522 
-                    Z                     P 
-                0.174                 0.862 </code></pre>
-<p>Our non-significant <em>p</em> value suggests that we cannot detect anything that’s obviously wrong in the model in terms of goodness of fit.</p>
-</div>
-</div>
-<div id="comparing-model-2-to-model-1-after-simple-imputation" class="section level2">
-<h2><span class="header-section-number">14.9</span> Comparing Model 2 to Model 1 after simple imputation</h2>
-<p>We can refit the models with <code>glm</code> and then compare them with <code>anova</code>, <code>aic</code> and <code>bic</code> approaches, if we like.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m1_a_glm &lt;-<span class="st"> </span><span class="kw">glm</span>(exerany <span class="op">~</span><span class="st"> </span>internet30 <span class="op">*</span><span class="st"> </span><span class="kw">factor</span>(genh_n) <span class="op">+</span><span class="st"> </span>
-<span class="st">                    </span>bmi <span class="op">*</span><span class="st"> </span>female <span class="op">+</span><span class="st"> </span>physhealth <span class="op">+</span><span class="st"> </span>menthealth <span class="op">+</span>
-<span class="st">                    </span>sleephrs, 
-                <span class="dt">data =</span> smartcle_imp1, 
-                <span class="dt">family =</span> binomial)
+Call:
+glm(formula = up_to_date ~ age + race + hispanic + insurance + 
+    bmi + sbp, family = binomial(link = &quot;probit&quot;), data = colscr2)
 
-m2_a_glm &lt;-<span class="st"> </span><span class="kw">glm</span>(exerany <span class="op">~</span><span class="st"> </span><span class="kw">rcs</span>(bmi, <span class="dv">4</span>) <span class="op">+</span><span class="st"> </span><span class="kw">rcs</span>(physhealth, <span class="dv">5</span>) <span class="op">+</span><span class="st"> </span>
-<span class="st">              </span>female <span class="op">+</span><span class="st"> </span>internet30 <span class="op">*</span><span class="st"> </span><span class="kw">factor</span>(genh_n) <span class="op">+</span><span class="st"> </span>
-<span class="st">              </span><span class="kw">factor</span>(genh_n) <span class="op">%ia%</span><span class="st"> </span>physhealth <span class="op">+</span><span class="st"> </span>female <span class="op">%ia%</span><span class="st"> </span>bmi <span class="op">+</span><span class="st"> </span>
-<span class="st">              </span>menthealth <span class="op">+</span><span class="st"> </span>sleephrs, 
-          <span class="dt">data =</span> smartcle_imp1,
-          <span class="dt">family =</span> binomial)</code></pre></div>
-<div id="comparison-by-analysis-of-deviance" class="section level3">
-<h3><span class="header-section-number">14.9.1</span> Comparison by Analysis of Deviance</h3>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">anova</span>(m1_a_glm, m2_a_glm)</code></pre></div>
-<pre><code>Analysis of Deviance Table
+Deviance Residuals: 
+    Min       1Q   Median       3Q      Max  
+-1.8608  -1.1561   0.6933   0.9607   1.6073  
 
-Model 1: exerany ~ internet30 * factor(genh_n) + bmi * female + physhealth + 
-    menthealth + sleephrs
-Model 2: exerany ~ rcs(bmi, 4) + rcs(physhealth, 5) + female + internet30 * 
-    factor(genh_n) + factor(genh_n) %ia% physhealth + female %ia% 
-    bmi + menthealth + sleephrs
-  Resid. Df Resid. Dev Df Deviance
-1      1017     985.32            
-2      1010     976.89  7   8.4245</code></pre>
-<p>To obtain a <em>p</em> value, we can compare this drop in deviance to a <span class="math inline">\(\chi^2\)</span> distribution with 7 df, as follows:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">pchisq</span>(<span class="fl">8.4245</span>, <span class="dv">7</span>, <span class="dt">lower.tail =</span> <span class="ot">FALSE</span>)</code></pre></div>
-<pre><code>[1] 0.2966531</code></pre>
-<p>So there’s no statistically significant advantage apparent from fitting the larger <code>m2_a</code> model.</p>
+Coefficients:
+                    Estimate Std. Error z value Pr(&gt;|z|)  
+(Intercept)         1.584604   1.658489   0.955   0.3394  
+age                 0.013461   0.024107   0.558   0.5766  
+raceOther          -1.238445   0.587093  -2.109   0.0349 *
+raceWhite          -0.199260   0.243505  -0.818   0.4132  
+hispanic            0.029483   0.484819   0.061   0.9515  
+insuranceMedicaid  -0.619277   0.293205  -2.112   0.0347 *
+insuranceMedicare  -0.322881   0.333549  -0.968   0.3330  
+insuranceUninsured  0.052776   0.463798   0.114   0.9094  
+bmi                 0.009652   0.012887   0.749   0.4539  
+sbp                -0.014696   0.005944  -2.472   0.0134 *
+---
+Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 230.85  on 171  degrees of freedom
+Residual deviance: 210.49  on 162  degrees of freedom
+AIC: 230.49
+
+Number of Fisher Scoring iterations: 4</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">confint</span>(m_scr2_probit)</code></pre></div>
+<pre><code>Waiting for profiling to be done...</code></pre>
+<pre><code>                         2.5 %       97.5 %
+(Intercept)        -1.70739455  4.894713408
+age                -0.03400934  0.061437784
+raceOther          -2.53819772 -0.119812915
+raceWhite          -0.67910311  0.282566349
+hispanic           -0.92476109  1.011089937
+insuranceMedicaid  -1.21212866 -0.049749873
+insuranceMedicare  -0.99315267  0.329851215
+insuranceUninsured -0.83335121  0.966504724
+bmi                -0.01577917  0.035632196
+sbp                -0.02659318 -0.003148488</code></pre>
 </div>
-<div id="comparing-aic-and-bic" class="section level3">
-<h3><span class="header-section-number">14.9.2</span> Comparing AIC and BIC</h3>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">glance</span>(m1_a_glm)</code></pre></div>
-<pre><code>  null.deviance df.null    logLik      AIC      BIC deviance df.residual
-1      1136.406    1032 -492.6596 1017.319 1096.363 985.3192        1017</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">glance</span>(m2_a_glm)</code></pre></div>
-<pre><code>  null.deviance df.null    logLik      AIC     BIC deviance df.residual
-1      1136.406    1032 -488.4473 1022.895 1136.52 976.8946        1010</code></pre>
-<p>Model <code>m1_a_glm</code> shows lower AIC and BIC than does <code>m2_a_glm</code>, again suggesting no meaningful advantage for the larger model.</p>
-</div>
-</div>
-<div id="dealing-with-missing-data-via-multiple-imputation" class="section level2">
-<h2><span class="header-section-number">14.10</span> Dealing with Missing Data via Multiple Imputation</h2>
-<p>Next, we’ll use the <code>aregImpute</code> function within the <code>Hmisc</code> package to predict all missing values for all of our variables, using additive regression bootstrapping and predictive mean matching. The steps for this work are as follows:</p>
-<ol style="list-style-type: decimal">
-<li><code>aregImpute</code> draws a sample with replacement from the observations where the target variable is observed, not missing.</li>
-<li><code>aregImpute</code> then fits a flexible additive model to predict this target variable while finding the optimum transformation of it.</li>
-<li><code>aregImpute</code> then uses this fitted flexible model to predict the target variable in all of the original observations.</li>
-<li>Finally, <code>aregImpute</code> imputes each missing value of the target variable with the observed value whose predicted transformed value is closest to the predicted transformed value of the missing value.</li>
-</ol>
-<p>We’ll start with the <code>smartcle_imp0</code> data set, which contains only the subjects in the original <code>smartcle1</code> data where <code>exerany</code> is available, and which includes only the variables of interest to us, including both the factor (<code>genhealth</code>) and numeric (<code>genh_n</code>) versions of the genhealth data.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(smartcle_imp0)</code></pre></div>
-<pre><code>     SEQNO              exerany         physhealth       menthealth    
- Min.   :2.016e+09   Min.   :0.0000   Min.   : 0.000   Min.   : 0.000  
- 1st Qu.:2.016e+09   1st Qu.:1.0000   1st Qu.: 0.000   1st Qu.: 0.000  
- Median :2.016e+09   Median :1.0000   Median : 0.000   Median : 0.000  
- Mean   :2.016e+09   Mean   :0.7609   Mean   : 3.949   Mean   : 2.701  
- 3rd Qu.:2.016e+09   3rd Qu.:1.0000   3rd Qu.: 2.000   3rd Qu.: 2.000  
- Max.   :2.016e+09   Max.   :1.0000   Max.   :30.000   Max.   :30.000  
-                                      NA&#39;s   :16       NA&#39;s   :11      
-       genhealth        bmi            female         internet30    
- 1_Excellent:172   Min.   :12.71   Min.   :0.0000   Min.   :0.0000  
- 2_VeryGood :350   1st Qu.:23.70   1st Qu.:0.0000   1st Qu.:1.0000  
- 3_Good     :344   Median :26.68   Median :1.0000   Median :1.0000  
- 4_Fair     :121   Mean   :27.85   Mean   :0.6012   Mean   :0.8101  
- 5_Poor     : 43   3rd Qu.:30.53   3rd Qu.:1.0000   3rd Qu.:1.0000  
- NA&#39;s       :  3   Max.   :66.06   Max.   :1.0000   Max.   :1.0000  
-                   NA&#39;s   :83                       NA&#39;s   :6       
-    sleephrs          genh_n     
- Min.   : 1.000   Min.   :1.000  
- 1st Qu.: 6.000   1st Qu.:2.000  
- Median : 7.000   Median :2.000  
- Mean   : 7.022   Mean   :2.527  
- 3rd Qu.: 8.000   3rd Qu.:3.000  
- Max.   :20.000   Max.   :5.000  
- NA&#39;s   :7        NA&#39;s   :3      </code></pre>
-<p>The <code>smartcle_imp0</code> data set contains 1033 rows (subjects) and 10 columns (variables.)</p>
-<div id="using-aregimpute-to-fit-a-multiple-imputation-model" class="section level3">
-<h3><span class="header-section-number">14.10.1</span> Using <code>aregImpute</code> to fit a multiple imputation model</h3>
-<p>To set up <code>aregImpute</code> here, we’ll need to specify:</p>
+<div id="interpreting-the-probit-models-coefficients" class="section level3">
+<h3><span class="header-section-number">16.2.5</span> Interpreting the Probit Model’s Coefficients</h3>
+<p>It is possible to use any number of link functions to ensure that predicted values in a generalized linear model fall between 0 and 1. The probit regression model, for instance, uses the inverse of the cumulative distribution function of the Normal model as its link function. Let’s look more closely at the coefficients of the probit model we just fit.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m_scr2_probit<span class="op">$</span>coef</code></pre></div>
+<pre><code>       (Intercept)                age          raceOther 
+       1.584603569        0.013461338       -1.238445198 
+         raceWhite           hispanic  insuranceMedicaid 
+      -0.199260184        0.029483051       -0.619276718 
+ insuranceMedicare insuranceUninsured                bmi 
+      -0.322880519        0.052775722        0.009652339 
+               sbp 
+      -0.014695526 </code></pre>
+<p>The probit regression coefficients give the change in the z-score of the outcome of interest (here, <code>up_to_date</code>) for a one-unit change in the target predictor, holding all other predictors constant.</p>
 <ul>
-<li>a suitable random seed with <code>set.seed</code> so we can replicate our work later</li>
-<li>a data set via the <code>datadist</code> stuff shown below</li>
-<li>the variables we want to include in the imputation process, which should include, at a minimum, any variables with missing values, and any variables we want to include in our outcome models</li>
-<li><code>n.impute</code> = number of imputations, we’ll run 20 here<a href="#fn10" class="footnoteRef" id="fnref10"><sup>10</sup></a></li>
-<li><code>nk</code> = number of knots to describe level of complexity, with our choice <code>nk = c(0, 3)</code> we’ll fit both linear models and models with restricted cubic splines with 3 knots (this approach will wind up throwing some warnings here because some of our variables with missing values have only a few options so fitting splines is tough.)</li>
-<li><code>tlinear = FALSE</code> allows the target variable for imputation to have a non-linear transformation when <code>nk</code> is 3 or more. Here, I’ll use <code>tlinear = TRUE</code>, the default.</li>
-<li><code>B = 10</code> specifies 10 bootstrap samples will be used</li>
-<li><code>pr = FALSE</code> tells the machine not to print out which iteration is running as it goes.</li>
-<li><code>data</code> specifies the source of the variables</li>
+<li>So, for a one-year increase in age, holding all other predictors constant, the z-score for <code>up_to_date</code> increases by 0.013</li>
+<li>And for a Medicaid subject as compared to a Commercial subject of the same age, race, ethnicity, bmi and sbp, the z-score for the Medicaid subject is predicted to be -0.619 lower, according to this model.</li>
 </ul>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">set.seed</span>(<span class="dv">432074</span>)
-dd &lt;-<span class="st"> </span><span class="kw">datadist</span>(smartcle_imp0)
-<span class="kw">options</span>(<span class="dt">datadist =</span> <span class="st">&quot;dd&quot;</span>)
-
-imp_fit &lt;-<span class="st"> </span><span class="kw">aregImpute</span>(<span class="op">~</span><span class="st"> </span>exerany <span class="op">+</span><span class="st"> </span>physhealth <span class="op">+</span><span class="st"> </span>menthealth <span class="op">+</span>
-<span class="st">                          </span>genh_n <span class="op">+</span><span class="st"> </span>bmi <span class="op">+</span><span class="st"> </span>female <span class="op">+</span><span class="st"> </span>
-<span class="st">                          </span>internet30 <span class="op">+</span><span class="st"> </span>sleephrs, 
-                   <span class="dt">nk =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">3</span>), <span class="dt">tlinear =</span> <span class="ot">TRUE</span>,
-                   <span class="dt">data =</span> smartcle_imp0, <span class="dt">B =</span> <span class="dv">10</span>, 
-                   <span class="dt">n.impute =</span> <span class="dv">20</span>, <span class="dt">pr =</span> <span class="ot">FALSE</span>) </code></pre></div>
-<p>OK. Here is the imputation model. The summary here isn’t especially critical. We want to see what was run, but to see what the results look like, we’ll need a plot, to come.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">imp_fit</code></pre></div>
-<pre><code>
-Multiple Imputation using Bootstrap and PMM
-
-aregImpute(formula = ~exerany + physhealth + menthealth + genh_n + 
-    bmi + female + internet30 + sleephrs, data = smartcle_imp0, 
-    n.impute = 20, nk = c(0, 3), tlinear = TRUE, pr = FALSE, 
-    B = 10)
-
-n: 1033     p: 8    Imputations: 20     nk: 0 
-
-Number of NAs:
-   exerany physhealth menthealth     genh_n        bmi     female 
-         0         16         11          3         83          0 
-internet30   sleephrs 
-         6          7 
-
-           type d.f.
-exerany       l    1
-physhealth    s    1
-menthealth    s    1
-genh_n        s    1
-bmi           s    1
-female        l    1
-internet30    l    1
-sleephrs      s    1
-
-Transformation of Target Variables Forced to be Linear
-
-R-squares for Predicting Non-Missing Values for Each Variable
-Using Last Imputations of Predictors
-physhealth menthealth     genh_n        bmi internet30   sleephrs 
-     0.336      0.107      0.304      0.127      0.111      0.056 
-
-Resampling results for determining the complexity of imputation models
-
-Variable being imputed: physhealth 
-                                         nk=0  nk=3
-Bootstrap bias-corrected R^2            0.289 0.399
-10-fold cross-validated  R^2            0.288 0.381
-Bootstrap bias-corrected mean   |error| 4.911 4.014
-10-fold cross-validated  mean   |error| 4.253 4.091
-Bootstrap bias-corrected median |error| 3.261 1.784
-10-fold cross-validated  median |error| 0.896 0.666
-
-Variable being imputed: menthealth 
-                                         nk=0  nk=3
-Bootstrap bias-corrected R^2            0.103 0.116
-10-fold cross-validated  R^2            0.110 0.128
-Bootstrap bias-corrected mean   |error| 3.660 3.651
-10-fold cross-validated  mean   |error| 3.018 3.075
-Bootstrap bias-corrected median |error| 1.957 1.780
-10-fold cross-validated  median |error| 0.715 0.786
-
-Variable being imputed: genh_n 
-                                         nk=0  nk=3
-Bootstrap bias-corrected R^2            0.323 0.319
-10-fold cross-validated  R^2            0.324 0.323
-Bootstrap bias-corrected mean   |error| 0.690 0.691
-10-fold cross-validated  mean   |error| 2.537 2.538
-Bootstrap bias-corrected median |error| 0.644 0.648
-10-fold cross-validated  median |error| 2.555 2.571
-
-Variable being imputed: bmi 
-                                           nk=0    nk=3
-Bootstrap bias-corrected R^2             0.0715  0.0919
-10-fold cross-validated  R^2             0.0825  0.0892
-Bootstrap bias-corrected mean   |error|  4.5861  4.5264
-10-fold cross-validated  mean   |error| 27.8377 27.8712
-Bootstrap bias-corrected median |error|  3.5091  3.5217
-10-fold cross-validated  median |error| 26.8401 26.7857
-
-Variable being imputed: internet30 
-                                          nk=0   nk=3
-Bootstrap bias-corrected R^2            0.0843 0.0760
-10-fold cross-validated  R^2            0.1016 0.0825
-Bootstrap bias-corrected mean   |error| 0.2798 0.2857
-10-fold cross-validated  mean   |error| 0.9636 0.9594
-Bootstrap bias-corrected median |error| 0.1883 0.1819
-10-fold cross-validated  median |error| 0.7757 0.7467
-
-Variable being imputed: sleephrs 
-                                          nk=0    nk=3
-Bootstrap bias-corrected R^2            0.0075 -0.0072
-10-fold cross-validated  R^2            0.0330  0.0149
-Bootstrap bias-corrected mean   |error| 1.0102  1.0506
-10-fold cross-validated  mean   |error| 7.0313  7.0163
-Bootstrap bias-corrected median |error| 0.9287  0.9000
-10-fold cross-validated  median |error| 7.0066  6.9739</code></pre>
-<p>OK, let’s plot these imputed values. Note that we had six predictors with missing values in our data set, and so if we plot each of those, we’ll wind up with six plots. I’ll arrange them in a grid with three rows and two columns.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">3</span>,<span class="dv">2</span>))
-<span class="kw">plot</span>(imp_fit)</code></pre></div>
-<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-261-1.png" width="672" /></p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">1</span>))</code></pre></div>
-<p>From these cumulative distribution functions, we can see that, for example,</p>
-<ul>
-<li>we imputed <code>bmi</code> values mostly between 20 and 35, with a few values below 20 or above 40.</li>
-<li>most of our imputed <code>sleephrs</code> were between 5 and 10</li>
-<li>we imputed 1 for <code>internet30</code> for about 70% of the subjects, and 0 for the other 30%.</li>
-</ul>
-<p>This predictive mean matching method never imputes a value for a variable that does not already exist in the data.</p>
 </div>
-</div>
-<div id="combining-the-imputation-and-outcome-models" class="section level2">
-<h2><span class="header-section-number">14.11</span> Combining the Imputation and Outcome Models</h2>
-<p>So, now we have an imputation model, called <code>imp_fit</code>. and two outcome models: <code>m1</code> and <code>m2</code>. What do we do with them?</p>
-<div id="model-1-with-multiple-imputation" class="section level3">
-<h3><span class="header-section-number">14.11.1</span> Model 1 with Multiple Imputation</h3>
-<p>To build the <code>m1_imp</code> multiple imputation fit for model <code>m1</code>, we use the <code>fit.mult.impute</code> command, and specify the model, the fitter (here, <code>lrm</code>), the imputation model (<code>xtrans = imp_fit</code>) and the data set prior to imputation (<code>smartcle_imp0</code>).</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m1_imp &lt;-<span class="st"> </span><span class="kw">fit.mult.impute</span>(exerany <span class="op">~</span><span class="st"> </span>
-<span class="st">            </span>internet30 <span class="op">*</span><span class="st"> </span><span class="kw">catg</span>(genh_n) <span class="op">+</span><span class="st"> </span>bmi <span class="op">*</span><span class="st"> </span>female <span class="op">+</span>
-<span class="st">            </span>physhealth <span class="op">+</span><span class="st"> </span>menthealth <span class="op">+</span><span class="st"> </span>sleephrs,
-            <span class="dt">fitter =</span> lrm, <span class="dt">xtrans =</span> imp_fit,
-            <span class="dt">data =</span> smartcle_imp0, <span class="dt">x =</span> <span class="ot">TRUE</span>, <span class="dt">y =</span> <span class="ot">TRUE</span>)</code></pre></div>
-<pre><code>
-Variance Inflation Factors Due to Imputation:
-
-            Intercept            internet30              genh_n=2 
-                 1.03                  1.00                  1.01 
-             genh_n=3              genh_n=4              genh_n=5 
-                 1.00                  1.01                  1.02 
-                  bmi                female            physhealth 
-                 1.06                  1.08                  1.05 
-           menthealth              sleephrs internet30 * genh_n=2 
-                 1.01                  1.02                  1.01 
-internet30 * genh_n=3 internet30 * genh_n=4 internet30 * genh_n=5 
-                 1.00                  1.01                  1.03 
-         bmi * female 
-                 1.08 
-
-Rate of Missing Information:
-
-            Intercept            internet30              genh_n=2 
-                 0.03                  0.00                  0.01 
-             genh_n=3              genh_n=4              genh_n=5 
-                 0.00                  0.01                  0.02 
-                  bmi                female            physhealth 
-                 0.05                  0.07                  0.04 
-           menthealth              sleephrs internet30 * genh_n=2 
-                 0.01                  0.02                  0.01 
-internet30 * genh_n=3 internet30 * genh_n=4 internet30 * genh_n=5 
-                 0.00                  0.01                  0.03 
-         bmi * female 
-                 0.08 
-
-d.f. for t-distribution for Tests of Single Coefficients:
-
-            Intercept            internet30              genh_n=2 
-             21695.29            4552554.82             342982.63 
-             genh_n=3              genh_n=4              genh_n=5 
-           2393040.31             340219.46              43771.65 
-                  bmi                female            physhealth 
-              6985.80               3594.27               9984.27 
-           menthealth              sleephrs internet30 * genh_n=2 
-             87510.83              39656.28             292980.96 
-internet30 * genh_n=3 internet30 * genh_n=4 internet30 * genh_n=5 
-           6057039.66             610087.87              23370.34 
-         bmi * female 
-              3152.92 
-
-The following fit components were averaged over the 20 model fits:
-
-  stats linear.predictors </code></pre>
-<p>OK. Let’s get the familiar description of an <code>lrm</code> model, after this multiple imputation.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m1_imp</code></pre></div>
-<pre><code>Logistic Regression Model
- 
- fit.mult.impute(formula = exerany ~ internet30 * catg(genh_n) + 
-     bmi * female + physhealth + menthealth + sleephrs, fitter = lrm, 
-     xtrans = imp_fit, data = smartcle_imp0, x = TRUE, y = TRUE)
- 
-                       Model Likelihood     Discrimination    Rank Discrim.    
-                          Ratio Test           Indexes           Indexes       
- Obs          1033    LR chi2     153.52    R2       0.207    C       0.743    
-  0            247    d.f.            15    g        1.031    Dxy     0.487    
-  1            786    Pr(&gt; chi2) &lt;0.0001    gr       2.803    gamma   0.487    
- max |deriv| 1e-12                          gp       0.176    tau-a   0.177    
-                                            Brier    0.153                     
- 
-                       Coef    S.E.   Wald Z Pr(&gt;|Z|)
- Intercept              3.3183 0.9782  3.39  0.0007  
- internet30             0.6499 0.7013  0.93  0.3540  
- genh_n=2              -0.4613 0.7507 -0.61  0.5389  
- genh_n=3              -0.9069 0.6978 -1.30  0.1937  
- genh_n=4              -1.3287 0.7392 -1.80  0.0722  
- genh_n=5              -0.9257 0.8342 -1.11  0.2671  
- bmi                   -0.0408 0.0216 -1.89  0.0588  
- female                -0.9153 0.7786 -1.18  0.2398  
- physhealth            -0.0234 0.0103 -2.27  0.0235  
- menthealth            -0.0192 0.0115 -1.68  0.0934  
- sleephrs              -0.0407 0.0496 -0.82  0.4120  
- internet30 * genh_n=2  0.3503 0.8117  0.43  0.6661  
- internet30 * genh_n=3  0.1110 0.7549  0.15  0.8832  
- internet30 * genh_n=4 -0.1851 0.8117 -0.23  0.8196  
- internet30 * genh_n=5 -1.2268 0.9748 -1.26  0.2082  
- bmi * female           0.0108 0.0263  0.41  0.6822  
- </code></pre>
-<p>We can obtain an ANOVA plot and an AIC plot to look at the predictors:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>,<span class="dv">1</span>))
-<span class="kw">plot</span>(<span class="kw">anova</span>(m1_imp))
-<span class="kw">plot</span>(<span class="kw">anova</span>(m1_imp), <span class="dt">what=</span><span class="st">&quot;aic&quot;</span>)</code></pre></div>
-<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-264-1.png" width="672" /></p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">1</span>))</code></pre></div>
-<p>Here’s the summary of effect sizes.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(m1_imp)</code></pre></div>
-<pre><code>             Effects              Response : exerany 
-
- Factor       Low  High  Diff. Effect    S.E.     Lower 0.95 Upper 0.95
- internet30    0.0  1.00 1.00   1.000300 0.411430  0.193880   1.8066000
-  Odds Ratio   0.0  1.00 1.00   2.719000       NA  1.214000   6.0899000
- bmi          23.7 30.53 6.83  -0.279000 0.147670 -0.568430   0.0104310
-  Odds Ratio  23.7 30.53 6.83   0.756540       NA  0.566410   1.0105000
- female        0.0  1.00 1.00  -0.628260 0.181140 -0.983290  -0.2732400
-  Odds Ratio   0.0  1.00 1.00   0.533520       NA  0.374080   0.7609100
- physhealth    0.0  2.00 2.00  -0.046783 0.020654 -0.087264  -0.0063023
-  Odds Ratio   0.0  2.00 2.00   0.954290       NA  0.916440   0.9937200
- menthealth    0.0  2.00 2.00  -0.038477 0.022932 -0.083422   0.0064689
-  Odds Ratio   0.0  2.00 2.00   0.962250       NA  0.919960   1.0065000
- sleephrs      6.0  8.00 2.00  -0.081454 0.099287 -0.276050   0.1131500
-  Odds Ratio   6.0  8.00 2.00   0.921770       NA  0.758770   1.1198000
- genh_n - 1:2  2.0  1.00   NA   0.461310 0.750680 -1.010000   1.9326000
-  Odds Ratio   2.0  1.00   NA   1.586200       NA  0.364220   6.9076000
- genh_n - 3:2  2.0  3.00   NA  -0.445620 0.442710 -1.313300   0.4220800
-  Odds Ratio   2.0  3.00   NA   0.640430       NA  0.268930   1.5251000
- genh_n - 4:2  2.0  4.00   NA  -0.867380 0.500240 -1.847800   0.1130700
-  Odds Ratio   2.0  4.00   NA   0.420050       NA  0.157580   1.1197000
- genh_n - 5:2  2.0  5.00   NA  -0.464420 0.626480 -1.692300   0.7634700
-  Odds Ratio   2.0  5.00   NA   0.628500       NA  0.184090   2.1457000
-
-Adjusted to: internet30=0 genh_n=2 bmi=26.68 female=0  </code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(<span class="kw">summary</span>(m1_imp))</code></pre></div>
-<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-265-1.png" width="672" /></p>
-<p>And here is the nomogram.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(<span class="kw">nomogram</span>(m1_imp, <span class="dt">fun =</span> plogis))</code></pre></div>
-<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-266-1.png" width="672" /></p>
-<p>Here are the descriptive model plots, on the original probability scale for our <code>exerany</code> outcome:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">ggplot</span>(<span class="kw">Predict</span>(m1_imp), <span class="dt">fun =</span> plogis)</code></pre></div>
-<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-267-1.png" width="672" /></p>
-<p>We can still do things like validate the summary statistics, too.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">validate</span>(m1_imp)</code></pre></div>
-<pre><code>          index.orig training   test optimism index.corrected  n
-Dxy           0.4889   0.5155 0.4739   0.0416          0.4473 40
-R2            0.2070   0.2299 0.1912   0.0388          0.1682 40
-Intercept     0.0000   0.0000 0.1047  -0.1047          0.1047 40
-Slope         1.0000   1.0000 0.8922   0.1078          0.8922 40
-Emax          0.0000   0.0000 0.0442   0.0442          0.0442 40
-D             0.1476   0.1659 0.1355   0.0304          0.1173 40
-U            -0.0019  -0.0019 0.0022  -0.0041          0.0022 40
-Q             0.1496   0.1678 0.1333   0.0345          0.1151 40
-B             0.1533   0.1499 0.1563  -0.0064          0.1597 40
-g             1.0307   1.1056 0.9773   0.1283          0.9024 40
-gp            0.1764   0.1851 0.1686   0.0165          0.1599 40</code></pre>
-<p>And we can look at calibration curves.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(<span class="kw">calibrate</span>(m1_imp))</code></pre></div>
-<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-269-1.png" width="672" /></p>
-<pre><code>
-n=1033   Mean absolute error=0.013   Mean squared error=0.00029
-0.9 Quantile of absolute error=0.022</code></pre>
-</div>
-<div id="model-2-with-multiple-imputation" class="section level3">
-<h3><span class="header-section-number">14.11.2</span> Model 2 with Multiple Imputation</h3>
-<p>The same approach is used to build the <code>m2_imp</code> multiple imputation fit for model <code>m2</code>, using the <code>fit.mult.impute</code> command, and specifying the model, the fitter (here, <code>lrm</code>), the imputation model (<code>xtrans = imp_fit</code>) and the data set prior to imputation (<code>smartcle_imp0</code>).</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m2_imp &lt;-<span class="st"> </span><span class="kw">fit.mult.impute</span>(exerany <span class="op">~</span><span class="st"> </span>
-<span class="st">            </span><span class="kw">rcs</span>(bmi, <span class="dv">4</span>) <span class="op">+</span><span class="st"> </span><span class="kw">rcs</span>(physhealth, <span class="dv">5</span>) <span class="op">+</span><span class="st"> </span>
-<span class="st">            </span>female <span class="op">+</span><span class="st"> </span>internet30 <span class="op">*</span><span class="st"> </span><span class="kw">catg</span>(genh_n) <span class="op">+</span><span class="st"> </span>
-<span class="st">            </span><span class="kw">catg</span>(genh_n) <span class="op">%ia%</span><span class="st"> </span>physhealth <span class="op">+</span><span class="st"> </span>female <span class="op">%ia%</span><span class="st"> </span>bmi <span class="op">+</span><span class="st"> </span>
-<span class="st">            </span>menthealth <span class="op">+</span><span class="st"> </span>sleephrs,
-            <span class="dt">fitter =</span> lrm, <span class="dt">xtrans =</span> imp_fit,
-            <span class="dt">data =</span> smartcle_imp0, <span class="dt">x =</span> <span class="ot">TRUE</span>, <span class="dt">y =</span> <span class="ot">TRUE</span>)</code></pre></div>
-<pre><code>
-Variance Inflation Factors Due to Imputation:
-
-            Intercept                   bmi                  bmi&#39; 
-                 1.07                  1.08                  1.06 
-                bmi&#39;&#39;            physhealth           physhealth&#39; 
-                 1.06                  1.04                  1.02 
-               female            internet30              genh_n=2 
-                 1.08                  1.00                  1.01 
-             genh_n=3              genh_n=4              genh_n=5 
-                 1.00                  1.01                  1.01 
-genh_n=2 * physhealth genh_n=3 * physhealth genh_n=4 * physhealth 
-                 1.03                  1.03                  1.02 
-genh_n=5 * physhealth          female * bmi            menthealth 
-                 1.03                  1.09                  1.01 
-             sleephrs internet30 * genh_n=2 internet30 * genh_n=3 
-                 1.03                  1.01                  1.00 
-internet30 * genh_n=4 internet30 * genh_n=5 
-                 1.01                  1.04 
-
-Rate of Missing Information:
-
-            Intercept                   bmi                  bmi&#39; 
-                 0.07                  0.07                  0.06 
-                bmi&#39;&#39;            physhealth           physhealth&#39; 
-                 0.06                  0.04                  0.02 
-               female            internet30              genh_n=2 
-                 0.08                  0.00                  0.01 
-             genh_n=3              genh_n=4              genh_n=5 
-                 0.00                  0.01                  0.01 
-genh_n=2 * physhealth genh_n=3 * physhealth genh_n=4 * physhealth 
-                 0.03                  0.03                  0.02 
-genh_n=5 * physhealth          female * bmi            menthealth 
-                 0.03                  0.08                  0.01 
-             sleephrs internet30 * genh_n=2 internet30 * genh_n=3 
-                 0.03                  0.01                  0.00 
-internet30 * genh_n=4 internet30 * genh_n=5 
-                 0.01                  0.04 
-
-d.f. for t-distribution for Tests of Single Coefficients:
-
-            Intercept                   bmi                  bmi&#39; 
-              4380.39               3700.10               5557.48 
-                bmi&#39;&#39;            physhealth           physhealth&#39; 
-              5611.05              14728.96              42868.19 
-               female            internet30              genh_n=2 
-              3252.44            3009564.42             305690.58 
-             genh_n=3              genh_n=4              genh_n=5 
-           1329373.30             318205.87             190432.29 
-genh_n=2 * physhealth genh_n=3 * physhealth genh_n=4 * physhealth 
-             21003.64              22615.76              38202.98 
-genh_n=5 * physhealth          female * bmi            menthealth 
-             21998.83               3002.51             111867.55 
-             sleephrs internet30 * genh_n=2 internet30 * genh_n=3 
-             26186.82             211617.58            2865315.54 
-internet30 * genh_n=4 internet30 * genh_n=5 
-            551890.44              10977.39 
-
-The following fit components were averaged over the 20 model fits:
-
-  stats linear.predictors </code></pre>
-<p>OK. Let’s get the familiar description of an <code>lrm</code> model, after this multiple imputation.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m2_imp</code></pre></div>
-<pre><code>Logistic Regression Model
- 
- fit.mult.impute(formula = exerany ~ rcs(bmi, 4) + rcs(physhealth, 
-     5) + female + internet30 * catg(genh_n) + catg(genh_n) %ia% 
-     physhealth + female %ia% bmi + menthealth + sleephrs, fitter = lrm, 
-     xtrans = imp_fit, data = smartcle_imp0, x = TRUE, y = TRUE)
- 
-                       Model Likelihood     Discrimination    Rank Discrim.    
-                          Ratio Test           Indexes           Indexes       
- Obs          1033    LR chi2     162.26    R2       0.218    C       0.746    
-  0            247    d.f.            22    g        1.062    Dxy     0.492    
-  1            786    Pr(&gt; chi2) &lt;0.0001    gr       2.892    gamma   0.492    
- max |deriv| 5e-12                          gp       0.180    tau-a   0.179    
-                                            Brier    0.152                     
- 
-                       Coef    S.E.   Wald Z Pr(&gt;|Z|)
- Intercept              2.9915 1.9954  1.50  0.1338  
- bmi                   -0.0164 0.0812 -0.20  0.8397  
- bmi&#39;                  -0.2350 0.3356 -0.70  0.4837  
- bmi&#39;&#39;                  0.7236 0.9089  0.80  0.4260  
- physhealth             0.0261 0.0862  0.30  0.7624  
- physhealth&#39;           -0.2434 0.3696 -0.66  0.5102  
- female                -0.9680 0.8140 -1.19  0.2344  
- internet30             0.6182 0.7059  0.88  0.3812  
- genh_n=2              -0.4851 0.7558 -0.64  0.5210  
- genh_n=3              -0.8620 0.7066 -1.22  0.2225  
- genh_n=4              -1.2144 0.7554 -1.61  0.1079  
- genh_n=5              -2.7928 1.2040 -2.32  0.0204  
- genh_n=2 * physhealth -0.0061 0.0803 -0.08  0.9397  
- genh_n=3 * physhealth -0.0325 0.0775 -0.42  0.6750  
- genh_n=4 * physhealth -0.0322 0.0772 -0.42  0.6766  
- genh_n=5 * physhealth  0.0634 0.0856  0.74  0.4591  
- female * bmi           0.0111 0.0272  0.41  0.6831  
- menthealth            -0.0197 0.0117 -1.68  0.0923  
- sleephrs              -0.0554 0.0510 -1.09  0.2774  
- internet30 * genh_n=2  0.3882 0.8163  0.48  0.6344  
- internet30 * genh_n=3  0.1368 0.7617  0.18  0.8575  
- internet30 * genh_n=4 -0.1712 0.8203 -0.21  0.8347  
- internet30 * genh_n=5 -1.4939 0.9985 -1.50  0.1346  
- </code></pre>
-<p>We can obtain an ANOVA plot and an AIC plot to look at the predictors:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>,<span class="dv">1</span>))
-<span class="kw">plot</span>(<span class="kw">anova</span>(m2_imp))
-<span class="kw">plot</span>(<span class="kw">anova</span>(m2_imp), <span class="dt">what=</span><span class="st">&quot;aic&quot;</span>)</code></pre></div>
-<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-272-1.png" width="672" /></p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">1</span>))</code></pre></div>
-<p>Here’s the summary of effect sizes.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(m2_imp)</code></pre></div>
-<pre><code>             Effects              Response : exerany 
-
- Factor       Low  High  Diff. Effect    S.E.     Lower 0.95 Upper 0.95
- bmi          23.7 30.53 6.83  -0.498810 0.233540 -0.956540  -0.0410830
-  Odds Ratio  23.7 30.53 6.83   0.607250       NA  0.384220   0.9597500
- physhealth    0.0  2.00 2.00   0.037808 0.100250 -0.158680   0.2343000
-  Odds Ratio   0.0  2.00 2.00   1.038500       NA  0.853270   1.2640000
- female        0.0  1.00 1.00  -0.671780 0.189360 -1.042900  -0.3006400
-  Odds Ratio   0.0  1.00 1.00   0.510800       NA  0.352420   0.7403400
- internet30    0.0  1.00 1.00   1.006400 0.412260  0.198370   1.8144000
-  Odds Ratio   0.0  1.00 1.00   2.735700       NA  1.219400   6.1374000
- menthealth    0.0  2.00 2.00  -0.039395 0.023405 -0.085267   0.0064773
-  Odds Ratio   0.0  2.00 2.00   0.961370       NA  0.918270   1.0065000
- sleephrs      6.0  8.00 2.00  -0.110820 0.102030 -0.310800   0.0891530
-  Odds Ratio   6.0  8.00 2.00   0.895100       NA  0.732860   1.0932000
- genh_n - 1:2  2.0  1.00   NA   0.485110 0.755780 -0.996190   1.9664000
-  Odds Ratio   2.0  1.00   NA   1.624400       NA  0.369290   7.1450000
- genh_n - 3:2  2.0  3.00   NA  -0.376840 0.455990 -1.270600   0.5168800
-  Odds Ratio   2.0  3.00   NA   0.686030       NA  0.280670   1.6768000
- genh_n - 4:2  2.0  4.00   NA  -0.729310 0.526230 -1.760700   0.3020700
-  Odds Ratio   2.0  4.00   NA   0.482240       NA  0.171920   1.3527000
- genh_n - 5:2  2.0  5.00   NA  -2.307700 1.074000 -4.412600  -0.2026900
-  Odds Ratio   2.0  5.00   NA   0.099493       NA  0.012123   0.8165300
-
-Adjusted to: bmi=26.68 physhealth=0 female=0 internet30=0 genh_n=2  </code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(<span class="kw">summary</span>(m2_imp))</code></pre></div>
-<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-273-1.png" width="672" /></p>
-<p>And here is the nomogram.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(<span class="kw">nomogram</span>(m2_imp, <span class="dt">fun =</span> plogis))</code></pre></div>
-<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-274-1.png" width="672" /></p>
-<p>Here are the descriptive model plots, on the scale of Pr(exerany = 1):</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">ggplot</span>(<span class="kw">Predict</span>(m2_imp), <span class="dt">fun =</span> plogis)</code></pre></div>
-<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-275-1.png" width="672" /></p>
-<p>Validation of summary statistics:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">validate</span>(m2_imp)</code></pre></div>
-<pre><code>          index.orig training   test optimism index.corrected  n
-Dxy           0.4950   0.5230 0.4682   0.0548          0.4402 40
-R2            0.2179   0.2463 0.1884   0.0579          0.1600 40
-Intercept     0.0000   0.0000 0.1773  -0.1773          0.1773 40
-Slope         1.0000   1.0000 0.8296   0.1704          0.8296 40
-Emax          0.0000   0.0000 0.0747   0.0747          0.0747 40
-D             0.1561   0.1783 0.1334   0.0449          0.1112 40
-U            -0.0019  -0.0019 0.0040  -0.0059          0.0040 40
-Q             0.1580   0.1802 0.1294   0.0508          0.1072 40
-B             0.1514   0.1464 0.1561  -0.0097          0.1611 40
-g             1.0618   1.1620 0.9707   0.1913          0.8705 40
-gp            0.1801   0.1894 0.1657   0.0237          0.1564 40</code></pre>
-<p>And the calibration curves.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(<span class="kw">calibrate</span>(m2_imp))</code></pre></div>
-<p><img src="bookdown-demo_files/figure-html/unnamed-chunk-277-1.png" width="672" /></p>
-<pre><code>
-n=1033   Mean absolute error=0.018   Mean squared error=0.00046
-0.9 Quantile of absolute error=0.027</code></pre>
-</div>
-</div>
-<div id="models-with-and-without-imputation" class="section level2">
-<h2><span class="header-section-number">14.12</span> Models with and without Imputation</h2>
-<table>
-<thead>
-<tr class="header">
-<th align="right">Model</th>
-<th align="right">1</th>
-<th align="right">1</th>
-<th align="right">2</th>
-<th align="right">2</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="right">Imputation</td>
-<td align="right">Simple</td>
-<td align="right">Multiple</td>
-<td align="right">Sim.</td>
-<td align="right">Mult.</td>
-</tr>
-<tr class="even">
-<td align="right">nominal R<sup>2</sup></td>
-<td align="right">0.204</td>
-<td align="right">0.204</td>
-<td align="right">0.214</td>
-<td align="right">0.218</td>
-</tr>
-<tr class="odd">
-<td align="right">nominal C</td>
-<td align="right">0.741</td>
-<td align="right">0.741</td>
-<td align="right">0.744</td>
-<td align="right">0.746</td>
-</tr>
-<tr class="even">
-<td align="right">validated R<sup>2</sup></td>
-<td align="right">0.170</td>
-<td align="right">0.168</td>
-<td align="right">0.165</td>
-<td align="right">0.160</td>
-</tr>
-<tr class="odd">
-<td align="right">validated C</td>
-<td align="right">0.722</td>
-<td align="right">0.724</td>
-<td align="right">0.720</td>
-<td align="right">0.722</td>
-</tr>
-</tbody>
-</table>
-<p>So, what can we conclude about the discrimination results?</p>
+<div id="what-about-harry-and-sally" class="section level3">
+<h3><span class="header-section-number">16.2.6</span> What about Harry and Sally?</h3>
+<p>Do the predictions for Harry and Sally change much with this probit model, as compared to the logistic regression?</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">predict</span>(m_scr2_probit, <span class="dt">newdata =</span> newdat_s2, <span class="dt">type =</span> <span class="st">&quot;response&quot;</span>)</code></pre></div>
+<pre><code>        1         2 
+0.5885511 0.4364027 </code></pre>
 
 </div>
 </div>
-<div class="footnotes">
-<hr />
-<ol start="10">
-<li id="fn10"><p>100 is generally safe but time-consuming. In the old days, we used to say 5. A reasonable idea is to identify the fraction of missingness in your variable with the most missingness, and if that’s 0.10, then you should run at least 100(0.10) = 10 sets of imputations.<a href="logistic-regression-and-the-smartcle1-data.html#fnref10">↩</a></p></li>
-</ol>
 </div>
             </section>
 
           </div>
         </div>
       </div>
-<a href="logistic-regression-and-the-resect-data.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-<a href="linear-regression-and-the-smartcle1-data.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="linear-regression-and-the-smartcle1-data.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="references.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
@@ -1999,7 +1041,7 @@ gitbook.start({
 "size": 2
 },
 "edit": {
-"link": "https://github.com/rstudio/bookdown-demo/edit/master/14_logistic2.Rmd",
+"link": "https://github.com/rstudio/bookdown-demo/edit/master/16_binary_regression.Rmd",
 "text": "Edit"
 },
 "download": ["bookdown-demo.pdf", "bookdown-demo.epub"],

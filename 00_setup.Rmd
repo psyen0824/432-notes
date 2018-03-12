@@ -34,6 +34,8 @@ emphysema <- read.csv("data/emphysema.csv") %>% tbl_df
 prost <- read.csv("data/prost.csv") %>% tbl_df
 pollution <- read.csv("data/pollution.csv") %>% tbl_df
 resect <- read.csv("data/resect.csv") %>% tbl_df
+colscr <- read.csv("data/screening.csv") %>% tbl_df
+colscr2 <- read.csv("data/screening2.csv") %>% tbl_df
 ```
 
 # Special Functions used in these notes {-}

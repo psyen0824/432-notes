@@ -124,7 +124,7 @@
   \postauthor{\par}
   \predate{\centering\large\emph}
   \postdate{\par}
-  \date{Built 2018-02-28 07:54:22}
+  \date{Built 2018-03-11 20:13:09}
 
 \usepackage{booktabs}
 \usepackage{amsthm}
@@ -246,6 +246,8 @@ Here, we'll load in the data sets used in these notes.
 \NormalTok{prost <-}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(}\StringTok{"data/prost.csv"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }\NormalTok{tbl_df}
 \NormalTok{pollution <-}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(}\StringTok{"data/pollution.csv"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }\NormalTok{tbl_df}
 \NormalTok{resect <-}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(}\StringTok{"data/resect.csv"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }\NormalTok{tbl_df}
+\NormalTok{colscr <-}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(}\StringTok{"data/screening.csv"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }\NormalTok{tbl_df}
+\NormalTok{colscr2 <-}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(}\StringTok{"data/screening2.csv"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }\NormalTok{tbl_df}
 \end{Highlighting}
 \end{Shaded}
 
@@ -18782,6 +18784,543 @@ command, and specifying the model, the fitter (here, \texttt{ols}), the
 imputation model (\texttt{xtrans\ =\ imp\_fit}) and the data set prior
 to imputation (\texttt{smartcle2\_imp0}). We'll skip it for now. The
 model remains terrible.
+
+\chapter{Colorectal Cancer Screening and Some Special
+Cases}\label{colorectal-cancer-screening-and-some-special-cases}
+
+In this Chapter, we discuss two issues as yet unraised regarding
+regression on a binary outcome.
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  What do we do if our binary outcome is not available for each subject
+  individually, but instead aggregated?
+\item
+  What is probit regression, and how can we use it as an alternative to
+  logistic regression on a binary outcome?
+\end{enumerate}
+
+\section{Logistic Regression for Aggregated
+Data}\label{logistic-regression-for-aggregated-data}
+
+\subsection{Colorectal Cancer Screening
+Data}\label{colorectal-cancer-screening-data}
+
+The \texttt{screening.csv} data (imported into the R tibble
+\texttt{colscr} are simulated. They mirror a subset of the actual
+results from the
+\href{http://www.betterhealthpartnership.org/data_center/}{Better Health
+Partnership}'s pilot study of colorectal cancer screening in primary
+care clinics in Northeast Ohio, but the numbers have been fuzzed
+slightly, and the clinics have been de-identified and moved around from
+system to system.
+
+Available to us are the following variables:
+
+\begin{longtable}[]{@{}rl@{}}
+\toprule
+Variable & Description\tabularnewline
+\midrule
+\endhead
+\texttt{location} & clinic code\tabularnewline
+\texttt{subjects} & number of subjects reported by clinic\tabularnewline
+\texttt{screen\_rate} & proportion of \texttt{subjects} who were
+screened\tabularnewline
+\texttt{screened} & number of \texttt{subjects} who were
+screened\tabularnewline
+\texttt{notscreened} & number of \texttt{subjects} not
+screened\tabularnewline
+\texttt{meanage} & mean age of clinic's subjects, years\tabularnewline
+\texttt{female} & \% of clinic's subjects who are female\tabularnewline
+\texttt{pct\_lowins} & \% of clinic's subjects who have Medicaid or are
+uninsured\tabularnewline
+\texttt{system} & system code\tabularnewline
+\bottomrule
+\end{longtable}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{colscr }\OperatorTok{%>%}\StringTok{ }\KeywordTok{skim}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Skim summary statistics
+ n obs: 26 
+ n variables: 9 
+
+Variable type: factor 
+ variable missing complete  n n_unique                     top_counts
+ location       0       26 26       26         A: 1, B: 1, C: 1, D: 1
+   system       0       26 26        4 Sys: 7, Sys: 7, Sys: 6, Sys: 6
+ ordered
+   FALSE
+   FALSE
+
+Variable type: integer 
+    variable missing complete  n    mean      sd  p0     p25 median
+ notscreened       0       26 26  663.23  271.17 231  508.75  611  
+    screened       0       26 26 2584.04 1765.11 572 1395.25 2169.5
+    subjects       0       26 26 3247.27 1945.83 803 1914.75 2765.5
+     p75 p100
+  791    1356
+ 2716    6947
+ 3607.75 7677
+
+Variable type: numeric 
+    variable missing complete  n  mean     sd    p0   p25 median   p75
+      female       0       26 26 58.72  6.29  46.2  55.42  60.05 62.62
+     meanage       0       26 26 60.58  1.93  58    58.82  60.5  61.98
+  pct_lowins       0       26 26 24.47 19.13   0.3   4.8   23.95 44.03
+ screen_rate       0       26 26  0.77  0.072  0.64  0.72   0.76  0.81
+ p100
+ 70.3
+ 65.9
+ 51.3
+  0.9
+\end{verbatim}
+
+\subsection{Fitting a Logistic Regression Model to Proportion
+Data}\label{fitting-a-logistic-regression-model-to-proportion-data}
+
+Here, we have a binary outcome (was the subject screened or not?) but we
+have aggregated results. We can use the counts of the numbers of
+subjects at each clinic (in \texttt{subjects}) and the proportion who
+were screened (in \texttt{screen\_rate}) to fit a logistic regression
+model, as follows:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{m_screen1 <-}\StringTok{  }\KeywordTok{glm}\NormalTok{(screen_rate }\OperatorTok{~}\StringTok{ }\NormalTok{meanage }\OperatorTok{+}\StringTok{ }\NormalTok{female }\OperatorTok{+}\StringTok{ }
+\StringTok{                    }\NormalTok{pct_lowins }\OperatorTok{+}\StringTok{ }\NormalTok{system, }\DataTypeTok{family =}\NormalTok{ binomial, }
+                  \DataTypeTok{weights =}\NormalTok{ subjects, }\DataTypeTok{data =}\NormalTok{ colscr)}
+
+\KeywordTok{summary}\NormalTok{(m_screen1)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+
+Call:
+glm(formula = screen_rate ~ meanage + female + pct_lowins + system, 
+    family = binomial, data = colscr, weights = subjects)
+
+Deviance Residuals: 
+   Min      1Q  Median      3Q     Max  
+-9.017  -3.705  -2.000   1.380  11.500  
+
+Coefficients:
+              Estimate Std. Error z value Pr(>|z|)    
+(Intercept) -1.3270393  0.5530782  -2.399   0.0164 *  
+meanage      0.0679866  0.0089754   7.575 3.60e-14 ***
+female      -0.0193142  0.0015831 -12.200  < 2e-16 ***
+pct_lowins  -0.0134547  0.0008585 -15.672  < 2e-16 ***
+systemSys_2 -0.1382189  0.0246591  -5.605 2.08e-08 ***
+systemSys_3 -0.0400170  0.0254505  -1.572   0.1159    
+systemSys_4  0.0229273  0.0294207   0.779   0.4358    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 2825.28  on 25  degrees of freedom
+Residual deviance:  816.39  on 19  degrees of freedom
+AIC: 1037.9
+
+Number of Fisher Scoring iterations: 4
+\end{verbatim}
+
+\subsection{Fitting a Logistic Regression Model to Counts of Successes
+and
+Failures}\label{fitting-a-logistic-regression-model-to-counts-of-successes-and-failures}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{m_screen2 <-}\StringTok{  }\KeywordTok{glm}\NormalTok{(}\KeywordTok{cbind}\NormalTok{(screened, notscreened) }\OperatorTok{~}\StringTok{ }
+\StringTok{                    }\NormalTok{meanage }\OperatorTok{+}\StringTok{ }\NormalTok{female }\OperatorTok{+}\StringTok{ }\NormalTok{pct_lowins }\OperatorTok{+}\StringTok{ }\NormalTok{system, }
+           \DataTypeTok{family =}\NormalTok{ binomial, }\DataTypeTok{data =}\NormalTok{ colscr)}
+\KeywordTok{summary}\NormalTok{(m_screen2)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+
+Call:
+glm(formula = cbind(screened, notscreened) ~ meanage + female + 
+    pct_lowins + system, family = binomial, data = colscr)
+
+Deviance Residuals: 
+   Min      1Q  Median      3Q     Max  
+-9.017  -3.705  -2.000   1.380  11.500  
+
+Coefficients:
+              Estimate Std. Error z value Pr(>|z|)    
+(Intercept) -1.3270392  0.5530782  -2.399   0.0164 *  
+meanage      0.0679866  0.0089754   7.575 3.60e-14 ***
+female      -0.0193142  0.0015831 -12.200  < 2e-16 ***
+pct_lowins  -0.0134547  0.0008585 -15.672  < 2e-16 ***
+systemSys_2 -0.1382189  0.0246591  -5.605 2.08e-08 ***
+systemSys_3 -0.0400170  0.0254505  -1.572   0.1159    
+systemSys_4  0.0229273  0.0294207   0.779   0.4358    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 2825.28  on 25  degrees of freedom
+Residual deviance:  816.39  on 19  degrees of freedom
+AIC: 1037.9
+
+Number of Fisher Scoring iterations: 4
+\end{verbatim}
+
+\subsection{\texorpdfstring{How does one address this problem in
+\texttt{rms}?}{How does one address this problem in rms?}}\label{how-does-one-address-this-problem-in-rms}
+
+We can use \texttt{Glm}. As an example to mirror \texttt{m\_screen1}, we
+have the following\ldots{}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{d <-}\StringTok{ }\KeywordTok{datadist}\NormalTok{(colscr)}
+\KeywordTok{options}\NormalTok{(}\DataTypeTok{datadist =} \StringTok{"d"}\NormalTok{)}
+
+\NormalTok{mod_screen_}\DecValTok{1}\NormalTok{ <-}\StringTok{  }\KeywordTok{Glm}\NormalTok{(screen_rate }\OperatorTok{~}\StringTok{ }\NormalTok{meanage }\OperatorTok{+}\StringTok{ }\NormalTok{female }\OperatorTok{+}\StringTok{ }
+\StringTok{                         }\NormalTok{pct_lowins }\OperatorTok{+}\StringTok{ }\NormalTok{system, }
+                     \DataTypeTok{family =}\NormalTok{ binomial, }\DataTypeTok{weights =}\NormalTok{ subjects, }
+                     \DataTypeTok{data =}\NormalTok{ colscr, }\DataTypeTok{x =}\NormalTok{ T, }\DataTypeTok{y =}\NormalTok{ T)}
+
+\NormalTok{mod_screen_}\DecValTok{1}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+General Linear Model
+ 
+ Glm(formula = screen_rate ~ meanage + female + pct_lowins + system, 
+     family = binomial, data = colscr, weights = subjects, x = T, 
+     y = T)
+ 
+                     Model Likelihood     
+                        Ratio Test        
+ Obs      26        LR chi2    2008.90    
+ Residual d.f.19    d.f.             6    
+ g 0.4614539        Pr(> chi2) <0.0001    
+ 
+              Coef    S.E.   Wald Z Pr(>|Z|)
+ Intercept    -1.3270 0.5531  -2.40 0.0164  
+ meanage       0.0680 0.0090   7.57 <0.0001 
+ female       -0.0193 0.0016 -12.20 <0.0001 
+ pct_lowins   -0.0135 0.0009 -15.67 <0.0001 
+ system=Sys_2 -0.1382 0.0247  -5.61 <0.0001 
+ system=Sys_3 -0.0400 0.0255  -1.57 0.1159  
+ system=Sys_4  0.0229 0.0294   0.78 0.4358  
+ 
+\end{verbatim}
+
+\section{Probit Regression}\label{probit-regression}
+
+\subsection{Colorectal Cancer Screening Data on
+Individuals}\label{colorectal-cancer-screening-data-on-individuals}
+
+The data in the \texttt{colscr2} data frame describe (disguised) data on
+the status of 172 adults who were eligible for colon cancer screening,
+with the following information included:
+
+\begin{longtable}[]{@{}rl@{}}
+\toprule
+Variable & Description\tabularnewline
+\midrule
+\endhead
+\texttt{subject} & subject ID code\tabularnewline
+\texttt{age} & subject's age (years)\tabularnewline
+\texttt{race} & subject's race (White/Black/Other)\tabularnewline
+\texttt{hispanic} & subject of Hispanic ethnicity (1 = yes / 0 =
+no)\tabularnewline
+\texttt{insurance} & Commercial, Medicaid, Medicare,
+Uninsured\tabularnewline
+\texttt{bmi} & body mass index at most recent visit\tabularnewline
+\texttt{sbp} & systolic blood pressure at most recent
+visit\tabularnewline
+\texttt{up\_to\_date} & meets colon cancer screening
+standards\tabularnewline
+\bottomrule
+\end{longtable}
+
+The goal is to use the other variables (besides subject ID) to predict
+whether or not a subject is up to date.
+
+\subsection{A logistic regression
+model}\label{a-logistic-regression-model}
+
+Here is a logistic regression model.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{colscr2 }\OperatorTok{%>%}\StringTok{ }\KeywordTok{summary}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+    subject           age           race        hispanic      
+ Min.   :101.0   Min.   :51.00   Black:118   Min.   :0.00000  
+ 1st Qu.:143.8   1st Qu.:54.00   Other:  9   1st Qu.:0.00000  
+ Median :186.5   Median :57.00   White: 45   Median :0.00000  
+ Mean   :186.5   Mean   :57.80               Mean   :0.06395  
+ 3rd Qu.:229.2   3rd Qu.:61.25               3rd Qu.:0.00000  
+ Max.   :272.0   Max.   :69.00               Max.   :1.00000  
+      insurance       bmi             sbp          up_to_date    
+ Commercial:32   Min.   :17.20   Min.   : 89.0   Min.   :0.0000  
+ Medicaid  :81   1st Qu.:25.48   1st Qu.:118.0   1st Qu.:0.0000  
+ Medicare  :46   Median :30.05   Median :127.0   Median :1.0000  
+ Uninsured :13   Mean   :31.24   Mean   :128.9   Mean   :0.6047  
+                 3rd Qu.:36.03   3rd Qu.:138.0   3rd Qu.:1.0000  
+                 Max.   :55.41   Max.   :198.0   Max.   :1.0000  
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{m_scr2_logistic <-}\StringTok{ }\KeywordTok{glm}\NormalTok{(up_to_date }\OperatorTok{~}\StringTok{ }\NormalTok{age }\OperatorTok{+}\StringTok{ }\NormalTok{race }\OperatorTok{+}\StringTok{ }\NormalTok{hispanic }\OperatorTok{+}\StringTok{ }
+\StringTok{                    }\NormalTok{insurance }\OperatorTok{+}\StringTok{ }\NormalTok{bmi }\OperatorTok{+}\StringTok{ }\NormalTok{sbp, }
+                \DataTypeTok{family =}\NormalTok{ binomial, }\DataTypeTok{data =}\NormalTok{ colscr2)}
+
+\KeywordTok{summary}\NormalTok{(m_scr2_logistic)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+
+Call:
+glm(formula = up_to_date ~ age + race + hispanic + insurance + 
+    bmi + sbp, family = binomial, data = colscr2)
+
+Deviance Residuals: 
+    Min       1Q   Median       3Q      Max  
+-1.8604  -1.1540   0.6933   0.9564   1.6108  
+
+Coefficients:
+                     Estimate Std. Error z value Pr(>|z|)  
+(Intercept)         2.7040470  2.7418625   0.986   0.3240  
+age                 0.0204901  0.0396920   0.516   0.6057  
+raceOther          -1.9722351  1.0023237  -1.968   0.0491 *
+raceWhite          -0.3210458  0.4001744  -0.802   0.4224  
+hispanic            0.0005855  0.7953482   0.001   0.9994  
+insuranceMedicaid  -1.0151860  0.4945169  -2.053   0.0401 *
+insuranceMedicare  -0.5216006  0.5629935  -0.926   0.3542  
+insuranceUninsured  0.1099966  0.7906196   0.139   0.8893  
+bmi                 0.0155894  0.0213547   0.730   0.4654  
+sbp                -0.0241777  0.0099138  -2.439   0.0147 *
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 230.85  on 171  degrees of freedom
+Residual deviance: 210.55  on 162  degrees of freedom
+AIC: 230.55
+
+Number of Fisher Scoring iterations: 4
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{confint}\NormalTok{(m_scr2_logistic)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Waiting for profiling to be done...
+\end{verbatim}
+
+\begin{verbatim}
+                         2.5 %       97.5 %
+(Intercept)        -2.64274441  8.157738367
+age                -0.05703934  0.099298904
+raceOther          -4.24604744 -0.175953229
+raceWhite          -1.10800168  0.469396096
+hispanic           -1.53691431  1.688738936
+insuranceMedicaid  -2.03640881 -0.079142467
+insuranceMedicare  -1.66246932  0.564088260
+insuranceUninsured -1.40110091  1.759391281
+bmi                -0.02568426  0.058563761
+sbp                -0.04436143 -0.005282686
+\end{verbatim}
+
+In this model, there appears to be some link between \texttt{sbp} and
+screening, as well as, perhaps, some statistically significant
+differences between some race groups and some insurance groups. We won't
+look at this much further for now, though. Instead, we'll simply
+describe predictions for two subjects, Harry and Sally.
+
+\subsection{Predicting status for Harry and
+Sally}\label{predicting-status-for-harry-and-sally}
+
+\begin{itemize}
+\tightlist
+\item
+  Harry is age 65, White, non-Hispanic, with Medicare insurance, a BMI
+  of 28 and SBP of 135.
+\item
+  Sally is age 60, Black, Hispanic, with Medicaid insurance, a BMI of 22
+  and SBP of 148.
+\end{itemize}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{newdat_s2 <-}\StringTok{ }\KeywordTok{data_frame}\NormalTok{(}\DataTypeTok{subject =} \KeywordTok{c}\NormalTok{(}\StringTok{"Harry"}\NormalTok{, }\StringTok{"Sally"}\NormalTok{),}
+                     \DataTypeTok{age =} \KeywordTok{c}\NormalTok{(}\DecValTok{65}\NormalTok{, }\DecValTok{60}\NormalTok{),}
+                     \DataTypeTok{race =} \KeywordTok{c}\NormalTok{(}\StringTok{"White"}\NormalTok{, }\StringTok{"Black"}\NormalTok{),}
+                     \DataTypeTok{hispanic =} \KeywordTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{1}\NormalTok{),}
+                     \DataTypeTok{insurance =} \KeywordTok{c}\NormalTok{(}\StringTok{"Medicare"}\NormalTok{, }\StringTok{"Medicaid"}\NormalTok{),}
+                     \DataTypeTok{bmi =} \KeywordTok{c}\NormalTok{(}\DecValTok{28}\NormalTok{, }\DecValTok{22}\NormalTok{),}
+                     \DataTypeTok{sbp =} \KeywordTok{c}\NormalTok{(}\DecValTok{135}\NormalTok{, }\DecValTok{148}\NormalTok{))}
+
+\KeywordTok{predict}\NormalTok{(m_scr2_logistic, }\DataTypeTok{newdata =}\NormalTok{ newdat_s2, }
+        \DataTypeTok{type =} \StringTok{"response"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+        1         2 
+0.5904364 0.4215335 
+\end{verbatim}
+
+The prediction for Harry is 0.59, and for Sally, 0.42, by this logistic
+regression model.
+
+\subsection{A probit regression model}\label{a-probit-regression-model}
+
+Now, consider a probit regression, fit by changing the default link for
+the \texttt{binomial} family as follows:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{m_scr2_probit <-}\StringTok{ }\KeywordTok{glm}\NormalTok{(up_to_date }\OperatorTok{~}\StringTok{ }\NormalTok{age }\OperatorTok{+}\StringTok{ }\NormalTok{race }\OperatorTok{+}\StringTok{ }\NormalTok{hispanic }\OperatorTok{+}\StringTok{ }
+\StringTok{                    }\NormalTok{insurance }\OperatorTok{+}\StringTok{ }\NormalTok{bmi }\OperatorTok{+}\StringTok{ }\NormalTok{sbp, }
+                \DataTypeTok{family =} \KeywordTok{binomial}\NormalTok{(}\DataTypeTok{link =} \StringTok{"probit"}\NormalTok{), }
+                \DataTypeTok{data =}\NormalTok{ colscr2)}
+
+\KeywordTok{summary}\NormalTok{(m_scr2_probit)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+
+Call:
+glm(formula = up_to_date ~ age + race + hispanic + insurance + 
+    bmi + sbp, family = binomial(link = "probit"), data = colscr2)
+
+Deviance Residuals: 
+    Min       1Q   Median       3Q      Max  
+-1.8608  -1.1561   0.6933   0.9607   1.6073  
+
+Coefficients:
+                    Estimate Std. Error z value Pr(>|z|)  
+(Intercept)         1.584604   1.658489   0.955   0.3394  
+age                 0.013461   0.024107   0.558   0.5766  
+raceOther          -1.238445   0.587093  -2.109   0.0349 *
+raceWhite          -0.199260   0.243505  -0.818   0.4132  
+hispanic            0.029483   0.484819   0.061   0.9515  
+insuranceMedicaid  -0.619277   0.293205  -2.112   0.0347 *
+insuranceMedicare  -0.322881   0.333549  -0.968   0.3330  
+insuranceUninsured  0.052776   0.463798   0.114   0.9094  
+bmi                 0.009652   0.012887   0.749   0.4539  
+sbp                -0.014696   0.005944  -2.472   0.0134 *
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 230.85  on 171  degrees of freedom
+Residual deviance: 210.49  on 162  degrees of freedom
+AIC: 230.49
+
+Number of Fisher Scoring iterations: 4
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{confint}\NormalTok{(m_scr2_probit)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Waiting for profiling to be done...
+\end{verbatim}
+
+\begin{verbatim}
+                         2.5 %       97.5 %
+(Intercept)        -1.70739455  4.894713408
+age                -0.03400934  0.061437784
+raceOther          -2.53819772 -0.119812915
+raceWhite          -0.67910311  0.282566349
+hispanic           -0.92476109  1.011089937
+insuranceMedicaid  -1.21212866 -0.049749873
+insuranceMedicare  -0.99315267  0.329851215
+insuranceUninsured -0.83335121  0.966504724
+bmi                -0.01577917  0.035632196
+sbp                -0.02659318 -0.003148488
+\end{verbatim}
+
+\subsection{Interpreting the Probit Model's
+Coefficients}\label{interpreting-the-probit-models-coefficients}
+
+It is possible to use any number of link functions to ensure that
+predicted values in a generalized linear model fall between 0 and 1. The
+probit regression model, for instance, uses the inverse of the
+cumulative distribution function of the Normal model as its link
+function. Let's look more closely at the coefficients of the probit
+model we just fit.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{m_scr2_probit}\OperatorTok{$}\NormalTok{coef}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+       (Intercept)                age          raceOther 
+       1.584603569        0.013461338       -1.238445198 
+         raceWhite           hispanic  insuranceMedicaid 
+      -0.199260184        0.029483051       -0.619276718 
+ insuranceMedicare insuranceUninsured                bmi 
+      -0.322880519        0.052775722        0.009652339 
+               sbp 
+      -0.014695526 
+\end{verbatim}
+
+The probit regression coefficients give the change in the z-score of the
+outcome of interest (here, \texttt{up\_to\_date}) for a one-unit change
+in the target predictor, holding all other predictors constant.
+
+\begin{itemize}
+\tightlist
+\item
+  So, for a one-year increase in age, holding all other predictors
+  constant, the z-score for \texttt{up\_to\_date} increases by 0.013
+\item
+  And for a Medicaid subject as compared to a Commercial subject of the
+  same age, race, ethnicity, bmi and sbp, the z-score for the Medicaid
+  subject is predicted to be -0.619 lower, according to this model.
+\end{itemize}
+
+\subsection{What about Harry and
+Sally?}\label{what-about-harry-and-sally}
+
+Do the predictions for Harry and Sally change much with this probit
+model, as compared to the logistic regression?
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{predict}\NormalTok{(m_scr2_probit, }\DataTypeTok{newdata =}\NormalTok{ newdat_s2, }\DataTypeTok{type =} \StringTok{"response"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+        1         2 
+0.5885511 0.4364027 
+\end{verbatim}
 
 \bibliography{text.bib}
 

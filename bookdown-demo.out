@@ -164,3 +164,6 @@
 \BOOKMARK [1][-]{section.15.9}{Comparing\040Model\040B.2\040to\040Model\040A.2\040after\040simple\040imputation}{chapter.15}% 164
 \BOOKMARK [1][-]{section.15.10}{Dealing\040with\040Missing\040Data\040via\040Multiple\040Imputation}{chapter.15}% 165
 \BOOKMARK [1][-]{section.15.11}{Combining\040the\040Imputation\040and\040Outcome\040Models}{chapter.15}% 166
+\BOOKMARK [0][-]{chapter.16}{Colorectal\040Cancer\040Screening\040and\040Some\040Special\040Cases}{}% 167
+\BOOKMARK [1][-]{section.16.1}{Logistic\040Regression\040for\040Aggregated\040Data}{chapter.16}% 168
+\BOOKMARK [1][-]{section.16.2}{Probit\040Regression}{chapter.16}% 169
