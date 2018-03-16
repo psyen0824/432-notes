@@ -216,7 +216,7 @@ m1_a <- lrm(exerany ~ internet30 * catg(genh_n) + bmi * female +
 m1_a
 ```
 
-All right. We've used 1033 observations, which is correct (after deleting the three with missing `exerany`. The model shows a Nagelkerke R^2^ value of 0.204, and a C statistic of 0.741 after imputation. The likelihood ratio (drop in deviance) test is highly significant. 
+All right. We've used 1033 observations, which is correct (after deleting the three with missing `exerany`.) The model shows a Nagelkerke R^2^ value of 0.204, and a C statistic of 0.741 after imputation. The likelihood ratio (drop in deviance) test is highly significant. 
 
 ### Validating Summary Statistics
 
