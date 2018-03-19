@@ -1,0 +1,20 @@
+# Cleaning the BRFSS SMART Data
+
+The Centers for Disease Control analyzes Behavioral Risk Factor Surveillance System (BRFSS) survey data for specific metropolitan and micropolitan statistical areas (MMSAs) in a program called the Selected Metropolitan/Micropolitan Area Risk Trends of BRFSS (SMART BRFSS.)
+
+In this work, we will focus on data from the 2016 SMART, and in particular on data from the state of Ohio, and from the Cleveland-Elyria, OH, Metropolitan Statistical Area. The purpose of this survey is to provide localized health information that can help public health practitioners identify local emerging health problems, plan and evaluate local responses, and efficiently allocate resources to specific needs.
+
+In this chapter, I describe all of the cleaning I have done (so far) on the BRFSS SMART data, and break it out into national, statewide, and local samples.
+
+The data files produced by this chapter include:
+
+- `smart_ohio.csv` which includes data on 57 variables for 6014 subjects in five MMSAs in Ohio.
+- `smartcle.csv` which includes data on those same 57 variables for the 1036 subjects in the Cleveland-Elyria-Lorain OH MMSA.
+- `smartcle1.csv` which includes a subset of 11 variables for those same 1036 subjects.
+
+## Where to Read this Chapter
+
+- This chapter of the course notes is available for you to read at [this link](http://htmlpreview.github.io/?https://github.com/THOMASELOVE/432-2018/blob/master/data-and-code/SMART/smart.html).
+
+Some additional information on the SMART / BRFSS data can be found in [this README file](https://github.com/THOMASELOVE/432-2018/tree/master/data-and-code/SMART).
+

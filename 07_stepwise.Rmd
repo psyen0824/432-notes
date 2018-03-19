@@ -56,7 +56,7 @@ We'll often refer to this (all predictors on board) approach as a "kitchen sink"
     + Each categorical factor variable is represented in the regression model as a set of indicator variables. In the absence of a good reason to do something else, the set is added to the model as a single unit, and R does this automatically.
 - Backwards Elimination
     + Start with the "kitchen sink" model and then delete potential predictors one at a time.
-    + Backwards Elimination is less likely than Forward Selection, to omit negatively confounded sets of variables, though all stepwise procedures have problems.
+    + Backwards Elimination is less likely than Forward Selection to omit negatively confounded sets of variables, though all stepwise procedures have problems.
 - Stepwise Regression can also be done by combining these methods.
 
 ### The Big Problems with Stepwise Regression

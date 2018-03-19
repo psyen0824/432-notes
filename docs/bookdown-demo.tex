@@ -124,7 +124,7 @@
   \postauthor{\par}
   \predate{\centering\large\emph}
   \postdate{\par}
-  \date{Built 2018-03-16 17:03:01}
+  \date{Built 2018-03-19 14:57:39}
 
 \usepackage{booktabs}
 \usepackage{amsthm}
@@ -479,16 +479,16 @@ Here's a quick look at the simulated data in \texttt{fakestroke}.
 # A tibble: 500 x 18
    studyid trt        age sex   nihss location hx.isch  afib    dm mrankin
    <fct>   <fct>    <dbl> <fct> <int> <fct>    <fct>   <int> <int> <fct>  
- 1 z001    Control   53.0 Male     21 Right    No          0     0 2      
- 2 z002    Interve~  51.0 Male     23 Left     No          1     0 0      
- 3 z003    Control   68.0 Fema~    11 Right    No          0     0 0      
- 4 z004    Control   28.0 Male     22 Left     No          0     0 0      
- 5 z005    Control   91.0 Male     24 Right    No          0     0 0      
- 6 z006    Control   34.0 Fema~    18 Left     No          0     0 2      
- 7 z007    Interve~  75.0 Male     25 Right    No          0     0 0      
- 8 z008    Control   89.0 Fema~    18 Right    No          0     0 0      
- 9 z009    Control   75.0 Male     25 Left     No          1     0 2      
-10 z010    Interve~  26.0 Fema~    27 Right    No          0     0 0      
+ 1 z001    Control    53. Male     21 Right    No          0     0 2      
+ 2 z002    Interve~   51. Male     23 Left     No          1     0 0      
+ 3 z003    Control    68. Fema~    11 Right    No          0     0 0      
+ 4 z004    Control    28. Male     22 Left     No          0     0 0      
+ 5 z005    Control    91. Male     24 Right    No          0     0 0      
+ 6 z006    Control    34. Fema~    18 Left     No          0     0 2      
+ 7 z007    Interve~   75. Male     25 Right    No          0     0 0      
+ 8 z008    Control    89. Fema~    18 Right    No          0     0 0      
+ 9 z009    Control    75. Male     25 Left     No          1     0 2      
+10 z010    Interve~   26. Fema~    27 Right    No          0     0 0      
 # ... with 490 more rows, and 8 more variables: sbp <int>, iv.altep <fct>,
 #   time.iv <int>, aspects <int>, ia.occlus <fct>, extra.ica <int>,
 #   time.rand <int>, time.punc <int>
@@ -1949,8 +1949,8 @@ be graphical.
 # A tibble: 2 x 3
   `bmi < 30`     n proportion
   <lgl>      <int>      <dbl>
-1 F            253      0.282
-2 T            643      0.718
+1 FALSE        253      0.282
+2 TRUE         643      0.718
 \end{verbatim}
 
 \subsection{How many of the respondents who have a BMI \textless{} 30
@@ -1969,10 +1969,10 @@ exercised?}\label{how-many-of-the-respondents-who-have-a-bmi-30-exercised}
 # Groups:   exerany [2]
   exerany `bmi < 30`     n percent
     <int> <lgl>      <int>   <dbl>
-1       0 F             88    42.1
-2       0 T            121    57.9
-3       1 F            165    24.0
-4       1 T            522    76.0
+1       0 FALSE         88    42.1
+2       0 TRUE         121    57.9
+3       1 FALSE        165    24.0
+4       1 TRUE         522    76.0
 \end{verbatim}
 
 \subsection{Is obesity associated with sex, in these
@@ -1991,10 +1991,10 @@ data?}\label{is-obesity-associated-with-sex-in-these-data}
 # Groups:   female [2]
   female `bmi < 30`     n percent
    <int> <lgl>      <int>   <dbl>
-1      0 F            105    28.2
-2      0 T            267    71.8
-3      1 F            148    28.2
-4      1 T            376    71.8
+1      0 FALSE        105    28.2
+2      0 TRUE         267    71.8
+3      1 FALSE        148    28.2
+4      1 TRUE         376    71.8
 \end{verbatim}
 
 \subsection{\texorpdfstring{Comparing \texttt{sleephrs} summaries by
@@ -2018,8 +2018,8 @@ to the respondents whose BMI is not?
 # A tibble: 2 x 4
   `bmi < 30` `mean(sleephrs)` `median(sleephrs)`   q75
   <lgl>                 <dbl>              <int> <dbl>
-1 F                      6.93                  7  8.00
-2 T                      7.06                  7  8.00
+1 FALSE                  6.93                  7    8.
+2 TRUE                   7.06                  7    8.
 \end{verbatim}
 
 \subsection{\texorpdfstring{The \texttt{skim} function within a
@@ -2555,9 +2555,9 @@ good candidate for a linear model?
 # A tibble: 3 x 3
   `physhealth == 0` `physhealth == 30`     n
   <lgl>             <lgl>              <int>
-1 F                 F                    231
-2 F                 T                     74
-3 T                 F                    591
+1 FALSE             FALSE                231
+2 FALSE             TRUE                  74
+3 TRUE              FALSE                591
 \end{verbatim}
 
 No matter what model we fit, if we are predicting \texttt{physhealth},
@@ -3278,12 +3278,12 @@ Data}\label{fitting-multiple-individual-predictions-to-new-data}
 # A tibble: 6 x 6
   subjectid female sleephrs   fit   lwr   upr
       <int>  <dbl>    <dbl> <dbl> <dbl> <dbl>
-1      1001   1.00     7.00  27.5  15.1  39.9
-2      1002   1.00     8.00  27.2  14.8  39.6
-3      1003   1.00     9.00  26.9  14.5  39.3
-4      1004   0        7.00  28.4  16.0  40.8
-5      1005   0        8.00  28.5  16.1  40.9
-6      1006   0        9.00  28.7  16.2  41.1
+1      1001     1.       7.  27.5  15.1  39.9
+2      1002     1.       8.  27.2  14.8  39.6
+3      1003     1.       9.  26.9  14.5  39.3
+4      1004     0.       7.  28.4  16.0  40.8
+5      1005     0.       8.  28.5  16.1  40.9
+6      1006     0.       9.  28.7  16.2  41.1
 \end{verbatim}
 
 The \texttt{result2} tibble contains predictions for each scenario.
@@ -5030,20 +5030,20 @@ of interest, since the clinical expectation is that the antibiotic
    patient   age sex   st_base st_day5 st_day10 st_delta
      <int> <int> <fct>   <dbl>   <dbl>    <dbl>    <dbl>
  1       1    61 F       14.1     2.30    10.3   -11.8  
- 2       2    70 F        7.20    5.40     7.30  - 1.80 
- 3       3    65 M       14.2    11.9     11.3   - 2.30 
+ 2       2    70 F        7.20    5.40     7.30   -1.80 
+ 3       3    65 M       14.2    11.9     11.3    -2.30 
  4       4    65 M       10.3    10.7     13.8     0.400
  5       5    NA M        9.90   10.7     11.7     0.800
  6       6    76 M        5.20    6.80     4.20    1.60 
  7       7    72 M       10.4    14.6     14.1     4.20 
- 8       8    69 F       10.5     7.20     5.40  - 3.30 
- 9       9    66 M        5.00    5.00     5.10    0    
-10      10    62 M        8.60    8.10     7.40  - 0.500
-11      11    65 F       16.6    14.9     13.0   - 1.70 
+ 8       8    69 F       10.5     7.20     5.40   -3.30 
+ 9       9    66 M        5.00    5.00     5.10    0.   
+10      10    62 M        8.60    8.10     7.40   -0.500
+11      11    65 F       16.6    14.9     13.0    -1.70 
 12      12    71 M       16.4    18.6     17.1     2.20 
-13      13    51 F       12.2    11.0     12.3   - 1.20 
-14      14    71 M        6.60    3.70     4.50  - 2.90 
-15      15    64 F       15.4    15.2     13.6   - 0.200
+13      13    51 F       12.2    11.0     12.3    -1.20 
+14      14    71 M        6.60    3.70     4.50   -2.90 
+15      15    64 F       15.4    15.2     13.6    -0.200
 16      16    50 M       10.2    10.8     11.2     0.600
 \end{verbatim}
 
@@ -5266,20 +5266,20 @@ where the NA value currently exists.
    patient   age sex   st_base st_day5 st_day10 st_delta
      <int> <dbl> <fct>   <dbl>   <dbl>    <dbl>    <dbl>
  1       1  61.0 F       14.1     2.30    10.3   -11.8  
- 2       2  70.0 F        7.20    5.40     7.30  - 1.80 
- 3       3  65.0 M       14.2    11.9     11.3   - 2.30 
+ 2       2  70.0 F        7.20    5.40     7.30   -1.80 
+ 3       3  65.0 M       14.2    11.9     11.3    -2.30 
  4       4  65.0 M       10.3    10.7     13.8     0.400
  5       5  65.2 M        9.90   10.7     11.7     0.800
  6       6  76.0 M        5.20    6.80     4.20    1.60 
  7       7  72.0 M       10.4    14.6     14.1     4.20 
- 8       8  69.0 F       10.5     7.20     5.40  - 3.30 
- 9       9  66.0 M        5.00    5.00     5.10    0    
-10      10  62.0 M        8.60    8.10     7.40  - 0.500
-11      11  65.0 F       16.6    14.9     13.0   - 1.70 
+ 8       8  69.0 F       10.5     7.20     5.40   -3.30 
+ 9       9  66.0 M        5.00    5.00     5.10    0.   
+10      10  62.0 M        8.60    8.10     7.40   -0.500
+11      11  65.0 F       16.6    14.9     13.0    -1.70 
 12      12  71.0 M       16.4    18.6     17.1     2.20 
-13      13  51.0 F       12.2    11.0     12.3   - 1.20 
-14      14  71.0 M        6.60    3.70     4.50  - 2.90 
-15      15  64.0 F       15.4    15.2     13.6   - 0.200
+13      13  51.0 F       12.2    11.0     12.3    -1.20 
+14      14  71.0 M        6.60    3.70     4.50   -2.90 
+15      15  64.0 F       15.4    15.2     13.6    -0.200
 16      16  50.0 M       10.2    10.8     11.2     0.600
 \end{verbatim}
 
@@ -5549,21 +5549,21 @@ have:
 # A tibble: 15 x 5
    subject treat diabetes sbp.before sbp.after
      <int> <fct>    <dbl>      <dbl>     <dbl>
- 1     101 A         1.00        120       105
- 2     102 B         0           145       135
- 3     103 C         0           150       150
- 4     104 A         1.00         NA       120
- 5     105 C        NA           155       135
- 6     106 A         1.00         NA       115
- 7     107 A         0           135       160
- 8     108 <NA>      1.00         NA       150
- 9     109 B        NA           115       130
-10     110 C         1.00        170       155
-11     111 A         0           150       140
-12     112 B         0           145       140
-13     113 C         1.00        140       150
-14     114 A         1.00        160       135
-15     115 B        NA           135       120
+ 1     101 A           1.       120.      105.
+ 2     102 B           0.       145.      135.
+ 3     103 C           0.       150.      150.
+ 4     104 A           1.        NA       120.
+ 5     105 C          NA        155.      135.
+ 6     106 A           1.        NA       115.
+ 7     107 A           0.       135.      160.
+ 8     108 <NA>        1.        NA       150.
+ 9     109 B          NA        115.      130.
+10     110 C           1.       170.      155.
+11     111 A           0.       150.      140.
+12     112 B           0.       145.      140.
+13     113 C           1.       140.      150.
+14     114 A           1.       160.      135.
+15     115 B          NA        135.      120.
 \end{verbatim}
 
 \subsection{How many missing values do we have in each
@@ -5619,12 +5619,12 @@ data?}\label{how-can-we-identify-the-subjects-with-missing-data}
 # A tibble: 6 x 5
   subject treat diabetes sbp.before sbp.after
     <int> <fct>    <dbl>      <dbl>     <dbl>
-1     104 A         1.00         NA       120
-2     105 C        NA           155       135
-3     106 A         1.00         NA       115
-4     108 <NA>      1.00         NA       150
-5     109 B        NA           115       130
-6     115 B        NA           135       120
+1     104 A           1.        NA       120.
+2     105 C          NA        155.      135.
+3     106 A           1.        NA       115.
+4     108 <NA>        1.        NA       150.
+5     109 B          NA        115.      130.
+6     115 B          NA        135.      120.
 \end{verbatim}
 
 \section{Missing-data mechanisms}\label{missing-data-mechanisms}
@@ -5849,21 +5849,21 @@ Here, suppose we decide to impute
 # A tibble: 15 x 5
    subject treat diabetes sbp.before sbp.after
      <int> <fct>    <dbl>      <dbl>     <dbl>
- 1     101 A         1.00        120       105
- 2     102 B         0           145       135
- 3     103 C         0           150       150
- 4     104 A         1.00        143       120
- 5     105 C         1.00        155       135
- 6     106 A         1.00        143       115
- 7     107 A         0           135       160
- 8     108 A         1.00        143       150
- 9     109 B         1.00        115       130
-10     110 C         1.00        170       155
-11     111 A         0           150       140
-12     112 B         0           145       140
-13     113 C         1.00        140       150
-14     114 A         1.00        160       135
-15     115 B         1.00        135       120
+ 1     101 A           1.       120.      105.
+ 2     102 B           0.       145.      135.
+ 3     103 C           0.       150.      150.
+ 4     104 A           1.       143.      120.
+ 5     105 C           1.       155.      135.
+ 6     106 A           1.       143.      115.
+ 7     107 A           0.       135.      160.
+ 8     108 A           1.       143.      150.
+ 9     109 B           1.       115.      130.
+10     110 C           1.       170.      155.
+11     111 A           0.       150.      140.
+12     112 B           0.       145.      140.
+13     113 C           1.       140.      150.
+14     114 A           1.       160.      135.
+15     115 B           1.       135.      120.
 \end{verbatim}
 
 We could accomplish the same thing with, for example:
@@ -5916,21 +5916,21 @@ Suppose we want to mirror what we did above, simply impute the mean for
 # A tibble: 15 x 5
    subject treat diabetes sbp.before sbp.after
  *   <int> <fct>    <dbl>      <dbl>     <dbl>
- 1     101 A         1.00        120       105
- 2     102 B         0           145       135
- 3     103 C         0           150       150
- 4     104 A         1.00        143       120
- 5     105 C         1.00        155       135
- 6     106 A         1.00        143       115
- 7     107 A         0           135       160
- 8     108 A         1.00        143       150
- 9     109 B         1.00        115       130
-10     110 C         1.00        170       155
-11     111 A         0           150       140
-12     112 B         0           145       140
-13     113 C         1.00        140       150
-14     114 A         1.00        160       135
-15     115 B         1.00        135       120
+ 1     101 A           1.       120.      105.
+ 2     102 B           0.       145.      135.
+ 3     103 C           0.       150.      150.
+ 4     104 A           1.       143.      120.
+ 5     105 C           1.       155.      135.
+ 6     106 A           1.       143.      115.
+ 7     107 A           0.       135.      160.
+ 8     108 A           1.       143.      150.
+ 9     109 B           1.       115.      130.
+10     110 C           1.       170.      155.
+11     111 A           0.       150.      140.
+12     112 B           0.       145.      140.
+13     113 C           1.       140.      150.
+14     114 A           1.       160.      135.
+15     115 B           1.       135.      120.
 \end{verbatim}
 
 \subsection{\texorpdfstring{Using a model to impute \texttt{sbp.before}
@@ -5969,21 +5969,21 @@ Suppose we wanted to use:
 # A tibble: 15 x 5
    subject treat diabetes sbp.before sbp.after
  *   <int> <fct>    <dbl>      <dbl>     <dbl>
- 1     101 A         1.00        120       105
- 2     102 B         0           145       135
- 3     103 C         0           150       150
- 4     104 A         1.00        139       120
- 5     105 C         1.00        155       135
- 6     106 A         1.00        136       115
- 7     107 A         0           135       160
- 8     108 A         1.00        155       150
- 9     109 B         1.00        115       130
-10     110 C         1.00        170       155
-11     111 A         0           150       140
-12     112 B         0           145       140
-13     113 C         1.00        140       150
-14     114 A         1.00        160       135
-15     115 B         1.00        135       120
+ 1     101 A           1.       120.      105.
+ 2     102 B           0.       145.      135.
+ 3     103 C           0.       150.      150.
+ 4     104 A           1.       139.      120.
+ 5     105 C           1.       155.      135.
+ 6     106 A           1.       136.      115.
+ 7     107 A           0.       135.      160.
+ 8     108 A           1.       155.      150.
+ 9     109 B           1.       115.      130.
+10     110 C           1.       170.      155.
+11     111 A           0.       150.      140.
+12     112 B           0.       145.      140.
+13     113 C           1.       140.      150.
+14     114 A           1.       160.      135.
+15     115 B           1.       135.      120.
 \end{verbatim}
 
 Details on the many available methods in \texttt{simputation} are
@@ -7093,7 +7093,7 @@ Approaches}\label{sequential-variable-selection-stepwise-approaches}
     Start with the ``kitchen sink'' model and then delete potential
     predictors one at a time.
   \item
-    Backwards Elimination is less likely than Forward Selection, to omit
+    Backwards Elimination is less likely than Forward Selection to omit
     negatively confounded sets of variables, though all stepwise
     procedures have problems.
   \end{itemize}
@@ -10598,7 +10598,7 @@ differences in predicted values when observations are omitted. See
  7     7    37.0    0.207   0.568 
  8     8   -14.3    0.145  -0.169 
  9     9    66.6    0.0863  0.587 
-10    10   - 4.96   0.0997 -0.0460
+10    10    -4.96   0.0997 -0.0460
 # ... with 50 more rows
 \end{verbatim}
 
@@ -11242,9 +11242,9 @@ MSE?}\label{what-value-of-the-key-fraction-minimizes-cross-validated-mse}
 [1] 0.989899
 \end{verbatim}
 
-The cross-validation plot suggests we use a fraction of about 0.3,
-that's suggesting a model with 4-5 predictors, based on the top LASSO
-plot.
+The cross-validation plot suggests we use a fraction of nearly 1.0,
+suggesting that all of the predictors will be kept in, based on the top
+LASSO plot.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -11281,7 +11281,7 @@ Cross-Validation}\label{coefficients-for-the-model-identified-by-the-cross-valid
    0.0030 
 \end{verbatim}
 
-So the model suggested by the lasso still includes all sight of these
+So the model suggested by the lasso still includes all eight of these
 predictors.
 
 \subsection{Obtaining Fitted Values from
@@ -15290,12 +15290,12 @@ The only variables that require no imputation are \texttt{exerany} and
 # A tibble: 6 x 3
   genhealth   genh_n     n
   <fct>        <dbl> <int>
-1 1_Excellent   1.00   172
-2 2_VeryGood    2.00   350
-3 3_Good        3.00   344
-4 4_Fair        4.00   121
-5 5_Poor        5.00    43
-6 <NA>         NA        3
+1 1_Excellent     1.   172
+2 2_VeryGood      2.   350
+3 3_Good          3.   344
+4 4_Fair          4.   121
+5 5_Poor          5.    43
+6 <NA>           NA      3
 \end{verbatim}
 
 I'll work from the bottom up, using various \texttt{simputation}
@@ -15340,11 +15340,11 @@ variable, then check to be sure I now have no missing values.
 # A tibble: 5 x 3
   genhealth   genh_n     n
   <fct>        <dbl> <int>
-1 1_Excellent   1.00   172
-2 2_VeryGood    2.00   351
-3 3_Good        3.00   346
-4 4_Fair        4.00   121
-5 5_Poor        5.00    43
+1 1_Excellent     1.   172
+2 2_VeryGood      2.   351
+3 3_Good          3.   346
+4 4_Fair          4.   121
+5 5_Poor          5.    43
 \end{verbatim}
 
 \begin{Shaded}
@@ -17548,12 +17548,12 @@ The only variables that require no imputation are \texttt{sleephrs} and
 # A tibble: 6 x 3
   genhealth   genh_n     n
   <fct>        <dbl> <int>
-1 1_Excellent   1.00   172
-2 2_VeryGood    2.00   349
-3 3_Good        3.00   341
-4 4_Fair        4.00   120
-5 5_Poor        5.00    44
-6 <NA>         NA        2
+1 1_Excellent     1.   172
+2 2_VeryGood      2.   349
+3 3_Good          3.   341
+4 4_Fair          4.   120
+5 5_Poor          5.    44
+6 <NA>           NA      2
 \end{verbatim}
 
 I'll work from the bottom up, using various \texttt{simputation}
@@ -17597,11 +17597,11 @@ variable, then check to be sure I now have no missing values.
 # A tibble: 5 x 3
   genhealth   genh_n     n
   <fct>        <dbl> <int>
-1 1_Excellent   1.00   172
-2 2_VeryGood    2.00   350
-3 3_Good        3.00   342
-4 4_Fair        4.00   120
-5 5_Poor        5.00    44
+1 1_Excellent     1.   172
+2 2_VeryGood      2.   350
+3 3_Good          3.   342
+4 4_Fair          4.   120
+5 5_Poor          5.    44
 \end{verbatim}
 
 \begin{Shaded}
@@ -19321,6 +19321,99 @@ model, as compared to the logistic regression?
         1         2 
 0.5885511 0.4364027 
 \end{verbatim}
+
+\chapter{Cleaning the BRFSS SMART
+Data}\label{cleaning-the-brfss-smart-data}
+
+The Centers for Disease Control analyzes Behavioral Risk Factor
+Surveillance System (BRFSS) survey data for specific metropolitan and
+micropolitan statistical areas (MMSAs) in a program called the Selected
+Metropolitan/Micropolitan Area Risk Trends of BRFSS (SMART BRFSS.)
+
+In this work, we will focus on data from the 2016 SMART, and in
+particular on data from the state of Ohio, and from the
+Cleveland-Elyria, OH, Metropolitan Statistical Area. The purpose of this
+survey is to provide localized health information that can help public
+health practitioners identify local emerging health problems, plan and
+evaluate local responses, and efficiently allocate resources to specific
+needs.
+
+In this chapter, I describe all of the cleaning I have done (so far) on
+the BRFSS SMART data, and break it out into national, statewide, and
+local samples.
+
+The data files produced by this chapter include:
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{smart\_ohio.csv} which includes data on 57 variables for 6014
+  subjects in five MMSAs in Ohio.
+\item
+  \texttt{smartcle.csv} which includes data on those same 57 variables
+  for the 1036 subjects in the Cleveland-Elyria-Lorain OH MMSA.
+\item
+  \texttt{smartcle1.csv} which includes a subset of 11 variables for
+  those same 1036 subjects.
+\end{itemize}
+
+\section{Where to Read this Chapter}\label{where-to-read-this-chapter}
+
+\begin{itemize}
+\tightlist
+\item
+  This chapter of the course notes is available for you to read at
+  \href{http://htmlpreview.github.io/?https://github.com/THOMASELOVE/432-2018/blob/master/data-and-code/SMART/smart.html}{this
+  link}.
+\end{itemize}
+
+Some additional information on the SMART / BRFSS data can be found in
+\href{https://github.com/THOMASELOVE/432-2018/tree/master/data-and-code/SMART}{this
+README file}.
+
+\chapter{Modeling a Count Outcome in Ohio
+SMART}\label{modeling-a-count-outcome-in-ohio-smart}
+
+In this chapter, I use a count outcome (\# of poor physical health days
+out of the last 30) to demonstrate regression models for count outcomes.
+
+Methods discussed in the chapter include the following:
+
+\begin{itemize}
+\tightlist
+\item
+  Ordinary Least Squares
+\item
+  Poisson Regression
+\item
+  Overdispersed Quasi-Poisson Regression
+\item
+  Negative Binomial Regression
+\item
+  Zero-Inflated Poisson Regression
+\item
+  Zero-Inflated Negative Binomial Regression
+\item
+  Hurdle Models with Poisson counts
+\item
+  Hurdle Models with Negative Binomial counts
+\item
+  Tobit Regression
+\end{itemize}
+
+\section{Where to Read this Chapter}\label{where-to-read-this-chapter-1}
+
+\begin{itemize}
+\tightlist
+\item
+  The current version of this chapter is available for you to read at
+  \href{http://htmlpreview.github.io/?https://github.com/THOMASELOVE/432-2018/blob/master/texts/chapter18/oh_smart_counts.html}{this
+  link}.
+\end{itemize}
+
+Some additional information on the chapter can be found in
+\href{https://github.com/THOMASELOVE/432-2018/blob/master/texts/chapter18/README.md}{this
+README file}.
 
 \bibliography{text.bib}
 

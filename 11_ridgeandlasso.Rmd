@@ -204,7 +204,7 @@ frac <- lassocv$index[which.min(lassocv$cv)]
 frac
 ```
 
-The cross-validation plot suggests we use a fraction of about 0.3, that's suggesting a model with 4-5 predictors, based on the top LASSO plot.
+The cross-validation plot suggests we use a fraction of nearly 1.0, suggesting that all of the predictors will be kept in, based on the top LASSO plot.
 
 ```{r lasso_bothplots, fig.height=7}
 par(mfrow=c(2,1))
@@ -222,7 +222,7 @@ coef.cv <- coef(lasso1, s=frac, mode="fraction")
 round(coef.cv,4)
 ```
 
-So the model suggested by the lasso still includes all sight of these predictors.
+So the model suggested by the lasso still includes all eight of these predictors.
 
 ### Obtaining Fitted Values from Lasso
 

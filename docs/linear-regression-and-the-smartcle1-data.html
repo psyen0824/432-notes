@@ -563,6 +563,12 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li class="chapter" data-level="16.2.6" data-path="colorectal-cancer-screening-and-some-special-cases.html"><a href="colorectal-cancer-screening-and-some-special-cases.html#what-about-harry-and-sally"><i class="fa fa-check"></i><b>16.2.6</b> What about Harry and Sally?</a></li>
 </ul></li>
 </ul></li>
+<li class="chapter" data-level="17" data-path="cleaning-the-brfss-smart-data.html"><a href="cleaning-the-brfss-smart-data.html"><i class="fa fa-check"></i><b>17</b> Cleaning the BRFSS SMART Data</a><ul>
+<li class="chapter" data-level="17.1" data-path="cleaning-the-brfss-smart-data.html"><a href="cleaning-the-brfss-smart-data.html#where-to-read-this-chapter"><i class="fa fa-check"></i><b>17.1</b> Where to Read this Chapter</a></li>
+</ul></li>
+<li class="chapter" data-level="18" data-path="modeling-a-count-outcome-in-ohio-smart.html"><a href="modeling-a-count-outcome-in-ohio-smart.html"><i class="fa fa-check"></i><b>18</b> Modeling a Count Outcome in Ohio SMART</a><ul>
+<li class="chapter" data-level="18.1" data-path="modeling-a-count-outcome-in-ohio-smart.html"><a href="modeling-a-count-outcome-in-ohio-smart.html#where-to-read-this-chapter-1"><i class="fa fa-check"></i><b>18.1</b> Where to Read this Chapter</a></li>
+</ul></li>
 <li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>References</a></li>
 <li class="divider"></li>
 <li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
@@ -936,12 +942,12 @@ smartcle2_imp0 <span class="op">%&gt;%</span><span class="st"> </span><span clas
 <pre><code># A tibble: 6 x 3
   genhealth   genh_n     n
   &lt;fct&gt;        &lt;dbl&gt; &lt;int&gt;
-1 1_Excellent   1.00   172
-2 2_VeryGood    2.00   349
-3 3_Good        3.00   341
-4 4_Fair        4.00   120
-5 5_Poor        5.00    44
-6 &lt;NA&gt;         NA        2</code></pre>
+1 1_Excellent     1.   172
+2 2_VeryGood      2.   349
+3 3_Good          3.   341
+4 4_Fair          4.   120
+5 5_Poor          5.    44
+6 &lt;NA&gt;           NA      2</code></pre>
 <p>I’ll work from the bottom up, using various <code>simputation</code> functions to accomplish the imputations I want. In this case, I’ll use predictive mean matching for the categorical data, and linear models or elastic net approaches for the quantitative data. Be sure to set a seed beforehand so you can replicate your work.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">set.seed</span>(<span class="dv">432109</span>)
 
@@ -964,11 +970,11 @@ smartcle2_imp1 <span class="op">%&gt;%</span><span class="st"> </span><span clas
 <pre><code># A tibble: 5 x 3
   genhealth   genh_n     n
   &lt;fct&gt;        &lt;dbl&gt; &lt;int&gt;
-1 1_Excellent   1.00   172
-2 2_VeryGood    2.00   350
-3 3_Good        3.00   342
-4 4_Fair        4.00   120
-5 5_Poor        5.00    44</code></pre>
+1 1_Excellent     1.   172
+2 2_VeryGood      2.   350
+3 3_Good          3.   342
+4 4_Fair          4.   120
+5 5_Poor          5.    44</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">colSums</span>(<span class="kw">is.na</span>(smartcle2_imp1))</code></pre></div>
 <pre><code>     SEQNO   sleephrs    alcdays        bmi    exerany     female 
          0          0          0          0          0          0 

@@ -563,6 +563,12 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li class="chapter" data-level="16.2.6" data-path="colorectal-cancer-screening-and-some-special-cases.html"><a href="colorectal-cancer-screening-and-some-special-cases.html#what-about-harry-and-sally"><i class="fa fa-check"></i><b>16.2.6</b> What about Harry and Sally?</a></li>
 </ul></li>
 </ul></li>
+<li class="chapter" data-level="17" data-path="cleaning-the-brfss-smart-data.html"><a href="cleaning-the-brfss-smart-data.html"><i class="fa fa-check"></i><b>17</b> Cleaning the BRFSS SMART Data</a><ul>
+<li class="chapter" data-level="17.1" data-path="cleaning-the-brfss-smart-data.html"><a href="cleaning-the-brfss-smart-data.html#where-to-read-this-chapter"><i class="fa fa-check"></i><b>17.1</b> Where to Read this Chapter</a></li>
+</ul></li>
+<li class="chapter" data-level="18" data-path="modeling-a-count-outcome-in-ohio-smart.html"><a href="modeling-a-count-outcome-in-ohio-smart.html"><i class="fa fa-check"></i><b>18</b> Modeling a Count Outcome in Ohio SMART</a><ul>
+<li class="chapter" data-level="18.1" data-path="modeling-a-count-outcome-in-ohio-smart.html"><a href="modeling-a-count-outcome-in-ohio-smart.html#where-to-read-this-chapter-1"><i class="fa fa-check"></i><b>18.1</b> Where to Read this Chapter</a></li>
+</ul></li>
 <li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>References</a></li>
 <li class="divider"></li>
 <li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
@@ -887,8 +893,8 @@ female
 <pre><code># A tibble: 2 x 3
   `bmi &lt; 30`     n proportion
   &lt;lgl&gt;      &lt;int&gt;      &lt;dbl&gt;
-1 F            253      0.282
-2 T            643      0.718</code></pre>
+1 FALSE        253      0.282
+2 TRUE         643      0.718</code></pre>
 </div>
 <div id="how-many-of-the-respondents-who-have-a-bmi-30-exercised" class="section level3">
 <h3><span class="header-section-number">2.5.5</span> How many of the respondents who have a BMI &lt; 30 exercised?</h3>
@@ -899,10 +905,10 @@ female
 # Groups:   exerany [2]
   exerany `bmi &lt; 30`     n percent
     &lt;int&gt; &lt;lgl&gt;      &lt;int&gt;   &lt;dbl&gt;
-1       0 F             88    42.1
-2       0 T            121    57.9
-3       1 F            165    24.0
-4       1 T            522    76.0</code></pre>
+1       0 FALSE         88    42.1
+2       0 TRUE         121    57.9
+3       1 FALSE        165    24.0
+4       1 TRUE         522    76.0</code></pre>
 </div>
 <div id="is-obesity-associated-with-sex-in-these-data" class="section level3">
 <h3><span class="header-section-number">2.5.6</span> Is obesity associated with sex, in these data?</h3>
@@ -913,10 +919,10 @@ female
 # Groups:   female [2]
   female `bmi &lt; 30`     n percent
    &lt;int&gt; &lt;lgl&gt;      &lt;int&gt;   &lt;dbl&gt;
-1      0 F            105    28.2
-2      0 T            267    71.8
-3      1 F            148    28.2
-4      1 T            376    71.8</code></pre>
+1      0 FALSE        105    28.2
+2      0 TRUE         267    71.8
+3      1 FALSE        148    28.2
+4      1 TRUE         376    71.8</code></pre>
 </div>
 <div id="comparing-sleephrs-summaries-by-obesity-status" class="section level3">
 <h3><span class="header-section-number">2.5.7</span> Comparing <code>sleephrs</code> summaries by obesity status</h3>
@@ -928,8 +934,8 @@ female
 <pre><code># A tibble: 2 x 4
   `bmi &lt; 30` `mean(sleephrs)` `median(sleephrs)`   q75
   &lt;lgl&gt;                 &lt;dbl&gt;              &lt;int&gt; &lt;dbl&gt;
-1 F                      6.93                  7  8.00
-2 T                      7.06                  7  8.00</code></pre>
+1 FALSE                  6.93                  7    8.
+2 TRUE                   7.06                  7    8.</code></pre>
 </div>
 <div id="the-skim-function-within-a-pipe" class="section level3">
 <h3><span class="header-section-number">2.5.8</span> The <code>skim</code> function within a pipe</h3>
@@ -1171,9 +1177,9 @@ Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&
 <pre><code># A tibble: 3 x 3
   `physhealth == 0` `physhealth == 30`     n
   &lt;lgl&gt;             &lt;lgl&gt;              &lt;int&gt;
-1 F                 F                    231
-2 F                 T                     74
-3 T                 F                    591</code></pre>
+1 FALSE             FALSE                231
+2 FALSE             TRUE                  74
+3 TRUE              FALSE                591</code></pre>
 <p>No matter what model we fit, if we are predicting <code>physhealth</code>, and most of the data are values of 0 and 30, we have limited variation in our outcome, and so our linear model will be somewhat questionable just on that basis.</p>
 <p>A normal Q-Q plot of the standardized residuals for our <code>model_A</code> shows this problem, too.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(model_A, <span class="dt">which =</span> <span class="dv">2</span>)</code></pre></div>
@@ -1527,12 +1533,12 @@ result2</code></pre></div>
 <pre><code># A tibble: 6 x 6
   subjectid female sleephrs   fit   lwr   upr
       &lt;int&gt;  &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
-1      1001   1.00     7.00  27.5  15.1  39.9
-2      1002   1.00     8.00  27.2  14.8  39.6
-3      1003   1.00     9.00  26.9  14.5  39.3
-4      1004   0        7.00  28.4  16.0  40.8
-5      1005   0        8.00  28.5  16.1  40.9
-6      1006   0        9.00  28.7  16.2  41.1</code></pre>
+1      1001     1.       7.  27.5  15.1  39.9
+2      1002     1.       8.  27.2  14.8  39.6
+3      1003     1.       9.  26.9  14.5  39.3
+4      1004     0.       7.  28.4  16.0  40.8
+5      1005     0.       8.  28.5  16.1  40.9
+6      1006     0.       9.  28.7  16.2  41.1</code></pre>
 <p>The <code>result2</code> tibble contains predictions for each scenario.</p>
 <ul>
 <li>Which has a bigger impact on these predictions and prediction intervals? A one category change in <code>female</code> or a one hour change in <code>sleephrs</code>?</li>

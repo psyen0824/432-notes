@@ -1,0 +1,22 @@
+# Modeling a Count Outcome in Ohio SMART
+
+In this chapter, I use a count outcome (# of poor physical health days out of the last 30) to demonstrate regression models for count outcomes. 
+
+Methods discussed in the chapter include the following:
+
+- Ordinary Least Squares
+- Poisson Regression
+- Overdispersed Quasi-Poisson Regression
+- Negative Binomial Regression
+- Zero-Inflated Poisson Regression
+- Zero-Inflated Negative Binomial Regression
+- Hurdle Models with Poisson counts
+- Hurdle Models with Negative Binomial counts
+- Tobit Regression
+
+## Where to Read this Chapter
+
+- The current version of this chapter is available for you to read at [this link](http://htmlpreview.github.io/?https://github.com/THOMASELOVE/432-2018/blob/master/texts/chapter18/oh_smart_counts.html).
+
+Some additional information on the chapter can be found in [this README file](https://github.com/THOMASELOVE/432-2018/blob/master/texts/chapter18/README.md).
+
