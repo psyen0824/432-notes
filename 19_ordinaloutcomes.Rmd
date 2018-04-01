@@ -1,0 +1,18 @@
+# Modeling an Ordinal Multi-Categorical Outcome in Ohio SMART
+
+In this chapter, I use an ordered multi-categorical outcome (self-reported general health: `genhealth` = 1 = Excellent / 2 = Very Good / 3 = Good / 4 = Fair / 5 = Poor) to demonstrate regression models for such outcomes. 
+
+Methods discussed in the chapter include the following:
+
+- Tabulating and Plotting Cross-Categorical Data (Cross-Tabulations)
+- Proportional Odds Logistic Regression using `polr`
+- Proportional Odds Logistic Regression using `lrm`
+- Interpreting these models and Displaying their fit
+- Assessing the assumption of Proportional Odds
+
+## Where to Read this Chapter
+
+- The current version of this chapter is available for you to read at [this link](http://htmlpreview.github.io/?https://github.com/THOMASELOVE/432-2018/blob/master/texts/chapter19/oh_smart_orderedcat.html).
+
+Some additional information on the chapter can be found in [this README file](https://github.com/THOMASELOVE/432-2018/tree/master/texts/chapter19/README.md).
+
