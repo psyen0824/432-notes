@@ -289,12 +289,6 @@ Note the impact of our interaction terms, and how we have two lines for `bmi` an
 2. sum up the Points across all predictors, and find that location in the Total Points line.
 3. move vertically down from the total points line to find the estimated "linear predictor" (`sleephrs`)
 
-### Checking the Calibration of our model
-
-There isn't any reason why we shouldn't be able to check the calibration of an `ols` fit, but the `plot(calibrate())` function doesn't seem to be working as I'd expect it to for `ols` fits, at the moment. This may be because we have only a limited number of potential predictions (over a fairly tight interval of predicted values) that we obtain from our model.
-
-Instead, I'll focus on residual plots.
-
 ### Residual Plots for mod.A2
 
 We can obtain our usual residual plots for a linear model. Or, we can obtain things like the residuals and fitted values directly, to produce a plot. For example,

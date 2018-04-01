@@ -298,13 +298,7 @@ Note the impact of our interaction terms, and how we have two lines for `bmi` an
 2. sum up the Points across all predictors, and find that location in the Total Points line.
 3. move vertically down from the total points line to find the estimated "linear predictor" (log odds ratio) and finally the "predicted value" (probability of our outcome `exerany` = 1.)
 
-### Checking the Calibration of our model
-
-```{r}
-plot(calibrate(m1_a))
-```
-
-The model appears better calibrated for predicted probabilities above 0.5 or so than it does for lower predicted probabilities. This isn't surprising given the rug plot at the top, which shows we make many more predictions at the high end of the scale.
+### Checking the Goodness of Fit of our model
 
 To test the goodness of fit, we can use the following omnibus test:
 
@@ -412,13 +406,7 @@ Note the impact of our interaction terms, **and** the cubic splines in `bmi` and
 2. sum up the Points across all predictors, and find that location in the Total Points line.
 3. move vertically down from the total points line to find the estimated "linear predictor" (log odds ratio) and finally the "predicted value" (probability of our outcome `exerany` = 1.)
 
-### Checking the Calibration of our model
-
-```{r}
-plot(calibrate(m2_a))
-```
-
-The model appears to be a bit less well calibrated than `m1_a` was. 
+### Checking the Goodness of Fit of our model
 
 To test the goodness of fit, we can use the following omnibus test:
 
@@ -593,12 +581,6 @@ We can still do things like validate the summary statistics, too.
 validate(m1_imp)
 ```
 
-And we can look at calibration curves.
-
-```{r}
-plot(calibrate(m1_imp))
-```
-
 ### Model 2 with Multiple Imputation
 
 The same approach is used to build the `m2_imp` multiple imputation fit for model `m2`, using the `fit.mult.impute` command, and specifying the model, the fitter (here, `lrm`), the imputation model (`xtrans = imp_fit`) and the data set prior to imputation (`smartcle_imp0`).
@@ -651,12 +633,6 @@ Validation of summary statistics:
 
 ```{r}
 validate(m2_imp)
-```
-
-And the calibration curves.
-
-```{r}
-plot(calibrate(m2_imp))
 ```
 
 ## Models with and without Imputation

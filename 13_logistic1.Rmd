@@ -826,16 +826,6 @@ show.influence(object = inf.C, dframe = data.frame(resect))
 
 It appears that observation 84 may have a meaningful effect on both the intercept and the coefficient for `resection`.
 
-### A plot of the model's calibration curve
-
-The `calibrate` function applied to a `lrm` fit provides an assessment of the impact of overfitting on our model. The function uses bootstrapping (or cross-validation) to get bias-corrected estimates of predicted vs. observed values based on nonparametric smoothers for logistic regressions. In order to obtain this curve, you need to set both x = TRUE and y = TRUE when fitting the model. The errors here refer to the difference between the model predicted values and the corresponding bias-corrected calibrated values.
-
-```{r}
-plot(calibrate(res_modC))
-```
-
-Here, we see that this model deviates fairly substantially from the "ideal" model, especially as the predicted probabilities increase over 0.1.
-
 ### A Nomogram for Model C
 
 We use the `plogis` function within a nomogram call to get R to produce fitted probabilities (of our outcome, `died`) in this case.
@@ -960,14 +950,6 @@ validate(res_modD, B = 100)
 ```
 
 The C statistic indicates fairly strong discrimination, at C = `r round(res_modD$stats["C"],2)`, although after validation, this looks much weaker (based on Dxy = `r set.seed(432002); round(validate(res_modD, B = 100)[45],4)`, we would have C = 0.5 + `r set.seed(432002); round(validate(res_modD, B = 100)[45],4)`/2 = `r set.seed(432002); round(0.5 + 0.5*validate(res_modD, B = 100)[45],2)`) and the Nagelkerke $R^2$ is also reasonably good, at `r round(res_modD$stats["R2"],2)`, although this, too, is overly optimistic, and we bias-correct through our validation study to `r set.seed(432002); round(validate(res_modD, B = 100)[46],2)`.
-
-### Calibration Plot for Model D
-
-```{r, fig.height=5}
-plot(calibrate(res_modD))
-```
-
-This larger model is perhaps a bit better calibrated than the simple model on `resection` alone, but there's still a lot of variation from the ideal (diagonal line.)
 
 ## Model E: Fitting a Reduced Model in light of Model D
 
