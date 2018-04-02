@@ -36,6 +36,7 @@ pollution <- read.csv("data/pollution.csv") %>% tbl_df
 resect <- read.csv("data/resect.csv") %>% tbl_df
 colscr <- read.csv("data/screening.csv") %>% tbl_df
 colscr2 <- read.csv("data/screening2.csv") %>% tbl_df
+authorship <- read_csv("data/authorship.csv") 
 ```
 
 # Special Functions used in these notes {-}

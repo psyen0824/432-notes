@@ -124,7 +124,7 @@
   \postauthor{\par}
   \predate{\centering\large\emph}
   \postdate{\par}
-  \date{Built 2018-04-01 00:10:13}
+  \date{Built 2018-04-02 00:09:10}
 
 \usepackage{booktabs}
 \usepackage{amsthm}
@@ -248,8 +248,21 @@ Here, we'll load in the data sets used in these notes.
 \NormalTok{resect <-}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(}\StringTok{"data/resect.csv"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }\NormalTok{tbl_df}
 \NormalTok{colscr <-}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(}\StringTok{"data/screening.csv"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }\NormalTok{tbl_df}
 \NormalTok{colscr2 <-}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(}\StringTok{"data/screening2.csv"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }\NormalTok{tbl_df}
+\NormalTok{authorship <-}\StringTok{ }\KeywordTok{read_csv}\NormalTok{(}\StringTok{"data/authorship.csv"}\NormalTok{) }
 \end{Highlighting}
 \end{Shaded}
+
+\begin{verbatim}
+Parsed with column specification:
+cols(
+  .default = col_integer(),
+  Author = col_character()
+)
+\end{verbatim}
+
+\begin{verbatim}
+See spec(...) for full column specifications.
+\end{verbatim}
 
 \chapter*{Special Functions used in these
 notes}\label{special-functions-used-in-these-notes}
@@ -27070,6 +27083,755 @@ Methods discussed in the chapter include the following:
 Some additional information on the chapter can be found in
 \href{https://github.com/THOMASELOVE/432-2018/tree/master/texts/chapter19/README.md}{this
 README file}.
+
+\chapter{Analyzing Literary Styles with Multinomial Logistic
+Regression}\label{analyzing-literary-styles-with-multinomial-logistic-regression}
+
+\section{The Authorship Example}\label{the-authorship-example}
+
+This example is based on the work of Jeffrey S. Simonoff (2003)
+\emph{Analyzing Categorical Data} in Chapter 10. Related data and R code
+are available at
+\url{http://people.stern.nyu.edu/jsimonof/AnalCatData/Splus/}.
+Meanwhile, the data set and analysis are based on the work of Peng RD
+and Hengartner NW (2002) Quantitative analysis of literary styles,
+\emph{The American Statistician}, 56, 175-185.
+
+The \texttt{authorship.csv} data file contains 841 rows. Each row
+describes a block of text that contains 1700 total words from one of
+several books by four authors: Jane Austen (samples from 7 books), Jack
+London (6 books), John Milton (2 books), or William Shakespeare (12
+books). The data include counts within the blocks of text of 69 function
+words, such as ``a'', ``by'', ``no'', ``that'' and ``with''. The goal of
+our analysis, mirroring that of Simonoff, will be to use the incidence
+of these function words to build a model that distinguishes the authors.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{authorship}\OperatorTok{$}\NormalTok{Author <-}\StringTok{ }\KeywordTok{factor}\NormalTok{(authorship}\OperatorTok{$}\NormalTok{Author, }
+    \DataTypeTok{levels =} \KeywordTok{c}\NormalTok{(}\StringTok{"Shakespeare"}\NormalTok{, }\StringTok{"Austen"}\NormalTok{, }\StringTok{"London"}\NormalTok{, }\StringTok{"Milton"}\NormalTok{))}
+
+\NormalTok{authorship}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+# A tibble: 841 x 71
+   BookID Author     a   all  also    an   and   any   are    as    at
+    <int> <fct>  <int> <int> <int> <int> <int> <int> <int> <int> <int>
+ 1      1 Austen    46    12     0     3    66     9     4    16    13
+ 2      1 Austen    35    10     0     7    44     4     3    18    16
+ 3      1 Austen    46     2     0     3    40     1    13    11     9
+ 4      1 Austen    40     7     0     4    64     3     3    20    13
+ 5      1 Austen    29     5     0     6    52     5    14    17     6
+ 6      1 Austen    27     8     0     3    42     2    15    11    14
+ 7      1 Austen    34     8     0    15    44     2     6    16    14
+ 8      1 Austen    38     6     1     2    67     3     6    17     4
+ 9      1 Austen    34    12     0     5    50     2     8     7    13
+10      1 Austen    54     8     0     6    44     4     8    13    17
+# ... with 831 more rows, and 60 more variables: be <int>, been <int>,
+#   but <int>, by <int>, can <int>, do <int>, down <int>, even <int>,
+#   every <int>, `for` <int>, from <int>, had <int>, has <int>,
+#   have <int>, her <int>, his <int>, `if` <int>, `in` <int>, into <int>,
+#   is <int>, it <int>, its <int>, may <int>, more <int>, must <int>,
+#   my <int>, no <int>, not <int>, now <int>, of <int>, on <int>,
+#   one <int>, only <int>, or <int>, our <int>, should <int>, so <int>,
+#   some <int>, such <int>, than <int>, that <int>, the <int>,
+#   their <int>, then <int>, there <int>, things <int>, this <int>,
+#   to <int>, up <int>, upon <int>, was <int>, were <int>, what <int>,
+#   when <int>, which <int>, who <int>, will <int>, with <int>,
+#   would <int>, your <int>
+\end{verbatim}
+
+\begin{quote}
+To-morrow, and to-morrow, and to-morrow, Creeps in this petty pace from
+day to day, To the last syllable of recorded time; And all our
+yesterdays have lighted fools The way to dusty death. Out, out, brief
+candle! Life's but a walking shadow, a poor player, That struts and
+frets his hour upon the stage, And then is heard no more. It is a tale
+Told by an idiot, full of sound and fury, Signifying nothing.
+\end{quote}
+
+\section{Focus on 11 key words}\label{focus-on-11-key-words}
+
+Again, following Simonoff, we will focus on 11 words from the set of 69
+potential predictors in the data, specifically\ldots{}
+
+\begin{itemize}
+\tightlist
+\item
+  ``be'', ``been'', ``had'', ``it'', ``may'', ``not'', ``on'', ``the'',
+  ``upon'', ``was'' and ``which''
+\end{itemize}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{auth2 <-}\StringTok{ }\NormalTok{authorship }\OperatorTok{%>%}
+\StringTok{    }\KeywordTok{select}\NormalTok{(Author, BookID, be, been, had, it, may, not, }
+\NormalTok{           on, the, upon, was, which)}
+
+\NormalTok{auth2.long <-}\StringTok{ }\NormalTok{auth2 }\OperatorTok{%>%}
+\StringTok{    }\KeywordTok{gather}\NormalTok{(}\StringTok{"word"}\NormalTok{, }\StringTok{"n"}\NormalTok{, }\DecValTok{3}\OperatorTok{:}\DecValTok{13}\NormalTok{)}
+
+\NormalTok{auth2.long}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+# A tibble: 9,251 x 4
+   Author BookID word      n
+   <fct>   <int> <chr> <int>
+ 1 Austen      1 be       13
+ 2 Austen      1 be        9
+ 3 Austen      1 be       23
+ 4 Austen      1 be       20
+ 5 Austen      1 be       16
+ 6 Austen      1 be       12
+ 7 Austen      1 be       11
+ 8 Austen      1 be       21
+ 9 Austen      1 be        7
+10 Austen      1 be       14
+# ... with 9,241 more rows
+\end{verbatim}
+
+\subsection{Side by Side Boxplots}\label{side-by-side-boxplots}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{ggplot}\NormalTok{(auth2.long, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ Author, }\DataTypeTok{y =}\NormalTok{ n)) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_boxplot}\NormalTok{() }\OperatorTok{+}
+\StringTok{    }\KeywordTok{facet_wrap}\NormalTok{(}\OperatorTok{~}\StringTok{ }\NormalTok{word, }\DataTypeTok{ncol =} \DecValTok{3}\NormalTok{, }\DataTypeTok{scales =} \StringTok{"free_y"}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{    }\KeywordTok{theme_bw}\NormalTok{() }\OperatorTok{+}
+\StringTok{    }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{x =} \StringTok{""}\NormalTok{, }\DataTypeTok{y =} \StringTok{""}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-470-1.pdf}
+
+\begin{quote}
+Oh! do not attack me with your watch. A watch is always too fast or too
+slow. I cannot be dictated to by a watch.
+\end{quote}
+
+\section{A Multinomial Logistic Regression
+Model}\label{a-multinomial-logistic-regression-model}
+
+Let's start with a multinomial model to predict \texttt{Author} on the
+basis of these 11 key predictors, using the \texttt{multinom} function
+from the \texttt{nnet} package.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{authnom1 <-}\StringTok{ }\KeywordTok{multinom}\NormalTok{(Author }\OperatorTok{~}\StringTok{ }\NormalTok{be }\OperatorTok{+}\StringTok{ }\NormalTok{been }\OperatorTok{+}\StringTok{ }\NormalTok{had }\OperatorTok{+}\StringTok{ }\NormalTok{it }\OperatorTok{+}\StringTok{ }\NormalTok{may }\OperatorTok{+}\StringTok{ }\NormalTok{not }\OperatorTok{+}\StringTok{ }\NormalTok{on }\OperatorTok{+}\StringTok{ }
+\StringTok{                         }\NormalTok{the }\OperatorTok{+}\StringTok{ }\NormalTok{upon }\OperatorTok{+}\StringTok{ }\NormalTok{was }\OperatorTok{+}\StringTok{ }\NormalTok{which, }\DataTypeTok{data=}\NormalTok{authorship, }
+                     \DataTypeTok{maxit=}\DecValTok{200}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+# weights:  52 (36 variable)
+initial  value 1165.873558 
+iter  10 value 293.806160
+iter  20 value 273.554538
+iter  30 value 192.309644
+iter  40 value 71.091334
+iter  50 value 48.419335
+iter  60 value 46.808141
+iter  70 value 46.184752
+iter  80 value 46.026162
+iter  90 value 45.932823
+iter 100 value 45.897793
+iter 110 value 45.868017
+iter 120 value 45.863256
+final  value 45.863228 
+converged
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{summary}\NormalTok{(authnom1)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Call:
+multinom(formula = Author ~ be + been + had + it + may + not + 
+    on + the + upon + was + which, data = authorship, maxit = 200)
+
+Coefficients:
+       (Intercept)          be       been       had          it
+Austen  -15.504834  0.48974946  0.5380318 0.4620513  0.00388835
+London  -14.671720 -0.07497073  0.1733116 0.4842272  0.08674782
+Milton   -1.776866 -0.10891178 -0.9127155 0.5319573 -0.82046587
+               may         not        on         the      upon       was
+Austen -0.15025084 -0.08861462 0.5967404 -0.02361614 -2.119001 0.7021371
+London -0.01590702 -0.32567063 0.5749969  0.12039782 -1.914428 0.6767581
+Milton -0.06760436  0.05575887 0.5198173  0.08739368 -2.042475 0.3048202
+             which
+Austen  0.10370827
+London -0.59121054
+Milton -0.05939104
+
+Std. Errors:
+       (Intercept)        be      been       had         it       may
+Austen    4.892258 0.1643694 0.3117357 0.2695081 0.09554376 0.3008164
+London    5.372898 0.1916618 0.3308759 0.2812555 0.11355697 0.4946804
+Milton    5.417300 0.1613282 0.5910561 0.3187304 0.23015421 0.3500753
+             not        on        the      upon       was     which
+Austen 0.1078329 0.2213827 0.03457288 0.6426484 0.1808681 0.1646472
+London 0.1440760 0.2251642 0.03088881 0.7072129 0.1768901 0.2542886
+Milton 0.1309306 0.2223575 0.04783646 0.6436399 0.1820885 0.2111105
+
+Residual Deviance: 91.72646 
+AIC: 163.7265 
+\end{verbatim}
+
+\subsection{Testing Model 1}\label{testing-model-1}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{z1 <-}\StringTok{ }\KeywordTok{summary}\NormalTok{(authnom1)}\OperatorTok{$}\NormalTok{coefficients}\OperatorTok{/}\KeywordTok{summary}\NormalTok{(authnom1)}\OperatorTok{$}\NormalTok{standard.errors}
+\KeywordTok{round}\NormalTok{(z1,}\DecValTok{2}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+       (Intercept)    be  been  had    it   may   not   on   the  upon
+Austen       -3.17  2.98  1.73 1.71  0.04 -0.50 -0.82 2.70 -0.68 -3.30
+London       -2.73 -0.39  0.52 1.72  0.76 -0.03 -2.26 2.55  3.90 -2.71
+Milton       -0.33 -0.68 -1.54 1.67 -3.56 -0.19  0.43 2.34  1.83 -3.17
+        was which
+Austen 3.88  0.63
+London 3.83 -2.32
+Milton 1.67 -0.28
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{p1 <-}\StringTok{ }\NormalTok{(}\DecValTok{1} \OperatorTok{-}\StringTok{ }\KeywordTok{pnorm}\NormalTok{(}\KeywordTok{abs}\NormalTok{(z1), }\DecValTok{0}\NormalTok{, }\DecValTok{1}\NormalTok{)) }\OperatorTok{*}\StringTok{ }\DecValTok{2}
+\KeywordTok{pander}\NormalTok{(}\KeywordTok{round}\NormalTok{(p1,}\DecValTok{3}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{longtable}[]{@{}cccccccc@{}}
+\caption{Table continues below}\tabularnewline
+\toprule
+\begin{minipage}[b]{0.14\columnwidth}\centering\strut
+~\strut
+\end{minipage} & \begin{minipage}[b]{0.15\columnwidth}\centering\strut
+(Intercept)\strut
+\end{minipage} & \begin{minipage}[b]{0.08\columnwidth}\centering\strut
+be\strut
+\end{minipage} & \begin{minipage}[b]{0.08\columnwidth}\centering\strut
+been\strut
+\end{minipage} & \begin{minipage}[b]{0.08\columnwidth}\centering\strut
+had\strut
+\end{minipage} & \begin{minipage}[b]{0.08\columnwidth}\centering\strut
+it\strut
+\end{minipage} & \begin{minipage}[b]{0.08\columnwidth}\centering\strut
+may\strut
+\end{minipage} & \begin{minipage}[b]{0.08\columnwidth}\centering\strut
+not\strut
+\end{minipage}\tabularnewline
+\midrule
+\endfirsthead
+\toprule
+\begin{minipage}[b]{0.14\columnwidth}\centering\strut
+~\strut
+\end{minipage} & \begin{minipage}[b]{0.15\columnwidth}\centering\strut
+(Intercept)\strut
+\end{minipage} & \begin{minipage}[b]{0.08\columnwidth}\centering\strut
+be\strut
+\end{minipage} & \begin{minipage}[b]{0.08\columnwidth}\centering\strut
+been\strut
+\end{minipage} & \begin{minipage}[b]{0.08\columnwidth}\centering\strut
+had\strut
+\end{minipage} & \begin{minipage}[b]{0.08\columnwidth}\centering\strut
+it\strut
+\end{minipage} & \begin{minipage}[b]{0.08\columnwidth}\centering\strut
+may\strut
+\end{minipage} & \begin{minipage}[b]{0.08\columnwidth}\centering\strut
+not\strut
+\end{minipage}\tabularnewline
+\midrule
+\endhead
+\begin{minipage}[t]{0.14\columnwidth}\centering\strut
+\textbf{Austen}\strut
+\end{minipage} & \begin{minipage}[t]{0.15\columnwidth}\centering\strut
+0.002\strut
+\end{minipage} & \begin{minipage}[t]{0.08\columnwidth}\centering\strut
+0.003\strut
+\end{minipage} & \begin{minipage}[t]{0.08\columnwidth}\centering\strut
+0.084\strut
+\end{minipage} & \begin{minipage}[t]{0.08\columnwidth}\centering\strut
+0.086\strut
+\end{minipage} & \begin{minipage}[t]{0.08\columnwidth}\centering\strut
+0.968\strut
+\end{minipage} & \begin{minipage}[t]{0.08\columnwidth}\centering\strut
+0.617\strut
+\end{minipage} & \begin{minipage}[t]{0.08\columnwidth}\centering\strut
+0.411\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\centering\strut
+\textbf{London}\strut
+\end{minipage} & \begin{minipage}[t]{0.15\columnwidth}\centering\strut
+0.006\strut
+\end{minipage} & \begin{minipage}[t]{0.08\columnwidth}\centering\strut
+0.696\strut
+\end{minipage} & \begin{minipage}[t]{0.08\columnwidth}\centering\strut
+0.6\strut
+\end{minipage} & \begin{minipage}[t]{0.08\columnwidth}\centering\strut
+0.085\strut
+\end{minipage} & \begin{minipage}[t]{0.08\columnwidth}\centering\strut
+0.445\strut
+\end{minipage} & \begin{minipage}[t]{0.08\columnwidth}\centering\strut
+0.974\strut
+\end{minipage} & \begin{minipage}[t]{0.08\columnwidth}\centering\strut
+0.024\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\centering\strut
+\textbf{Milton}\strut
+\end{minipage} & \begin{minipage}[t]{0.15\columnwidth}\centering\strut
+0.743\strut
+\end{minipage} & \begin{minipage}[t]{0.08\columnwidth}\centering\strut
+0.5\strut
+\end{minipage} & \begin{minipage}[t]{0.08\columnwidth}\centering\strut
+0.123\strut
+\end{minipage} & \begin{minipage}[t]{0.08\columnwidth}\centering\strut
+0.095\strut
+\end{minipage} & \begin{minipage}[t]{0.08\columnwidth}\centering\strut
+0\strut
+\end{minipage} & \begin{minipage}[t]{0.08\columnwidth}\centering\strut
+0.847\strut
+\end{minipage} & \begin{minipage}[t]{0.08\columnwidth}\centering\strut
+0.67\strut
+\end{minipage}\tabularnewline
+\bottomrule
+\end{longtable}
+
+\begin{longtable}[]{@{}cccccc@{}}
+\toprule
+\begin{minipage}[b]{0.15\columnwidth}\centering\strut
+~\strut
+\end{minipage} & \begin{minipage}[b]{0.09\columnwidth}\centering\strut
+on\strut
+\end{minipage} & \begin{minipage}[b]{0.09\columnwidth}\centering\strut
+the\strut
+\end{minipage} & \begin{minipage}[b]{0.09\columnwidth}\centering\strut
+upon\strut
+\end{minipage} & \begin{minipage}[b]{0.09\columnwidth}\centering\strut
+was\strut
+\end{minipage} & \begin{minipage}[b]{0.09\columnwidth}\centering\strut
+which\strut
+\end{minipage}\tabularnewline
+\midrule
+\endhead
+\begin{minipage}[t]{0.15\columnwidth}\centering\strut
+\textbf{Austen}\strut
+\end{minipage} & \begin{minipage}[t]{0.09\columnwidth}\centering\strut
+0.007\strut
+\end{minipage} & \begin{minipage}[t]{0.09\columnwidth}\centering\strut
+0.495\strut
+\end{minipage} & \begin{minipage}[t]{0.09\columnwidth}\centering\strut
+0.001\strut
+\end{minipage} & \begin{minipage}[t]{0.09\columnwidth}\centering\strut
+0\strut
+\end{minipage} & \begin{minipage}[t]{0.09\columnwidth}\centering\strut
+0.529\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.15\columnwidth}\centering\strut
+\textbf{London}\strut
+\end{minipage} & \begin{minipage}[t]{0.09\columnwidth}\centering\strut
+0.011\strut
+\end{minipage} & \begin{minipage}[t]{0.09\columnwidth}\centering\strut
+0\strut
+\end{minipage} & \begin{minipage}[t]{0.09\columnwidth}\centering\strut
+0.007\strut
+\end{minipage} & \begin{minipage}[t]{0.09\columnwidth}\centering\strut
+0\strut
+\end{minipage} & \begin{minipage}[t]{0.09\columnwidth}\centering\strut
+0.02\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.15\columnwidth}\centering\strut
+\textbf{Milton}\strut
+\end{minipage} & \begin{minipage}[t]{0.09\columnwidth}\centering\strut
+0.019\strut
+\end{minipage} & \begin{minipage}[t]{0.09\columnwidth}\centering\strut
+0.068\strut
+\end{minipage} & \begin{minipage}[t]{0.09\columnwidth}\centering\strut
+0.002\strut
+\end{minipage} & \begin{minipage}[t]{0.09\columnwidth}\centering\strut
+0.094\strut
+\end{minipage} & \begin{minipage}[t]{0.09\columnwidth}\centering\strut
+0.778\strut
+\end{minipage}\tabularnewline
+\bottomrule
+\end{longtable}
+
+Simonoff suggests that ``been'' and ``may'' can be dropped. What do we
+think?
+
+\begin{quote}
+The proper function of man is to live, not to exist. I shall not waste
+my days in trying to prolong them. I shall use my time.
+\end{quote}
+
+\section{Model 2}\label{model-2}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{authnom2 <-}\StringTok{ }\KeywordTok{multinom}\NormalTok{(Author }\OperatorTok{~}\StringTok{ }\NormalTok{be }\OperatorTok{+}\StringTok{ }\NormalTok{had }\OperatorTok{+}\StringTok{ }\NormalTok{it }\OperatorTok{+}\StringTok{ }\NormalTok{not }\OperatorTok{+}\StringTok{ }\NormalTok{on }\OperatorTok{+}\StringTok{ }
+\StringTok{                         }\NormalTok{the }\OperatorTok{+}\StringTok{ }\NormalTok{upon }\OperatorTok{+}\StringTok{ }\NormalTok{was }\OperatorTok{+}\StringTok{ }\NormalTok{which, }\DataTypeTok{data=}\NormalTok{authorship, }
+                     \DataTypeTok{maxit=}\DecValTok{200}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+# weights:  44 (30 variable)
+initial  value 1165.873558 
+iter  10 value 304.985478
+iter  20 value 285.428679
+iter  30 value 143.301103
+iter  40 value 54.589791
+iter  50 value 52.140470
+iter  60 value 51.421454
+iter  70 value 51.012790
+iter  80 value 50.888718
+iter  90 value 50.834262
+iter 100 value 50.743136
+final  value 50.743111 
+converged
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{summary}\NormalTok{(authnom2)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Call:
+multinom(formula = Author ~ be + had + it + not + on + the + 
+    upon + was + which, data = authorship, maxit = 200)
+
+Coefficients:
+       (Intercept)          be       had          it         not        on
+Austen   -16.55647  0.45995950 0.6698612  0.02621612 -0.03684654 0.4676716
+London   -16.06419 -0.13378141 0.6052164  0.10517792 -0.27934022 0.4958923
+Milton    -2.22344 -0.07031256 0.1737526 -0.81984885  0.05444678 0.5363108
+                the      upon       was       which
+Austen -0.001852454 -1.950761 0.6543956  0.06363998
+London  0.128565811 -1.643829 0.6418607 -0.54690144
+Milton  0.074236636 -1.762533 0.2932065 -0.08748272
+
+Std. Errors:
+       (Intercept)        be       had         it        not        on
+Austen    4.723001 0.1293729 0.2201823 0.08657746 0.08771157 0.1949021
+London    5.202732 0.1587639 0.2306803 0.10117217 0.11608348 0.2072383
+Milton    4.593806 0.1499103 0.2057258 0.21551377 0.12103678 0.1895226
+              the      upon       was     which
+Austen 0.02945139 0.5620273 0.1524982 0.1466250
+London 0.02739965 0.6219927 0.1512911 0.2087120
+Milton 0.04463721 0.6246766 0.1601393 0.1928361
+
+Residual Deviance: 101.4862 
+AIC: 161.4862 
+\end{verbatim}
+
+\subsection{Comparing Model 2 to Model
+1}\label{comparing-model-2-to-model-1}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{anova}\NormalTok{(authnom1, authnom2)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Likelihood ratio tests of Multinomial Models
+
+Response: Author
+                                                             Model
+1              be + had + it + not + on + the + upon + was + which
+2 be + been + had + it + may + not + on + the + upon + was + which
+  Resid. df Resid. Dev   Test    Df LR stat.   Pr(Chi)
+1      2493  101.48622                                
+2      2487   91.72646 1 vs 2     6 9.759767 0.1351402
+\end{verbatim}
+
+\subsection{Testing Model 2}\label{testing-model-2}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{z2 <-}\StringTok{ }\KeywordTok{summary}\NormalTok{(authnom2)}\OperatorTok{$}\NormalTok{coefficients}\OperatorTok{/}\KeywordTok{summary}\NormalTok{(authnom2)}\OperatorTok{$}\NormalTok{standard.errors}
+\KeywordTok{round}\NormalTok{(z2,}\DecValTok{2}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+       (Intercept)    be  had    it   not   on   the  upon  was which
+Austen       -3.51  3.56 3.04  0.30 -0.42 2.40 -0.06 -3.47 4.29  0.43
+London       -3.09 -0.84 2.62  1.04 -2.41 2.39  4.69 -2.64 4.24 -2.62
+Milton       -0.48 -0.47 0.84 -3.80  0.45 2.83  1.66 -2.82 1.83 -0.45
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{p2 <-}\StringTok{ }\NormalTok{(}\DecValTok{1} \OperatorTok{-}\StringTok{ }\KeywordTok{pnorm}\NormalTok{(}\KeywordTok{abs}\NormalTok{(z2), }\DecValTok{0}\NormalTok{, }\DecValTok{1}\NormalTok{)) }\OperatorTok{*}\StringTok{ }\DecValTok{2}
+\KeywordTok{round}\NormalTok{(p2,}\DecValTok{3}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+       (Intercept)    be   had    it   not    on   the  upon   was which
+Austen       0.000 0.000 0.002 0.762 0.674 0.016 0.950 0.001 0.000 0.664
+London       0.002 0.399 0.009 0.299 0.016 0.017 0.000 0.008 0.000 0.009
+Milton       0.628 0.639 0.398 0.000 0.653 0.005 0.096 0.005 0.067 0.650
+\end{verbatim}
+
+\subsection{A little history}\label{a-little-history}
+
+Simonoff has an interesting note: Consider the lifetimes of these four
+authors:
+
+\begin{itemize}
+\tightlist
+\item
+  William Shakespeare was born in 1564 and died in 1616
+\item
+  John Milton was born in 1608 (44 years after Shakespeare) and died in
+  1674
+\item
+  Jane Austen was born in 1775 (211 years after Shakespeare) and died in
+  1817
+\item
+  Jack London was born in 1876 (312 years after Shakespeare) and died in
+  1916
+\end{itemize}
+
+How many significant coefficients does each author display relative to
+Shakespeare?
+
+\section{Classification Table}\label{classification-table}
+
+How well does this model (model 2) distinguish these authors based on
+blocks of 1700 words of text?
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{table}\NormalTok{(authorship}\OperatorTok{$}\NormalTok{Author, }\KeywordTok{predict}\NormalTok{(authnom2))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+             
+              Shakespeare Austen London Milton
+  Shakespeare         168      3      1      1
+  Austen                4    308      5      0
+  London                0      1    294      1
+  Milton                2      0      1     52
+\end{verbatim}
+
+Based on this classification table, I'd say it does a nice job. Almost
+98\% of the blocks of text are correctly classified.
+
+\begin{quote}
+Fly, envious Time, till thou run out thy race; Call on the lazy
+leaden-stepping hours, Whose speed is but the heavy plummet's pace; And
+glut thyself with what thy womb devours, Which is no more then what is
+false and vain, And merely mortal dross; So little is our loss, So
+little is thy gain. For when, as each thing bad thou hast entomb'd And
+last of all thy greedy self consumed, Then long Eternity shall greet our
+bliss, With an individual kiss; And Joy shall overtake us, as a flood,
+When every thing that is sincerely good, And perfectly divine, With
+truth, and peace, and love, shall ever shine, About the supreme throne
+Of Him, to whose happy-making sight, alone, When once our
+heavenly-guided soul shall climb, Then all this earthly grossness quit,
+Attired with stars, we shall for ever sit, Triumphing over Death, and
+Chance, and thee, O Time!
+\end{quote}
+
+\section{Probability Curves based on a Single
+Predictor}\label{probability-curves-based-on-a-single-predictor}
+
+In situations where only one predictor is used, we can develop nice
+plots of estimated probabilities for each group as a function of the
+predictor. Suppose we look at the single word ``been'' (note that this
+was left out of Model 2.)
+
+Note that the possible values for counts of ``been'' in the data range
+from 0 to 27\ldots{}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{summary}\NormalTok{(authorship}\OperatorTok{$}\NormalTok{been)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  0.000   2.000   4.000   4.614   7.000  27.000 
+\end{verbatim}
+
+Now, we'll build a model to predict the author based solely on the
+counts of the word ``been''.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{authnom3 <-}\StringTok{ }\KeywordTok{multinom}\NormalTok{(Author }\OperatorTok{~}\StringTok{ }\NormalTok{been, }
+                     \DataTypeTok{data=}\NormalTok{authorship, }\DataTypeTok{maxit=}\DecValTok{200}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+# weights:  12 (6 variable)
+initial  value 1165.873558 
+iter  10 value 757.915093
+iter  20 value 755.454631
+final  value 755.454551 
+converged
+\end{verbatim}
+
+Next, we'll build a grid of the predicted log odds for each author (as
+compared to Shakespeare) using the fitted coefficients. The grid will
+cover every possible value from 0 to 27, increasing by 0.1, using the
+following trick in R.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{beengrid <-}\StringTok{ }\KeywordTok{cbind}\NormalTok{(}\DecValTok{1}\NormalTok{,}\KeywordTok{c}\NormalTok{(}\DecValTok{0}\OperatorTok{:}\DecValTok{270}\NormalTok{)}\OperatorTok{/}\DecValTok{10}\NormalTok{)}
+\NormalTok{austenlogit <-}\StringTok{ }\NormalTok{beengrid }\OperatorTok{%*%}\StringTok{ }\KeywordTok{coef}\NormalTok{(authnom3)[}\DecValTok{1}\NormalTok{,]}
+\NormalTok{londonlogit <-}\StringTok{ }\NormalTok{beengrid }\OperatorTok{%*%}\StringTok{ }\KeywordTok{coef}\NormalTok{(authnom3)[}\DecValTok{2}\NormalTok{,]}
+\NormalTok{miltonlogit <-}\StringTok{ }\NormalTok{beengrid }\OperatorTok{%*%}\StringTok{ }\KeywordTok{coef}\NormalTok{(authnom3)[}\DecValTok{3}\NormalTok{,]}
+\end{Highlighting}
+\end{Shaded}
+
+Next, we'll use that grid of logit values to estimate the fitted
+probabilities for each value of ``been'' between 0 and 27.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{austenprob <-}\StringTok{ }\KeywordTok{exp}\NormalTok{(austenlogit)}\OperatorTok{/}\StringTok{ }
+\StringTok{    }\NormalTok{(}\KeywordTok{exp}\NormalTok{(austenlogit) }\OperatorTok{+}\StringTok{ }\KeywordTok{exp}\NormalTok{(londonlogit) }\OperatorTok{+}\StringTok{ }
+\StringTok{         }\KeywordTok{exp}\NormalTok{(miltonlogit) }\OperatorTok{+}\StringTok{ }\DecValTok{1}\NormalTok{)}
+\NormalTok{londonprob <-}\StringTok{ }\KeywordTok{exp}\NormalTok{(londonlogit)}\OperatorTok{/}\StringTok{ }
+\StringTok{    }\NormalTok{(}\KeywordTok{exp}\NormalTok{(austenlogit) }\OperatorTok{+}\StringTok{ }\KeywordTok{exp}\NormalTok{(londonlogit) }\OperatorTok{+}\StringTok{ }
+\StringTok{         }\KeywordTok{exp}\NormalTok{(miltonlogit) }\OperatorTok{+}\StringTok{ }\DecValTok{1}\NormalTok{)}
+\NormalTok{miltonprob <-}\StringTok{ }\KeywordTok{exp}\NormalTok{(miltonlogit)}\OperatorTok{/}\StringTok{ }
+\StringTok{    }\NormalTok{(}\KeywordTok{exp}\NormalTok{(austenlogit) }\OperatorTok{+}\StringTok{ }\KeywordTok{exp}\NormalTok{(londonlogit) }\OperatorTok{+}\StringTok{ }
+\StringTok{         }\KeywordTok{exp}\NormalTok{(miltonlogit) }\OperatorTok{+}\StringTok{ }\DecValTok{1}\NormalTok{)}
+\NormalTok{shakesprob <-}\StringTok{ }\DecValTok{1} \OperatorTok{-}\StringTok{ }\NormalTok{austenprob }\OperatorTok{-}\StringTok{ }\NormalTok{londonprob }\OperatorTok{-}\StringTok{ }\NormalTok{miltonprob}
+
+\NormalTok{been_dat <-}\StringTok{ }\KeywordTok{data_frame}\NormalTok{(}\DataTypeTok{been_count =}\NormalTok{ beengrid[,}\DecValTok{2}\NormalTok{], }
+                       \DataTypeTok{austen =}\NormalTok{ austenprob[,}\DecValTok{1}\NormalTok{], }
+                       \DataTypeTok{london =}\NormalTok{ londonprob[,}\DecValTok{1}\NormalTok{], }
+                       \DataTypeTok{milton =}\NormalTok{ miltonprob[,}\DecValTok{1}\NormalTok{], }
+                       \DataTypeTok{shakespeare =}\NormalTok{ shakesprob[,}\DecValTok{1}\NormalTok{])}
+\NormalTok{been_dat}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+# A tibble: 271 x 5
+   been_count austen london milton shakespeare
+        <dbl>  <dbl>  <dbl>  <dbl>       <dbl>
+ 1      0.    0.0258  0.136  0.285       0.553
+ 2      0.100 0.0288  0.147  0.272       0.553
+ 3      0.200 0.0321  0.158  0.258       0.551
+ 4      0.300 0.0357  0.171  0.245       0.548
+ 5      0.400 0.0396  0.184  0.232       0.545
+ 6      0.500 0.0438  0.197  0.219       0.540
+ 7      0.600 0.0484  0.211  0.207       0.534
+ 8      0.700 0.0534  0.225  0.195       0.527
+ 9      0.800 0.0587  0.240  0.183       0.518
+10      0.900 0.0644  0.256  0.171       0.509
+# ... with 261 more rows
+\end{verbatim}
+
+Now, we gather the data by author name and probability
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{been_dat_long <-}\StringTok{ }\NormalTok{been_dat }\OperatorTok{%>%}
+\StringTok{    }\KeywordTok{gather}\NormalTok{(}\StringTok{"name"}\NormalTok{, }\StringTok{"prob"}\NormalTok{, }\DecValTok{2}\OperatorTok{:}\DecValTok{5}\NormalTok{)}
+\NormalTok{been_dat_long}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+# A tibble: 1,084 x 3
+   been_count name     prob
+        <dbl> <chr>   <dbl>
+ 1      0.    austen 0.0258
+ 2      0.100 austen 0.0288
+ 3      0.200 austen 0.0321
+ 4      0.300 austen 0.0357
+ 5      0.400 austen 0.0396
+ 6      0.500 austen 0.0438
+ 7      0.600 austen 0.0484
+ 8      0.700 austen 0.0534
+ 9      0.800 austen 0.0587
+10      0.900 austen 0.0644
+# ... with 1,074 more rows
+\end{verbatim}
+
+\subsection{\texorpdfstring{Produce the Plot of Estimated Probabilities
+based on ``been''
+counts}{Produce the Plot of Estimated Probabilities based on been counts}}\label{produce-the-plot-of-estimated-probabilities-based-on-been-counts}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{ggplot}\NormalTok{(been_dat_long, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ been_count, }\DataTypeTok{y =}\NormalTok{ prob, }
+                          \DataTypeTok{col =}\NormalTok{ name)) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_line}\NormalTok{(}\DataTypeTok{size =} \FloatTok{1.5}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{    }\KeywordTok{theme_bw}\NormalTok{() }\OperatorTok{+}\StringTok{ }
+\StringTok{    }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{x =} \StringTok{"Count of the word `been`"}\NormalTok{, }
+         \DataTypeTok{y =} \StringTok{"Model probability"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/plot of estimated probabilities-1.pdf}
+
+\subsection{\texorpdfstring{Boxplot of ``been''
+counts}{Boxplot of been counts}}\label{boxplot-of-been-counts}
+
+Compare this to what we see in the raw counts of the word ``been''.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{been.long <-}\StringTok{ }\KeywordTok{filter}\NormalTok{(auth2.long, word }\OperatorTok{==}\StringTok{ "been"}\NormalTok{)}
+\NormalTok{been.long}\OperatorTok{$}\NormalTok{Auth <-}\StringTok{ }\KeywordTok{fct_relevel}\NormalTok{(been.long}\OperatorTok{$}\NormalTok{Author, }
+            \StringTok{"Austen"}\NormalTok{, }\StringTok{"London"}\NormalTok{, }\StringTok{"Milton"}\NormalTok{, }\StringTok{"Shakespeare"}\NormalTok{)}
+\CommentTok{# releveling to make the colors match the model plot}
+
+\KeywordTok{ggplot}\NormalTok{(been.long, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ Auth, }\DataTypeTok{y =}\NormalTok{ n, }\DataTypeTok{fill =}\NormalTok{ Auth)) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_boxplot}\NormalTok{() }\OperatorTok{+}
+\StringTok{    }\KeywordTok{guides}\NormalTok{(}\DataTypeTok{fill =} \OtherTok{FALSE}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{theme_bw}\NormalTok{() }\OperatorTok{+}
+\StringTok{    }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{x =} \StringTok{""}\NormalTok{, }\DataTypeTok{y =} \StringTok{"Count of the word `been`"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/side by side boxplot of been by author-1.pdf}
+
+\subsection{Quote Sources}\label{quote-sources}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  To-morrow, and to-morrow, and to-morrow \ldots{} Shakespeare
+  \emph{Macbeth} Act 5.
+\item
+  Oh! do not attack me with your watch. \ldots{} Jane Austen
+  \emph{Mansfield Park}
+\item
+  The proper function of man is to live, not to exist. \ldots{} Jack
+  London \emph{The Bulletin} San Francisco 1916-12-02.
+\item
+  Fly, envious Time, till thou run out thy race \ldots{} John Milton
+  \emph{On Time}
+\end{enumerate}
 
 \bibliography{text.bib}
 
