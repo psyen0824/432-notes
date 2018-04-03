@@ -124,7 +124,7 @@
   \postauthor{\par}
   \predate{\centering\large\emph}
   \postdate{\par}
-  \date{Built 2018-04-02 00:09:10}
+  \date{Built 2018-04-02 21:37:54}
 
 \usepackage{booktabs}
 \usepackage{amsthm}
@@ -27046,43 +27046,1900 @@ The predictions from this tobit model are obtained as follows\ldots{}
 The prediction for both Harry and Sally under the tobit model would be
 truncated to 0 days.
 
-\chapter{Modeling an Ordinal Multi-Categorical Outcome in Ohio
-SMART}\label{modeling-an-ordinal-multi-categorical-outcome-in-ohio-smart}
+\chapter{Modeling an Ordinal Categorical Outcome in Ohio
+SMART}\label{modeling-an-ordinal-categorical-outcome-in-ohio-smart}
 
-In this chapter, I use an ordered multi-categorical outcome
-(self-reported general health: \texttt{genhealth} = 1 = Excellent / 2 =
-Very Good / 3 = Good / 4 = Fair / 5 = Poor) to demonstrate regression
-models for such outcomes.
+\section{Preliminaries}\label{preliminaries-1}
 
-Methods discussed in the chapter include the following:
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(gmodels)}
+\KeywordTok{library}\NormalTok{(nnet)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{smart_oh <-}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(}\StringTok{"data/smart_ohio.csv"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }\NormalTok{tbl_df}
+\end{Highlighting}
+\end{Shaded}
+
+\section{A subset of the Ohio SMART
+data}\label{a-subset-of-the-ohio-smart-data-1}
+
+Let's consider the following data. The outcome we'll study now is
+\texttt{genhealth}, which has five ordered categories. I'll include the
+subset of all observations in \texttt{smart\_oh} with complete data on
+these 7 variables.
+
+\begin{longtable}[]{@{}rl@{}}
+\toprule
+\begin{minipage}[b]{0.13\columnwidth}\raggedleft\strut
+Variable\strut
+\end{minipage} & \begin{minipage}[b]{0.63\columnwidth}\raggedright\strut
+Description\strut
+\end{minipage}\tabularnewline
+\midrule
+\endhead
+\begin{minipage}[t]{0.13\columnwidth}\raggedleft\strut
+\texttt{SEQNO}\strut
+\end{minipage} & \begin{minipage}[t]{0.63\columnwidth}\raggedright\strut
+Subject identification code\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.13\columnwidth}\raggedleft\strut
+\texttt{genhealth}\strut
+\end{minipage} & \begin{minipage}[t]{0.63\columnwidth}\raggedright\strut
+Five categories (1 = Excellent, 2 = Very Good, 3 = Good, 4 = Fair, 5 =
+Poor) on general health\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.13\columnwidth}\raggedleft\strut
+\texttt{physhealth}\strut
+\end{minipage} & \begin{minipage}[t]{0.63\columnwidth}\raggedright\strut
+Now thinking about your physical health, which includes physical illness
+and injury, for how many days during the past 30 days was your physical
+health not good?\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.13\columnwidth}\raggedleft\strut
+\texttt{costprob}\strut
+\end{minipage} & \begin{minipage}[t]{0.63\columnwidth}\raggedright\strut
+1 indicates Yes to ``Was there a time in the past 12 months when you
+needed to see a doctor but could not because of cost?'', and 0
+otherwise.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.13\columnwidth}\raggedleft\strut
+\texttt{sleephrs}\strut
+\end{minipage} & \begin{minipage}[t]{0.63\columnwidth}\raggedright\strut
+average amount of sleep the subject gets in a 24-hour period\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.13\columnwidth}\raggedleft\strut
+\texttt{incomegroup}\strut
+\end{minipage} & \begin{minipage}[t]{0.63\columnwidth}\raggedright\strut
+8 income groups from \textless{} 10,000 to 75,000 or more\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.13\columnwidth}\raggedleft\strut
+\texttt{bmi}\strut
+\end{minipage} & \begin{minipage}[t]{0.63\columnwidth}\raggedright\strut
+body-mass index\strut
+\end{minipage}\tabularnewline
+\bottomrule
+\end{longtable}
+
+To make my life easier later, I'm also going to drop the 11 subjects who
+have no missing data on these variables, but who also have a listed
+\texttt{bmi} above 60.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{sm1 <-}\StringTok{ }\NormalTok{smart_oh }\OperatorTok{%>%}
+\StringTok{    }\KeywordTok{select}\NormalTok{(SEQNO, genhealth, physhealth, costprob, sleephrs, }
+\NormalTok{           incomegroup, bmi) }\OperatorTok{%>%}
+\StringTok{    }\KeywordTok{filter}\NormalTok{(bmi }\OperatorTok{<=}\StringTok{ }\DecValTok{60}\NormalTok{) }\OperatorTok{%>%}
+\StringTok{    }\NormalTok{drop_na}
+\end{Highlighting}
+\end{Shaded}
+
+In total, we have 4719 subjects in the \texttt{sm1} sample.
+
+\subsection{Several Ways of Storing Multi-Categorical
+data}\label{several-ways-of-storing-multi-categorical-data}
+
+We will store the information in our outcome, \texttt{genhealth} in both
+a numeric form (\texttt{gen\_n}) and an ordered factor (\texttt{gen\_h})
+with some abbreviated labels) because we'll have some use for each
+approach in this material.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{sm1 <-}\StringTok{ }\NormalTok{sm1 }\OperatorTok{%>%}
+\StringTok{    }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{genh =} \KeywordTok{fct_recode}\NormalTok{(genhealth,}
+                             \StringTok{"1-E"}\NormalTok{ =}\StringTok{ "1_Excellent"}\NormalTok{,}
+                             \StringTok{"2_VG"}\NormalTok{ =}\StringTok{ "2_VeryGood"}\NormalTok{,}
+                             \StringTok{"3_G"}\NormalTok{ =}\StringTok{ "3_Good"}\NormalTok{,}
+                             \StringTok{"4_F"}\NormalTok{ =}\StringTok{ "4_Fair"}\NormalTok{,}
+                             \StringTok{"5_P"}\NormalTok{ =}\StringTok{ "5_Poor"}\NormalTok{),}
+           \DataTypeTok{genh =} \KeywordTok{factor}\NormalTok{(genh, }\DataTypeTok{ordered =} \OtherTok{TRUE}\NormalTok{),}
+           \DataTypeTok{gen_n =} \KeywordTok{as.numeric}\NormalTok{(genhealth))}
+
+\NormalTok{sm1 }\OperatorTok{%>%}\StringTok{ }\KeywordTok{count}\NormalTok{(genh, gen_n, genhealth)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+# A tibble: 5 x 4
+  genh  gen_n genhealth       n
+  <ord> <dbl> <fct>       <int>
+1 1-E      1. 1_Excellent   807
+2 2_VG     2. 2_VeryGood   1606
+3 3_G      3. 3_Good       1468
+4 4_F      4. 4_Fair        598
+5 5_P      5. 5_Poor        240
+\end{verbatim}
+
+\section{Building Cross-Tabulations}\label{building-cross-tabulations}
+
+Is income group associated with general health?
+
+\subsection{\texorpdfstring{Using base \texttt{table}
+functions}{Using base table functions}}\label{using-base-table-functions}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{addmargins}\NormalTok{(}\KeywordTok{table}\NormalTok{(sm1}\OperatorTok{$}\NormalTok{incomegroup, sm1}\OperatorTok{$}\NormalTok{genh))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+        
+          1-E 2_VG  3_G  4_F  5_P  Sum
+  0-9K     20   32   55   49   27  183
+  10-14K   11   36   65   67   37  216
+  15-19K   29   67  126   79   46  347
+  20-24K   40  115  137  108   45  445
+  25-34K   60  170  186   83   30  529
+  35-49K   92  227  252   72   23  666
+  50-74K  151  297  261   46   18  773
+  75K+    404  662  386   94   14 1560
+  Sum     807 1606 1468  598  240 4719
+\end{verbatim}
+
+More people answer Very Good and Good than choose the other categories.
+It might be easier to look at percentages here.
+
+\subsubsection{Adding percentages within each
+row}\label{adding-percentages-within-each-row}
+
+Here are the percentages giving each \texttt{genhealth} response within
+each income group.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{addmargins}\NormalTok{(}
+    \KeywordTok{round}\NormalTok{(}\DecValTok{100}\OperatorTok{*}\KeywordTok{prop.table}\NormalTok{(}
+        \KeywordTok{table}\NormalTok{(sm1}\OperatorTok{$}\NormalTok{incomegroup, sm1}\OperatorTok{$}\NormalTok{genh)}
+\NormalTok{        ,}\DecValTok{1}\NormalTok{)}
+\NormalTok{        ,}\DecValTok{1}\NormalTok{)}
+\NormalTok{    )}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+        
+           1-E  2_VG   3_G   4_F   5_P   Sum
+  0-9K    10.9  17.5  30.1  26.8  14.8 100.1
+  10-14K   5.1  16.7  30.1  31.0  17.1 100.0
+  15-19K   8.4  19.3  36.3  22.8  13.3 100.1
+  20-24K   9.0  25.8  30.8  24.3  10.1 100.0
+  25-34K  11.3  32.1  35.2  15.7   5.7 100.0
+  35-49K  13.8  34.1  37.8  10.8   3.5 100.0
+  50-74K  19.5  38.4  33.8   6.0   2.3 100.0
+  75K+    25.9  42.4  24.7   6.0   0.9  99.9
+  Sum    103.9 226.3 258.8 143.4  67.7 800.1
+\end{verbatim}
+
+So, for example, 11.3\% of the \texttt{genhealth} responses in subjects
+with incomes between 25 and 34 thousand dollars were Excellent.
+
+\subsubsection{Adding percentages within each
+column}\label{adding-percentages-within-each-column}
+
+Here are the percentages in each \texttt{incomegroup} within each
+\texttt{genhealth} response.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{addmargins}\NormalTok{(}
+    \KeywordTok{round}\NormalTok{(}\DecValTok{100}\OperatorTok{*}\KeywordTok{prop.table}\NormalTok{(}
+        \KeywordTok{table}\NormalTok{(sm1}\OperatorTok{$}\NormalTok{incomegroup, sm1}\OperatorTok{$}\NormalTok{genh)}
+\NormalTok{        ,}\DecValTok{2}\NormalTok{)}
+\NormalTok{        ,}\DecValTok{1}\NormalTok{)}
+\NormalTok{    )}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+        
+           1-E  2_VG   3_G   4_F   5_P   Sum
+  0-9K     2.5   2.0   3.7   8.2  11.2  27.6
+  10-14K   1.4   2.2   4.4  11.2  15.4  34.6
+  15-19K   3.6   4.2   8.6  13.2  19.2  48.8
+  20-24K   5.0   7.2   9.3  18.1  18.8  58.4
+  25-34K   7.4  10.6  12.7  13.9  12.5  57.1
+  35-49K  11.4  14.1  17.2  12.0   9.6  64.3
+  50-74K  18.7  18.5  17.8   7.7   7.5  70.2
+  75K+    50.1  41.2  26.3  15.7   5.8 139.1
+  Sum    100.1 100.0 100.0 100.0 100.0 500.1
+\end{verbatim}
+
+From this table, we see that 7.4\% of the Excellent \texttt{genhealth}
+responses were given by people with incomes between 25 and 34 thousand
+dollars.
+
+\subsection{\texorpdfstring{Using
+\texttt{xtabs}}{Using xtabs}}\label{using-xtabs}
+
+The \texttt{xtabs} function provides a formula method for obtaining
+cross-tabulations.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{xtabs}\NormalTok{(}\OperatorTok{~}\StringTok{ }\NormalTok{incomegroup }\OperatorTok{+}\StringTok{ }\NormalTok{genh, }\DataTypeTok{data =}\NormalTok{ sm1)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+           genh
+incomegroup 1-E 2_VG 3_G 4_F 5_P
+     0-9K    20   32  55  49  27
+     10-14K  11   36  65  67  37
+     15-19K  29   67 126  79  46
+     20-24K  40  115 137 108  45
+     25-34K  60  170 186  83  30
+     35-49K  92  227 252  72  23
+     50-74K 151  297 261  46  18
+     75K+   404  662 386  94  14
+\end{verbatim}
+
+\subsection{Storing a table in a
+tibble}\label{storing-a-table-in-a-tibble}
+
+We can store the elements of a cross-tabulation in a tibble, like this:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{(sm1.tableA <-}\StringTok{ }\NormalTok{sm1 }\OperatorTok{%>%}\StringTok{ }\KeywordTok{count}\NormalTok{(incomegroup, genh))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+# A tibble: 40 x 3
+   incomegroup genh      n
+   <fct>       <ord> <int>
+ 1 0-9K        1-E      20
+ 2 0-9K        2_VG     32
+ 3 0-9K        3_G      55
+ 4 0-9K        4_F      49
+ 5 0-9K        5_P      27
+ 6 10-14K      1-E      11
+ 7 10-14K      2_VG     36
+ 8 10-14K      3_G      65
+ 9 10-14K      4_F      67
+10 10-14K      5_P      37
+# ... with 30 more rows
+\end{verbatim}
+
+From such a tibble, we can visualize the data in many ways, but we can
+also return to \texttt{xtabs} and include the frequencies (\texttt{n})
+in that setup.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{xtabs}\NormalTok{(n }\OperatorTok{~}\StringTok{ }\NormalTok{incomegroup }\OperatorTok{+}\StringTok{ }\NormalTok{genh, }\DataTypeTok{data =}\NormalTok{ sm1.tableA)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+           genh
+incomegroup 1-E 2_VG 3_G 4_F 5_P
+     0-9K    20   32  55  49  27
+     10-14K  11   36  65  67  37
+     15-19K  29   67 126  79  46
+     20-24K  40  115 137 108  45
+     25-34K  60  170 186  83  30
+     35-49K  92  227 252  72  23
+     50-74K 151  297 261  46  18
+     75K+   404  662 386  94  14
+\end{verbatim}
+
+And, we can get the \(\chi^2\) test of independence, with:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{summary}\NormalTok{(}\KeywordTok{xtabs}\NormalTok{(n }\OperatorTok{~}\StringTok{ }\NormalTok{incomegroup }\OperatorTok{+}\StringTok{ }\NormalTok{genh, }\DataTypeTok{data =}\NormalTok{ sm1.tableA))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Call: xtabs(formula = n ~ incomegroup + genh, data = sm1.tableA)
+Number of cases in table: 4719 
+Number of factors: 2 
+Test for independence of all factors:
+    Chisq = 763.3, df = 28, p-value = 1.067e-142
+\end{verbatim}
+
+\subsection{\texorpdfstring{Using \texttt{CrossTable} from the
+\texttt{gmodels}
+package}{Using CrossTable from the gmodels package}}\label{using-crosstable-from-the-gmodels-package}
+
+The \texttt{CrossTable} function from the \texttt{gmodels} package
+produces a cross-tabulation with various counts and proportions like
+people often generate with SPSS and SAS.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{CrossTable}\NormalTok{(sm1}\OperatorTok{$}\NormalTok{incomegroup, sm1}\OperatorTok{$}\NormalTok{genh, }\DataTypeTok{chisq =}\NormalTok{ T)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+
+ 
+   Cell Contents
+|-------------------------|
+|                       N |
+| Chi-square contribution |
+|           N / Row Total |
+|           N / Col Total |
+|         N / Table Total |
+|-------------------------|
+
+ 
+Total Observations in Table:  4719 
+
+ 
+                | sm1$genh 
+sm1$incomegroup |       1-E |      2_VG |       3_G |       4_F |       5_P | Row Total | 
+----------------|-----------|-----------|-----------|-----------|-----------|-----------|
+           0-9K |        20 |        32 |        55 |        49 |        27 |       183 | 
+                |     4.077 |    14.722 |     0.065 |    28.726 |    33.635 |           | 
+                |     0.109 |     0.175 |     0.301 |     0.268 |     0.148 |     0.039 | 
+                |     0.025 |     0.020 |     0.037 |     0.082 |     0.112 |           | 
+                |     0.004 |     0.007 |     0.012 |     0.010 |     0.006 |           | 
+----------------|-----------|-----------|-----------|-----------|-----------|-----------|
+         10-14K |        11 |        36 |        65 |        67 |        37 |       216 | 
+                |    18.214 |    19.141 |     0.072 |    57.372 |    61.606 |           | 
+                |     0.051 |     0.167 |     0.301 |     0.310 |     0.171 |     0.046 | 
+                |     0.014 |     0.022 |     0.044 |     0.112 |     0.154 |           | 
+                |     0.002 |     0.008 |     0.014 |     0.014 |     0.008 |           | 
+----------------|-----------|-----------|-----------|-----------|-----------|-----------|
+         15-19K |        29 |        67 |       126 |        79 |        46 |       347 | 
+                |    15.513 |    22.106 |     3.020 |    27.902 |    45.549 |           | 
+                |     0.084 |     0.193 |     0.363 |     0.228 |     0.133 |     0.074 | 
+                |     0.036 |     0.042 |     0.086 |     0.132 |     0.192 |           | 
+                |     0.006 |     0.014 |     0.027 |     0.017 |     0.010 |           | 
+----------------|-----------|-----------|-----------|-----------|-----------|-----------|
+         20-24K |        40 |       115 |       137 |       108 |        45 |       445 | 
+                |    17.125 |     8.771 |     0.015 |    47.232 |    22.107 |           | 
+                |     0.090 |     0.258 |     0.308 |     0.243 |     0.101 |     0.094 | 
+                |     0.050 |     0.072 |     0.093 |     0.181 |     0.188 |           | 
+                |     0.008 |     0.024 |     0.029 |     0.023 |     0.010 |           | 
+----------------|-----------|-----------|-----------|-----------|-----------|-----------|
+         25-34K |        60 |       170 |       186 |        83 |        30 |       529 | 
+                |    10.259 |     0.559 |     2.793 |     3.802 |     0.356 |           | 
+                |     0.113 |     0.321 |     0.352 |     0.157 |     0.057 |     0.112 | 
+                |     0.074 |     0.106 |     0.127 |     0.139 |     0.125 |           | 
+                |     0.013 |     0.036 |     0.039 |     0.018 |     0.006 |           | 
+----------------|-----------|-----------|-----------|-----------|-----------|-----------|
+         35-49K |        92 |       227 |       252 |        72 |        23 |       666 | 
+                |     4.208 |     0.001 |     9.696 |     1.821 |     3.489 |           | 
+                |     0.138 |     0.341 |     0.378 |     0.108 |     0.035 |     0.141 | 
+                |     0.114 |     0.141 |     0.172 |     0.120 |     0.096 |           | 
+                |     0.019 |     0.048 |     0.053 |     0.015 |     0.005 |           | 
+----------------|-----------|-----------|-----------|-----------|-----------|-----------|
+         50-74K |       151 |       297 |       261 |        46 |        18 |       773 | 
+                |     2.676 |     4.376 |     1.753 |    27.557 |    11.555 |           | 
+                |     0.195 |     0.384 |     0.338 |     0.060 |     0.023 |     0.164 | 
+                |     0.187 |     0.185 |     0.178 |     0.077 |     0.075 |           | 
+                |     0.032 |     0.063 |     0.055 |     0.010 |     0.004 |           | 
+----------------|-----------|-----------|-----------|-----------|-----------|-----------|
+           75K+ |       404 |       662 |       386 |        94 |        14 |      1560 | 
+                |    70.584 |    32.369 |    20.314 |    54.383 |    53.809 |           | 
+                |     0.259 |     0.424 |     0.247 |     0.060 |     0.009 |     0.331 | 
+                |     0.501 |     0.412 |     0.263 |     0.157 |     0.058 |           | 
+                |     0.086 |     0.140 |     0.082 |     0.020 |     0.003 |           | 
+----------------|-----------|-----------|-----------|-----------|-----------|-----------|
+   Column Total |       807 |      1606 |      1468 |       598 |       240 |      4719 | 
+                |     0.171 |     0.340 |     0.311 |     0.127 |     0.051 |           | 
+----------------|-----------|-----------|-----------|-----------|-----------|-----------|
+
+ 
+Statistics for All Table Factors
+
+
+Pearson's Chi-squared test 
+------------------------------------------------------------
+Chi^2 =  763.3281     d.f. =  28     p =  1.066581e-142 
+
+
+ 
+\end{verbatim}
+
+\section{Graphing Categorical Data}\label{graphing-categorical-data}
+
+\subsection{A Bar Chart for a Single
+Variable}\label{a-bar-chart-for-a-single-variable}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{ggplot}\NormalTok{(sm1, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ genhealth, }\DataTypeTok{fill =}\NormalTok{ genhealth)) }\OperatorTok{+}\StringTok{ }
+\StringTok{    }\KeywordTok{geom_bar}\NormalTok{() }\OperatorTok{+}
+\StringTok{    }\KeywordTok{scale_fill_brewer}\NormalTok{(}\DataTypeTok{palette =} \StringTok{"Set1"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{guides}\NormalTok{(}\DataTypeTok{fill =} \OtherTok{FALSE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-480-1.pdf}
+
+or, you might prefer to plot percentages, perhaps like this:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{ggplot}\NormalTok{(sm1, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ genhealth, }\DataTypeTok{fill =}\NormalTok{ genhealth)) }\OperatorTok{+}\StringTok{ }
+\StringTok{    }\KeywordTok{geom_bar}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{y =}\NormalTok{ (..count..)}\OperatorTok{/}\KeywordTok{sum}\NormalTok{(..count..))) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_text}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{y =}\NormalTok{ (..count..)}\OperatorTok{/}\KeywordTok{sum}\NormalTok{(..count..), }
+                  \DataTypeTok{label =}\NormalTok{ scales}\OperatorTok{::}\KeywordTok{percent}\NormalTok{((..count..) }\OperatorTok{/}\StringTok{ }
+\StringTok{                                        }\KeywordTok{sum}\NormalTok{(..count..))),}
+              \DataTypeTok{stat =} \StringTok{"count"}\NormalTok{, }\DataTypeTok{vjust =} \DecValTok{1}\NormalTok{, }
+              \DataTypeTok{color =} \StringTok{"white"}\NormalTok{, }\DataTypeTok{size =} \DecValTok{5}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{scale_y_continuous}\NormalTok{(}\DataTypeTok{labels =}\NormalTok{ scales}\OperatorTok{::}\NormalTok{percent) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{scale_fill_brewer}\NormalTok{(}\DataTypeTok{palette =} \StringTok{"Dark2"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{guides}\NormalTok{(}\DataTypeTok{fill =} \OtherTok{FALSE}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{    }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{y =} \StringTok{"Percentage"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-481-1.pdf}
+
+Use bar charts, rather than pie charts.
+
+\subsection{A Counts Chart for a 2-Way
+Cross-Tabulation}\label{a-counts-chart-for-a-2-way-cross-tabulation}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{ggplot}\NormalTok{(sm1, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ genhealth, }\DataTypeTok{y =}\NormalTok{ incomegroup)) }\OperatorTok{+}\StringTok{ }
+\StringTok{    }\KeywordTok{geom_count}\NormalTok{() }
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-482-1.pdf}
+
+\section{\texorpdfstring{Building a Model for \texttt{genh} using
+\texttt{sleephrs}}{Building a Model for genh using sleephrs}}\label{building-a-model-for-genh-using-sleephrs}
+
+To begin, we'll predict each subject's \texttt{genh} response using just
+one predictor, \texttt{sleephrs}.
+
+\subsection{A little EDA}\label{a-little-eda}
+
+Let's start with a quick table of summary statistics.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{sm1 }\OperatorTok{%>%}\StringTok{ }\KeywordTok{group_by}\NormalTok{(genh) }\OperatorTok{%>%}
+\StringTok{    }\KeywordTok{summarize}\NormalTok{(}\KeywordTok{n}\NormalTok{(), }\KeywordTok{mean}\NormalTok{(sleephrs), }\KeywordTok{sd}\NormalTok{(sleephrs), }\KeywordTok{median}\NormalTok{(sleephrs))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+# A tibble: 5 x 5
+  genh  `n()` `mean(sleephrs)` `sd(sleephrs)` `median(sleephrs)`
+  <ord> <int>            <dbl>          <dbl>              <dbl>
+1 1-E     807             7.05           1.29                 7.
+2 2_VG   1606             7.05           1.18                 7.
+3 3_G    1468             6.90           1.44                 7.
+4 4_F     598             6.64           1.74                 7.
+5 5_P     240             6.62           2.53                 6.
+\end{verbatim}
+
+To actually see what's going on, we might build a comparison boxplot, or
+violin plot. The plot below shows both, together, with the violin plot
+helping to indicate the discrete nature of the \texttt{sleephrs} data
+and the boxplot indicating quartiles and outlying values within each
+\texttt{genhealth} category.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{ggplot}\NormalTok{(sm1, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ genhealth, }\DataTypeTok{y =}\NormalTok{ sleephrs)) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_violin}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{fill =}\NormalTok{ genhealth), }\DataTypeTok{trim =} \OtherTok{TRUE}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_boxplot}\NormalTok{(}\DataTypeTok{width =} \FloatTok{0.2}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{guides}\NormalTok{(}\DataTypeTok{fill =} \OtherTok{FALSE}\NormalTok{, }\DataTypeTok{color =} \OtherTok{FALSE}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{theme_bw}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-484-1.pdf}
+
+\subsection{Describing the Proportional-Odds Cumulative Logit
+Model}\label{describing-the-proportional-odds-cumulative-logit-model}
+
+To fit the ordinal logistic regression model (specifically, a
+proportional-odds cumulative-logit model) in this situation, we'll use
+the \texttt{polr} function in the \texttt{MASS} library.
 
 \begin{itemize}
 \tightlist
 \item
-  Tabulating and Plotting Cross-Categorical Data (Cross-Tabulations)
+  Our outcome is \texttt{genh}, which has five ordered levels, with
+  \texttt{1-E} best and \texttt{5-P} worst.
 \item
-  Proportional Odds Logistic Regression using \texttt{polr}
-\item
-  Proportional Odds Logistic Regression using \texttt{lrm}
-\item
-  Interpreting these models and Displaying their fit
-\item
-  Assessing the assumption of Proportional Odds
+  Our model will include one quantitative predictor, \texttt{sleephrs}.
 \end{itemize}
 
-\section{Where to Read this Chapter}\label{where-to-read-this-chapter}
+The model will have four logit equations:
 
 \begin{itemize}
 \tightlist
 \item
-  The current version of this chapter is available for you to read at
-  \href{http://htmlpreview.github.io/?https://github.com/THOMASELOVE/432-2018/blob/master/texts/chapter19/oh_smart_orderedcat.html}{this
-  link}.
+  one estimating the log odds that \texttt{genh} will be less than or
+  equal to 1 (i.e. \texttt{genhealth} = 1\_Excellent,)
+\item
+  one estimating the log odds that \texttt{genh} \(\leq\) 2 (i.e.
+  \texttt{genhealth} = 1\_Excellent or 2\_VeryGood,)
+\item
+  another estimating the log odds that \texttt{genh} \(\leq\) 3 (i.e.
+  \texttt{genhealth} = 1\_Excellent, 2\_VeryGood or 3\_Good,) and,
+  finally,
+\item
+  one estimating the log odds that \texttt{genh} \(\leq\) 4 (i.e.
+  \texttt{genhealth} = 1\_Excellent, 2\_VeryGood, 3\_Good or 4\_Fair)
 \end{itemize}
 
-Some additional information on the chapter can be found in
-\href{https://github.com/THOMASELOVE/432-2018/tree/master/texts/chapter19/README.md}{this
-README file}.
+That's all we need to estimate the five categories, since
+Pr(\texttt{genh} \(\leq\) 5) = 1, because (5\_Poor) is the maximum
+category for \texttt{genhealth}.
+
+We'll have a total of five free parameters when we add in the slope for
+\texttt{sleephrs}, and I'll label these parameters as
+\(\zeta_1, \zeta_2, \zeta_3, \zeta_4\) and \(\beta_1\). The \(\zeta\)s
+are read as ``zeta'' values, and the people who built the \texttt{polr}
+function use that term.
+
+The four logistic equations that will be fit differ only by their
+intercepts. They are:
+
+\[ 
+logit[Pr(genh \leq 1)] = log \frac{Pr(genh \leq 1}{Pr(genh > 1)} = \zeta_1 - \beta_1 sleephrs
+\]
+
+which describes the log odds of a \texttt{genh} value of 1 (Excellent)
+as compared to a \texttt{genh} value greater than 1 (which includes Very
+Good, Good, Fair and Poor).
+
+The second logit model is:
+
+\[ 
+logit[Pr(genh \leq 2)] = log \frac{Pr(genh \leq 2}{Pr(genh > 2)} = \zeta_2 - \beta_1 sleephrs
+\]
+
+which describes the log odds of a \texttt{genh} value of 1 (Excellent)
+or 2 (Very Good) as compared to a \texttt{genh} value greater than 2
+(which includes Good, Fair and Poor).
+
+Next we have:
+
+\[ 
+logit[Pr(genh \leq 3)] = log \frac{Pr(genh \leq 3}{Pr(genh > 3)} = \zeta_3 - \beta_1 sleephrs
+\]
+
+which describes the log odds of a \texttt{genh} value of 1 (Excellent)
+or 2 (Very Good) or 3 (Good) as compared to a \texttt{genh} value
+greater than 3 (which includes Fair and Poor).
+
+Finally, we have
+
+\[ 
+logit[Pr(genh \leq 4)] = log \frac{Pr(genh \leq 4}{Pr(genh > 4)} = \zeta_4 - \beta_1 sleephrs
+\]
+
+which describes the log odds of a \texttt{genh} value of 4 or less,
+which includes Excellent, Very Good, Good and Fair as compared to a
+\texttt{genh} value greater than 4 (which is Poor).
+
+Again, the intercept term is the only piece that varies across the four
+equations.
+
+In this case, a positive coefficient \(\beta_1\) for \texttt{sleephrs}
+means that increasing the value of \texttt{sleephrs} would increase the
+\texttt{genh} category (describing a worse level of general health,
+since higher values of \texttt{genh} are associated with worse health.)
+
+\subsection{\texorpdfstring{Fitting a Proportional Odds Logistic
+Regression with
+\texttt{polr}}{Fitting a Proportional Odds Logistic Regression with polr}}\label{fitting-a-proportional-odds-logistic-regression-with-polr}
+
+Our model \texttt{m1} will use proportional odds logistic regression
+(sometimes called an \emph{ordered logit} model) to predict
+\texttt{genh} on the basis of \texttt{sleephrs}. The \texttt{polr}
+function can help us do this. Note that we include
+\texttt{Hess\ =\ TRUE} to retain what is called the \emph{Hessian}
+matrix, which lets R calculate standard errors more effectively in
+\texttt{summary} and other follow-up descriptions of the model.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{m1 <-}\StringTok{ }\KeywordTok{polr}\NormalTok{(genh }\OperatorTok{~}\StringTok{ }\NormalTok{sleephrs, }
+            \DataTypeTok{data =}\NormalTok{ sm1, }\DataTypeTok{Hess =} \OtherTok{TRUE}\NormalTok{)}
+
+\KeywordTok{summary}\NormalTok{(m1)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Call:
+polr(formula = genh ~ sleephrs, data = sm1, Hess = TRUE)
+
+Coefficients:
+           Value Std. Error t value
+sleephrs -0.1334    0.01957   -6.82
+
+Intercepts:
+         Value    Std. Error t value 
+1-E|2_VG  -2.5148   0.1430   -17.5846
+2_VG|3_G  -0.8820   0.1389    -6.3518
+3_G|4_F    0.6184   0.1385     4.4652
+4_F|5_P    2.0201   0.1473    13.7181
+
+Residual Deviance: 13594.01 
+AIC: 13604.01 
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{confint}\NormalTok{(m1)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Waiting for profiling to be done...
+\end{verbatim}
+
+\begin{verbatim}
+      2.5 %      97.5 % 
+-0.17189503 -0.09518665 
+\end{verbatim}
+
+\section{\texorpdfstring{Interpreting Model
+\texttt{m1}}{Interpreting Model m1}}\label{interpreting-model-m1}
+
+\subsection{Looking at Predictions}\label{looking-at-predictions}
+
+Consider two individuals:
+
+\begin{itemize}
+\tightlist
+\item
+  Harry, who sleeps an average of 6 hours per night, so Harry's
+  \texttt{sleephrs} = 6, and
+\item
+  Sally, who sleeps an average of 5 hours per night, so Sally's
+  \texttt{sleephrs} = 5.
+\end{itemize}
+
+We're going to start by using our model \texttt{m1} to predict the
+\texttt{genh} for Harry and Sally, so we can see the effect (on the
+predicted \texttt{genh} probabilities) of a change of one unit in
+\texttt{sleephrs}.
+
+For example, what are the log odds that Harry, who sleeps 6 hours, will
+describe his \texttt{genh} as Excellent (\texttt{genh} \(\leq\) 1)?
+
+\[
+logit[Pr(genh \leq 1)] = \zeta_1 - \beta_1 sleephrs \\
+logit[Pr(genh \leq 1)] = -2.5156 - (-0.1335) sleephrs \\
+logit[Pr(genh \leq 1)] = -2.5156 - (-0.1335) (6) = -1.7146
+\]
+
+That's not much help. So we'll convert it to a probability by taking the
+inverse logit. The formula is
+
+\[
+Pr(genh \leq 1) = \frac{exp(\zeta_1 + \beta_1 sleephrs)}{1 + exp(\zeta_1 + \beta_1 sleephrs)} = 
+\frac{exp(-1.7146)}{1 + exp(-1.7146)} = \frac{0.180}{1.180} = 0.15
+\]
+
+So the model estimates a 15\% probability that Harry will describe his
+\texttt{genh} as Excellent.
+
+OK. Now, what are the log odds that Harry, who sleeps 6 hours, will
+describe his \texttt{genh} as either Excellent or Very Good
+(\texttt{genh} \(\leq\) 2)?
+
+\[
+logit[Pr(genh \leq 2)] = \zeta_2 - \beta_1 sleephrs \\
+logit[Pr(genh \leq 2)] = -0.8823 - (-0.1335) sleephrs \\
+logit[Pr(genh \leq 2)] = -0.8823 - (-0.1335) (6) = -0.0813
+\]
+
+Again, we'll convert this to a probability by taking the inverse logit.
+
+\[
+Pr(genh \leq 2) = \frac{exp(\zeta_2 + \beta_1 sleephrs)}{1 + exp(\zeta_2 + \beta_1 sleephrs)} = 
+\frac{exp(-0.0813)}{1 + exp(-0.0813)} = \frac{0.922}{1.922} = 0.48
+\]
+
+So, the model estimates a probability of .48 that Harry will describe
+his \texttt{genh} as either Excellent or Very Good, so by subtraction,
+that's a probability of .33 that Harry describes his \texttt{genh} as
+Very Good.
+
+Happily, that's the last time we'll calculate this by hand.
+
+\subsection{\texorpdfstring{Making Predictions for Harry (and Sally)
+with
+\texttt{predict}}{Making Predictions for Harry (and Sally) with predict}}\label{making-predictions-for-harry-and-sally-with-predict}
+
+Suppose Harry sleeps for 6 hours on average, and Sally for 5.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{temp.dat <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{name =} \KeywordTok{c}\NormalTok{(}\StringTok{"Harry"}\NormalTok{, }\StringTok{"Sally"}\NormalTok{), }
+                       \DataTypeTok{sleephrs =} \KeywordTok{c}\NormalTok{(}\DecValTok{6}\NormalTok{,}\DecValTok{5}\NormalTok{))}
+
+\KeywordTok{predict}\NormalTok{(m1, temp.dat, }\DataTypeTok{type =} \StringTok{"p"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+        1-E      2_VG       3_G       4_F        5_P
+1 0.1526268 0.3270672 0.3254990 0.1385938 0.05621333
+2 0.1361555 0.3103702 0.3368797 0.1528675 0.06372711
+\end{verbatim}
+
+The predicted probabilities of falling into each category of
+\texttt{genh} are:
+
+\begin{longtable}[]{@{}rrrrrrr@{}}
+\toprule
+Subject & \texttt{sleephrs} & Pr(1\_E) & Pr(2\_VG) & Pr(3\_G) & Pr(4\_F)
+& Pr(5\_P)\tabularnewline
+\midrule
+\endhead
+Harry & 6 & 15.3 & 32.7 & 32.6 & 13.9 & 5.6\tabularnewline
+Sally & 5 & 13.6 & 31.0 & 33.7 & 15.3 & 6.4\tabularnewline
+\bottomrule
+\end{longtable}
+
+\begin{itemize}
+\tightlist
+\item
+  Harry has a higher predicted probability of lower (healthier) values
+  of \texttt{genh}. Specifically, Harry has a higher predicted
+  probability than Sally of falling into the Excellent and Very Good
+  categories, and a lower probability than Sally of falling into the
+  Good, Fair and Poor categories.
+\item
+  This means that Harry, with a higher \texttt{sleephrs} is predicted to
+  have, on average, a lower (that is to say, healthier) value of
+  \texttt{genh}.
+\item
+  As we'll see, this association will be indicated by a negative
+  coefficient of \texttt{sleephrs} in the proportional odds logistic
+  regression model.
+\end{itemize}
+
+\subsection{\texorpdfstring{Predicting the actual classification of
+\texttt{genh}}{Predicting the actual classification of genh}}\label{predicting-the-actual-classification-of-genh}
+
+The default prediction approach actually returns the predicted
+\texttt{genh} classification for Harry and Sally, which is just the
+classification with the largest predicted probability. Here, for Harry
+that is Very Good, and for Sally, that's Good.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{predict}\NormalTok{(m1, temp.dat)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+[1] 2_VG 3_G 
+Levels: 1-E 2_VG 3_G 4_F 5_P
+\end{verbatim}
+
+\subsection{A Cross-Tabuation of
+Predictions?}\label{a-cross-tabuation-of-predictions}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{addmargins}\NormalTok{(}\KeywordTok{table}\NormalTok{(}\KeywordTok{predict}\NormalTok{(m1), sm1}\OperatorTok{$}\NormalTok{genh))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+      
+        1-E 2_VG  3_G  4_F  5_P  Sum
+  1-E     2    0    3    1    2    8
+  2_VG  750 1493 1278  471  155 4147
+  3_G    55  113  187  126   83  564
+  4_F     0    0    0    0    0    0
+  5_P     0    0    0    0    0    0
+  Sum   807 1606 1468  598  240 4719
+\end{verbatim}
+
+The \texttt{m1} model classifies all subjects in the \texttt{sm1} sample
+as either Excellent, Very Good or Good, and most subjects as Very Good.
+
+\subsection{The Fitted Model
+Equations}\label{the-fitted-model-equations}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{summary}\NormalTok{(m1)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Call:
+polr(formula = genh ~ sleephrs, data = sm1, Hess = TRUE)
+
+Coefficients:
+           Value Std. Error t value
+sleephrs -0.1334    0.01957   -6.82
+
+Intercepts:
+         Value    Std. Error t value 
+1-E|2_VG  -2.5148   0.1430   -17.5846
+2_VG|3_G  -0.8820   0.1389    -6.3518
+3_G|4_F    0.6184   0.1385     4.4652
+4_F|5_P    2.0201   0.1473    13.7181
+
+Residual Deviance: 13594.01 
+AIC: 13604.01 
+\end{verbatim}
+
+The first part of the output provides coefficient estimates for the
+\texttt{sleephrs} predictor, and these are followed by the estimates for
+the various model intercepts. Plugging in the estimates, we have:
+
+\[ 
+logit[Pr(genh \leq 1)] = -2.5156 - (-0.1335) sleephrs \\
+logit[Pr(genh \leq 2)]  = -0.8823 - (-0.1335) sleephrs \\
+logit[Pr(genh \leq 3)]  =  0.6186 - (-0.1335) sleephrs \\
+logit[Pr(genh \leq 4)] =  2.0202 - (-0.1335) sleephrs 
+\]
+
+Note that we can obtain these pieces separately as follows:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{m1}\OperatorTok{$}\NormalTok{zeta}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+  1-E|2_VG   2_VG|3_G    3_G|4_F    4_F|5_P 
+-2.5148414 -0.8819647  0.6183763  2.0200504 
+\end{verbatim}
+
+shows the boundary intercepts, and
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{m1}\OperatorTok{$}\NormalTok{coefficients}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+  sleephrs 
+-0.1334493 
+\end{verbatim}
+
+shows the regression coefficient for \texttt{sleephrs}.
+
+\subsection{\texorpdfstring{Interpreting the \texttt{sleephrs}
+coefficient}{Interpreting the sleephrs coefficient}}\label{interpreting-the-sleephrs-coefficient}
+
+The first part of the output provides coefficient estimates for the
+\texttt{sleephrs} predictor.
+
+\begin{itemize}
+\tightlist
+\item
+  The estimated slope for \texttt{sleephrs} is -0.133
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Remember Harry and Sally, who have the same values of \texttt{bmi}
+    and \texttt{costprob}, but Harry gets one more hour of sleep than
+    Sally does. We noted that Harry is predicted by the model to have a
+    smaller (i.e.~healthier) \texttt{genh} response than Sally.
+  \item
+    So a negative coefficient here means that higher values of
+    \texttt{sleephrs} are associated with more of the probability
+    distribution falling in lower values of \texttt{genh}.
+  \item
+    We usually don't interpret this slope (on the log odds scale)
+    directly, but rather exponentiate it.
+  \end{itemize}
+\end{itemize}
+
+\subsection{Exponentiating the Slope Coefficient to facilitate
+Interpretation}\label{exponentiating-the-slope-coefficient-to-facilitate-interpretation}
+
+We can compute the odds ratio associated with \texttt{sleephrs} and its
+confidence interval as follows\ldots{}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{exp}\NormalTok{(}\KeywordTok{coef}\NormalTok{(m1))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+ sleephrs 
+0.8750718 
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{exp}\NormalTok{(}\KeywordTok{confint}\NormalTok{(m1))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Waiting for profiling to be done...
+\end{verbatim}
+
+\begin{verbatim}
+    2.5 %    97.5 % 
+0.8420676 0.9092032 
+\end{verbatim}
+
+\begin{itemize}
+\tightlist
+\item
+  So, if Harry gets one more hour of sleep than Sally, our model
+  predicts that Harry will have 88\% of the odds of Sally of having a
+  larger \texttt{genh} score. That means that Harry is likelier to have
+  a smaller \texttt{genh} score.
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Since \texttt{genh} gets larger as a person's general health gets
+    worse (moves from Excellent towards Poor), this means that since
+    Harry is predicted to have smaller odds of a larger \texttt{genh}
+    score, he is also predicted to have smaller odds of worse general
+    health.
+  \item
+    Our 95\% confidence interval around that estimated odds ratio of
+    0.875 is (0.842, 0.909). Since that interval is entirely below 1,
+    the odds of having the larger (worse) \texttt{genh} for Harry are
+    \emph{statistically significantly} lower than the odds for Sally.
+  \item
+    So, an increase in \texttt{sleephrs} is associated with smaller
+    (better) \texttt{genh} scores.
+  \end{itemize}
+\end{itemize}
+
+\subsection{Comparison to a Null
+Model}\label{comparison-to-a-null-model-4}
+
+We can fit a model with intercepts only to test the significance of
+\texttt{sleephrs} in our model \texttt{m1}, using the \texttt{anova}
+function.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{m0 <-}\StringTok{ }\KeywordTok{polr}\NormalTok{(genh }\OperatorTok{~}\StringTok{ }\DecValTok{1}\NormalTok{, }\DataTypeTok{data =}\NormalTok{ sm1)}
+
+\KeywordTok{anova}\NormalTok{(m1, m0)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Likelihood ratio tests of ordinal regression models
+
+Response: genh
+     Model Resid. df Resid. Dev   Test    Df LR stat.      Pr(Chi)
+1        1      4715   13641.21                                   
+2 sleephrs      4714   13594.01 1 vs 2     1 47.20218 6.402878e-12
+\end{verbatim}
+
+We could also compare model \texttt{m1} to the null model \texttt{m0}
+with AIC or BIC.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{AIC}\NormalTok{(m1, m0)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+   df      AIC
+m1  5 13604.01
+m0  4 13649.21
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{BIC}\NormalTok{(m1,m0)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+   df      BIC
+m1  5 13636.31
+m0  4 13675.05
+\end{verbatim}
+
+\section{The Assumption of Proportional
+Odds}\label{the-assumption-of-proportional-odds}
+
+Let us calculate the odds for all levels of \texttt{genh} if a person
+gets six hours of sleep. First, we'll get the probabilities, in another
+way, to demonstrate how to do so\ldots{}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{(prob.}\DecValTok{6}\NormalTok{ <-}\StringTok{ }\KeywordTok{exp}\NormalTok{(m1}\OperatorTok{$}\NormalTok{zeta }\OperatorTok{-}\StringTok{ }\DecValTok{6}\OperatorTok{*}\NormalTok{m1}\OperatorTok{$}\NormalTok{coefficients)}\OperatorTok{/}\NormalTok{(}\DecValTok{1} \OperatorTok{+}\StringTok{ }\KeywordTok{exp}\NormalTok{(m1}\OperatorTok{$}\NormalTok{zeta }\OperatorTok{-}\StringTok{ }\DecValTok{6}\OperatorTok{*}\NormalTok{m1}\OperatorTok{$}\NormalTok{coefficients)))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+ 1-E|2_VG  2_VG|3_G   3_G|4_F   4_F|5_P 
+0.1526268 0.4796939 0.8051929 0.9437867 
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{(prob.}\DecValTok{5}\NormalTok{ <-}\StringTok{ }\KeywordTok{exp}\NormalTok{(m1}\OperatorTok{$}\NormalTok{zeta }\OperatorTok{-}\StringTok{ }\DecValTok{5}\OperatorTok{*}\NormalTok{m1}\OperatorTok{$}\NormalTok{coefficients)}\OperatorTok{/}\NormalTok{(}\DecValTok{1} \OperatorTok{+}\StringTok{ }\KeywordTok{exp}\NormalTok{(m1}\OperatorTok{$}\NormalTok{zeta }\OperatorTok{-}\StringTok{ }\DecValTok{5}\OperatorTok{*}\NormalTok{m1}\OperatorTok{$}\NormalTok{coefficients)))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+ 1-E|2_VG  2_VG|3_G   3_G|4_F   4_F|5_P 
+0.1361555 0.4465257 0.7834054 0.9362729 
+\end{verbatim}
+
+Now, we'll calculate the odds, first for a subject getting six hours of
+sleep:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{(}\DataTypeTok{odds.6 =}\NormalTok{ prob.}\DecValTok{6}\OperatorTok{/}\NormalTok{(}\DecValTok{1}\OperatorTok{-}\NormalTok{prob.}\DecValTok{6}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+  1-E|2_VG   2_VG|3_G    3_G|4_F    4_F|5_P 
+ 0.1801175  0.9219457  4.1332835 16.7893748 
+\end{verbatim}
+
+And here are the odds, for a subject getting five hours of sleep:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{(}\DataTypeTok{odds.5 =}\NormalTok{ prob.}\DecValTok{5}\OperatorTok{/}\NormalTok{(}\DecValTok{1}\OperatorTok{-}\NormalTok{prob.}\DecValTok{5}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+  1-E|2_VG   2_VG|3_G    3_G|4_F    4_F|5_P 
+ 0.1576158  0.8067687  3.6169200 14.6919090 
+\end{verbatim}
+
+Now, let's take the ratio of the odds for someone who sleeps 6 hours
+over the odds for someone who sleeps 5.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{odds.}\DecValTok{6}\OperatorTok{/}\NormalTok{odds.}\DecValTok{5}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+1-E|2_VG 2_VG|3_G  3_G|4_F  4_F|5_P 
+1.142763 1.142763 1.142763 1.142763 
+\end{verbatim}
+
+They are all the same. The odds ratios are equal, which means they are
+proportional. For any level of \texttt{genh}, the estimated odds that a
+person who sleeps 6 hours has better (lower) \texttt{genh} is about 1.14
+times the odds for someone who sleeps 5 hours. Those who sleep more have
+higher odds of better (lower) \texttt{genh}. Less than 1 means lower
+odds, and more than 1 means greater odds.
+
+Now, let's take the log of the odds ratios:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{log}\NormalTok{(odds.}\DecValTok{6}\OperatorTok{/}\NormalTok{odds.}\DecValTok{5}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+ 1-E|2_VG  2_VG|3_G   3_G|4_F   4_F|5_P 
+0.1334493 0.1334493 0.1334493 0.1334493 
+\end{verbatim}
+
+That should be familiar. It is the slope coefficient in the model
+summary, without the minus sign. R tacks on a minus sign so that higher
+levels of predictors correspond to the ordinal outcome falling in the
+higher end of its scale.
+
+If we exponentiate the slope estimated by R (-0.128), we get 0.88. If we
+have two people, and A sleeps one more hour on average than B, then the
+estimated odds of A having a higher `genh' (i.e.~worse general health)
+are 88\% as higher as B's.
+
+\subsection{Testing the Proportional Odds
+Assumption}\label{testing-the-proportional-odds-assumption}
+
+One way to test the proportional odds assumption is to compare the fit
+of the proportional odds logistic regression to a model that does not
+make that assumption. A natural candidate is a \textbf{multinomial
+logit} model, which is typically used to model unordered
+multi-categorical outcomes, and fits a slope to each level of the
+\texttt{genh} outcome in this case, as opposed to the proportional odds
+logit, which fits only one slope across all levels.
+
+Since the proportional odds logistic regression model is nested in the
+multinomial logit, we can perform a likelihood ratio test. To do this,
+we first fit the multinomial logit model, with the \texttt{multinom}
+function from the \texttt{nnet} package.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{(m1_multi <-}\StringTok{ }\KeywordTok{multinom}\NormalTok{(genh }\OperatorTok{~}\StringTok{ }\NormalTok{sleephrs, }\DataTypeTok{data =}\NormalTok{ sm1))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+# weights:  15 (8 variable)
+initial  value 7594.937509 
+iter  10 value 6800.789221
+final  value 6794.943171 
+converged
+\end{verbatim}
+
+\begin{verbatim}
+Call:
+multinom(formula = genh ~ sleephrs, data = sm1)
+
+Coefficients:
+     (Intercept)     sleephrs
+2_VG   0.6974561 -0.001316394
+3_G    1.0935031 -0.070984363
+4_F    1.0634375 -0.199129778
+5_P    0.2109232 -0.208238458
+
+Residual Deviance: 13589.89 
+AIC: 13605.89 
+\end{verbatim}
+
+The multinomial logit fits four intercepts and four slopes, for a total
+of 8 estimated parameters. The proportional odds logit, as we've seen,
+fits four intercepts and one slope, for a total of 5. The difference is
+3, and we use that number in the sequence below to build our test of the
+proportional odds assumption.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{LL_}\DecValTok{1}\NormalTok{ <-}\StringTok{ }\KeywordTok{logLik}\NormalTok{(m1)}
+\NormalTok{LL_1m <-}\StringTok{ }\KeywordTok{logLik}\NormalTok{(m1_multi)}
+\NormalTok{(G <-}\StringTok{ }\OperatorTok{-}\DecValTok{2} \OperatorTok{*}\StringTok{ }\NormalTok{(LL_}\DecValTok{1}\NormalTok{[}\DecValTok{1}\NormalTok{] }\OperatorTok{-}\StringTok{ }\NormalTok{LL_1m[}\DecValTok{1}\NormalTok{]))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+[1] 4.125118
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{pchisq}\NormalTok{(G, }\DecValTok{3}\NormalTok{, }\DataTypeTok{lower.tail =} \OtherTok{FALSE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+[1] 0.2482667
+\end{verbatim}
+
+The \emph{p} value is fairly large, so it indicates that the
+proportional odds model fits about as well as the more complex
+multinomial logit. A non-significant \emph{p} value here isn't always
+the best way to assess the proportional odds assumption, but it does
+provide some evidence of model adequacy.
+
+\section{\texorpdfstring{Can model \texttt{m1} be fit using \texttt{rms}
+tools?}{Can model m1 be fit using rms tools?}}\label{can-model-m1-be-fit-using-rms-tools}
+
+Yes.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{d <-}\StringTok{ }\KeywordTok{datadist}\NormalTok{(sm1)}
+\KeywordTok{options}\NormalTok{(}\DataTypeTok{datadist =} \StringTok{"d"}\NormalTok{)}
+\NormalTok{m1_lrm <-}\StringTok{ }\KeywordTok{lrm}\NormalTok{(genh }\OperatorTok{~}\StringTok{ }\NormalTok{sleephrs, }\DataTypeTok{data =}\NormalTok{ sm1, }\DataTypeTok{x =}\NormalTok{ T, }\DataTypeTok{y =}\NormalTok{ T)}
+
+\NormalTok{m1_lrm}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Logistic Regression Model
+ 
+ lrm(formula = genh ~ sleephrs, data = sm1, x = T, y = T)
+ 
+ 
+ Frequencies of Responses
+ 
+  1-E 2_VG  3_G  4_F  5_P 
+  807 1606 1468  598  240 
+ 
+                       Model Likelihood     Discrimination    Rank Discrim.    
+                          Ratio Test           Indexes           Indexes       
+ Obs          4719    LR chi2      47.20    R2       0.011    C       0.546    
+ max |deriv| 3e-12    d.f.             1    g        0.198    Dxy     0.092    
+                      Pr(> chi2) <0.0001    gr       1.219    gamma   0.119    
+                                            gp       0.049    tau-a   0.068    
+                                            Brier    0.248                     
+ 
+          Coef    S.E.   Wald Z Pr(>|Z|)
+ y>=2_VG   2.5148 0.1430  17.58 <0.0001 
+ y>=3_G    0.8820 0.1389   6.35 <0.0001 
+ y>=4_F   -0.6184 0.1385  -4.47 <0.0001 
+ y>=5_P   -2.0201 0.1473 -13.72 <0.0001 
+ sleephrs -0.1334 0.0196  -6.82 <0.0001 
+ 
+\end{verbatim}
+
+The model is highly significant (remember the large sample size) but
+very weak, with a Nagelkerke R\textsuperscript{2} of 0.01, and a C
+statistic of 0.55.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{summary}\NormalTok{(m1_lrm)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+             Effects              Response : genh 
+
+ Factor      Low High Diff. Effect   S.E.     Lower 0.95 Upper 0.95
+ sleephrs    6   8    2     -0.26690 0.039134 -0.34360   -0.1902   
+  Odds Ratio 6   8    2      0.76575       NA  0.70921    0.8268   
+\end{verbatim}
+
+A two-hour change in \texttt{sleephrs} is associated with an odds ratio
+of 0.77, with 95\% confidence interval (0.72, 0.84). Since these values
+are all below 1, we have a clear indication of a significant effect of
+\texttt{sleephrs} with higher \texttt{sleephrs} associated with lower
+\texttt{genh}, which means, in this case, better health.
+
+There is also a tool in \texttt{rms} called \texttt{orm} which may be
+used to fit a wide array of ordinal regression models. I suggest you
+read Frank Harrell's book on \emph{Regression Modeling Strategies} if
+you want to learn more.
+
+\section{Building a Three-Predictor
+Model}\label{building-a-three-predictor-model}
+
+Now, we'll model \texttt{genh} using \texttt{sleephrs}, \texttt{bmi} and
+\texttt{costprob}.
+
+\subsection{Scatterplot Matrix}\label{scatterplot-matrix}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{GGally}\OperatorTok{::}\KeywordTok{ggpairs}\NormalTok{(sm1 }\OperatorTok{%>%}\StringTok{ }
+\StringTok{                    }\KeywordTok{select}\NormalTok{(bmi, sleephrs, costprob, genh))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+\end{verbatim}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-505-1.pdf}
+
+We might choose to plot the \texttt{costprob} data as a binary factor,
+rather than the raw 0-1 numbers included above, but not at this time.
+
+\subsection{\texorpdfstring{Our Three-Predictor Model,
+\texttt{m2}}{Our Three-Predictor Model, m2}}\label{our-three-predictor-model-m2}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{m2 <-}\StringTok{ }\KeywordTok{polr}\NormalTok{(genh }\OperatorTok{~}\StringTok{ }\NormalTok{sleephrs }\OperatorTok{+}\StringTok{ }\NormalTok{bmi }\OperatorTok{+}\StringTok{ }\NormalTok{costprob, }\DataTypeTok{data =}\NormalTok{ sm1)}
+
+\KeywordTok{summary}\NormalTok{(m2)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+
+Re-fitting to get Hessian
+\end{verbatim}
+
+\begin{verbatim}
+Call:
+polr(formula = genh ~ sleephrs + bmi + costprob, data = sm1)
+
+Coefficients:
+            Value Std. Error t value
+sleephrs -0.10455   0.019665  -5.317
+bmi       0.08045   0.004226  19.036
+costprob  0.78082   0.095410   8.184
+
+Intercepts:
+         Value   Std. Error t value
+1-E|2_VG -0.0472  0.1873    -0.2519
+2_VG|3_G  1.6772  0.1881     8.9151
+3_G|4_F   3.2876  0.1930    17.0300
+4_F|5_P   4.7470  0.2023    23.4671
+
+Residual Deviance: 13160.49 
+AIC: 13174.49 
+\end{verbatim}
+
+This model contains four intercepts (to cover the five \texttt{genh}
+categories) and three slopes (one each for \texttt{sleephrs},
+\texttt{bmi} and \texttt{costprob}.)
+
+\subsection{\texorpdfstring{Does the three-predictor model outperform
+\texttt{m1}?}{Does the three-predictor model outperform m1?}}\label{does-the-three-predictor-model-outperform-m1}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{anova}\NormalTok{(m1, m2)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Likelihood ratio tests of ordinal regression models
+
+Response: genh
+                      Model Resid. df Resid. Dev   Test    Df LR stat.
+1                  sleephrs      4714   13594.01                      
+2 sleephrs + bmi + costprob      4712   13160.49 1 vs 2     2 433.5181
+  Pr(Chi)
+1        
+2       0
+\end{verbatim}
+
+There is a statistically significant improvement in fit from model 1 to
+model 2. The AIC and BIC are also better for the three-predictor model
+than they were for the model with \texttt{sleephrs} alone.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{AIC}\NormalTok{(m1, m2)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+   df      AIC
+m1  5 13604.01
+m2  7 13174.49
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{BIC}\NormalTok{(m1, m2)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+   df      BIC
+m1  5 13636.31
+m2  7 13219.71
+\end{verbatim}
+
+\subsection{Wald tests for individual
+predictors}\label{wald-tests-for-individual-predictors}
+
+To obtain the appropriate Wald tests, we can use \texttt{lrm} to fit the
+model instead.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{d <-}\StringTok{ }\KeywordTok{datadist}\NormalTok{(sm1)}
+\KeywordTok{options}\NormalTok{(}\DataTypeTok{datadist =} \StringTok{"d"}\NormalTok{)}
+\NormalTok{m2_lrm <-}\StringTok{ }\KeywordTok{lrm}\NormalTok{(genh }\OperatorTok{~}\StringTok{ }\NormalTok{sleephrs }\OperatorTok{+}\StringTok{ }\NormalTok{bmi }\OperatorTok{+}\StringTok{ }\NormalTok{costprob, }
+              \DataTypeTok{data =}\NormalTok{ sm1, }\DataTypeTok{x =}\NormalTok{ T, }\DataTypeTok{y =}\NormalTok{ T)}
+\NormalTok{m2_lrm}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Logistic Regression Model
+ 
+ lrm(formula = genh ~ sleephrs + bmi + costprob, data = sm1, x = T, 
+     y = T)
+ 
+ 
+ Frequencies of Responses
+ 
+  1-E 2_VG  3_G  4_F  5_P 
+  807 1606 1468  598  240 
+ 
+                       Model Likelihood     Discrimination    Rank Discrim.    
+                          Ratio Test           Indexes           Indexes       
+ Obs          4719    LR chi2     480.72    R2       0.103    C       0.634    
+ max |deriv| 1e-08    d.f.             3    g        0.645    Dxy     0.267    
+                      Pr(> chi2) <0.0001    gr       1.906    gamma   0.267    
+                                            gp       0.150    tau-a   0.198    
+                                            Brier    0.231                     
+ 
+          Coef    S.E.   Wald Z Pr(>|Z|)
+ y>=2_VG   0.0472 0.1873   0.25 0.8010  
+ y>=3_G   -1.6773 0.1881  -8.92 <0.0001 
+ y>=4_F   -3.2877 0.1930 -17.03 <0.0001 
+ y>=5_P   -4.7470 0.2023 -23.47 <0.0001 
+ sleephrs -0.1046 0.0197  -5.32 <0.0001 
+ bmi       0.0805 0.0042  19.04 <0.0001 
+ costprob  0.7808 0.0954   8.18 <0.0001 
+ 
+\end{verbatim}
+
+It appears that each of the added predictors (\texttt{bmi} and
+\texttt{costprob}) adds statistically detectable value to the model.
+
+\subsection{A Cross-Tabuation of
+Predictions?}\label{a-cross-tabuation-of-predictions-1}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{addmargins}\NormalTok{(}\KeywordTok{table}\NormalTok{(}\KeywordTok{predict}\NormalTok{(m2), sm1}\OperatorTok{$}\NormalTok{genh))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+      
+        1-E 2_VG  3_G  4_F  5_P  Sum
+  1-E     0    0    3    0    1    4
+  2_VG  685 1150  840  265  111 3051
+  3_G   119  449  608  309  114 1599
+  4_F     3    7   17   21   12   60
+  5_P     0    0    0    3    2    5
+  Sum   807 1606 1468  598  240 4719
+\end{verbatim}
+
+At least the \texttt{m2} model predicted that a few of the cases will
+fall in the Fair and Poor categories, but still, this isn't impressive.
+
+\subsection{Interpreting the Effect
+Sizes}\label{interpreting-the-effect-sizes}
+
+We can do this in two ways:
+
+\begin{itemize}
+\tightlist
+\item
+  By exponentiating the \texttt{polr} output, which shows the effect of
+  increasing each predictor by a single unit
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Increasing \texttt{sleephrs} by 1 hour is associated with reducing
+    the odds (by a factor of 0.89 with 95\% CI 0.86, 0.93)) of higher
+    values of \texttt{genh}: hence increasing \texttt{sleephrs} is
+    associated with increasing the odds of a response indicating better
+    health.
+  \item
+    Increasing \texttt{bmi} by 1 kg/m\textsuperscript{2} is associated
+    with increasing the odds (by a factor of 1.08 with 95\% CI 1.07,
+    1.09)) of higher values of \texttt{genh}: hence increasing
+    \texttt{bmi} is associated with reducing the odds of a response
+    indicating better health.
+  \item
+    Increasing \texttt{costprob} from 0 to 1 is associated with an
+    increase (by a factor of 2.17 with 95\% CI 1.80, 2.62)) of a higher
+    \texttt{genh} value. Since higher \texttt{genh} values indicate
+    worse health, those with \texttt{costprob} = 1 are modeled to have
+    generally worse health.
+  \end{itemize}
+\end{itemize}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{exp}\NormalTok{(}\KeywordTok{coef}\NormalTok{(m2))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+ sleephrs       bmi  costprob 
+0.9007276 1.0837784 2.1832652 
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{exp}\NormalTok{(}\KeywordTok{confint}\NormalTok{(m2))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Waiting for profiling to be done...
+\end{verbatim}
+
+\begin{verbatim}
+
+Re-fitting to get Hessian
+\end{verbatim}
+
+\begin{verbatim}
+             2.5 %    97.5 %
+sleephrs 0.8665942 0.9360375
+bmi      1.0748601 1.0928175
+costprob 1.8111826 2.6328298
+\end{verbatim}
+
+\begin{itemize}
+\tightlist
+\item
+  Or by looking at the summary provided by \texttt{lrm}, which like all
+  such summaries produced by \texttt{rms} shows the impact of moving
+  from the 25th to the 75th percentile on all continuous predictors.
+\end{itemize}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{summary}\NormalTok{(m2_lrm)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+             Effects              Response : genh 
+
+ Factor      Low   High   Diff. Effect   S.E.     Lower 0.95 Upper 0.95
+ sleephrs     6.00  8.000 2.000 -0.20910 0.039330 -0.28619   -0.13202  
+  Odds Ratio  6.00  8.000 2.000  0.81131       NA  0.75112    0.87632  
+ bmi         23.99 31.495 7.505  0.60381 0.031718  0.54165    0.66598  
+  Odds Ratio 23.99 31.495 7.505  1.82910       NA  1.71880    1.94640  
+ costprob     0.00  1.000 1.000  0.78082 0.095410  0.59382    0.96782  
+  Odds Ratio  0.00  1.000 1.000  2.18330       NA  1.81090    2.63220  
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plot}\NormalTok{(}\KeywordTok{summary}\NormalTok{(m2_lrm))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-512-1.pdf}
+
+\subsection{Quality of the Model Fit}\label{quality-of-the-model-fit}
+
+Model \texttt{m2}, as we can see from the \texttt{m2\_lrm} output, is
+still weak, with a Nagelkerke R\textsuperscript{2} of 0.10, and a C
+statistic of 0.63.
+
+\subsection{\texorpdfstring{Validating the Summary Statistics in
+\texttt{m2\_lrm}}{Validating the Summary Statistics in m2\_lrm}}\label{validating-the-summary-statistics-in-m2_lrm}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{43203}\NormalTok{); }\KeywordTok{validate}\NormalTok{(m2_lrm)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+          index.orig training    test optimism index.corrected  n
+Dxy           0.2670   0.2690  0.2665   0.0026          0.2645 40
+R2            0.1025   0.1041  0.1019   0.0022          0.1003 40
+Intercept     0.0000   0.0000 -0.0064   0.0064         -0.0064 40
+Slope         1.0000   1.0000  0.9888   0.0112          0.9888 40
+Emax          0.0000   0.0000  0.0035   0.0035          0.0035 40
+D             0.1017   0.1034  0.1010   0.0024          0.0993 40
+U            -0.0004  -0.0004 -1.4828   1.4824         -1.4828 40
+Q             0.1021   0.1038  1.5838  -1.4800          1.5821 40
+B             0.2306   0.2305  0.2308  -0.0003          0.2308 40
+g             0.6450   0.6505  0.6424   0.0081          0.6369 40
+gp            0.1497   0.1507  0.1491   0.0016          0.1481 40
+\end{verbatim}
+
+As in our work with binary logistic regression, we can convert the Dxy
+to C with C = 0.5 + (Dxy/2). Both the R\textsuperscript{2} and C
+statistics are pretty consistent with what we saw above.
+
+\subsection{Testing the Proportional Odds
+Assumption}\label{testing-the-proportional-odds-assumption-1}
+
+Again, we'll fit the analogous multinomial logit model, with the
+\texttt{multinom} function from the \texttt{nnet} package.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{(m2_multi <-}\StringTok{ }\KeywordTok{multinom}\NormalTok{(genh }\OperatorTok{~}\StringTok{ }\NormalTok{sleephrs }\OperatorTok{+}\StringTok{ }\NormalTok{bmi }\OperatorTok{+}\StringTok{ }\NormalTok{costprob, }
+                      \DataTypeTok{data =}\NormalTok{ sm1))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+# weights:  25 (16 variable)
+initial  value 7594.937509 
+iter  10 value 6838.002224
+iter  20 value 6561.870918
+final  value 6559.672254 
+converged
+\end{verbatim}
+
+\begin{verbatim}
+Call:
+multinom(formula = genh ~ sleephrs + bmi + costprob, data = sm1)
+
+Coefficients:
+     (Intercept)      sleephrs        bmi  costprob
+2_VG   -1.314009  0.0009137165 0.07494024 0.2227114
+3_G    -2.503930 -0.0602649560 0.12741985 0.6945437
+4_F    -3.982395 -0.1631066255 0.16771482 1.1405275
+5_P    -4.113892 -0.1675476694 0.14171093 1.4240225
+
+Residual Deviance: 13119.34 
+AIC: 13151.34 
+\end{verbatim}
+
+The multinomial logit fits four intercepts and 12 slopes, for a total of
+16 estimated parameters. The proportional odds logit in model
+\texttt{m2}, as we've seen, fits four intercepts and three slopes, for a
+total of 7. The difference is 9, and we use that number in the sequence
+below to build our test of the proportional odds assumption.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{LL_}\DecValTok{2}\NormalTok{ <-}\StringTok{ }\KeywordTok{logLik}\NormalTok{(m2)}
+\NormalTok{LL_2m <-}\StringTok{ }\KeywordTok{logLik}\NormalTok{(m2_multi)}
+\NormalTok{(G <-}\StringTok{ }\OperatorTok{-}\DecValTok{2} \OperatorTok{*}\StringTok{ }\NormalTok{(LL_}\DecValTok{2}\NormalTok{[}\DecValTok{1}\NormalTok{] }\OperatorTok{-}\StringTok{ }\NormalTok{LL_2m[}\DecValTok{1}\NormalTok{]))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+[1] 41.14883
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{pchisq}\NormalTok{(G, }\DecValTok{9}\NormalTok{, }\DataTypeTok{lower.tail =} \OtherTok{FALSE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+[1] 4.699394e-06
+\end{verbatim}
+
+The result is highly significant, suggesting that we have a problem
+somewhere with the proportional odds assumption. When this happens, I
+suggest you build the following plot of score residuals:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{par}\NormalTok{(}\DataTypeTok{mfrow =} \KeywordTok{c}\NormalTok{(}\DecValTok{2}\NormalTok{,}\DecValTok{2}\NormalTok{))}
+\KeywordTok{resid}\NormalTok{(m2_lrm, }\StringTok{'score.binary'}\NormalTok{, }\DataTypeTok{pl=}\OtherTok{TRUE}\NormalTok{)}
+\KeywordTok{par}\NormalTok{(}\DataTypeTok{mfrow=} \KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{1}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-516-1.pdf}
+
+From this plot, \texttt{bmi} and \texttt{costprob} look pretty different
+as we move from the Very Good toward the Poor cutpoints, relative to
+\texttt{sleephrs}, which is more stable.
+
+\subsection{Plotting the Fitted Model}\label{plotting-the-fitted-model}
+
+\subsubsection{Nomogram}\label{nomogram}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{fun.ge3 <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(x) }\KeywordTok{plogis}\NormalTok{(x }\OperatorTok{-}\StringTok{ }\NormalTok{m2_lrm}\OperatorTok{$}\NormalTok{coef[}\DecValTok{1}\NormalTok{] }\OperatorTok{+}\StringTok{ }\NormalTok{m2_lrm}\OperatorTok{$}\NormalTok{coef[}\DecValTok{2}\NormalTok{])}
+\NormalTok{fun.ge4 <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(x) }\KeywordTok{plogis}\NormalTok{(x }\OperatorTok{-}\StringTok{ }\NormalTok{m2_lrm}\OperatorTok{$}\NormalTok{coef[}\DecValTok{1}\NormalTok{] }\OperatorTok{+}\StringTok{ }\NormalTok{m2_lrm}\OperatorTok{$}\NormalTok{coef[}\DecValTok{3}\NormalTok{])}
+\NormalTok{fun.ge5 <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(x) }\KeywordTok{plogis}\NormalTok{(x }\OperatorTok{-}\StringTok{ }\NormalTok{m2_lrm}\OperatorTok{$}\NormalTok{coef[}\DecValTok{1}\NormalTok{] }\OperatorTok{+}\StringTok{ }\NormalTok{m2_lrm}\OperatorTok{$}\NormalTok{coef[}\DecValTok{4}\NormalTok{])}
+
+\KeywordTok{plot}\NormalTok{(}\KeywordTok{nomogram}\NormalTok{(m2_lrm, }\DataTypeTok{fun=}\KeywordTok{list}\NormalTok{(}\StringTok{'Prob Y >= 2 (VG or worse)'}\NormalTok{ =}\StringTok{ }\NormalTok{plogis, }
+                               \StringTok{'Prob Y >= 3 (Good or worse)'}\NormalTok{ =}\StringTok{ }\NormalTok{fun.ge3,}
+                               \StringTok{'Prob Y >= 4 (Fair or Poor)'}\NormalTok{ =}\StringTok{ }\NormalTok{fun.ge4,}
+                               \StringTok{'Prob Y = 5 (Poor)'}\NormalTok{ =}\StringTok{ }\NormalTok{fun.ge5)))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-517-1.pdf}
+
+\subsubsection{Using Predict and showing mean prediction on 1-5
+scale}\label{using-predict-and-showing-mean-prediction-on-1-5-scale}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{Predict}\NormalTok{(m2_lrm, }\DataTypeTok{fun =} \KeywordTok{Mean}\NormalTok{(m2_lrm, }\DataTypeTok{code =} \OtherTok{TRUE}\NormalTok{)))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-518-1.pdf}
+
+The nomogram and Predict results would be more interesting, of course,
+if we included a spline or interaction term. Let's do that in model
+\texttt{m3\_lrm}, and also add the \texttt{incomegroup} information.
+
+\section{A Larger Model, including income
+group}\label{a-larger-model-including-income-group}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{m3_lrm <-}\StringTok{ }\KeywordTok{lrm}\NormalTok{(gen_n }\OperatorTok{~}\StringTok{ }\KeywordTok{rcs}\NormalTok{(sleephrs,}\DecValTok{3}\NormalTok{) }\OperatorTok{+}\StringTok{ }\KeywordTok{rcs}\NormalTok{(bmi, }\DecValTok{4}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{                  }\NormalTok{incomegroup }\OperatorTok{+}\StringTok{ }\KeywordTok{catg}\NormalTok{(costprob) }\OperatorTok{+}\StringTok{ }
+\StringTok{                  }\NormalTok{bmi }\OperatorTok{%ia%}\StringTok{ }\NormalTok{costprob, }
+              \DataTypeTok{data =}\NormalTok{ sm1, }\DataTypeTok{x =}\NormalTok{ T, }\DataTypeTok{y =}\NormalTok{ T)}
+
+\NormalTok{m3_lrm}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Logistic Regression Model
+ 
+ lrm(formula = gen_n ~ rcs(sleephrs, 3) + rcs(bmi, 4) + incomegroup + 
+     catg(costprob) + bmi %ia% costprob, data = sm1, x = T, y = T)
+ 
+ 
+ Frequencies of Responses
+ 
+    1    2    3    4    5 
+  807 1606 1468  598  240 
+ 
+                       Model Likelihood     Discrimination    Rank Discrim.    
+                          Ratio Test           Indexes           Indexes       
+ Obs          4719    LR chi2    1159.61    R2       0.231    C       0.706    
+ max |deriv| 1e-12    d.f.            14    g        1.097    Dxy     0.413    
+                      Pr(> chi2) <0.0001    gr       2.994    gamma   0.413    
+                                            gp       0.236    tau-a   0.305    
+                                            Brier    0.209                     
+ 
+                    Coef    S.E.   Wald Z Pr(>|Z|)
+ y>=2                4.7764 0.5773   8.27 <0.0001 
+ y>=3                2.9112 0.5758   5.06 <0.0001 
+ y>=4                1.1172 0.5740   1.95 0.0516  
+ y>=5               -0.4672 0.5743  -0.81 0.4160  
+ sleephrs           -0.4138 0.0420  -9.85 <0.0001 
+ sleephrs'           0.2799 0.0324   8.65 <0.0001 
+ bmi                -0.0036 0.0223  -0.16 0.8719  
+ bmi'                0.4846 0.1045   4.64 <0.0001 
+ bmi''              -1.3758 0.2853  -4.82 <0.0001 
+ incomegroup=10-14K  0.3688 0.1895   1.95 0.0517  
+ incomegroup=15-19K -0.0273 0.1728  -0.16 0.8744  
+ incomegroup=20-24K -0.2071 0.1667  -1.24 0.2142  
+ incomegroup=25-34K -0.6931 0.1628  -4.26 <0.0001 
+ incomegroup=35-49K -0.8813 0.1585  -5.56 <0.0001 
+ incomegroup=50-74K -1.3348 0.1574  -8.48 <0.0001 
+ incomegroup=75K+   -1.5934 0.1514 -10.53 <0.0001 
+ costprob=1          1.0119 0.4440   2.28 0.0227  
+ bmi * costprob     -0.0214 0.0151  -1.42 0.1568  
+ 
+\end{verbatim}
+
+Another option here would have been to consider building
+\texttt{incomegroup} as a \texttt{scored} variable, with an order on its
+own, but I won't force that here. Here's the \texttt{polr}
+version\ldots{}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{m3 <-}\StringTok{ }\KeywordTok{polr}\NormalTok{(genh }\OperatorTok{~}\StringTok{ }\KeywordTok{rcs}\NormalTok{(sleephrs,}\DecValTok{3}\NormalTok{) }\OperatorTok{+}\StringTok{ }\KeywordTok{rcs}\NormalTok{(bmi, }\DecValTok{4}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{               }\NormalTok{incomegroup }\OperatorTok{+}\StringTok{ }\NormalTok{costprob }\OperatorTok{+}\StringTok{ }
+\StringTok{               }\NormalTok{bmi }\OperatorTok{%ia%}\StringTok{ }\NormalTok{costprob, }\DataTypeTok{data =}\NormalTok{ sm1)}
+\end{Highlighting}
+\end{Shaded}
+
+\subsection{Cross-Tabulation of Predicted/Observed
+Classifications}\label{cross-tabulation-of-predictedobserved-classifications}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{addmargins}\NormalTok{(}\KeywordTok{table}\NormalTok{(}\KeywordTok{predict}\NormalTok{(m3), sm1}\OperatorTok{$}\NormalTok{genh))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+      
+        1-E 2_VG  3_G  4_F  5_P  Sum
+  1-E     0    0    0    0    0    0
+  2_VG  628 1094  694  140   38 2594
+  3_G   171  495  726  382  153 1927
+  4_F     6   15   43   64   39  167
+  5_P     2    2    5   12   10   31
+  Sum   807 1606 1468  598  240 4719
+\end{verbatim}
+
+This model predicts more Fair results, but still far too many Very Good
+with no Excellent at all.
+
+\subsection{Nomogram}\label{nomogram-1}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{fun.ge3 <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(x) }\KeywordTok{plogis}\NormalTok{(x }\OperatorTok{-}\StringTok{ }\NormalTok{m3_lrm}\OperatorTok{$}\NormalTok{coef[}\DecValTok{1}\NormalTok{] }\OperatorTok{+}\StringTok{ }\NormalTok{m3_lrm}\OperatorTok{$}\NormalTok{coef[}\DecValTok{2}\NormalTok{])}
+\NormalTok{fun.ge4 <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(x) }\KeywordTok{plogis}\NormalTok{(x }\OperatorTok{-}\StringTok{ }\NormalTok{m3_lrm}\OperatorTok{$}\NormalTok{coef[}\DecValTok{1}\NormalTok{] }\OperatorTok{+}\StringTok{ }\NormalTok{m3_lrm}\OperatorTok{$}\NormalTok{coef[}\DecValTok{3}\NormalTok{])}
+\NormalTok{fun.ge5 <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(x) }\KeywordTok{plogis}\NormalTok{(x }\OperatorTok{-}\StringTok{ }\NormalTok{m3_lrm}\OperatorTok{$}\NormalTok{coef[}\DecValTok{1}\NormalTok{] }\OperatorTok{+}\StringTok{ }\NormalTok{m3_lrm}\OperatorTok{$}\NormalTok{coef[}\DecValTok{4}\NormalTok{])}
+
+\KeywordTok{plot}\NormalTok{(}\KeywordTok{nomogram}\NormalTok{(m3_lrm, }\DataTypeTok{fun=}\KeywordTok{list}\NormalTok{(}\StringTok{'Prob Y >= 2 (VG or worse)'}\NormalTok{ =}\StringTok{ }\NormalTok{plogis, }
+                               \StringTok{'Prob Y >= 3 (Good or worse)'}\NormalTok{ =}\StringTok{ }\NormalTok{fun.ge3,}
+                               \StringTok{'Prob Y >= 4 (Fair or Poor)'}\NormalTok{ =}\StringTok{ }\NormalTok{fun.ge4,}
+                               \StringTok{'Prob Y = 5 (Poor)'}\NormalTok{ =}\StringTok{ }\NormalTok{fun.ge5)))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-522-1.pdf}
+
+\subsection{Using Predict and showing mean prediction on 1-5
+scale}\label{using-predict-and-showing-mean-prediction-on-1-5-scale-1}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{Predict}\NormalTok{(m3_lrm, }\DataTypeTok{fun =} \KeywordTok{Mean}\NormalTok{(m3_lrm, }\DataTypeTok{code =} \OtherTok{TRUE}\NormalTok{)))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-523-1.pdf}
+
+Here, we're plotting the mean score on the 1-5 \texttt{gen\_n} scale.
+
+\subsection{\texorpdfstring{Validating the Summary Statistics in
+\texttt{m3\_lrm}}{Validating the Summary Statistics in m3\_lrm}}\label{validating-the-summary-statistics-in-m3_lrm}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{43221}\NormalTok{); }\KeywordTok{validate}\NormalTok{(m3_lrm)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+          index.orig training    test optimism index.corrected  n
+Dxy           0.4127   0.4143  0.4101   0.0042          0.4084 40
+R2            0.2307   0.2338  0.2278   0.0059          0.2247 40
+Intercept     0.0000   0.0000 -0.0048   0.0048         -0.0048 40
+Slope         1.0000   1.0000  0.9846   0.0154          0.9846 40
+Emax          0.0000   0.0000  0.0042   0.0042          0.0042 40
+D             0.2455   0.2493  0.2421   0.0072          0.2383 40
+U            -0.0004  -0.0004 -1.4339   1.4334         -1.4339 40
+Q             0.2459   0.2497  1.6760  -1.4262          1.6722 40
+B             0.2090   0.2087  0.2095  -0.0008          0.2098 40
+g             1.0968   1.1043  1.0862   0.0180          1.0787 40
+gp            0.2357   0.2365  0.2336   0.0028          0.2329 40
+\end{verbatim}
+
+Still not very impressive, but much better than where we started. It's
+not crazy to suggest that in new data, we might expect a Nagelkerke
+R\textsuperscript{2} of 0.22 and a C statistic of 0.5 + (0.4088/2) =
+0.7044.
+
+\section{References for this Chapter}\label{references-for-this-chapter}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  Some of the material here is adapted from
+  \url{http://stats.idre.ucla.edu/r/dae/ordinal-logistic-regression/}.
+\item
+  I also found great guidance at
+  \url{http://data.library.virginia.edu/fitting-and-interpreting-a-proportional-odds-model/}
+\item
+  Other parts are based on the work of Jeffrey S. Simonoff (2003)
+  \emph{Analyzing Categorical Data} in Chapter 10. Related data and R
+  code are available at
+  \url{http://people.stern.nyu.edu/jsimonof/AnalCatData/Splus/}.
+\item
+  Another good source for a simple example is
+  \url{https://onlinecourses.science.psu.edu/stat504/node/177}.
+\item
+  Also helpful is
+  \url{https://onlinecourses.science.psu.edu/stat504/node/178} which
+  shows a more complex example nicely.
+\end{enumerate}
 
 \chapter{Analyzing Literary Styles with Multinomial Logistic
 Regression}\label{analyzing-literary-styles-with-multinomial-logistic-regression}
@@ -27206,7 +29063,7 @@ potential predictors in the data, specifically\ldots{}
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-470-1.pdf}
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-527-1.pdf}
 
 \begin{quote}
 Oh! do not attack me with your watch. A watch is always too fast or too
