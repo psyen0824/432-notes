@@ -124,7 +124,7 @@
   \postauthor{\par}
   \predate{\centering\large\emph}
   \postdate{\par}
-  \date{Built 2018-04-02 21:37:54}
+  \date{Built 2018-04-04 23:04:18}
 
 \usepackage{booktabs}
 \usepackage{amsthm}
@@ -216,6 +216,7 @@ Here, we'll load in the packages used in these notes.
 \KeywordTok{library}\NormalTok{(skimr)}
 \KeywordTok{library}\NormalTok{(ggridges)}
 \KeywordTok{library}\NormalTok{(magrittr)}
+\KeywordTok{library}\NormalTok{(pander)}
 \KeywordTok{library}\NormalTok{(arm)}
 \KeywordTok{library}\NormalTok{(rms)}
 \KeywordTok{library}\NormalTok{(leaps)}
@@ -23755,7 +23756,8 @@ overdispersion ratio is  15.49983
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\KeywordTok{cat}\NormalTok{(}\StringTok{"p value of overdispersion test is "}\NormalTok{, }\KeywordTok{pchisq}\NormalTok{(}\KeywordTok{sum}\NormalTok{(z}\OperatorTok{^}\DecValTok{2}\NormalTok{)}\OperatorTok{/}\NormalTok{(n}\OperatorTok{-}\NormalTok{k), n}\OperatorTok{-}\NormalTok{k), }\StringTok{"}\CharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\KeywordTok{cat}\NormalTok{(}\StringTok{"p value of overdispersion test is "}\NormalTok{, }
+    \KeywordTok{pchisq}\NormalTok{(}\KeywordTok{sum}\NormalTok{(z}\OperatorTok{^}\DecValTok{2}\NormalTok{), }\DataTypeTok{df =}\NormalTok{ n}\OperatorTok{-}\NormalTok{k, }\DataTypeTok{lower.tail =} \OtherTok{FALSE}\NormalTok{), }\StringTok{"}\CharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -23766,7 +23768,7 @@ p value of overdispersion test is  0
 The p value here is 0, indicating that the probability is essentially
 zero that a random variable from a \(\chi^2\) distribution with (n - k)
 = 1633 degrees of freedom would be as large as what we observed in this
-case.
+case. So there is significant overdispersion.
 
 In summary, the polyps counts are overdispersed by a factor of 15.499,
 which is enormous (even a factor of 2 would be considered large) and

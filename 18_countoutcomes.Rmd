@@ -633,10 +633,11 @@ n <- arm::display(mod_poiss1)$n
 k <- arm::display(mod_poiss1)$k
 z <- (sm_oh_A_young$physhealth - yhat) / sqrt(yhat)
 cat("overdispersion ratio is ", sum(z^2)/ (n - k), "\n")
-cat("p value of overdispersion test is ", pchisq(sum(z^2)/(n-k), n-k), "\n")
+cat("p value of overdispersion test is ", 
+    pchisq(sum(z^2), df = n-k, lower.tail = FALSE), "\n")
 ```
 
-The p value here is 0, indicating that the probability is essentially zero that a random variable from a $\chi^2$ distribution with (n - k) = 1633 degrees of freedom would be as large as what we observed in this case. 
+The p value here is 0, indicating that the probability is essentially zero that a random variable from a $\chi^2$ distribution with (n - k) = 1633 degrees of freedom would be as large as what we observed in this case. So there is significant overdispersion.
 
 In summary, the polyps counts are overdispersed by a factor of 15.499, which is enormous (even a factor of 2 would be considered large) and also highly statistically significant. The basic correction for overdisperson is to multiply all regression standard errors by $\sqrt{15.499}$ = `r round(sqrt(15.499),2)`. 
 
