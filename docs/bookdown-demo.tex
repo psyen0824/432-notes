@@ -124,7 +124,7 @@
   \postauthor{\par}
   \predate{\centering\large\emph}
   \postdate{\par}
-  \date{Built 2018-04-07 13:29:39}
+  \date{Built 2018-04-07 16:02:10}
 
 \usepackage{booktabs}
 \usepackage{amsthm}
@@ -271,6 +271,7 @@ See spec(...) for full column specifications.
 \begin{Shaded}
 \begin{Highlighting}[]
 \NormalTok{hem <-}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(}\StringTok{"data/hem.csv"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }\NormalTok{tbl_df}
+\NormalTok{leukem <-}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(}\StringTok{"data/leukem.csv"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }\NormalTok{tbl_df}
 \end{Highlighting}
 \end{Shaded}
 
@@ -30691,6 +30692,1786 @@ faceted plots, if that would be helpful.
 
 Next, we will consider the issue of modeling a survival outcome using
 Cox proportional hazards regression.
+
+\chapter{Cox Regression Models for Survival
+Data}\label{cox-regression-models-for-survival-data}
+
+The Cox proportional hazards (Cox regression) model fits survival data
+with a constant (i.e.~not varying over time) covariate \(x\) to a hazard
+function of the form:
+
+\[
+h(t | x) = h_0(t) exp[\beta_1 x]
+\]
+
+where we will estimate the unknown value of \(\beta_1\) and where
+\(h_0(t)\) is the baseline hazard, which is a non-parametric and
+unspecified value which depends on \(t\) but not on \(x\).
+
+\begin{itemize}
+\tightlist
+\item
+  For particular \(x\) values, we will be able to estimate the survival
+  function if we have an estimate of the baseline survival function,
+  \(\hat{S_0}(t)\).
+\end{itemize}
+
+The estimated survival function for an individual with covariate value
+\(x_k\) turns out to be
+
+\[
+\hat{S}(t | x_k) = [\hat{S_0}(t)]^{exp(\beta_1 x_k)}
+\]
+
+From Wikipedia (yes, really) \ldots{}
+
+\begin{quote}
+Survival models can be viewed as consisting of two parts: the underlying
+hazard function, describing how the risk of event per time unit changes
+over time at baseline levels of covariates; and the effect parameters,
+describing how the hazard varies in response to explanatory covariates.
+\end{quote}
+
+The key assumption in a Cox model is that the hazards are
+\textbf{proportional} - other types of survival models need not have
+this restriction. Quoting the always reliable (well, it's better than
+you think) Wikipedia \ldots{}
+
+\begin{quote}
+In a proportional hazards model, the unique effect of a unit increase in
+a covariate is multiplicative with respect to the hazard rate. For
+example, taking a drug may halve one's hazard rate for a stroke
+occurring, or, changing the material from which a manufactured component
+is constructed may double its hazard rate for failure.
+\end{quote}
+
+There are two main approaches to fitting Cox models in R.
+
+\begin{itemize}
+\tightlist
+\item
+  the \texttt{coxph} function in the \texttt{survival} package, and
+\item
+  the \texttt{cph} function in the \texttt{rms} package.
+\end{itemize}
+
+\section{Sources used in building this
+material}\label{sources-used-in-building-this-material}
+
+\begin{itemize}
+\tightlist
+\item
+  David Diez's excellent supplement for the OpenIntro Statistics
+  project, on \href{https://www.openintro.org/stat/surv.php}{Survival
+  Analysis in R}. I've posted it on our web site, as well.
+\item
+  Some tools in R to do some fancier work can be viewed at
+  \url{https://cran.r-project.org/web/views/Survival.html}
+\item
+  You might also look at these two blog posts, originally from the Just
+  Another Data blog.
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \url{https://www.r-bloggers.com/survival-analysis-1/}\\
+  \item
+    \url{https://www.r-bloggers.com/survival-analysis-2/}
+  \end{itemize}
+\item
+  \url{https://rpubs.com/daspringate/survival} has some great slides,
+  and I've stolen from them quite a bit here.
+\end{itemize}
+
+\section{\texorpdfstring{Fitting a Cox Model in R with
+\texttt{coxph}}{Fitting a Cox Model in R with coxph}}\label{fitting-a-cox-model-in-r-with-coxph}
+
+As a first example, I'll fit a model to predict time to recurrence in
+the \texttt{hem} data, on the basis of a single predictor:
+\texttt{genotype}.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{cfit <-}\StringTok{ }\KeywordTok{with}\NormalTok{(hem, }\KeywordTok{coxph}\NormalTok{(}\KeywordTok{Surv}\NormalTok{(time, recur) }\OperatorTok{~}\StringTok{ }\NormalTok{genotype))}
+\NormalTok{cfit}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Call:
+coxph(formula = Surv(time, recur) ~ genotype)
+
+         coef exp(coef) se(coef)    z     p
+genotype 1.33      3.79     0.57 2.34 0.019
+
+Likelihood ratio test=6.61  on 1 df, p=0.0102
+n= 70, number of events= 18 
+\end{verbatim}
+
+This summary provides an overall comparison of the two genotypes, using
+a proportional hazards model.
+
+\begin{itemize}
+\tightlist
+\item
+  The default approach in R is to use the ``efron'' method of breaking
+  ties: other options include ``breslow'' and ``exact''.
+\end{itemize}
+
+\subsection{Summarizing the Fit}\label{summarizing-the-fit}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{summary}\NormalTok{(cfit)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Call:
+coxph(formula = Surv(time, recur) ~ genotype)
+
+  n= 70, number of events= 18 
+
+           coef exp(coef) se(coef)     z Pr(>|z|)  
+genotype 1.3317    3.7874   0.5699 2.337   0.0195 *
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+         exp(coef) exp(-coef) lower .95 upper .95
+genotype     3.787      0.264     1.239     11.57
+
+Concordance= 0.622  (se = 0.065 )
+Rsquare= 0.09   (max possible= 0.851 )
+Likelihood ratio test= 6.61  on 1 df,   p=0.01015
+Wald test            = 5.46  on 1 df,   p=0.01946
+Score (logrank) test = 6.28  on 1 df,   p=0.01219
+\end{verbatim}
+
+This provides estimates of the \(\beta\) value for \texttt{genotype},
+including standard errors and \(p\) values for a Wald test. Also
+included is an estimate of the hazard ratio and its confidence interval.
+
+\begin{itemize}
+\tightlist
+\item
+  Here we have a hazard ratio estimate of \texttt{exp(coef)\ =\ 3.787},
+  with 95\% CI (1.24, 11.57).
+\item
+  The hazard ratio is the multiplicative effect of the covariate (here,
+  having at least one of the \(\epsilon 2\) or \(\epsilon 4\) allele) on
+  the hazard function for recurrent hemorrhage
+
+  \begin{itemize}
+  \tightlist
+  \item
+    A hazard ratio of 1 indicates no effect
+  \item
+    A hazard ratio \textgreater{} 1 indicates an increase in the hazard
+    as the covariate rises
+  \item
+    A hazard ratio \textless{} 1 indicates a decrease in the hazard as
+    the covariate rises
+  \end{itemize}
+\end{itemize}
+
+We can also \texttt{tidy} the hazard ratio estimate with the
+\texttt{broom} package.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{tidy}\NormalTok{(cfit, }\DataTypeTok{exponentiate =} \OtherTok{TRUE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+      term estimate std.error statistic    p.value conf.low conf.high
+1 genotype 3.787366 0.5699005  2.336672 0.01945623 1.239473  11.57278
+\end{verbatim}
+
+In addition, we have several other summaries:
+
+\begin{itemize}
+\tightlist
+\item
+  The \emph{concordance} measure is only appropriate when we have at
+  least one continuous predictor in our Cox model.
+\item
+  The Cox \& Snell pseudo-R\textsuperscript{2} reflects the improvement
+  of the model we've fit over the model with an intercept alone, but
+  isn't a proportion of anything (hence the listing of the maximum
+  possible value).
+\item
+  The Likelihood ratio, Wald and Score (logrank) tests provide insight
+  into the overall significance of the model.
+\end{itemize}
+
+We can obtain a more detailed description of the likelihood-ratio test
+of the model with \texttt{anova}.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{anova}\NormalTok{(cfit)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Analysis of Deviance Table
+ Cox model: response is Surv(time, recur)
+Terms added sequentially (first to last)
+
+          loglik  Chisq Df Pr(>|Chi|)  
+NULL     -66.675                       
+genotype -63.371 6.6078  1    0.01015 *
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+\end{verbatim}
+
+\subsection{Glancing at the model?}\label{glancing-at-the-model}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{glance}\NormalTok{(cfit)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+   n nevent statistic.log p.value.log statistic.sc p.value.sc
+1 70     18      6.607825  0.01015316     6.283367 0.01218763
+  statistic.wald p.value.wald  r.squared r.squared.max concordance
+1           5.46   0.01945623 0.09007901     0.8511768   0.6220715
+  std.error.concordance    logLik      AIC      BIC
+1            0.06467615 -63.37095 128.7419 129.6323
+\end{verbatim}
+
+Here, we obtain several additional summaries of the model, including
+most of the important information from a summary of \texttt{cfit}.
+
+\subsection{Plot the baseline survival
+function}\label{plot-the-baseline-survival-function}
+
+Here, we'll plot the time in terms of months, but scaled to 12 month
+(one year) groups.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plot}\NormalTok{(}\KeywordTok{survfit}\NormalTok{(cfit), }\DataTypeTok{xscale =} \DecValTok{12}\NormalTok{,}
+     \DataTypeTok{xlab =} \StringTok{"Years after initial hemorrhage"}\NormalTok{,}
+     \DataTypeTok{ylab =} \StringTok{"Proportion without recurrent hemorrhage"}\NormalTok{,}
+     \DataTypeTok{main =} \StringTok{"Baseline Hazard Curve"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-550-1.pdf}
+
+\subsection{Plot the genotype effect}\label{plot-the-genotype-effect}
+
+There are several ways to build these plots. One approach follows.
+Another uses a \texttt{cph} fit and the \texttt{survplot} function from
+the \texttt{rms} package.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{newdat <-}\StringTok{ }\KeywordTok{with}\NormalTok{(hem, }
+               \KeywordTok{data.frame}\NormalTok{(}
+                 \DataTypeTok{genotype =} \KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{0}\NormalTok{)}
+\NormalTok{               )}
+\NormalTok{)}
+
+\NormalTok{newdat}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+  genotype
+1        1
+2        0
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plot}\NormalTok{(}\KeywordTok{survfit}\NormalTok{(cfit, }\DataTypeTok{newdata =}\NormalTok{ newdat), }\DataTypeTok{xscale =} \DecValTok{12}\NormalTok{,}
+     \DataTypeTok{conf.int =} \OtherTok{TRUE}\NormalTok{,}
+     \DataTypeTok{col =} \KeywordTok{c}\NormalTok{(}\StringTok{"red"}\NormalTok{, }\StringTok{"blue"}\NormalTok{),}
+     \DataTypeTok{xlab =} \StringTok{"Years after initial hemorrhage"}\NormalTok{,}
+     \DataTypeTok{ylab =} \StringTok{"Proportion without recurrent hemorrhage"}\NormalTok{,}
+     \DataTypeTok{main =} \StringTok{"Plotting the genotype effects from the cfit Model"}\NormalTok{)}
+\KeywordTok{legend}\NormalTok{(}\FloatTok{0.5}\NormalTok{, }\FloatTok{0.2}\NormalTok{, }
+       \DataTypeTok{legend=}\KeywordTok{c}\NormalTok{(}
+         \KeywordTok{expression}\NormalTok{(}\KeywordTok{paste}\NormalTok{(}\StringTok{"Homozygous "}\NormalTok{, epsilon, }\StringTok{"3 / "}\NormalTok{, }
+\NormalTok{                   epsilon, }\StringTok{"3"}\NormalTok{)), }
+         \KeywordTok{expression}\NormalTok{(}\KeywordTok{paste}\NormalTok{(}\StringTok{"At least one "}\NormalTok{, epsilon,}\StringTok{"2 or "}\NormalTok{,}
+\NormalTok{                   epsilon,}\StringTok{"4 Allele"}\NormalTok{))}
+\NormalTok{       ),}
+       \DataTypeTok{lty =} \DecValTok{1}\NormalTok{, }
+       \DataTypeTok{col =} \KeywordTok{c}\NormalTok{(}\StringTok{"red"}\NormalTok{, }\StringTok{"blue"}\NormalTok{),}
+       \DataTypeTok{text.col =} \KeywordTok{c}\NormalTok{(}\StringTok{"red"}\NormalTok{, }\StringTok{"blue"}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-552-1.pdf}
+
+\subsection{Testing the Key Assumption: Proportional
+Hazards}\label{testing-the-key-assumption-proportional-hazards}
+
+The \texttt{cox.zph} function in the \texttt{survival} package will test
+the proportionality of all of the predictors included in your model by
+creating interactions with time.
+
+\begin{itemize}
+\tightlist
+\item
+  A small \(p\) value would indicate a violation of the proportionality
+  assumption.
+\end{itemize}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{cox.zph}\NormalTok{(cfit, }\DataTypeTok{transform=}\StringTok{"km"}\NormalTok{, }\DataTypeTok{global=}\OtherTok{TRUE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+           rho chisq     p
+genotype 0.333  2.02 0.156
+\end{verbatim}
+
+Since the \emph{p} value here is not significant, we may be all right.
+But it's sensible to focus further on plots derived from the model fit,
+rather than relying solely on this test.
+
+\subsection{\texorpdfstring{Plotting the \texttt{cox.zph} results for
+the \texttt{cfit}
+model}{Plotting the cox.zph results for the cfit model}}\label{plotting-the-cox.zph-results-for-the-cfit-model}
+
+\texttt{cox.zph} function can be used to generate a plot for each of the
+individual predictors in the model. Of course, in this case, we have
+just one predictor: \texttt{genotype}. If the proportional hazards
+assumption is appropriate, then we should see a slope of essentially
+zero in each such plot. A slope that is seriously different from zero
+suggests a violation of the proportional hazards assumption.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plot}\NormalTok{(}\KeywordTok{cox.zph}\NormalTok{(cfit, }\DataTypeTok{transform=}\StringTok{"km"}\NormalTok{, }\DataTypeTok{global=}\OtherTok{TRUE}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/surv_hem_cfit_coxzph_plot-1.pdf}
+
+The plot suggests only a slight rise in the plotted values over time,
+suggesting no serious problem with the proportional hazards assumption.
+This combined testing and plotting approach is a reasonable starting
+place for assessing the proportional hazards assumption, but it's likely
+insufficient for good practical work.
+
+We'll see an example of a model where the proportional hazards
+assumption fits the data less well later, and when we do, we'll
+demonstrate two relatively simple options for accounting for this.
+
+\section{\texorpdfstring{Fitting a Cox Model using \texttt{cph} from the
+\texttt{rms}
+package}{Fitting a Cox Model using cph from the rms package}}\label{fitting-a-cox-model-using-cph-from-the-rms-package}
+
+To set up a \texttt{cph} fit for our comparison of genotypes in the
+\texttt{hem} data, we'll follow these steps.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{units}\NormalTok{(hem}\OperatorTok{$}\NormalTok{time) <-}\StringTok{ "month"}
+\NormalTok{d <-}\StringTok{ }\KeywordTok{datadist}\NormalTok{(hem)}
+\KeywordTok{options}\NormalTok{(}\DataTypeTok{datadist =} \StringTok{"d"}\NormalTok{)}
+
+\NormalTok{hemsurv <-}\StringTok{ }\KeywordTok{Surv}\NormalTok{(}\DataTypeTok{time =}\NormalTok{ hem}\OperatorTok{$}\NormalTok{time, }\DataTypeTok{event =}\NormalTok{ hem}\OperatorTok{$}\NormalTok{recur)}
+
+\NormalTok{model_hem <-}\StringTok{ }\KeywordTok{cph}\NormalTok{(hemsurv }\OperatorTok{~}\StringTok{ }\NormalTok{genotype, }\DataTypeTok{data =}\NormalTok{ hem, }
+                 \DataTypeTok{x =} \OtherTok{TRUE}\NormalTok{, }\DataTypeTok{y =} \OtherTok{TRUE}\NormalTok{, }\DataTypeTok{surv =} \OtherTok{TRUE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+Note that the \texttt{surv\ =\ TRUE} piece is required to get some of
+the follow-up analyses to work smoothly.
+
+\subsection{\texorpdfstring{The Main \texttt{cph}
+results}{The Main cph results}}\label{the-main-cph-results}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{model_hem}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Cox Proportional Hazards Model
+ 
+ cph(formula = hemsurv ~ genotype, data = hem, x = TRUE, y = TRUE, 
+     surv = TRUE)
+ 
+                     Model Tests       Discrimination    
+                                          Indexes        
+ Obs        70    LR chi2      6.61    R2       0.106    
+ Events     18    d.f.            1    Dxy      0.244    
+ Center 0.7229    Pr(> chi2) 0.0102    g        0.671    
+                  Score chi2   6.28    gr       1.955    
+                  Pr(> chi2) 0.0122                      
+ 
+          Coef   S.E.   Wald Z Pr(>|Z|)
+ genotype 1.3317 0.5699 2.34   0.0195  
+ 
+\end{verbatim}
+
+Included here are likelihood ratio and score tests for the model as a
+whole (as compared to the intercept-only model), as well as the usual
+discrimination indexes.
+
+\begin{itemize}
+\tightlist
+\item
+  These include both an R\textsuperscript{2} analog due to Nagelkerke
+  (which can go all the way up to 1), and
+\item
+  Somers' \(Dxy\), which can also produce an estimate of the C statistic
+  (area under the curve) via the formula C = 0.5 + Dxy / 2, so here C =
+  0.5 + (.244/2) = 0.622
+\item
+  For lots more on survival analysis C statistics, look at the
+  \texttt{survAUC} package in R.
+\end{itemize}
+
+These results are followed by a table of Wald tests for each of the
+coefficients in the model.
+
+\subsection{\texorpdfstring{Using \texttt{anova} with
+\texttt{cph}}{Using anova with cph}}\label{using-anova-with-cph}
+
+As in other \texttt{rms} fits, we can use \texttt{anova} to obtain more
+detailed (in terms of combining nonlinear terms and, if available,
+interactions) tests.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{anova}\NormalTok{(model_hem)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+                Wald Statistics          Response: hemsurv 
+
+ Factor     Chi-Square d.f. P     
+ genotype   5.46       1    0.0195
+ TOTAL      5.46       1    0.0195
+\end{verbatim}
+
+\subsection{\texorpdfstring{Effect Sizes after \texttt{cph}
+fit}{Effect Sizes after cph fit}}\label{effect-sizes-after-cph-fit}
+
+We can use \texttt{summary} on a \texttt{cph} object to get and plot
+effect size estimates (here, these are hazard ratios.)
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{summary}\NormalTok{(model_hem)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+             Effects              Response : hemsurv 
+
+ Factor        Low High Diff. Effect S.E.   Lower 0.95 Upper 0.95
+ genotype      0   1    1     1.3317 0.5699 0.21468     2.4486   
+  Hazard Ratio 0   1    1     3.7873     NA 1.23950    11.5730   
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plot}\NormalTok{(}\KeywordTok{summary}\NormalTok{(model_hem))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/surv_hem_cph_summary-1.pdf}
+
+\subsection{\texorpdfstring{Validating \texttt{cph}
+summaries}{Validating cph summaries}}\label{validating-cph-summaries}
+
+For details on these last few indices (D, U, Q, etc.), visit
+\texttt{?validate.cph} in R.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{43201}\NormalTok{); }\KeywordTok{validate}\NormalTok{(model_hem)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+      index.orig training   test optimism index.corrected  n
+Dxy       0.2441   0.2588 0.2441   0.0146          0.2295 40
+R2        0.1058   0.1169 0.1058   0.0110          0.0948 40
+Slope     1.0000   1.0000 1.1045  -0.1045          1.1045 40
+D         0.0421   0.0490 0.0421   0.0070          0.0351 40
+U        -0.0150  -0.0153 0.0072  -0.0226          0.0076 40
+Q         0.0571   0.0644 0.0348   0.0295          0.0275 40
+g         0.6705   0.7181 0.6705   0.0476          0.6229 40
+\end{verbatim}
+
+\subsection{Plotting Survival Functions for each
+Genotype}\label{plotting-survival-functions-for-each-genotype}
+
+Here is the \texttt{survplot} approach I mentioned earlier.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{survplot}\NormalTok{(model_hem, genotype, }
+         \DataTypeTok{lty =} \KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{2}\NormalTok{), }\DataTypeTok{n.risk=}\OtherTok{TRUE}\NormalTok{, }\DataTypeTok{time.inc=}\DecValTok{12}\NormalTok{,}
+         \DataTypeTok{col=}\KeywordTok{c}\NormalTok{(}\StringTok{"magenta"}\NormalTok{, }\StringTok{"dodgerblue"}\NormalTok{),}
+         \DataTypeTok{xlab=}\StringTok{"Hemorrhage-Free Survival in Months"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/survplot_model_hem_plot1-1.pdf}
+
+We can add, for instance, confidence interval bars, with:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{survplot}\NormalTok{(model_hem, genotype, }
+         \DataTypeTok{lwd=}\DecValTok{3}\NormalTok{, }\DataTypeTok{lty =} \KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{2}\NormalTok{), }\DataTypeTok{conf.int=}\NormalTok{.}\DecValTok{95}\NormalTok{,}
+         \DataTypeTok{n.risk=}\OtherTok{TRUE}\NormalTok{, }\DataTypeTok{time.inc =} \DecValTok{12}\NormalTok{, }\DataTypeTok{conf=}\StringTok{'bars'}\NormalTok{,}
+         \DataTypeTok{col=}\KeywordTok{c}\NormalTok{(}\StringTok{"magenta"}\NormalTok{, }\StringTok{"dodgerblue"}\NormalTok{),}
+         \DataTypeTok{xlab=}\StringTok{"Hemorrhage-Free Survival Time in Months"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/survplot_model_hem_plot2-1.pdf}
+
+For more details, check out R's help file on \texttt{survplot}.
+
+\subsection{Genotype's effect on log relative
+hazard}\label{genotypes-effect-on-log-relative-hazard}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{Predict}\NormalTok{(model_hem, genotype))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/log_rel_haz_hem_model_plot-1.pdf}
+
+\subsection{\texorpdfstring{Nomogram of our simple \texttt{hem}
+model}{Nomogram of our simple hem model}}\label{nomogram-of-our-simple-hem-model}
+
+We can estimate 1-year and 3-year hemorrhage-free survival
+probabilities, for example, with this model, and incorporate these
+results into our nomogram.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{survx <-}\StringTok{ }\KeywordTok{Survival}\NormalTok{(model_hem)}
+\KeywordTok{plot}\NormalTok{(}\KeywordTok{nomogram}\NormalTok{(model_hem, }\DataTypeTok{fun=}\KeywordTok{list}\NormalTok{(}\ControlFlowTok{function}\NormalTok{(x) }\KeywordTok{survx}\NormalTok{(}\DecValTok{12}\NormalTok{, x),}
+                            \ControlFlowTok{function}\NormalTok{(x) }\KeywordTok{survx}\NormalTok{(}\DecValTok{36}\NormalTok{, x)),}
+            \DataTypeTok{funlabel=}\KeywordTok{c}\NormalTok{(}\StringTok{"12-month Pr(Survival)"}\NormalTok{, }
+                       \StringTok{"36-month Pr(Survival)"}\NormalTok{)))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/nomogram_model_hem-1.pdf}
+
+Again, this is just a very simple model, with one binary predictor.
+
+\subsection{Assessing the Proportional Hazards
+Assumption}\label{assessing-the-proportional-hazards-assumption}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{cox.zph}\NormalTok{(model_hem, }\DataTypeTok{transform=}\StringTok{"km"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+           rho chisq     p
+genotype 0.333  2.02 0.156
+\end{verbatim}
+
+\begin{itemize}
+\tightlist
+\item
+  Consider using \texttt{transform="rank"} to transform the survival
+  times by their ranks prior to performing the test.
+\item
+  Or use \texttt{transform="identity"} as we'll do in the plot below.
+\end{itemize}
+
+\subsection{Plot to Check PH
+Assumption}\label{plot-to-check-ph-assumption}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plot}\NormalTok{(}\KeywordTok{cox.zph}\NormalTok{(model_hem, }\StringTok{"identity"}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/ph_plot_check_zph-1.pdf}
+
+\section{\texorpdfstring{A Second Example: The \texttt{leukem}
+data}{A Second Example: The leukem data}}\label{a-second-example-the-leukem-data}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{leukem}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+# A tibble: 51 x 8
+      id   age pblasts  pinf  plab maxtemp months alive
+   <int> <int>   <int> <int> <int>   <dbl>  <int> <int>
+ 1     1    20      78    39     7    99.0     18     0
+ 2     2    25      64    61    16   103.      31     1
+ 3     3    26      61    55    12    98.2     31     0
+ 4     4    26      64    64    16   100.      31     0
+ 5     5    27      95    95     6    98.0     36     0
+ 6     6    27      80    64     8   101.       1     0
+ 7     7    28      88    88    20    98.6      9     0
+ 8     8    28      70    70    14   101.      39     1
+ 9     9    31      72    72     5    98.8     20     1
+10    10    33      58    58     7    98.6      4     0
+# ... with 41 more rows
+\end{verbatim}
+
+The data describe 51 leukemia patients. The variables are:
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{id}, a patient identification code
+\item
+  \texttt{age}, age at diagnosis
+\item
+  \texttt{pblasts}, the Smear differential percentage of blasts
+\item
+  \texttt{pinf}, the Percentage of absolute marrow leukemia infiltrate
+\item
+  \texttt{plab}, the Percentage labeling index of the bone marrow
+  leukemia cells
+\item
+  \texttt{maxtemp}, Highest temperature prior to treatment (in
+  \(^\circ F\))
+\item
+  \texttt{months}, which is Survival time from diagnosis (in months)
+\item
+  \texttt{alive}, which indicates Status as of the end of the study (1 =
+  alive and thus censored, 0 = dead)
+\end{itemize}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{glimpse}\NormalTok{(leukem)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Observations: 51
+Variables: 8
+$ id      <int> 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16,...
+$ age     <int> 20, 25, 26, 26, 27, 27, 28, 28, 31, 33, 33, 33, 34, 36...
+$ pblasts <int> 78, 64, 61, 64, 95, 80, 88, 70, 72, 58, 92, 42, 26, 55...
+$ pinf    <int> 39, 61, 55, 64, 95, 64, 88, 70, 72, 58, 92, 38, 26, 55...
+$ plab    <int> 7, 16, 12, 16, 6, 8, 20, 14, 5, 7, 5, 12, 7, 14, 15, 9...
+$ maxtemp <dbl> 99.0, 103.0, 98.2, 100.0, 98.0, 101.0, 98.6, 101.0, 98...
+$ months  <int> 18, 31, 31, 31, 36, 1, 9, 39, 20, 4, 45, 36, 12, 8, 1,...
+$ alive   <int> 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, ...
+\end{verbatim}
+
+\subsection{Creating our response: A survival time
+object}\label{creating-our-response-a-survival-time-object}
+
+Regardless of how we're going to fit a survival model, we start by
+creating a \emph{survival time} object that combines the information in
+\texttt{months} (the survival times, possibly censored) and
+\texttt{alive} (the censoring indicator) into a single variable we'll
+call \texttt{stime} in this example.
+
+The function below correctly registers the survival time, and censors
+subjects who are alive at the end of the study (we need to indicate
+those whose times are known, and they are identified by
+\texttt{alive\ ==\ 0}). All other subjects are alive for at least as
+long as we observe them, but their exact survival times are
+\emph{right-censored}.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{stime <-}\StringTok{ }\KeywordTok{Surv}\NormalTok{(leukem}\OperatorTok{$}\NormalTok{months, leukem}\OperatorTok{$}\NormalTok{alive }\OperatorTok{==}\StringTok{ }\DecValTok{0}\NormalTok{)}
+\NormalTok{stime}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+ [1] 18  31+ 31  31  36   1   9  39+ 20+  4  45+ 36  12   8   1  15  24 
+[18]  2  33  29+  7   0   1   2  12   9   1   1   9   5  27+  1  13   1 
+[35]  5   1   3   4   1  18   1   2   1   8   3   4  14   3  13  13   1 
+\end{verbatim}
+
+\subsection{Models We'll Fit}\label{models-well-fit}
+
+We'll fit several models here, including:
+
+\begin{itemize}
+\tightlist
+\item
+  Model A: A model for survival time using \texttt{age} at diagnosis
+  alone.
+\item
+  Model B: A model for survival time using the main effects of 5
+  predictors, specifically, \texttt{age}, \texttt{pblasts},
+  \texttt{pinf}, \texttt{plab}, and \texttt{maxtemp}.
+\item
+  Model B2: The model we get after applying stepwise variable selection
+  to Model B, which will include \texttt{age}, \texttt{pinf} and
+  \texttt{plab}.
+\item
+  Model C: A model using \texttt{age} (with a restricted cubic spline),
+  \texttt{plab} and \texttt{maxtemp}
+\end{itemize}
+
+\section{\texorpdfstring{Model A: \texttt{coxph} Model for Survival Time
+using \texttt{age} at
+diagnosis}{Model A: coxph Model for Survival Time using age at diagnosis}}\label{model-a-coxph-model-for-survival-time-using-age-at-diagnosis}
+
+We'll start by using \texttt{age} at diagnosis to predict our survival
+object (survival time, accounting for censoring).
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{modA <-}\StringTok{ }\KeywordTok{coxph}\NormalTok{(}\KeywordTok{Surv}\NormalTok{(months, alive}\OperatorTok{==}\DecValTok{0}\NormalTok{) }\OperatorTok{~}\StringTok{ }\NormalTok{age, }
+              \DataTypeTok{data=}\NormalTok{leukem, }\DataTypeTok{model=}\OtherTok{TRUE}\NormalTok{)}
+
+\KeywordTok{summary}\NormalTok{(modA)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Call:
+coxph(formula = Surv(months, alive == 0) ~ age, data = leukem, 
+    model = TRUE)
+
+  n= 51, number of events= 45 
+
+        coef exp(coef) se(coef)     z Pr(>|z|)    
+age 0.032397  1.032927 0.009521 3.403 0.000667 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+    exp(coef) exp(-coef) lower .95 upper .95
+age     1.033     0.9681     1.014     1.052
+
+Concordance= 0.65  (se = 0.057 )
+Rsquare= 0.207   (max possible= 0.996 )
+Likelihood ratio test= 11.85  on 1 df,   p=0.000577
+Wald test            = 11.58  on 1 df,   p=0.0006675
+Score (logrank) test = 12.29  on 1 df,   p=0.0004562
+\end{verbatim}
+
+Across these 51 subjects, we observe 45 events (deaths) and 6 subjects
+are censored. The hazard ratio (shown under \texttt{exp(coef)}) is
+1.0329272, and this means each additional year of age at diagnosis is
+associated with a 1.03-fold increase in the hazard of death.
+
+For this simple Cox regression model, we will focus on interpreting
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  the \textbf{hazard ratio} (specified by the \texttt{exp(coef)} result
+  and associated confidence interval) as a measure of effect size,
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Here, the hazard ratio associated with a 1-year increase in
+    \texttt{age} is 1.033, and its 95\% confidence interval is: (1.014,
+    1.052).
+  \item
+    Since this confidence interval ratio does not include 1 (barely), we
+    can conclude that there is a significant association between
+    \texttt{age} and \texttt{stime} at the 5\% significance level.
+  \end{itemize}
+\item
+  the \textbf{concordance} and \textbf{Rsquare} as measures of fit
+  quality, and
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \textbf{concordance} is only appropriate when we have at least one
+    continuous predictor in our Cox model, in which case it assesses the
+    probability of agreement between the survival time and the risk
+    score generated by the predictor (or set of predictors. A value of 1
+    indicates perfect agreement, but values of 0.6 to 0.7 are more
+    common in survival data. 0.5 is an agreement that is no better than
+    chance. Here, our concordance is 0.65, which is a fairly typical
+    value.
+  \item
+    \textbf{Rsquare} in this setting is Cox and Snell's
+    pseudo-R\textsuperscript{2}, which reflects the improvement of the
+    model we have fit over the model with the intercept alone - a
+    comparison that is tested by the likelihood ratio test. The maximum
+    value of this statistic is often less than one, in which case R will
+    tell you that. Here, our observed pseudo-R\textsuperscript{2} is
+    0.207 and that is out of a possible maximum of 0.996.
+  \end{itemize}
+\item
+  the significance tests, particularly the \textbf{Wald} test (shown
+  next to the coefficient estimates in the position of a t test in
+  linear regression), and the \textbf{Likelihood ratio} test at the
+  bottom of the output, which compares this model to a null model which
+  predicts the mean survival time for all subjects.
+
+  \begin{itemize}
+  \tightlist
+  \item
+    The Wald test for an individual predictor compares the coefficient
+    to its standard error, just like a t test in linear regression.
+  \item
+    The likelihood ratio test compares the entire model to the null
+    model (intercept-only). Again, run an ANOVA (technically an analysis
+    of deviance) to get more details on the likelihood-ratio test.
+  \end{itemize}
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{anova}\NormalTok{(modA)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Analysis of Deviance Table
+ Cox model: response is Surv(months, alive == 0)
+Terms added sequentially (first to last)
+
+      loglik  Chisq Df Pr(>|Chi|)    
+NULL -142.94                         
+age  -137.02 11.849  1   0.000577 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+\end{verbatim}
+
+\subsection{Plotting the Survival Curve implied by Model
+A}\label{plotting-the-survival-curve-implied-by-model-a}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plot}\NormalTok{(}\KeywordTok{survfit}\NormalTok{(modA), }\DataTypeTok{ylab=}\StringTok{"Probability of Survival"}\NormalTok{,}
+     \DataTypeTok{xlab=}\StringTok{"Months in Study"}\NormalTok{, }\DataTypeTok{col=}\KeywordTok{c}\NormalTok{(}\StringTok{"red"}\NormalTok{, }\StringTok{"black"}\NormalTok{, }\StringTok{"black"}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/surv_leukem_modelA_plot-1.pdf}
+
+\subsection{Testing the Proportional Hazards
+Assumption}\label{testing-the-proportional-hazards-assumption}
+
+As we've noted, the key assumption in a Cox model is that the hazards
+are \textbf{proportional}.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{cox.zph}\NormalTok{(modA)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+      rho chisq     p
+age 0.147 0.791 0.374
+\end{verbatim}
+
+A significant result here would indicate a problem with the proportional
+hazards assumption - again, not the case here. We can also plot the
+results:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plot}\NormalTok{(}\KeywordTok{cox.zph}\NormalTok{(modA))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/surv_leukem_modelA_zphplot-1.pdf}
+
+We're looking for the smooth curve to be fairly level across the time
+horizon here, as opposed to substantially increasing or decreasing in
+level as time passes.
+
+\section{\texorpdfstring{Building Model A with \texttt{cph} for the
+\texttt{leukem}
+data}{Building Model A with cph for the leukem data}}\label{building-model-a-with-cph-for-the-leukem-data}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{units}\NormalTok{(leukem}\OperatorTok{$}\NormalTok{months) <-}\StringTok{ "month"}
+\NormalTok{d <-}\StringTok{ }\KeywordTok{datadist}\NormalTok{(leukem)}
+\KeywordTok{options}\NormalTok{(}\DataTypeTok{datadist=}\StringTok{"d"}\NormalTok{)}
+\NormalTok{modA_cph <-}\StringTok{ }\KeywordTok{cph}\NormalTok{(}\KeywordTok{Surv}\NormalTok{(months, alive}\OperatorTok{==}\DecValTok{0}\NormalTok{) }\OperatorTok{~}\StringTok{ }\NormalTok{age, }\DataTypeTok{data=}\NormalTok{leukem, }
+              \DataTypeTok{x=}\OtherTok{TRUE}\NormalTok{, }\DataTypeTok{y=}\OtherTok{TRUE}\NormalTok{, }\DataTypeTok{surv=}\OtherTok{TRUE}\NormalTok{, }\DataTypeTok{time.inc=}\DecValTok{12}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{modA_cph}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Cox Proportional Hazards Model
+ 
+ cph(formula = Surv(months, alive == 0) ~ age, data = leukem, 
+     x = TRUE, y = TRUE, surv = TRUE, time.inc = 12)
+ 
+                     Model Tests       Discrimination    
+                                          Indexes        
+ Obs        51    LR chi2     11.85    R2       0.208    
+ Events     45    d.f.            1    Dxy      0.301    
+ Center 1.6152    Pr(> chi2) 0.0006    g        0.621    
+                  Score chi2  12.29    gr       1.861    
+                  Pr(> chi2) 0.0005                      
+ 
+     Coef   S.E.   Wald Z Pr(>|Z|)
+ age 0.0324 0.0095 3.40   0.0007  
+ 
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{exp}\NormalTok{(}\KeywordTok{coef}\NormalTok{(modA_cph)) }\CommentTok{# hazard ratio estimate}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+     age 
+1.032923 
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{exp}\NormalTok{(}\KeywordTok{confint}\NormalTok{(modA_cph)) }\CommentTok{# hazard ratio 95% CI}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+       2.5 %   97.5 %
+age 1.013826 1.052379
+\end{verbatim}
+
+\subsection{\texorpdfstring{Plotting the \texttt{age} effect implied by
+our
+model.}{Plotting the age effect implied by our model.}}\label{plotting-the-age-effect-implied-by-our-model.}
+
+We can plot the \texttt{age} effect implied by the model, using
+\texttt{ggplot2}, as follows\ldots{}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{Predict}\NormalTok{(modA_cph, age))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/surv_leukem_modelA_cph_ggplot-1.pdf}
+
+\subsection{\texorpdfstring{Survival Plots (Kaplan-Meier) of the
+\texttt{age}
+effect}{Survival Plots (Kaplan-Meier) of the age effect}}\label{survival-plots-kaplan-meier-of-the-age-effect}
+
+The first survival plot I'll show displays 95\% confidence intervals for
+the probability of survival at the median \texttt{age} at diagnosis in
+the sample, which turns out to be 50 years, with numbers of patients
+still at risk indicated every 12 months of time in the study. We can
+substitute in \textbf{conf = \texttt{bars}} to get a different flavor
+for this sort of plot.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{survplot}\NormalTok{(modA_cph, }\DataTypeTok{age=}\KeywordTok{median}\NormalTok{(leukem}\OperatorTok{$}\NormalTok{age), }\DataTypeTok{conf.int=}\NormalTok{.}\DecValTok{95}\NormalTok{, }
+         \DataTypeTok{col=}\StringTok{'blue'}\NormalTok{, }\DataTypeTok{time.inc=}\DecValTok{12}\NormalTok{, }\DataTypeTok{n.risk=}\OtherTok{TRUE}\NormalTok{,}
+         \DataTypeTok{conf=}\StringTok{'bands'}\NormalTok{, }\DataTypeTok{type=}\StringTok{"kaplan-meier"}\NormalTok{, }
+         \DataTypeTok{xlab=}\StringTok{"Study Survival Time in Months"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/surv_leukem_modelA_cph_survplot1-1.pdf}
+
+Or we can generate a survival plot that shows survival probabilities
+over time across a range of values for \texttt{age} at diagnosis, as
+follows\ldots{}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{survplot}\NormalTok{(modA_cph, }\DataTypeTok{levels.only=}\OtherTok{TRUE}\NormalTok{, }\DataTypeTok{time.inc=}\DecValTok{12}\NormalTok{, }
+         \DataTypeTok{type=}\StringTok{"kaplan-meier"}\NormalTok{, }
+         \DataTypeTok{xlab=}\StringTok{"Study Survival Time in Months"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/surv_leukem_modelA_cph_survplot2-1.pdf}
+
+This plot shows a series of modeled survival probabilities, for five
+different diagnosis \texttt{age} levels, as identified by the labels.
+Generally we see that the older the subject is at diagnosis, the longer
+their survival time in the study.
+
+\subsection{\texorpdfstring{ANOVA test for the \texttt{cph}-built model
+for
+\texttt{leukem}}{ANOVA test for the cph-built model for leukem}}\label{anova-test-for-the-cph-built-model-for-leukem}
+
+We can run a likelihood-ratio (drop in deviance) test of the
+significance of the \texttt{age} effect\ldots{}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{anova}\NormalTok{(modA_cph)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+                Wald Statistics          Response: Surv(months, alive == 0) 
+
+ Factor     Chi-Square d.f. P    
+ age        11.57      1    7e-04
+ TOTAL      11.57      1    7e-04
+\end{verbatim}
+
+\subsection{\texorpdfstring{Summarizing the Effect Sizes from
+\texttt{modA\_cph}}{Summarizing the Effect Sizes from modA\_cph}}\label{summarizing-the-effect-sizes-from-moda_cph}
+
+We can generate the usual summaries of effect size in this context, too.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{summary}\NormalTok{(modA_cph)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+             Effects              Response : Surv(months, alive == 0) 
+
+ Factor        Low High Diff. Effect S.E.    Lower 0.95 Upper 0.95
+ age           35  61   26    0.8422 0.24755 0.35701    1.3274    
+  Hazard Ratio 35  61   26    2.3215      NA 1.42910    3.7712    
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plot}\NormalTok{(}\KeywordTok{summary}\NormalTok{(modA_cph))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/surv_leukem_modelA_cph_summaryandeffects-1.pdf}
+
+As with all \texttt{rms} package effect estimates, this quantitative
+predictor (\texttt{age}) yields an effect comparing \texttt{age} at the
+25th percentile of the sample (\texttt{age} = 35) to \texttt{age} at the
+75th percentile (\texttt{age} = 61). So the hazard ratio is 2.32, with
+95\% CI (1.43, 3.77) for the effect of moving 26 years. Our
+\texttt{coxph} version of this same model showed a hazard ratio for the
+effect of moving just a single year.
+
+\subsection{Validating the Cox Model Summary
+Statistics}\label{validating-the-cox-model-summary-statistics}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{432410}\NormalTok{); }\KeywordTok{validate}\NormalTok{(modA_cph)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+      index.orig training   test optimism index.corrected  n
+Dxy       0.3007   0.3060 0.3007   0.0053          0.2954 40
+R2        0.2081   0.2078 0.2081  -0.0003          0.2084 40
+Slope     1.0000   1.0000 1.0495  -0.0495          1.0495 40
+D         0.0379   0.0388 0.0379   0.0008          0.0371 40
+U        -0.0070  -0.0070 0.0032  -0.0102          0.0032 40
+Q         0.0449   0.0457 0.0348   0.0110          0.0340 40
+g         0.6210   0.6189 0.6210  -0.0021          0.6231 40
+\end{verbatim}
+
+The R\textsuperscript{2} statistic barely moves, and neither does the
+Somers' d estimate, so at least in this simple model, the nominal
+summary statistics are likely to hold up pretty well in new data.
+
+\subsection{Looking for Influential
+Points}\label{looking-for-influential-points}
+
+This plot shows the influence of each point, in terms of DFBETA - the
+impact on the coefficient of \texttt{age} in the model were that
+specific point to be removed from the data set. We can also identify the
+row numbers of the largest (positive and negative) DFBETAs.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plot}\NormalTok{(}\KeywordTok{residuals}\NormalTok{(modA_cph, }\DataTypeTok{type=}\StringTok{"dfbeta"}\NormalTok{, }
+               \DataTypeTok{collapse =}\NormalTok{ leukem}\OperatorTok{$}\NormalTok{id) }\OperatorTok{~}\StringTok{ }
+\StringTok{       }\NormalTok{leukem}\OperatorTok{$}\NormalTok{id, }\DataTypeTok{main=}\StringTok{"Index Plot of DFBETA for Age"}\NormalTok{, }
+     \DataTypeTok{type=}\StringTok{"h"}\NormalTok{, }\DataTypeTok{ylab=}\StringTok{"DFBETA in modelA_cph"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/surv_leukem_modelA_cph_influential_points-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{which.max}\NormalTok{(}\KeywordTok{residuals}\NormalTok{(modA_cph, }\DataTypeTok{type=}\StringTok{"dfbeta"}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+8 
+8 
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{which.min}\NormalTok{(}\KeywordTok{residuals}\NormalTok{(modA_cph, }\DataTypeTok{type=}\StringTok{"dfbeta"}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+50 
+50 
+\end{verbatim}
+
+The DFBETAs look very small here. Changes in the \(\beta\) estimates as
+large as 0.002 don't have a meaningful impact in this case, so I don't
+see anything particularly influential.
+
+\subsection{Checking the Proportional Hazards
+Assumption}\label{checking-the-proportional-hazards-assumption}
+
+As before, we can check the proportional hazards assumption with a test,
+or plot.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{cox.zph}\NormalTok{(modA_cph)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+      rho chisq     p
+age 0.147 0.791 0.374
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plot}\NormalTok{(}\KeywordTok{cox.zph}\NormalTok{(modA_cph))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/surv_leukem_modelA_cph_proportional_hazards_assumption-1.pdf}
+
+Still no serious signs of trouble, of course. We'll see what happens
+when we fit a bigger model.
+
+\section{\texorpdfstring{Model B: Fitting a 5-Predictor Model with
+\texttt{coxph}}{Model B: Fitting a 5-Predictor Model with coxph}}\label{model-b-fitting-a-5-predictor-model-with-coxph}
+
+Next, we use the \texttt{coxph} function from the \texttt{survival}
+package to apply a Cox regression model to predict the survival time
+using the main effects of the five predictors: \texttt{age},
+\texttt{pblasts}, \texttt{pinf}, \texttt{plab} and \texttt{maxtemp}.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{modB <-}\StringTok{ }\KeywordTok{coxph}\NormalTok{(}\KeywordTok{Surv}\NormalTok{(months, alive}\OperatorTok{==}\DecValTok{0}\NormalTok{) }\OperatorTok{~}\StringTok{ }
+\StringTok{          }\NormalTok{age }\OperatorTok{+}\StringTok{ }\NormalTok{pblasts }\OperatorTok{+}\StringTok{ }\NormalTok{pinf }\OperatorTok{+}\StringTok{ }\NormalTok{plab }\OperatorTok{+}\StringTok{ }\NormalTok{maxtemp, }\DataTypeTok{data=}\NormalTok{leukem)}
+\NormalTok{modB}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Call:
+coxph(formula = Surv(months, alive == 0) ~ age + pblasts + pinf + 
+    plab + maxtemp, data = leukem)
+
+            coef exp(coef) se(coef)     z      p
+age      0.03308   1.03363  0.01016  3.26 0.0011
+pblasts  0.00945   1.00950  0.01396  0.68 0.4983
+pinf    -0.01710   0.98304  0.01224 -1.40 0.1625
+plab    -0.06600   0.93613  0.03865 -1.71 0.0877
+maxtemp  0.15545   1.16818  0.11198  1.39 0.1651
+
+Likelihood ratio test=18.5  on 5 df, p=0.00241
+n= 51, number of events= 45 
+\end{verbatim}
+
+The Wald tests suggest that \texttt{age} and perhaps \texttt{plab} are
+the only terms which appear to be significant after accounting for the
+other predictors in the model.
+
+\subsection{Interpreting the Results from Model
+B}\label{interpreting-the-results-from-model-b}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{summary}\NormalTok{(modB)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Call:
+coxph(formula = Surv(months, alive == 0) ~ age + pblasts + pinf + 
+    plab + maxtemp, data = leukem)
+
+  n= 51, number of events= 45 
+
+             coef exp(coef)  se(coef)      z Pr(>|z|)   
+age      0.033080  1.033633  0.010163  3.255  0.00113 **
+pblasts  0.009452  1.009497  0.013959  0.677  0.49831   
+pinf    -0.017102  0.983043  0.012244 -1.397  0.16248   
+plab    -0.066000  0.936131  0.038651 -1.708  0.08771 . 
+maxtemp  0.155448  1.168182  0.111978  1.388  0.16507   
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+        exp(coef) exp(-coef) lower .95 upper .95
+age        1.0336     0.9675    1.0132     1.054
+pblasts    1.0095     0.9906    0.9823     1.037
+pinf       0.9830     1.0172    0.9597     1.007
+plab       0.9361     1.0682    0.8678     1.010
+maxtemp    1.1682     0.8560    0.9380     1.455
+
+Concordance= 0.705  (se = 0.057 )
+Rsquare= 0.304   (max possible= 0.996 )
+Likelihood ratio test= 18.48  on 5 df,   p=0.002405
+Wald test            = 17.62  on 5 df,   p=0.003466
+Score (logrank) test = 18.96  on 5 df,   p=0.001953
+\end{verbatim}
+
+Again, it appears that only \texttt{age} has a statistically significant
+effect, as last predictor in.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{anova}\NormalTok{(modB)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Analysis of Deviance Table
+ Cox model: response is Surv(months, alive == 0)
+Terms added sequentially (first to last)
+
+         loglik   Chisq Df Pr(>|Chi|)    
+NULL    -142.94                          
+age     -137.02 11.8488  1   0.000577 ***
+pblasts -136.64  0.7537  1   0.385319    
+pinf    -135.77  1.7308  1   0.188314    
+plab    -134.60  2.3370  1   0.126334    
+maxtemp -133.70  1.8057  1   0.179022    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+\end{verbatim}
+
+At least taken in this order, none of the variables appear to add
+significant predictive value, given that we have already accounted for
+the preceding variables.
+
+\subsection{Plotting the Survival Curve implied by Model
+B}\label{plotting-the-survival-curve-implied-by-model-b}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plot}\NormalTok{(}\KeywordTok{survfit}\NormalTok{(modB), }\DataTypeTok{ylab=}\StringTok{"Probability of Survival"}\NormalTok{, }
+     \DataTypeTok{xlab=}\StringTok{"Months in Study"}\NormalTok{, }\DataTypeTok{col=}\KeywordTok{c}\NormalTok{(}\StringTok{"red"}\NormalTok{, }\StringTok{"black"}\NormalTok{, }\StringTok{"black"}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/survival curves from Model B-1.pdf}
+
+The crosses in the plot indicate censoring points, while the drops
+indicate people who have died, and are thus no longer at risk.
+
+\subsection{Plotting the Cumulative Hazard implied by Model
+B}\label{plotting-the-cumulative-hazard-implied-by-model-b}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plot}\NormalTok{(}\KeywordTok{survfit}\NormalTok{(modB, }\DataTypeTok{type=}\StringTok{"fleming"}\NormalTok{), }\DataTypeTok{col=}\KeywordTok{c}\NormalTok{(}\StringTok{"blue"}\NormalTok{, }\StringTok{"black"}\NormalTok{, }\StringTok{"black"}\NormalTok{), }
+     \DataTypeTok{fun=}\StringTok{"cumhaz"}\NormalTok{, }\DataTypeTok{ylab=}\StringTok{"Cumulative Hazard"}\NormalTok{, }\DataTypeTok{xlab=}\StringTok{"Months in Study"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/cumulative hazard from Model B-1.pdf}
+
+\subsection{Testing the Proportional Hazards
+Assumption}\label{testing-the-proportional-hazards-assumption-1}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{cox.zph}\NormalTok{(modB, }\DataTypeTok{transform=}\StringTok{"km"}\NormalTok{, }\DataTypeTok{global=}\OtherTok{TRUE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+            rho chisq     p
+age      0.1875 1.408 0.235
+pblasts -0.1036 0.412 0.521
+pinf    -0.0962 0.359 0.549
+plab     0.1810 1.784 0.182
+maxtemp -0.2182 2.278 0.131
+GLOBAL       NA 8.852 0.115
+\end{verbatim}
+
+Note that we get a global test, and a separate test for each predictor.
+None show significant problems.
+
+\subsection{Assessing Collinearity}\label{assessing-collinearity}
+
+Perhaps we have some collinearity here, which might imply that we could
+sensibly fit a smaller model, which would be appealing anyway, with only
+45 actual events - we should probably be sticking to a model with no
+more than 2 or perhaps as many as 3 coefficients to be estimated.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{vif}\NormalTok{(modB)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+     age  pblasts     pinf     plab  maxtemp 
+1.081775 3.029862 3.000944 1.035400 1.045249 
+\end{verbatim}
+
+The variance inflation factors don't look enormous - it may be that
+removing one of these variables will help make the others look more
+significant. Let's consider a stepwise variable selection algorithm to
+see what results\ldots{}
+
+\begin{itemize}
+\tightlist
+\item
+  Note that the \texttt{leaps} library, which generates best subsets
+  output, is designed for linear regression, as is the \texttt{lars}
+  library, which generates the lasso. Either could be used here for some
+  guidance, but not with the survival object
+  \texttt{stime\ =\ Surv(months,\ age)} as the response, but instead
+  only with \texttt{months} as the outcome, which ignores the censoring.
+  The \texttt{step} procedure can be used on the survival object,
+  though.
+\end{itemize}
+
+\section{Model B2: A Stepwise Reduction of Model
+B}\label{model-b2-a-stepwise-reduction-of-model-b}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{step}\NormalTok{(modB)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Start:  AIC=277.4
+Surv(months, alive == 0) ~ age + pblasts + pinf + plab + maxtemp
+
+          Df    AIC
+- pblasts  1 275.85
+- pinf     1 277.17
+- maxtemp  1 277.21
+<none>       277.40
+- plab     1 278.42
+- age      1 286.47
+
+Step:  AIC=275.85
+Surv(months, alive == 0) ~ age + pinf + plab + maxtemp
+
+          Df    AIC
+- maxtemp  1 275.63
+<none>       275.85
+- pinf     1 275.89
+- plab     1 276.86
+- age      1 284.47
+
+Step:  AIC=275.63
+Surv(months, alive == 0) ~ age + pinf + plab
+
+       Df    AIC
+<none>    275.63
+- pinf  1 275.69
+- plab  1 275.95
+- age   1 285.52
+\end{verbatim}
+
+\begin{verbatim}
+Call:
+coxph(formula = Surv(months, alive == 0) ~ age + pinf + plab, 
+    data = leukem)
+
+         coef exp(coef) se(coef)     z       p
+age   0.03317   1.03373  0.00973  3.41 0.00065
+pinf -0.01015   0.98990  0.00709 -1.43 0.15225
+plab -0.05756   0.94407  0.03848 -1.50 0.13466
+
+Likelihood ratio test=16.2  on 3 df, p=0.00101
+n= 51, number of events= 45 
+\end{verbatim}
+
+The stepwise procedure lands on a model with three predictors. How does
+this result look, practically?
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{modB2 <-}\StringTok{ }\KeywordTok{coxph}\NormalTok{(}\KeywordTok{Surv}\NormalTok{(months, alive}\OperatorTok{==}\DecValTok{0}\NormalTok{) }\OperatorTok{~}\StringTok{ }\NormalTok{age }\OperatorTok{+}\StringTok{ }\NormalTok{pinf }\OperatorTok{+}\StringTok{ }\NormalTok{plab, }\DataTypeTok{data=}\NormalTok{leukem)}
+\KeywordTok{summary}\NormalTok{(modB2)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Call:
+coxph(formula = Surv(months, alive == 0) ~ age + pinf + plab, 
+    data = leukem)
+
+  n= 51, number of events= 45 
+
+          coef exp(coef)  se(coef)      z Pr(>|z|)    
+age   0.033171  1.033727  0.009733  3.408 0.000655 ***
+pinf -0.010147  0.989905  0.007088 -1.432 0.152246    
+plab -0.057558  0.944067  0.038476 -1.496 0.134662    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+     exp(coef) exp(-coef) lower .95 upper .95
+age     1.0337     0.9674    1.0142     1.054
+pinf    0.9899     1.0102    0.9762     1.004
+plab    0.9441     1.0592    0.8755     1.018
+
+Concordance= 0.676  (se = 0.057 )
+Rsquare= 0.273   (max possible= 0.996 )
+Likelihood ratio test= 16.25  on 3 df,   p=0.001008
+Wald test            = 15.28  on 3 df,   p=0.00159
+Score (logrank) test = 16.21  on 3 df,   p=0.001027
+\end{verbatim}
+
+\subsection{The Survival Curve implied by Model
+B2}\label{the-survival-curve-implied-by-model-b2}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plot}\NormalTok{(}\KeywordTok{survfit}\NormalTok{(modB2), }\DataTypeTok{ylab=}\StringTok{"Probability of Survival"}\NormalTok{, }\DataTypeTok{xlab=}\StringTok{"Months in Study"}\NormalTok{, }
+     \DataTypeTok{col=}\KeywordTok{c}\NormalTok{(}\StringTok{"red"}\NormalTok{, }\StringTok{"black"}\NormalTok{, }\StringTok{"black"}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/survival curves from Model B2-1.pdf}
+
+\subsection{Checking Proportional Hazards for Model
+B2}\label{checking-proportional-hazards-for-model-b2}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{cox.zph}\NormalTok{(modB2, }\DataTypeTok{transform=}\StringTok{"km"}\NormalTok{, }\DataTypeTok{global=}\OtherTok{TRUE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+          rho chisq      p
+age     0.170  1.12 0.2892
+pinf   -0.257  3.25 0.0713
+plab    0.183  1.87 0.1715
+GLOBAL     NA  6.35 0.0957
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{par}\NormalTok{(}\DataTypeTok{mfrow=}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{3}\NormalTok{))}
+\KeywordTok{plot}\NormalTok{(}\KeywordTok{cox.zph}\NormalTok{(modB2, }\DataTypeTok{transform=}\StringTok{"km"}\NormalTok{, }\DataTypeTok{global=}\OtherTok{TRUE}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/test proportional hazards for B2-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{par}\NormalTok{(}\DataTypeTok{mfrow=}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{1}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\section{Model C: Using a Spearman Plot to pick a
+model}\label{model-c-using-a-spearman-plot-to-pick-a-model}
+
+If we want to use the \textbf{Spearman} \(\rho^2\) plot to consider how
+we might perhaps incorporate non-linear terms describing any or all of
+the five potential predictors (\texttt{age}, \texttt{pblasts},
+\texttt{pinf}, \texttt{plab} and \texttt{maxtemp}) for survival time, we
+need to do so on the raw \texttt{months} variable, rather than the
+survival object (\texttt{stime\ =\ Surv(months,\ alive==0))} which
+accounts for censoring\ldots{}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plot}\NormalTok{(}\KeywordTok{spearman2}\NormalTok{(months }\OperatorTok{~}\StringTok{ }\NormalTok{age }\OperatorTok{+}\StringTok{ }\NormalTok{pblasts }\OperatorTok{+}\StringTok{ }\NormalTok{pinf }\OperatorTok{+}\StringTok{ }\NormalTok{plab }\OperatorTok{+}\StringTok{ }\NormalTok{maxtemp, }\DataTypeTok{data=}\NormalTok{leukem))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/spearman rho2 plot on months-1.pdf}
+
+Recognizing that we can probably only fit a small model safely (since we
+observe only 45 actual {[}uncensored{]} survival times) I will consider
+a non-linear term in \texttt{age} (specifically a restricted cubic
+spline with 3 knots), along with linear terms for \texttt{plab} and
+\texttt{maxtemp}. I'm mostly just looking for a new model to study for
+this example.
+
+\subsection{Fitting Model C}\label{fitting-model-c}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# still have datadist set up for leukem}
+\NormalTok{modC <-}\StringTok{ }\KeywordTok{cph}\NormalTok{(}\KeywordTok{Surv}\NormalTok{(months, alive}\OperatorTok{==}\DecValTok{0}\NormalTok{) }\OperatorTok{~}\StringTok{ }\KeywordTok{rcs}\NormalTok{(age, }\DecValTok{3}\NormalTok{) }\OperatorTok{+}\StringTok{ }\NormalTok{plab }\OperatorTok{+}\StringTok{ }\NormalTok{maxtemp, }
+            \DataTypeTok{data=}\NormalTok{leukem, }\DataTypeTok{x=}\OtherTok{TRUE}\NormalTok{, }\DataTypeTok{y=}\OtherTok{TRUE}\NormalTok{, }\DataTypeTok{surv=}\OtherTok{TRUE}\NormalTok{, }\DataTypeTok{time.inc=}\DecValTok{12}\NormalTok{)}
+\NormalTok{modC}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Cox Proportional Hazards Model
+ 
+ cph(formula = Surv(months, alive == 0) ~ rcs(age, 3) + plab + 
+     maxtemp, data = leukem, x = TRUE, y = TRUE, surv = TRUE, 
+     time.inc = 12)
+ 
+                      Model Tests       Discrimination    
+                                           Indexes        
+ Obs         51    LR chi2     19.75    R2       0.322    
+ Events      45    d.f.            4    Dxy      0.438    
+ Center 20.3856    Pr(> chi2) 0.0006    g        0.947    
+                   Score chi2  18.66    gr       2.577    
+                   Pr(> chi2) 0.0009                      
+ 
+         Coef    S.E.   Wald Z Pr(>|Z|)
+ age      0.0804 0.0283  2.84  0.0045  
+ age'    -0.0629 0.0332 -1.90  0.0580  
+ plab    -0.0736 0.0381 -1.93  0.0536  
+ maxtemp  0.1788 0.1145  1.56  0.1184  
+ 
+\end{verbatim}
+
+\subsection{ANOVA for Model C}\label{anova-for-model-c}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{anova}\NormalTok{(modC)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+                Wald Statistics          Response: Surv(months, alive == 0) 
+
+ Factor     Chi-Square d.f. P     
+ age        11.55      2    0.0031
+  Nonlinear  3.59      1    0.0580
+ plab        3.73      1    0.0536
+ maxtemp     2.44      1    0.1184
+ TOTAL      17.13      4    0.0018
+\end{verbatim}
+
+\subsection{Summarizing Model C Effect
+Sizes}\label{summarizing-model-c-effect-sizes}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{summary}\NormalTok{(modC)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+             Effects              Response : Surv(months, alive == 0) 
+
+ Factor        Low  High  Diff. Effect   S.E.    Lower 0.95 Upper 0.95
+ age           35.0  61.0 26.0   1.06010 0.31559  0.44152   1.6786000 
+  Hazard Ratio 35.0  61.0 26.0   2.88650      NA  1.55510   5.3580000 
+ plab           6.5  13.5  7.0  -0.51511 0.26686 -1.03820   0.0079317 
+  Hazard Ratio  6.5  13.5  7.0   0.59744      NA  0.35411   1.0080000 
+ maxtemp       98.6 100.5  1.9   0.33979 0.21758 -0.08666   0.7662400 
+  Hazard Ratio 98.6 100.5  1.9   1.40470      NA  0.91699   2.1517000 
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plot}\NormalTok{(}\KeywordTok{summary}\NormalTok{(modC))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/effect summaries for model C-1.pdf}
+
+\subsection{\texorpdfstring{Plotting the diagnosis \texttt{age} effect
+in Model
+C}{Plotting the diagnosis age effect in Model C}}\label{plotting-the-diagnosis-age-effect-in-model-c}
+
+Of course, we're no longer assuming that the log relative hazard is
+linear in \texttt{age}, once we include a restricted cubic spline for
+\texttt{age} in our Model C. So our hazard ratio and confidence
+intervals for \texttt{age} are a bit trickier to understand.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{exp}\NormalTok{(}\KeywordTok{coef}\NormalTok{(modC))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+      age      age'      plab   maxtemp 
+1.0837479 0.9390008 0.9290553 1.1958265 
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{exp}\NormalTok{(}\KeywordTok{confint}\NormalTok{(modC))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+            2.5 %   97.5 %
+age     1.0252687 1.145563
+age'    0.8798328 1.002148
+plab    0.8621662 1.001134
+maxtemp 0.9554141 1.496734
+\end{verbatim}
+
+We can use \texttt{ggplot} and the \texttt{Predict} function to produce
+plots of the log Relative Hazard associated with any of our predictors,
+while holding the others constant at their medians. The effects of
+\texttt{maxtemp} and \texttt{plab} in our Model C are linear in the log
+Relative Hazard, but \texttt{age}, thanks to our use of a restricted
+cubic spline with 3 knots, shows a single bend.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{Predict}\NormalTok{(modC, age))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/model C age effect-1.pdf}
+
+\subsection{Survival Plot associated with Model
+C}\label{survival-plot-associated-with-model-c}
+
+Let's look at a survival plot associated with Model C for a subject with
+median values of our three predictors.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{survplot}\NormalTok{(modC, }\DataTypeTok{age=}\KeywordTok{median}\NormalTok{(leukem}\OperatorTok{$}\NormalTok{age), }\DataTypeTok{conf.int=}\FloatTok{0.95}\NormalTok{, }\DataTypeTok{col=}\StringTok{"blue"}\NormalTok{, }
+         \DataTypeTok{time.inc=}\DecValTok{12}\NormalTok{, }\DataTypeTok{n.risk=}\OtherTok{TRUE}\NormalTok{, }\DataTypeTok{conf=}\StringTok{'bands'}\NormalTok{,}
+         \DataTypeTok{xlab=}\StringTok{"Study Time in Months"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/survplot for model C-1.pdf}
+
+As before, we could fit such a plot to compare results across multiple
+\texttt{age} values, if desired.
+
+\subsection{Checking the Proportional Hazards
+Assumption}\label{checking-the-proportional-hazards-assumption-1}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{cox.zph}\NormalTok{(modC, }\DataTypeTok{transform=}\StringTok{"km"}\NormalTok{, }\DataTypeTok{global=}\OtherTok{TRUE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+           rho chisq      p
+age     -0.113 0.593 0.4411
+age'     0.181 1.643 0.1999
+plab     0.214 2.559 0.1097
+maxtemp -0.229 2.787 0.0951
+GLOBAL      NA 5.974 0.2011
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{par}\NormalTok{(}\DataTypeTok{mfrow=}\KeywordTok{c}\NormalTok{(}\DecValTok{2}\NormalTok{,}\DecValTok{2}\NormalTok{))}
+\KeywordTok{plot}\NormalTok{(}\KeywordTok{cox.zph}\NormalTok{(modC, }\DataTypeTok{transform=}\StringTok{"km"}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/test proportional hazards for C-1.pdf}
+
+\subsection{Model C Nomogram}\label{model-c-nomogram}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{sv <-}\StringTok{ }\KeywordTok{Survival}\NormalTok{(modC)}
+\NormalTok{surv12 <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(x) }\KeywordTok{sv}\NormalTok{(}\DecValTok{12}\NormalTok{, }\DataTypeTok{lp=}\NormalTok{x)}
+\NormalTok{surv24 <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(x) }\KeywordTok{sv}\NormalTok{(}\DecValTok{24}\NormalTok{, }\DataTypeTok{lp=}\NormalTok{x)}
+
+\KeywordTok{plot}\NormalTok{(}\KeywordTok{nomogram}\NormalTok{(modC, }\DataTypeTok{fun=}\KeywordTok{list}\NormalTok{(surv12, surv24), }
+              \DataTypeTok{funlabel=}\KeywordTok{c}\NormalTok{(}\StringTok{'12-month survival'}\NormalTok{, }\StringTok{'24-month survival'}\NormalTok{)))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/nomogram of model C-1.pdf}
+
+\subsection{Validating Model C's Summary
+Statistics}\label{validating-model-cs-summary-statistics}
+
+We can validate the model for Somers' \(D_{xy}\), which is the rank
+correlation between the predicted log hazard and observed survival time,
+and for slope shrinkage.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{43234}\NormalTok{); }\KeywordTok{validate}\NormalTok{(modC, }\DataTypeTok{B=}\DecValTok{100}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+      index.orig training   test optimism index.corrected   n
+Dxy       0.4385   0.4847 0.4194   0.0652          0.3732 100
+R2        0.3222   0.3802 0.2874   0.0928          0.2294 100
+Slope     1.0000   1.0000 0.8155   0.1845          0.8155 100
+D         0.0656   0.0832 0.0569   0.0263          0.0393 100
+U        -0.0070  -0.0070 0.0076  -0.0147          0.0077 100
+Q         0.0726   0.0902 0.0492   0.0410          0.0316 100
+g         0.9466   1.0919 0.8573   0.2346          0.7119 100
+\end{verbatim}
+
+\subsection{Calibration of Model C (12-month survival
+estimates)}\label{calibration-of-model-c-12-month-survival-estimates}
+
+Finally, we validate the model for calibration accuracy in predicting
+the probability of surviving one year.
+
+Quoting Harrell (page 529, RMS second edition):
+
+\begin{quote}
+The bootstrap is used to estimate the optimism in how well predicted
+{[}one{]}-year survival from the final Cox model tracks flexible smooth
+estimates, without any binning of predicted survival probabilities or
+assuming proportional hazards.
+\end{quote}
+
+The \texttt{u} variable specifies the length of time at which we look at
+the calibration. I've specified the \texttt{units} earlier to be months.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{43233}\NormalTok{); }\KeywordTok{plot}\NormalTok{(rms}\OperatorTok{::}\KeywordTok{calibrate}\NormalTok{(modC, }\DataTypeTok{B =} \DecValTok{10}\NormalTok{, }\DataTypeTok{u =} \DecValTok{12}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Using Cox survival estimates at 12 months
+\end{verbatim}
+
+\includegraphics{bookdown-demo_files/figure-latex/calibration of model C-1.pdf}
+
+The model seems neither especially well calibrated nor especially poorly
+so - looking at the comparison of the blue curve to the gray, our
+predictions basically aren't aggressive enough - more people are
+surviving to a year in our low predicted probability of 12 month
+survival group, and fewer people are surviving on the high end of the
+x-axis than should be the case.
 
 \bibliography{text.bib}
 

@@ -42,6 +42,7 @@ colscr <- read.csv("data/screening.csv") %>% tbl_df
 colscr2 <- read.csv("data/screening2.csv") %>% tbl_df
 authorship <- read_csv("data/authorship.csv") 
 hem <- read.csv("data/hem.csv") %>% tbl_df
+leukem <- read.csv("data/leukem.csv") %>% tbl_df
 ```
 
 # Special Functions used in these notes {-}
