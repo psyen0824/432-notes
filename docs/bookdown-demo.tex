@@ -124,7 +124,7 @@
   \postauthor{\par}
   \predate{\centering\large\emph}
   \postdate{\par}
-  \date{Built 2018-04-04 23:04:18}
+  \date{Built 2018-04-07 13:29:39}
 
 \usepackage{booktabs}
 \usepackage{amsthm}
@@ -218,6 +218,9 @@ Here, we'll load in the packages used in these notes.
 \KeywordTok{library}\NormalTok{(magrittr)}
 \KeywordTok{library}\NormalTok{(pander)}
 \KeywordTok{library}\NormalTok{(arm)}
+\KeywordTok{library}\NormalTok{(survival)}
+\KeywordTok{library}\NormalTok{(OIsurv)}
+\KeywordTok{library}\NormalTok{(survminer)}
 \KeywordTok{library}\NormalTok{(rms)}
 \KeywordTok{library}\NormalTok{(leaps)}
 \KeywordTok{library}\NormalTok{(lars)}
@@ -264,6 +267,12 @@ cols(
 \begin{verbatim}
 See spec(...) for full column specifications.
 \end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{hem <-}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(}\StringTok{"data/hem.csv"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }\NormalTok{tbl_df}
+\end{Highlighting}
+\end{Shaded}
 
 \chapter*{Special Functions used in these
 notes}\label{special-functions-used-in-these-notes}
@@ -29691,6 +29700,997 @@ Compare this to what we see in the raw counts of the word ``been''.
   Fly, envious Time, till thou run out thy race \ldots{} John Milton
   \emph{On Time}
 \end{enumerate}
+
+\chapter{Exploring Time To Event / Survival
+Data}\label{exploring-time-to-event-survival-data}
+
+In many medical studies, the main outcome variable is the time to the
+occurrence of a particular event.
+
+\begin{itemize}
+\tightlist
+\item
+  In a randomized controlled trial of cancer, for instance, surgery,
+  radiation, and chemotherapy might be compared with respect to time
+  from randomization and the start of therapy until death.
+
+  \begin{itemize}
+  \tightlist
+  \item
+    In this case, the event of interest is the death of a patient, but
+    in other situations it might be remission from a disease, relief
+    from symptoms or the recurrence of a particular condition.
+  \item
+    Such observations are generally referred to by the generic term
+    \textbf{survival data} even when the endpoint or event being
+    considered is not death but something else.
+  \end{itemize}
+\end{itemize}
+
+These notes on survival analysis are just an introduction to the key
+ideas of the field. The PQHS department offers an entire course on
+survival analysis (PQHS 435) and I recommend that to those of you
+interested in deeper learning about the approaches we'll discuss, or in
+learning more about other approaches to survival analysis.
+
+The OpenIntro Statistics extra material on
+\href{https://www.openintro.org/stat/surv.php}{Survival Analysis in R,
+written by David Diez} is a very useful guide to survival analysis in R,
+using the \texttt{survival} package and supplemented by the
+\texttt{KMsurv} and \texttt{OIsurv} packages. A PDF version of that
+material is available, along with a full set of the code used in that
+guide.
+
+\section{An Outline of Key Topics Discussed in these
+Notes}\label{an-outline-of-key-topics-discussed-in-these-notes}
+
+In this chapter, we tackle the building blocks of survival analysis, and
+use R to work with survival objects.
+
+\begin{itemize}
+\tightlist
+\item
+  The Survival Function, \(S(t)\)
+
+  \begin{itemize}
+  \tightlist
+  \item
+    The Kaplan-Meier Estimate/Plot
+  \item
+    Comparing Survival Functions with log rank test
+  \end{itemize}
+\item
+  The Hazard Function, \(H(t) = -log(S(t))\)
+\item
+  Using \texttt{survival} and related packages in R
+\end{itemize}
+
+In the next chapter, we introduce the the Cox Proportional Hazards
+Regression Model, one of several available models for fitting
+regressions to time-to-event (survival) outcomes.
+
+\section{Foundations of Survival
+Analysis}\label{foundations-of-survival-analysis}
+
+Survival analysis is concerned with \emph{prospective} studies, where we
+start with a cohort of subjects and follow them forwards in time to
+determine some clinical outcome. Follow-up continues until either some
+event of interest occurs, the study ends, or further observation becomes
+impossible.
+
+The outcomes in a survival analysis consist of the subject's
+\textbf{fate} and \textbf{length of follow-up} at the end of the study.
+
+\begin{itemize}
+\tightlist
+\item
+  For some patients, the outcome of interest may not occur during
+  follow-up.
+\item
+  For such patients, whose follow-up time is \emph{censored}, we know
+  only that this event did not occur while the patient was being
+  followed. We do not know whether or not it will occur at some later
+  time.
+\end{itemize}
+
+The primary problems with survival data are \emph{non-normality} and
+\emph{censoring}\ldots{}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Survival data are quantitative, but not symmetrically distributed.
+  They will often appear positively skewed, with a few people surviving
+  a very long time compared with the majority; so assuming a normal
+  distribution will not be reasonable.
+\item
+  At the completion of the study, some patients may not have reached the
+  endpoint of interest (death, relapse, etc.). Consequently, the exact
+  survival times are not known.
+\end{enumerate}
+
+\begin{itemize}
+\tightlist
+\item
+  All that is known is that the survival times are greater than the
+  amount of time the individual has been in the study.
+\item
+  The survival times of these individuals are said to be
+  \textbf{censored} (precisely, they are right-censored).
+\end{itemize}
+
+\subsection{\texorpdfstring{The Survival Function,
+\(S(t)\)}{The Survival Function, S(t)}}\label{the-survival-function-st}
+
+The \textbf{survival function}, \(S(t)\) (sometimes called the survivor
+function) is the probability that the survival time, \(T\), is greater
+than or equal to a particular time, \(t\).
+
+\begin{itemize}
+\tightlist
+\item
+  \(S(t)\) = proportion of people surviving to time \(t\) or beyond
+\end{itemize}
+
+If there's no censoring, the survival function is easy to estimate.
+
+\[
+\hat{S}(t) = \frac{\# \mbox{ of subjects with survival times } \geq t}{n}
+\]
+
+but this won't work if there is censoring.
+
+\subsection{Kaplan-Meier Estimator of the Survival
+Function}\label{kaplan-meier-estimator-of-the-survival-function}
+
+The survival function \(S(t)\) is the probability of surviving until at
+least time \(t\). It is essentially estimated by the number of patients
+alive at time \(t\) divided by the total number of study subjects
+remaining at that time.
+
+The Kaplan-Meier estimator first orders the (unique) survival times from
+smallest to largest, then estimates the survival function at each unique
+survival time.
+
+\begin{itemize}
+\tightlist
+\item
+  The survival function at the second death time, \(t_{(2)}\) is equal
+  to the estimated probability of not dying at time \(t_{(2)}\)
+  conditional on the individual being still at risk at time \(t_{(2)}\).
+\end{itemize}
+
+In the presence of censoring, the survival function is estimated as
+follows.
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Order the survival times from smallest to largest, where t\_\{(j)\} is
+  the \(j\)th largest unique survival time, so we have\ldots{}
+\end{enumerate}
+
+\[
+t_{(1)} \leq t_{(2)} \leq t_{(3)} \leq ... t_{(n)}
+\]
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{1}
+\tightlist
+\item
+  The Kaplan-Meier estimate of the survival function is
+\end{enumerate}
+
+\[
+\hat{S}(t) = \prod_{j: t_{(j)} \leq t} (1 - \frac{d_j}{r_j})
+\]
+
+where \(r_j\) is the number of people at risk just before \(t_{(j)}\),
+including those censored at time \(t_{(j)}\), and \(d_j\) is the number
+of people who experience the event at time \(t_{(j)}\).
+
+When we want to compare survival functions (or their Kaplan-Meier
+estimates, at least) we'll use a \textbf{log rank test} or one of
+several extensions of that test.
+
+\subsection{Creating a Survival Object in
+R}\label{creating-a-survival-object-in-r}
+
+To do survival analysis in R, we're going to start with three main
+functions, all in the \texttt{survival} package:
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{Surv} creates a survival object
+\item
+  \texttt{survfit} builds a Kaplan-Meier test, and the results may be
+  plotted, as we've seen.
+\item
+  \texttt{survdiff} builds a log rank test, that will let us compare two
+  survival functions, as well as running several alternatives.
+\end{itemize}
+
+Plus, we'll build out some estimates of the hazard function.
+
+The \texttt{Surv} function, part of the \texttt{survival} package in R,
+will create a \textbf{survival object} from two arguments:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \texttt{time} = follow-up time
+\item
+  \texttt{event} = a status indicator, where
+
+  \begin{itemize}
+  \tightlist
+  \item
+    event = 1 or TRUE means the event was observed (for instance, the
+    patient died)
+  \item
+    event = 0 or FALSE means the follow-up time was censored
+  \end{itemize}
+\end{enumerate}
+
+\section{A First Example: Recurrent Lobar Intracerebral
+Hemorrhage}\label{a-first-example-recurrent-lobar-intracerebral-hemorrhage}
+
+O'Donnell et al. (2000) studied the effect of the apolipoprotein E gene
+on the risk of recurrent lobar intracerebral hemorrhage in 70 patients
+who survived such a hemorrhage\footnote{These data come from Dupont WD
+  (2002) Statistical Modeling for Biomedical Researchers. New York:
+  Cambridge U. Press, section 6.4.}. Patients in the study are
+classified by:
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{time} = follow-up time, in months
+\item
+  \texttt{recur} = indicator of whether or not they had a recurrent
+  event (1 = subject had a recurrence, 0 subject did not have a
+  recurrence), and
+\item
+  \texttt{genotype} = the subject's apolipoprotein E genotype (0 =
+  Homozygous \(\epsilon3/\epsilon3\) and 1 = At least one \(\epsilon2\)
+  or \(\epsilon4\) allele)
+\end{itemize}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{hem }\OperatorTok{%>%}\StringTok{ }\KeywordTok{head}\NormalTok{(.,}\DecValTok{4}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+# A tibble: 4 x 4
+     id genotype  time recur
+  <int>    <int> <dbl> <int>
+1     1        0 0.230     1
+2     2        0 1.05      0
+3     3        1 1.38      0
+4     4        1 1.41      1
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{table}\NormalTok{(hem}\OperatorTok{$}\NormalTok{recur)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+
+ 0  1 
+52 18 
+\end{verbatim}
+
+We have 70 patients at the start, and observe 18 events (rest are
+censored.)
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{hem }\OperatorTok{%>%}\StringTok{ }\KeywordTok{group_by}\NormalTok{(recur) }\OperatorTok{%>%}\StringTok{ }\KeywordTok{skim}\NormalTok{(time)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Skim summary statistics
+ n obs: 70 
+ n variables: 4 
+ group variables: recur 
+
+Variable type: numeric 
+ recur variable missing complete  n  mean    sd   p0   p25 median   p75
+     0     time       0       52 52 25.51 14.68 1.05 14.41  23.01 38.64
+     1     time       0       18 18 14.99 13.89 0.23  3.37  10.92 24.85
+  p100
+ 53.88
+ 42.87
+\end{verbatim}
+
+The median survival time looks like 23 weeks in the patients who do not
+exhibit a recurrence, but only 11 weeks in those who do.
+
+\subsection{Building a Survival
+Object}\label{building-a-survival-object}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{hemsurv <-}\StringTok{ }\KeywordTok{Surv}\NormalTok{(}\DataTypeTok{time =}\NormalTok{ hem}\OperatorTok{$}\NormalTok{time, }\DataTypeTok{event =}\NormalTok{ hem}\OperatorTok{$}\NormalTok{recur)}
+
+\KeywordTok{head}\NormalTok{(hemsurv, }\DecValTok{4}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+[1] 0.2299795  1.0513350+ 1.3798770+ 1.4127311 
+\end{verbatim}
+
+This object both displays the survival time for each subject, and
+indicates whether or not the subject's follow-up was \emph{censored}
+before a recurrent event occurred. Survival times with a \texttt{+} sign
+indicate censoring.
+
+\begin{itemize}
+\tightlist
+\item
+  Subject 1 lived for 0.23 months hemorrhage-free and then had a
+  recurrence.
+\item
+  Subject 2 lived for 1.05 months hemorrhage-free, at which point they
+  were censored (perhaps because the study ended, or perhaps because the
+  subject was no longer available for follow-up)
+\end{itemize}
+
+Remember that 18 of the subjects experienced a recurrent hemorrhage, and
+the other 52 are therefore censored.
+
+\subsection{Kaplan-Meier Estimate of the Survival
+Function}\label{kaplan-meier-estimate-of-the-survival-function}
+
+To build a Kaplan-Meier estimate of the survival function (to account
+properly for censoring), we take the survival object we have created,
+and use the \texttt{survfit} function from the \texttt{survival}
+package.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{hemfit1 <-}\StringTok{ }\KeywordTok{survfit}\NormalTok{(hemsurv }\OperatorTok{~}\StringTok{ }\DecValTok{1}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+We can look at the \texttt{hemfit1} object directly, although the K-M
+estimate is usually plotted.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{print}\NormalTok{(hemfit1, }\DataTypeTok{print.rmean=}\OtherTok{TRUE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Call: survfit(formula = hemsurv ~ 1)
+
+         n     events     *rmean *se(rmean)     median    0.95LCL 
+     70.00      18.00      40.37       2.63         NA      42.87 
+   0.95UCL 
+        NA 
+    * restricted mean with upper limit =  53.9 
+\end{verbatim}
+
+We see that 18 events occurred out of a total of 70 subjects. The median
+survival time is listed as \texttt{NA} (missing) which implies it cannot
+be estimated by this simple model.
+
+\begin{itemize}
+\tightlist
+\item
+  This is because only 18 of our 70 subjects have a known
+  recurrence-free survival time (the rest are censored), so we don't
+  actually know what the median survival time will be across our 70
+  subjects. Apparently, R can produce a lower bound on a 95\% confidence
+  interval for the median survival time, but not the actual point
+  estimate.
+\end{itemize}
+
+We also observe a \textbf{restricted mean survival time} estimate. The
+restricted mean uses as its upper limit the largest observed or censored
+survival time, which here is a censored value: 53.9 months. So it is the
+mean survival time, assuming all censored subjects lived hemorrhage-free
+for 53.9 months.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{summary}\NormalTok{(hemfit1)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Call: survfit(formula = hemsurv ~ 1)
+
+  time n.risk n.event survival std.err lower 95% CI upper 95% CI
+  0.23     70       1    0.986  0.0142        0.958        1.000
+  1.41     67       1    0.971  0.0202        0.932        1.000
+  1.58     65       1    0.956  0.0248        0.909        1.000
+  3.06     63       1    0.941  0.0287        0.886        0.999
+  3.32     62       1    0.926  0.0320        0.865        0.991
+  3.52     61       1    0.911  0.0349        0.845        0.982
+  3.55     60       1    0.895  0.0375        0.825        0.972
+  4.76     57       1    0.880  0.0400        0.805        0.962
+  9.53     54       1    0.863  0.0424        0.784        0.951
+ 12.32     50       1    0.846  0.0449        0.762        0.939
+ 15.57     46       1    0.828  0.0476        0.740        0.926
+ 19.15     38       1    0.806  0.0511        0.712        0.912
+ 24.77     32       1    0.781  0.0553        0.679        0.897
+ 24.87     31       1    0.756  0.0590        0.648        0.881
+ 28.09     26       1    0.726  0.0635        0.612        0.862
+ 33.61     22       1    0.693  0.0687        0.571        0.842
+ 37.52     17       1    0.653  0.0758        0.520        0.819
+ 42.87      8       1    0.571  0.1011        0.404        0.808
+\end{verbatim}
+
+This written summary provides us with lots of detail on the Kaplan-Meier
+estimate. In particular, the first two lines of this summary can be read
+to indicate the following.
+
+\begin{itemize}
+\tightlist
+\item
+  Up to time 0.23 months, no patients had a recurrence. Then, an event
+  occurred, and the estimated survival (i.e.~non-recurrence) probability
+  is reduced from 1 to 0.986.
+\item
+  By time 1.41 months, when the next event occurred, only 67 patients
+  remained at risk. This is because one of them had a recurrent
+  hemorrhage already (at 0.23 months) and two others had been
+  right-censored. The estimated hemorrhage-free survival probability
+  estimate starting at time 1.41 months is now 0.971.
+\end{itemize}
+
+A Kaplan-Meier plot graphically represents this summary.
+
+\subsection{The Kaplan-Meier Plot, using Base
+R}\label{the-kaplan-meier-plot-using-base-r}
+
+Now, let's plot the Kaplan-Meier estimate, so we can see what is going
+on.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plot}\NormalTok{(hemfit1, }\DataTypeTok{ylab=}\StringTok{"Pr(Hemorrhage-Free Survival)"}\NormalTok{,}
+     \DataTypeTok{xlab=}\StringTok{"Months of Follow-Up"}\NormalTok{,}
+     \DataTypeTok{main=}\StringTok{"Kaplan-Meier Plot for hem Data"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/surv_hem_base_KMplot_no_genotype-1.pdf}
+
+The solid line indicates estimated hemorrhage-free survival probability.
+The dotted lines identify pointwise confidence intervals (default 95\%).
+
+\begin{itemize}
+\tightlist
+\item
+  For example, we see that the estimated probability of hemorrhage-free
+  survival to 20 months is estimated to be about 0.8
+\item
+  The estimated probability of hemorrhage-free survival to 50 months is
+  estimated to be about 0.6
+\end{itemize}
+
+The steps down indicate events (recurrences.) The estimated probability
+of survival to 0 months starts at 1, and drops down at each time point
+where an event (or more than one event) is observed.
+
+\subsection{\texorpdfstring{Using \texttt{survminer} to draw survival
+curves}{Using survminer to draw survival curves}}\label{using-survminer-to-draw-survival-curves}
+
+Another approach to plotting the Kaplan-Meier estimate comes from
+\texttt{ggsurvplot}, from the \texttt{survminer} package.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{ggsurvplot}\NormalTok{(hemfit1, }\DataTypeTok{data =}\NormalTok{ hem)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-538-1.pdf}
+
+Again, the solid line indicates estimated hemorrhage-free survival
+probability. The crosses indicate censoring. The steps down indicate
+events (recurrences,) and the shading indicates (default 95\%) pointwise
+confidence intervals. By \textbf{pointwise} confidence intervals, I mean
+that these bounds apply only to individual points in the time scale.
+
+For more on an alternative approach, using \emph{simultaneous confidence
+bands}, visit the OpenIntro Statistics
+\href{https://www.openintro.org/stat/surv.php}{Survival Analysis in R
+materials, written by David Diez}, which are also posted on
+\href{https://github.com/THOMASELOVE/432-2018/blob/master/texts/Diez_OpenIntro_survival_analysis_in_R.pdf}{our
+web site}.
+
+\subsection{\texorpdfstring{A ``Fancy'' K-M Plot with a number at risk
+table}{A Fancy K-M Plot with a number at risk table}}\label{a-fancy-k-m-plot-with-a-number-at-risk-table}
+
+We can do a lot more with these plots. Following the suggestions at
+\url{https://github.com/kassambara/survminer/} we can create the
+following\ldots{}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{ggsurvplot}\NormalTok{(hemfit1, }\DataTypeTok{data =}\NormalTok{ hem,}
+   \DataTypeTok{conf.int =} \OtherTok{TRUE}\NormalTok{, }\CommentTok{# Add confidence interval}
+   \DataTypeTok{risk.table =} \OtherTok{TRUE}\NormalTok{, }\CommentTok{# Add risk table}
+   \DataTypeTok{xlab =} \StringTok{"Time in months"}\NormalTok{, }\CommentTok{# adjust X axis label}
+   \DataTypeTok{break.time.by =} \DecValTok{12} \CommentTok{# add tick every 12 months}
+\NormalTok{   )}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-539-1.pdf}
+
+This sort of plot is really designed to work best when we compare
+multiple groups in terms of their survival. So let's do that.
+
+\section{Comparing Survival Across the Two
+Genotypes}\label{comparing-survival-across-the-two-genotypes}
+
+Now, suppose we want to compare the hemorrhage-free survival functions
+for subjects classified by their apoliprotein E genotype. Working with
+the same survival object \texttt{hemsurv} we now run the
+\texttt{survfit} function to compare across the two \texttt{genotype}
+groups.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{hemfit2 <-}\StringTok{ }\KeywordTok{survfit}\NormalTok{(hemsurv }\OperatorTok{~}\StringTok{ }\NormalTok{hem}\OperatorTok{$}\NormalTok{genotype)}
+\KeywordTok{print}\NormalTok{(hemfit2, }\DataTypeTok{print.rmean=}\OtherTok{TRUE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Call: survfit(formula = hemsurv ~ hem$genotype)
+
+                n events *rmean *se(rmean) median 0.95LCL 0.95UCL
+hem$genotype=0 32      4   44.8       2.64     NA      NA      NA
+hem$genotype=1 38     14   32.7       3.43   37.5    24.9      NA
+    * restricted mean with upper limit =  50.4 
+\end{verbatim}
+
+\begin{itemize}
+\tightlist
+\item
+  In \texttt{genotype\ =\ 0} (the subjects who are Homozygous
+  \(\epsilon3/\epsilon3\),) we had 32 subjects, and observed 4 recurrent
+  hemorrhages. Our estimated restricted mean survival time in those
+  subjects is 44.8 months and we cannot estimate a median survival time
+  because only a small fraction of our subjects were not censored.
+\item
+  In \texttt{genotype\ =\ 1} (subjects who have at least one
+  \(\epsilon2\) or \(\epsilon4\) allele,) we had 38 subjects and
+  observed 14 recurrences. The estimated restricted mean survival time
+  is 32.7 months in these subjects, and we can (it seems) estimate a
+  median survival time in this group of 37.5 months. Note that we don't
+  actually need to observe the event in half of the subjects to estimate
+  a median survival time.
+\end{itemize}
+
+\subsection{Kaplan-Meier Survival Function Estimates, by
+Genotype}\label{kaplan-meier-survival-function-estimates-by-genotype}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plot}\NormalTok{(hemfit2, }\DataTypeTok{main=}\StringTok{"Kaplan-Meier Curve by Genotype"}\NormalTok{, }
+     \DataTypeTok{ylab=}\StringTok{"Probability of Hemorrhage-Free Survival"}\NormalTok{, }
+     \DataTypeTok{xlab=}\StringTok{"Months of Follow-Up"}\NormalTok{, }\DataTypeTok{col=}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{2}\NormalTok{), }\DataTypeTok{lty=}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{2}\NormalTok{))}
+\KeywordTok{legend}\NormalTok{(}\DecValTok{5}\NormalTok{,.}\DecValTok{4}\NormalTok{, }\DataTypeTok{legend=}\KeywordTok{c}\NormalTok{(}
+  \KeywordTok{expression}\NormalTok{(}\KeywordTok{paste}\NormalTok{(}\StringTok{"Homozygous "}\NormalTok{, epsilon, }\StringTok{"3 / "}\NormalTok{, }
+\NormalTok{                   epsilon, }\StringTok{"3"}\NormalTok{)), }
+  \KeywordTok{expression}\NormalTok{(}\KeywordTok{paste}\NormalTok{(}\StringTok{"At least one "}\NormalTok{, epsilon,}\StringTok{"2 or "}\NormalTok{,}
+\NormalTok{                   epsilon,}\StringTok{"4 Allele"}\NormalTok{))), }
+  \DataTypeTok{text.col=}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{2}\NormalTok{), }\DataTypeTok{col=}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{2}\NormalTok{), }\DataTypeTok{lty=}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{2}\NormalTok{), }\DataTypeTok{bty=}\StringTok{"n"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/km plot for hemfit2-1.pdf}
+
+It appears that patients who were homozygous for the \(\epsilon3\)
+allele of this gene (i.e. \texttt{genotype} = 0 in the hemorrhage data)
+had a much better prognosis than others (\texttt{genotype} = 1).
+
+\subsection{\texorpdfstring{Plotting the K-M comparison with
+\texttt{ggsurvplot}}{Plotting the K-M comparison with ggsurvplot}}\label{plotting-the-k-m-comparison-with-ggsurvplot}
+
+I find I have to crank the \texttt{fig.height} in Markdown up to at
+least 6 to get the risk table to show up nicely in this setting.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{ggsurvplot}\NormalTok{(hemfit2, }\DataTypeTok{data =}\NormalTok{ hem,}
+           \DataTypeTok{conf.int =} \OtherTok{TRUE}\NormalTok{,}
+           \DataTypeTok{xlab =} \StringTok{"Time in months"}\NormalTok{,}
+           \DataTypeTok{break.time.by =} \DecValTok{12}\NormalTok{,}
+           \DataTypeTok{legend.labs =} \KeywordTok{c}\NormalTok{(}\StringTok{"Homozygous"}\NormalTok{, }\StringTok{"Heterozygous"}\NormalTok{),}
+           \DataTypeTok{risk.table =} \OtherTok{TRUE}\NormalTok{,}
+           \DataTypeTok{risk.table.height =} \FloatTok{0.25}
+\NormalTok{           )}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-540-1.pdf}
+
+\section{Testing the difference between two survival
+curves}\label{testing-the-difference-between-two-survival-curves}
+
+To obtain a significance test comparing these two survival curves, we
+turn to a \emph{log rank} test, which tests the null hypothesis
+\(H_0: S_1(t) = S_2(t)\) for all \(t\) where the two exposures have
+survival functions \(S_1(t)\) and \(S_2(t)\). We use the
+\texttt{survdiff} function to explore this test, which uses a \(\chi^2\)
+statistic to do the testing.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{survdiff}\NormalTok{(hemsurv }\OperatorTok{~}\StringTok{ }\NormalTok{hem}\OperatorTok{$}\NormalTok{genotype)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Call:
+survdiff(formula = hemsurv ~ hem$genotype)
+
+                N Observed Expected (O-E)^2/E (O-E)^2/V
+hem$genotype=0 32        4     9.28      3.00      6.28
+hem$genotype=1 38       14     8.72      3.19      6.28
+
+ Chisq= 6.3  on 1 degrees of freedom, p= 0.0122 
+\end{verbatim}
+
+Based on the log rank test, we conclude that there is a statistically
+significant difference (\(p\) = .0122) between the hemorrhage-free
+survival curves for the two genotypes, as shown in the Kaplan-Meier
+plot.
+
+\begin{itemize}
+\tightlist
+\item
+  The log rank test generalizes to permit survival comparisons across
+  more than two groups, with the test statistic having an asymptotic
+  chi-squared distribution with one degree of freedom less than the
+  number of patient groups being compared.
+\end{itemize}
+
+\subsection{Alternative log rank
+tests}\label{alternative-log-rank-tests}
+
+An alternative approach to testing is the \emph{Peto and Peto
+modification of the Gehan-Wilcoxon test}, which results from adding
+\texttt{rho=1} to the \texttt{survdiff} function (\texttt{rho=0}, the
+default, yields the log rank test.)
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{survdiff}\NormalTok{(hemsurv }\OperatorTok{~}\StringTok{ }\NormalTok{hem}\OperatorTok{$}\NormalTok{genotype, }\DataTypeTok{rho=}\DecValTok{1}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Call:
+survdiff(formula = hemsurv ~ hem$genotype, rho = 1)
+
+                N Observed Expected (O-E)^2/E (O-E)^2/V
+hem$genotype=0 32     3.63     7.87      2.29      5.46
+hem$genotype=1 38    11.79     7.54      2.39      5.46
+
+ Chisq= 5.5  on 1 degrees of freedom, p= 0.0194 
+\end{verbatim}
+
+As compared to the log rank test, this Peto-Peto modification (and
+others using \texttt{rho\ \textgreater{}\ 0}) give greater weight to the
+left hand (earlier) side of the survival curves.
+
+\begin{itemize}
+\tightlist
+\item
+  To obtain chi-square tests that give greater weight to the right hand
+  (later) side of the survival curves than the log rank test, use a
+  \texttt{rho} value which is less than 0.
+\end{itemize}
+
+\section{\texorpdfstring{A ``Fancy'' K-M Plot with a number at risk
+table}{A Fancy K-M Plot with a number at risk table}}\label{a-fancy-k-m-plot-with-a-number-at-risk-table-1}
+
+We can add the log rank test result to our ``fancy'' K-M plot. Visit
+\url{https://github.com/kassambara/survminer/} for more options.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{ggsurvplot}\NormalTok{(hemfit2, }\DataTypeTok{data =}\NormalTok{ hem, }\DataTypeTok{size =} \DecValTok{1}\NormalTok{,}
+   \DataTypeTok{palette =} \KeywordTok{c}\NormalTok{(}\StringTok{"purple"}\NormalTok{, }\StringTok{"darkgoldenrod"}\NormalTok{), }\CommentTok{# custom colors}
+   \DataTypeTok{conf.int =} \OtherTok{TRUE}\NormalTok{, }\CommentTok{# Add confidence interval}
+   \DataTypeTok{pval =} \OtherTok{TRUE}\NormalTok{, }\CommentTok{# Add p-value}
+   \DataTypeTok{risk.table =} \OtherTok{TRUE}\NormalTok{, }\CommentTok{# Add risk table}
+   \DataTypeTok{risk.table.height =} \FloatTok{0.25}\NormalTok{, }\CommentTok{# change if you have >2 groups}
+   \DataTypeTok{risk.table.y.text.col =}\NormalTok{ T, }\CommentTok{# show colors in table listing}
+   \DataTypeTok{xlab =} \StringTok{"Time in months"}\NormalTok{, }\CommentTok{# adjust X axis label}
+   \DataTypeTok{break.time.by =} \DecValTok{12}\NormalTok{, }\CommentTok{# break X axis in time intervals}
+   \DataTypeTok{legend.labs =} \KeywordTok{c}\NormalTok{(}\StringTok{"Homozygous"}\NormalTok{, }\StringTok{"Heterozygous"}\NormalTok{), }\CommentTok{# labels}
+   \DataTypeTok{ggtheme =} \KeywordTok{theme_bw}\NormalTok{() }\CommentTok{# Change ggplot2 theme}
+\NormalTok{   )}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-541-1.pdf}
+
+\subsection{Customizing the Kaplan-Meier Plot Presentation
+Further}\label{customizing-the-kaplan-meier-plot-presentation-further}
+
+We can even add a plot of the number of censored subjects at each time
+point, as well as a median survival pointer (which, of course, we've
+seen that we can't estimate in one of the groups), and customize the
+style of the confidence intervals. Again, see
+\url{https://github.com/kassambara/survminer/} for even more customized
+results.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{ggsurvplot}\NormalTok{(hemfit2,              }
+           \DataTypeTok{data =}\NormalTok{ hem, }
+           \DataTypeTok{palette =} \KeywordTok{c}\NormalTok{(}\StringTok{"#E7B800"}\NormalTok{, }\StringTok{"#2E9FDF"}\NormalTok{),}
+           \DataTypeTok{risk.table =} \OtherTok{TRUE}\NormalTok{,      }
+           \DataTypeTok{pval =} \OtherTok{TRUE}\NormalTok{,           }
+           \DataTypeTok{conf.int =} \OtherTok{TRUE}\NormalTok{,       }
+           \DataTypeTok{xlab =} \StringTok{"Time in months"}\NormalTok{, }
+           \DataTypeTok{break.time.by =} \DecValTok{12}\NormalTok{,     }
+           \DataTypeTok{ggtheme =} \KeywordTok{theme_light}\NormalTok{(),}
+           \DataTypeTok{risk.table.y.text.col =}\NormalTok{ T,}
+           \DataTypeTok{risk.table.height =} \FloatTok{0.25}\NormalTok{, }
+           \DataTypeTok{risk.table.y.text =} \OtherTok{FALSE}\NormalTok{,}
+           \DataTypeTok{ncensor.plot =} \OtherTok{TRUE}\NormalTok{,}
+           \DataTypeTok{ncensor.plot.height =} \FloatTok{0.25}\NormalTok{,}
+           \DataTypeTok{conf.int.style =} \StringTok{"step"}\NormalTok{,}
+           \DataTypeTok{surv.median.line =} \StringTok{"hv"}\NormalTok{,}
+           \DataTypeTok{legend.labs =} \KeywordTok{c}\NormalTok{(}\StringTok{"Homozygous"}\NormalTok{, }\StringTok{"Heterozygous"}\NormalTok{)}
+\NormalTok{        )}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-542-1.pdf}
+
+\section{The Hazard Function}\label{the-hazard-function}
+
+To build regression models for time-to-event data, we will need to
+introduce the \textbf{hazard function}. Consider a subject in the
+hemorrhage study who has a hemorrhage-free survival time of 9 months.
+
+\begin{itemize}
+\tightlist
+\item
+  For this subject to have had a recurrent hemorrhage at 9 months, they
+  had to be hemorrhage-free for the first 8 months.
+\item
+  The subject's hazard at 9 months is the failure rate ``per month''
+  conditional on the subject being hemorrhage-free for the first 8
+  months.
+\end{itemize}
+
+If \(S(t)\) is the survival function, and time \(t\) is taken to be
+continuous, then \(S(t) = e^{H(t)}\) defines the hazard function
+\(H(t)\).
+
+\begin{itemize}
+\tightlist
+\item
+  Note that \(H(t)\) = \(-ln(S(t))\).
+\item
+  The function \(H(t)\) is an important analytic tool.
+
+  \begin{itemize}
+  \tightlist
+  \item
+    It's used to describe the concept of the risk of ``failure'' in an
+    interval after time \(t\), conditioned on the subject having
+    survived to time \(t\).
+  \item
+    It's often called the \emph{cumulative hazard function}, to
+    emphasize the fact that its value is the ``sum'' of the hazard up to
+    time \(t\).
+  \end{itemize}
+\end{itemize}
+
+There are several different methods to estimate \(H(t)\), but we'll
+focus on two\ldots{}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  The inverse Kaplan-Meier estimator
+\item
+  The Nelson-Aalen estimator
+\end{enumerate}
+
+\subsection{\texorpdfstring{The Inverse Kaplan-Meier Estimator of
+\(H(t)\)}{The Inverse Kaplan-Meier Estimator of H(t)}}\label{the-inverse-kaplan-meier-estimator-of-ht}
+
+Our first estimator of the hazard function, \(H(t)\) will be the inverse
+Kaplan-Meier estimate, which I'll place in an R object called
+\texttt{H\_est1}.
+
+\begin{itemize}
+\tightlist
+\item
+  To start, we will take the negative of the log of the Kaplan-Meier
+  survival estimate. That takes care of the first \emph{t}-1 levels of
+  the eventual estimate.
+\item
+  To complete the process, we will repeat the final one of those
+  time-specific estimates at the end.
+\end{itemize}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# hemsurv <- Surv(hem$time, hem$recur) }
+\CommentTok{# hemfit1 <- survfit(hemsurv ~ 1)}
+\NormalTok{H_est1 <-}\StringTok{ }\OperatorTok{-}\KeywordTok{log}\NormalTok{(hemfit1}\OperatorTok{$}\NormalTok{surv)}
+\NormalTok{H_est1 <-}\StringTok{ }\KeywordTok{c}\NormalTok{(H_est1, }\KeywordTok{tail}\NormalTok{(H_est1, }\DecValTok{1}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+Here are the first five, and last five values of the hazard function
+estimate.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{head}\NormalTok{(H_est1,}\DecValTok{5}\NormalTok{) }\CommentTok{# first 5 values}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+[1] 0.01438874 0.01438874 0.01438874 0.02942661 0.02942661
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{tail}\NormalTok{(H_est1, }\DecValTok{5}\NormalTok{) }\CommentTok{# last 5}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+[1] 0.5602049 0.5602049 0.5602049 0.5602049 0.5602049
+\end{verbatim}
+
+We can create a little data frame containing the times and hazard
+estimates, like this:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{haz_hem <-}\StringTok{ }\KeywordTok{data_frame}\NormalTok{(}
+    \DataTypeTok{time =} \KeywordTok{c}\NormalTok{(hemfit1}\OperatorTok{$}\NormalTok{time, }\KeywordTok{tail}\NormalTok{(hemfit1}\OperatorTok{$}\NormalTok{time, }\DecValTok{1}\NormalTok{)),}
+    \DataTypeTok{inverse_KM =}\NormalTok{ H_est1}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\subsection{Cumulative Hazard Function from Inverse
+K-M}\label{cumulative-hazard-function-from-inverse-k-m}
+
+Since we've built the data set of times and hazard values, we can use
+the \texttt{geom\_step} function in \texttt{ggplot2}.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{ggplot}\NormalTok{(haz_hem, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ time, }\DataTypeTok{y =}\NormalTok{ inverse_KM)) }\OperatorTok{+}\StringTok{ }
+\StringTok{    }\KeywordTok{geom_step}\NormalTok{() }\OperatorTok{+}\StringTok{ }
+\StringTok{    }\KeywordTok{scale_x_continuous}\NormalTok{(}\DataTypeTok{breaks =} \KeywordTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{12}\NormalTok{, }\DecValTok{24}\NormalTok{, }\DecValTok{36}\NormalTok{, }\DecValTok{48}\NormalTok{)) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{x =} \StringTok{"Months of Follow-Up"}\NormalTok{, }
+         \DataTypeTok{y =} \StringTok{"Cumulative Hazard"}\NormalTok{,}
+         \DataTypeTok{title =} \StringTok{"Cumulative Hazard Function via Inverse K-M"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-545-1.pdf}
+
+\subsection{\texorpdfstring{The Nelson-Aalen Estimator of
+\(H(t)\)}{The Nelson-Aalen Estimator of H(t)}}\label{the-nelson-aalen-estimator-of-ht}
+
+An alternative estimate of the cumulative hazard is called the
+Nelson-Aalen estimate, captured here in \texttt{H\_est2}.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{h_st <-}\StringTok{ }\NormalTok{hemfit1}\OperatorTok{$}\NormalTok{n.event }\OperatorTok{/}\StringTok{ }\NormalTok{hemfit1}\OperatorTok{$}\NormalTok{n.risk}
+\NormalTok{H_est2 <-}\StringTok{ }\KeywordTok{cumsum}\NormalTok{(h_st)}
+\NormalTok{H_est2 <-}\StringTok{ }\KeywordTok{c}\NormalTok{(H_est2, }\KeywordTok{tail}\NormalTok{(H_est2, }\DecValTok{1}\NormalTok{))}
+\NormalTok{haz_hem}\OperatorTok{$}\NormalTok{Nelson_Aalen <-}\StringTok{ }\NormalTok{H_est2}
+
+\KeywordTok{head}\NormalTok{(haz_hem)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+# A tibble: 6 x 3
+   time inverse_KM Nelson_Aalen
+  <dbl>      <dbl>        <dbl>
+1 0.230     0.0144       0.0143
+2 1.05      0.0144       0.0143
+3 1.38      0.0144       0.0143
+4 1.41      0.0294       0.0292
+5 1.51      0.0294       0.0292
+6 1.58      0.0449       0.0446
+\end{verbatim}
+
+\subsection{Convert Wide Data to Long}\label{convert-wide-data-to-long}
+
+In order to easily plot the two hazard function estimates in the same
+graph, we'll want to convert these data from wide format to long format,
+with the \texttt{gather} function.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{haz_hem_comp <-}\StringTok{ }\KeywordTok{gather}\NormalTok{(haz_hem, }\DataTypeTok{key =} \StringTok{"method"}\NormalTok{, }
+                       \DataTypeTok{value =} \StringTok{"hazardest"}\NormalTok{, }
+\NormalTok{                       inverse_KM}\OperatorTok{:}\NormalTok{Nelson_Aalen)}
+
+\KeywordTok{head}\NormalTok{(haz_hem_comp)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+# A tibble: 6 x 3
+   time method     hazardest
+  <dbl> <chr>          <dbl>
+1 0.230 inverse_KM    0.0144
+2 1.05  inverse_KM    0.0144
+3 1.38  inverse_KM    0.0144
+4 1.41  inverse_KM    0.0294
+5 1.51  inverse_KM    0.0294
+6 1.58  inverse_KM    0.0449
+\end{verbatim}
+
+\subsection{Plot Comparison of Hazard
+Estimates}\label{plot-comparison-of-hazard-estimates}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{ggplot}\NormalTok{(haz_hem_comp, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ time, }\DataTypeTok{y =}\NormalTok{ hazardest, }
+                    \DataTypeTok{col =}\NormalTok{ method)) }\OperatorTok{+}\StringTok{ }
+\StringTok{    }\KeywordTok{geom_step}\NormalTok{(}\DataTypeTok{size =} \DecValTok{2}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{    }\KeywordTok{scale_x_continuous}\NormalTok{(}\DataTypeTok{breaks =} \KeywordTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{12}\NormalTok{, }\DecValTok{24}\NormalTok{, }\DecValTok{36}\NormalTok{, }\DecValTok{48}\NormalTok{)) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{x =} \StringTok{"Months of Follow-Up"}\NormalTok{, }
+         \DataTypeTok{y =} \StringTok{"Cumulative Hazard"}\NormalTok{,}
+         \DataTypeTok{title =} \StringTok{"Cumulative Hazard Function"}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{    }\KeywordTok{theme_bw}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-547-1.pdf}
+
+We can see that the two cumulative hazard function estimates are nearly
+identical in this case. We could instead compare the two functions in
+faceted plots, if that would be helpful.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{ggplot}\NormalTok{(haz_hem_comp, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ time, }\DataTypeTok{y =}\NormalTok{ hazardest)) }\OperatorTok{+}\StringTok{ }
+\StringTok{    }\KeywordTok{geom_step}\NormalTok{() }\OperatorTok{+}\StringTok{ }
+\StringTok{    }\KeywordTok{scale_x_continuous}\NormalTok{(}\DataTypeTok{breaks =} \KeywordTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{12}\NormalTok{, }\DecValTok{24}\NormalTok{, }\DecValTok{36}\NormalTok{, }\DecValTok{48}\NormalTok{)) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{x =} \StringTok{"Months of Follow-Up"}\NormalTok{, }
+         \DataTypeTok{y =} \StringTok{"Cumulative Hazard"}\NormalTok{,}
+         \DataTypeTok{title =} \StringTok{"Cumulative Hazard Function"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{facet_grid}\NormalTok{(method }\OperatorTok{~}\StringTok{ }\NormalTok{.) }\OperatorTok{+}\StringTok{ }\KeywordTok{theme_bw}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{bookdown-demo_files/figure-latex/unnamed-chunk-548-1.pdf}
+
+Next, we will consider the issue of modeling a survival outcome using
+Cox proportional hazards regression.
 
 \bibliography{text.bib}
 

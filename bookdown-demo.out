@@ -212,3 +212,11 @@
 \BOOKMARK [1][-]{section.20.4}{Model\0402}{chapter.20}% 212
 \BOOKMARK [1][-]{section.20.5}{Classification\040Table}{chapter.20}% 213
 \BOOKMARK [1][-]{section.20.6}{Probability\040Curves\040based\040on\040a\040Single\040Predictor}{chapter.20}% 214
+\BOOKMARK [0][-]{chapter.21}{Exploring\040Time\040To\040Event\040/\040Survival\040Data}{}% 215
+\BOOKMARK [1][-]{section.21.1}{An\040Outline\040of\040Key\040Topics\040Discussed\040in\040these\040Notes}{chapter.21}% 216
+\BOOKMARK [1][-]{section.21.2}{Foundations\040of\040Survival\040Analysis}{chapter.21}% 217
+\BOOKMARK [1][-]{section.21.3}{A\040First\040Example:\040Recurrent\040Lobar\040Intracerebral\040Hemorrhage}{chapter.21}% 218
+\BOOKMARK [1][-]{section.21.4}{Comparing\040Survival\040Across\040the\040Two\040Genotypes}{chapter.21}% 219
+\BOOKMARK [1][-]{section.21.5}{Testing\040the\040difference\040between\040two\040survival\040curves}{chapter.21}% 220
+\BOOKMARK [1][-]{section.21.6}{A\040Fancy\040K-M\040Plot\040with\040a\040number\040at\040risk\040table}{chapter.21}% 221
+\BOOKMARK [1][-]{section.21.7}{The\040Hazard\040Function}{chapter.21}% 222

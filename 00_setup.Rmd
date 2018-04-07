@@ -9,6 +9,9 @@ library(ggridges)
 library(magrittr)
 library(pander)
 library(arm)
+library(survival)
+library(OIsurv)
+library(survminer)
 library(rms)
 library(leaps)
 library(lars)
@@ -38,6 +41,7 @@ resect <- read.csv("data/resect.csv") %>% tbl_df
 colscr <- read.csv("data/screening.csv") %>% tbl_df
 colscr2 <- read.csv("data/screening2.csv") %>% tbl_df
 authorship <- read_csv("data/authorship.csv") 
+hem <- read.csv("data/hem.csv") %>% tbl_df
 ```
 
 # Special Functions used in these notes {-}
