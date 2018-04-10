@@ -124,7 +124,7 @@
   \postauthor{\par}
   \predate{\centering\large\emph}
   \postdate{\par}
-  \date{Built 2018-04-07 16:02:10}
+  \date{Built 2018-04-10 08:32:38}
 
 \usepackage{booktabs}
 \usepackage{amsthm}
@@ -30693,8 +30693,8 @@ faceted plots, if that would be helpful.
 Next, we will consider the issue of modeling a survival outcome using
 Cox proportional hazards regression.
 
-\chapter{Cox Regression Models for Survival
-Data}\label{cox-regression-models-for-survival-data}
+\chapter{Cox Regression Models for Survival Data: Example
+1}\label{cox-regression-models-for-survival-data-example-1}
 
 The Cox proportional hazards (Cox regression) model fits survival data
 with a constant (i.e.~not varying over time) covariate \(x\) to a hazard
@@ -30957,7 +30957,7 @@ Here, we'll plot the time in terms of months, but scaled to 12 month
 \KeywordTok{plot}\NormalTok{(}\KeywordTok{survfit}\NormalTok{(cfit), }\DataTypeTok{xscale =} \DecValTok{12}\NormalTok{,}
      \DataTypeTok{xlab =} \StringTok{"Years after initial hemorrhage"}\NormalTok{,}
      \DataTypeTok{ylab =} \StringTok{"Proportion without recurrent hemorrhage"}\NormalTok{,}
-     \DataTypeTok{main =} \StringTok{"Baseline Hazard Curve"}\NormalTok{)}
+     \DataTypeTok{main =} \StringTok{"Baseline Survival Function"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -31064,9 +31064,10 @@ This combined testing and plotting approach is a reasonable starting
 place for assessing the proportional hazards assumption, but it's likely
 insufficient for good practical work.
 
-We'll see an example of a model where the proportional hazards
-assumption fits the data less well later, and when we do, we'll
-demonstrate two relatively simple options for accounting for this.
+Should the proportional hazards assumption fit less well, we have two
+main options: (1) fit a non-linear term in the covariate in question,
+and (2) fit a different type of regression model that doesn't require
+the proportional hazards assumption.
 
 \section{\texorpdfstring{Fitting a Cox Model using \texttt{cph} from the
 \texttt{rms}
@@ -31309,6 +31310,9 @@ Assumption}\label{plot-to-check-ph-assumption}
 \end{Shaded}
 
 \includegraphics{bookdown-demo_files/figure-latex/ph_plot_check_zph-1.pdf}
+
+\chapter{Cox Regression Models for Survival Data: Example
+2}\label{cox-regression-models-for-survival-data-example-2}
 
 \section{\texorpdfstring{A Second Example: The \texttt{leukem}
 data}{A Second Example: The leukem data}}\label{a-second-example-the-leukem-data}

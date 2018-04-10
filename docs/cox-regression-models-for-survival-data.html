@@ -1064,7 +1064,7 @@ Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(<span class="kw">survfit</span>(cfit), <span class="dt">xscale =</span> <span class="dv">12</span>,
      <span class="dt">xlab =</span> <span class="st">&quot;Years after initial hemorrhage&quot;</span>,
      <span class="dt">ylab =</span> <span class="st">&quot;Proportion without recurrent hemorrhage&quot;</span>,
-     <span class="dt">main =</span> <span class="st">&quot;Baseline Hazard Curve&quot;</span>)</code></pre></div>
+     <span class="dt">main =</span> <span class="st">&quot;Baseline Survival Function&quot;</span>)</code></pre></div>
 <p><img src="bookdown-demo_files/figure-html/unnamed-chunk-550-1.png" width="672" /></p>
 </div>
 <div id="plot-the-genotype-effect" class="section level3">
@@ -1115,7 +1115,7 @@ genotype 0.333  2.02 0.156</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(<span class="kw">cox.zph</span>(cfit, <span class="dt">transform=</span><span class="st">&quot;km&quot;</span>, <span class="dt">global=</span><span class="ot">TRUE</span>))</code></pre></div>
 <p><img src="bookdown-demo_files/figure-html/surv_hem_cfit_coxzph_plot-1.png" width="672" /></p>
 <p>The plot suggests only a slight rise in the plotted values over time, suggesting no serious problem with the proportional hazards assumption. This combined testing and plotting approach is a reasonable starting place for assessing the proportional hazards assumption, but it’s likely insufficient for good practical work.</p>
-<p>We’ll see an example of a model where the proportional hazards assumption fits the data less well later, and when we do, we’ll demonstrate two relatively simple options for accounting for this.</p>
+<p>Should the proportional hazards assumption fit less well, we have two main options: (1) fit a non-linear term in the covariate in question, and (2) fit a different type of regression model that doesn’t require the proportional hazards assumption.</p>
 </div>
 </div>
 <div id="fitting-a-cox-model-using-cph-from-the-rms-package" class="section level2">
