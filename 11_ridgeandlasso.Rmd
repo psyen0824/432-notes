@@ -109,7 +109,7 @@ MASS::select(x)
 
 I'll use the GCV = generalized cross-validation to select $\lambda$ = 6 instead.
 
-```{r ridge for ptsdmale with 40 line}
+```{r c11_ridge_for_ptdsmale_with_40_line}
 x <- lm.ridge(prost$lpsa ~ preds, lambda = 0:100)
 plot(x)
 title("Ridge Regression for prost data")
