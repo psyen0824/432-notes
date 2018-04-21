@@ -838,7 +838,6 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </ul></li>
 <li class="chapter" data-level="21.4" data-path="exploring-time-to-event-survival-data.html"><a href="exploring-time-to-event-survival-data.html#comparing-survival-across-the-two-genotypes"><i class="fa fa-check"></i><b>21.4</b> Comparing Survival Across the Two Genotypes</a><ul>
 <li class="chapter" data-level="21.4.1" data-path="exploring-time-to-event-survival-data.html"><a href="exploring-time-to-event-survival-data.html#kaplan-meier-survival-function-estimates-by-genotype"><i class="fa fa-check"></i><b>21.4.1</b> Kaplan-Meier Survival Function Estimates, by Genotype</a></li>
-<li class="chapter" data-level="21.4.2" data-path="exploring-time-to-event-survival-data.html"><a href="exploring-time-to-event-survival-data.html#plotting-the-k-m-comparison-with-ggsurvplot"><i class="fa fa-check"></i><b>21.4.2</b> Plotting the K-M comparison with <code>ggsurvplot</code></a></li>
 </ul></li>
 <li class="chapter" data-level="21.5" data-path="exploring-time-to-event-survival-data.html"><a href="exploring-time-to-event-survival-data.html#testing-the-difference-between-two-survival-curves"><i class="fa fa-check"></i><b>21.5</b> Testing the difference between two survival curves</a><ul>
 <li class="chapter" data-level="21.5.1" data-path="exploring-time-to-event-survival-data.html"><a href="exploring-time-to-event-survival-data.html#alternative-log-rank-tests"><i class="fa fa-check"></i><b>21.5.1</b> Alternative log rank tests</a></li>
@@ -996,7 +995,7 @@ Attaching package: &#39;gmodels&#39;</code></pre>
 </tr>
 </tbody>
 </table>
-<p>To make my life easier later, I’m also going to drop the 11 subjects who have no missing data on these variables, but who also have a listed <code>bmi</code> above 60.</p>
+<p>To make my life easier later, I’m going to drop any subjects with missing data on these variables. I’m also going to drop the 11 subjects who have no missing data, but have a listed <code>bmi</code> above 60.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">sm1 &lt;-<span class="st"> </span>smart_oh <span class="op">%&gt;%</span>
 <span class="st">    </span><span class="kw">select</span>(SEQNO, genhealth, physhealth, costprob, sleephrs, 
            incomegroup, bmi) <span class="op">%&gt;%</span>

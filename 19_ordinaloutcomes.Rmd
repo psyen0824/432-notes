@@ -25,7 +25,7 @@ Variable | Description
 `incomegroup` | 8 income groups from < 10,000 to 75,000 or more
 `bmi` | body-mass index
 
-To make my life easier later, I'm also going to drop the 11 subjects who have no missing data on these variables, but who also have a listed `bmi` above 60.
+To make my life easier later, I'm going to drop any subjects with missing data on these variables. I'm also going to drop the 11 subjects who have no missing data, but have a listed `bmi` above 60.
 
 ```{r}
 sm1 <- smart_oh %>%

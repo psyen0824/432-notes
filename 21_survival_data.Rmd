@@ -225,22 +225,6 @@ print(hemfit2, print.rmean=TRUE)
 
 ### Kaplan-Meier Survival Function Estimates, by Genotype
 
-```{r km plot for hemfit2}
-plot(hemfit2, main="Kaplan-Meier Curve by Genotype", 
-     ylab="Probability of Hemorrhage-Free Survival", 
-     xlab="Months of Follow-Up", col=c(1,2), lty=c(1,2))
-legend(5,.4, legend=c(
-  expression(paste("Homozygous ", epsilon, "3 / ", 
-                   epsilon, "3")), 
-  expression(paste("At least one ", epsilon,"2 or ",
-                   epsilon,"4 Allele"))), 
-  text.col=c(1,2), col=c(1,2), lty=c(1,2), bty="n")
-```
-
-It appears that patients who were homozygous for the $\epsilon3$ allele of this gene (i.e. `genotype` = 0 in the hemorrhage data) had a much better prognosis than others (`genotype` = 1).
-
-### Plotting the K-M comparison with `ggsurvplot`
-
 I find I have to crank the `fig.height` in Markdown up to at least 6 to get the risk table to show up nicely in this setting.
 
 ```{r, fig.height = 6}
@@ -253,6 +237,8 @@ ggsurvplot(hemfit2, data = hem,
            risk.table.height = 0.25
            )
 ```
+
+It appears that patients who were homozygous for the $\epsilon3$ allele of this gene (i.e. `genotype` = 0 in the hemorrhage data) had a much better prognosis than others (`genotype` = 1.)
 
 ## Testing the difference between two survival curves
 

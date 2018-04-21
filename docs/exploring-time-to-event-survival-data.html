@@ -838,7 +838,6 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </ul></li>
 <li class="chapter" data-level="21.4" data-path="exploring-time-to-event-survival-data.html"><a href="exploring-time-to-event-survival-data.html#comparing-survival-across-the-two-genotypes"><i class="fa fa-check"></i><b>21.4</b> Comparing Survival Across the Two Genotypes</a><ul>
 <li class="chapter" data-level="21.4.1" data-path="exploring-time-to-event-survival-data.html"><a href="exploring-time-to-event-survival-data.html#kaplan-meier-survival-function-estimates-by-genotype"><i class="fa fa-check"></i><b>21.4.1</b> Kaplan-Meier Survival Function Estimates, by Genotype</a></li>
-<li class="chapter" data-level="21.4.2" data-path="exploring-time-to-event-survival-data.html"><a href="exploring-time-to-event-survival-data.html#plotting-the-k-m-comparison-with-ggsurvplot"><i class="fa fa-check"></i><b>21.4.2</b> Plotting the K-M comparison with <code>ggsurvplot</code></a></li>
 </ul></li>
 <li class="chapter" data-level="21.5" data-path="exploring-time-to-event-survival-data.html"><a href="exploring-time-to-event-survival-data.html#testing-the-difference-between-two-survival-curves"><i class="fa fa-check"></i><b>21.5</b> Testing the difference between two survival curves</a><ul>
 <li class="chapter" data-level="21.5.1" data-path="exploring-time-to-event-survival-data.html"><a href="exploring-time-to-event-survival-data.html#alternative-log-rank-tests"><i class="fa fa-check"></i><b>21.5.1</b> Alternative log rank tests</a></li>
@@ -1183,20 +1182,6 @@ hem$genotype=1 38     14   32.7       3.43   37.5    24.9      NA
 </ul>
 <div id="kaplan-meier-survival-function-estimates-by-genotype" class="section level3">
 <h3><span class="header-section-number">21.4.1</span> Kaplan-Meier Survival Function Estimates, by Genotype</h3>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(hemfit2, <span class="dt">main=</span><span class="st">&quot;Kaplan-Meier Curve by Genotype&quot;</span>, 
-     <span class="dt">ylab=</span><span class="st">&quot;Probability of Hemorrhage-Free Survival&quot;</span>, 
-     <span class="dt">xlab=</span><span class="st">&quot;Months of Follow-Up&quot;</span>, <span class="dt">col=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">2</span>), <span class="dt">lty=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))
-<span class="kw">legend</span>(<span class="dv">5</span>,.<span class="dv">4</span>, <span class="dt">legend=</span><span class="kw">c</span>(
-  <span class="kw">expression</span>(<span class="kw">paste</span>(<span class="st">&quot;Homozygous &quot;</span>, epsilon, <span class="st">&quot;3 / &quot;</span>, 
-                   epsilon, <span class="st">&quot;3&quot;</span>)), 
-  <span class="kw">expression</span>(<span class="kw">paste</span>(<span class="st">&quot;At least one &quot;</span>, epsilon,<span class="st">&quot;2 or &quot;</span>,
-                   epsilon,<span class="st">&quot;4 Allele&quot;</span>))), 
-  <span class="dt">text.col=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">2</span>), <span class="dt">col=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">2</span>), <span class="dt">lty=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">2</span>), <span class="dt">bty=</span><span class="st">&quot;n&quot;</span>)</code></pre></div>
-<p><img src="bookdown-demo_files/figure-html/km%20plot%20for%20hemfit2-1.png" width="672" /></p>
-<p>It appears that patients who were homozygous for the <span class="math inline">\(\epsilon3\)</span> allele of this gene (i.e. <code>genotype</code> = 0 in the hemorrhage data) had a much better prognosis than others (<code>genotype</code> = 1).</p>
-</div>
-<div id="plotting-the-k-m-comparison-with-ggsurvplot" class="section level3">
-<h3><span class="header-section-number">21.4.2</span> Plotting the K-M comparison with <code>ggsurvplot</code></h3>
 <p>I find I have to crank the <code>fig.height</code> in Markdown up to at least 6 to get the risk table to show up nicely in this setting.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">ggsurvplot</span>(hemfit2, <span class="dt">data =</span> hem,
            <span class="dt">conf.int =</span> <span class="ot">TRUE</span>,
@@ -1207,6 +1192,7 @@ hem$genotype=1 38     14   32.7       3.43   37.5    24.9      NA
            <span class="dt">risk.table.height =</span> <span class="fl">0.25</span>
            )</code></pre></div>
 <p><img src="bookdown-demo_files/figure-html/unnamed-chunk-540-1.png" width="672" /></p>
+<p>It appears that patients who were homozygous for the <span class="math inline">\(\epsilon3\)</span> allele of this gene (i.e. <code>genotype</code> = 0 in the hemorrhage data) had a much better prognosis than others (<code>genotype</code> = 1.)</p>
 </div>
 </div>
 <div id="testing-the-difference-between-two-survival-curves" class="section level2">
