@@ -1835,7 +1835,7 @@ smoke100    0.70     0.03
     <span class="kw">pchisq</span>(<span class="kw">sum</span>(z<span class="op">^</span><span class="dv">2</span>), <span class="dt">df =</span> n<span class="op">-</span>k, <span class="dt">lower.tail =</span> <span class="ot">FALSE</span>), <span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span>)</code></pre></div>
 <pre><code>p value of overdispersion test is  0 </code></pre>
 <p>The p value here is 0, indicating that the probability is essentially zero that a random variable from a <span class="math inline">\(\chi^2\)</span> distribution with (n - k) = 1633 degrees of freedom would be as large as what we observed in this case. So there is significant overdispersion.</p>
-<p>In summary, the polyps counts are overdispersed by a factor of 15.499, which is enormous (even a factor of 2 would be considered large) and also highly statistically significant. The basic correction for overdisperson is to multiply all regression standard errors by <span class="math inline">\(\sqrt{15.499}\)</span> = 3.94.</p>
+<p>In summary, the <code>physhealth</code> counts are overdispersed by a factor of 15.499, which is enormous (even a factor of 2 would be considered large) and also highly statistically significant. The basic correction for overdisperson is to multiply all regression standard errors by <span class="math inline">\(\sqrt{15.499}\)</span> = 3.94.</p>
 <p>The <code>quasipoisson</code> model and the negative binomial model that we’ll fit below are very similar. We write the overdispersed “quasiPoisson” model as:</p>
 <p><span class="math display">\[
 y_i \sim \mbox{overdispersed Poisson} (\mu_i exp(X_i \beta), \omega)
