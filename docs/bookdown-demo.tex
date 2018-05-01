@@ -124,7 +124,7 @@
   \postauthor{\par}
   \predate{\centering\large\emph}
   \postdate{\par}
-  \date{Built 2018-04-22 19:39:00}
+  \date{Built 2018-05-01 10:10:30}
 
 \usepackage{booktabs}
 \usepackage{amsthm}
@@ -24377,6 +24377,16 @@ binomial.
 
 \begin{Shaded}
 \begin{Highlighting}[]
+\DecValTok{2} \OperatorTok{*}\StringTok{ }\NormalTok{(}\KeywordTok{logLik}\NormalTok{(mod_nb1) }\OperatorTok{-}\StringTok{ }\KeywordTok{logLik}\NormalTok{(mod_poiss1))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+'log Lik.' 10508.47 (df=4)
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
 \KeywordTok{pchisq}\NormalTok{(}\DecValTok{2} \OperatorTok{*}\StringTok{ }\NormalTok{(}\KeywordTok{logLik}\NormalTok{(mod_nb1) }\OperatorTok{-}\StringTok{ }\KeywordTok{logLik}\NormalTok{(mod_poiss1)), }\DataTypeTok{df =} \DecValTok{1}\NormalTok{, }\DataTypeTok{lower.tail =} \OtherTok{FALSE}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
@@ -24385,10 +24395,10 @@ binomial.
 'log Lik.' 0 (df=4)
 \end{verbatim}
 
-Here, the difference in the log likelihoods, multiplied by 2, is 10512
-with 1 degree of freedom. This strongly suggests that the negative
-binomial model, estimating the dispersion parameter, is more appropriate
-than the raw Poisson model.
+Here, the difference in the log likelihoods is large enough that the
+resulting \emph{p} value is very small. This strongly suggests that the
+negative binomial model, which adds the dispersion parameter, is more
+appropriate than the raw Poisson model.
 
 However, both the regression coefficients and the standard errors are
 rather similar to the quasi-Poisson and the sandwich-adjusted Poisson

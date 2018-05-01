@@ -858,11 +858,12 @@ To compare the negative binomial model to the Poisson model (without the overdis
 ```{r}
 logLik(mod_nb1)
 logLik(mod_poiss1)
-
+2 * (logLik(mod_nb1) - logLik(mod_poiss1))
+     
 pchisq(2 * (logLik(mod_nb1) - logLik(mod_poiss1)), df = 1, lower.tail = FALSE)
 ```
 
-Here, the difference in the log likelihoods, multiplied by 2, is 10512 with 1 degree of freedom. This strongly suggests that the negative binomial model, estimating the dispersion parameter, is more appropriate than the raw Poisson model.
+Here, the difference in the log likelihoods is large enough that the resulting *p* value is very small. This strongly suggests that the negative binomial model, which adds the dispersion parameter, is more appropriate than the raw Poisson model.
 
 However, both the regression coefficients and the standard errors are rather similar to the quasi-Poisson and the sandwich-adjusted Poisson results above. Thus, in terms of predicted means, all three models give very similar results; the associated Wald tests also lead to the same conclusions.
 

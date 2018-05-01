@@ -2155,9 +2155,11 @@ smoke100    0.47867108 1.04219722</code></pre>
 <pre><code>&#39;log Lik.&#39; -2581.68 (df=4)</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">logLik</span>(mod_poiss1)</code></pre></div>
 <pre><code>&#39;log Lik.&#39; -7835.914 (df=3)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="dv">2</span> <span class="op">*</span><span class="st"> </span>(<span class="kw">logLik</span>(mod_nb1) <span class="op">-</span><span class="st"> </span><span class="kw">logLik</span>(mod_poiss1))</code></pre></div>
+<pre><code>&#39;log Lik.&#39; 10508.47 (df=4)</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">pchisq</span>(<span class="dv">2</span> <span class="op">*</span><span class="st"> </span>(<span class="kw">logLik</span>(mod_nb1) <span class="op">-</span><span class="st"> </span><span class="kw">logLik</span>(mod_poiss1)), <span class="dt">df =</span> <span class="dv">1</span>, <span class="dt">lower.tail =</span> <span class="ot">FALSE</span>)</code></pre></div>
 <pre><code>&#39;log Lik.&#39; 0 (df=4)</code></pre>
-<p>Here, the difference in the log likelihoods, multiplied by 2, is 10512 with 1 degree of freedom. This strongly suggests that the negative binomial model, estimating the dispersion parameter, is more appropriate than the raw Poisson model.</p>
+<p>Here, the difference in the log likelihoods is large enough that the resulting <em>p</em> value is very small. This strongly suggests that the negative binomial model, which adds the dispersion parameter, is more appropriate than the raw Poisson model.</p>
 <p>However, both the regression coefficients and the standard errors are rather similar to the quasi-Poisson and the sandwich-adjusted Poisson results above. Thus, in terms of predicted means, all three models give very similar results; the associated Wald tests also lead to the same conclusions.</p>
 </div>
 <div id="interpreting-the-coefficients-4" class="section level3">
